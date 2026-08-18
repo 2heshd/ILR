@@ -1,0 +1,5 @@
+.card:has(.locked-source) .passage {
+  filter: blur(8px);
+  user-select: none;
+  pointer-events: none;
+}
