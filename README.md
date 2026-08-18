@@ -1,32 +1,25 @@
 # ILR
 
-Adaptive Persian/Farsi learning system designed around a 36-week intensive course and proficiency targets of **ILR Reading 4 / Listening 3+ / Speaking 2**.
+Adaptive Persian/Farsi learning system for a 36-week intensive course with target outcomes of **ILR Reading 4 / Listening 3+ / Speaking 2**.
 
-## Product goal
+## What the app does now
 
-Make high-ROI study tactics frictionless: weekly vocabulary intake, adaptive spaced retrieval, timed recognition, recycled reading/listening, speaking maintenance, and persistent analytics across the entire course.
-
-## Current MVP
-
-The first runnable version is now in `main`.
-
-Implemented:
-
-- responsive **Today** dashboard
-- weekly Persian vocabulary paste/import
-- optional Persian — definition — romanization input format
-- Persian normalization for Arabic/Persian ی and ک plus whitespace/ZWNJ cleanup
-- duplicate protection on normalized forms
-- automatic addition of **5 advanced government/politics/economics/diplomacy words** from a starter pool
-- timed Persian→meaning retrieval
-- response-latency capture
-- accuracy, lapse, retention and mature-item tracking
-- due-review queue
-- append-only browser review history for the prototype
-- 35/35/20/10 listening/reading/lexical/speaking guardrail displayed in the UI
-- PostgreSQL schema for the durable 36-week data model
-
-The current browser persistence is intentionally an MVP bridge. The SQL schema in `db/schema.sql` is the source design for moving history into hosted PostgreSQL/Supabase so it survives devices and the full 36-week course.
+- imports the required weekly DLI vocabulary in one paste
+- normalizes Persian spelling variants and blocks duplicates
+- fills missing English definitions + romanization when AI is configured
+- adds exactly **5 advanced government/politics/economics/security/diplomacy terms** per week without repeating learned items
+- schedules vocabulary with **FSRS** rather than fixed intervals
+- measures retrieval latency and turns a correct response into an automatic Easy/Good/Hard grade based on speed
+- keeps the recall workflow to two decisions: **Reveal → I was right / I was wrong**
+- builds adaptive reading passages that recycle current + weak older vocabulary
+- tracks reading comprehension, inference, discourse control, rereads, unknown words, and time
+- builds adaptive listening passages with the transcript hidden until reveal
+- tracks listen count, overall comprehension, detail, inference, and transcript use
+- shifts reading/listening study allocation toward the weaker receptive skill while preserving lexical and speaking floors
+- shows weak/slow vocabulary and longitudinal receptive-skill statistics
+- saves automatically in the browser
+- optionally syncs the complete course state across devices with **Supabase magic-link authentication**
+- appends individual cloud review events in addition to the recovery snapshot
 
 ## Run locally
 
@@ -39,9 +32,11 @@ npm install
 npm run dev
 ```
 
-Then open `http://localhost:3000`.
+Open `http://localhost:3000`.
 
-## Weekly input format
+The app works immediately in local mode.
+
+## Weekly vocabulary input
 
 Minimum:
 
@@ -51,7 +46,7 @@ Minimum:
 آینده
 ```
 
-Better:
+Preferred if definitions are already available:
 
 ```text
 کارمند — employee — kārmand
@@ -59,45 +54,123 @@ Better:
 آینده — future — āyande
 ```
 
-The app adds five advanced domain items automatically while avoiding items already in the local learner history.
+If `OPENAI_API_KEY` is configured, missing definitions/romanization are filled automatically and the system can generate the advanced weekly vocabulary and adaptive reading/listening content.
 
-## Core principles
+## Optional AI setup
 
-- Receptive-first optimization for Reading 4 and Listening 3+
-- FSRS rather than a home-grown long-term scheduler
-- Track every review/exposure as an event; never overwrite learning history
-- Measure both accuracy and retrieval latency
-- Recycle current + older vocabulary in contextual reading/listening
-- Add exactly 5 advanced domain words each week
-- Prevent flashcard optimization from replacing authentic comprehension practice
-- Persian-aware normalization for ی/ي, ک/ك, ZWNJ, clitics, formal/colloquial variants
+Copy the environment template:
 
-## Next engineering milestone
+```bash
+cp .env.example .env.local
+```
 
-1. Replace the temporary interval function with persisted `ts-fsrs` card state.
-2. Connect PostgreSQL/Supabase and migrate local history into the database.
-3. Build Reading Lab with timed passages and inference/discourse scoring.
-4. Build Listening Lab with first-listen accuracy, speed and transcript reveal tracking.
-5. Add adaptive daily allocation based on actual skill weakness.
-6. Expand the advanced-word pool into a tagged, non-repeating 36-week curriculum.
+Set:
 
-## Planned modules
+```text
+OPENAI_API_KEY=...
+OPENAI_MODEL=gpt-5.6
+```
 
-1. **Today** — adaptive study queue
-2. **Weekly Intake** — paste/import required DLI vocabulary
-3. **Vocabulary Lab** — reading recognition, audio recognition, productive recall where useful
-4. **Reading Lab** — timed passages, comprehension, inference, discourse tracking
-5. **Listening Lab** — audio-first comprehension with speed/register tracking
-6. **Speaking Maintenance** — short ILR-2-oriented prompts
-7. **Analytics** — 36-week longitudinal stats by word, skill, genre, and register
-8. **Difficult Items** — lapses, slow retrieval, repeated comprehension errors
+The API key is used only in server routes; never expose it with a `NEXT_PUBLIC_` prefix.
+
+AI enables:
+
+- vocabulary definition + romanization enrichment
+- dynamic non-repeating advanced-domain terms
+- adaptive reading passages
+- adaptive listening scripts
+- Persian TTS through `gpt-4o-mini-tts`
+
+Without the API key, the vocabulary system still works and uses a built-in advanced-word fallback pool. Browser Persian speech synthesis is used as the listening-audio fallback.
+
+## Optional cross-device sync
+
+Create a Supabase project, then run [`db/supabase.sql`](db/supabase.sql) in its SQL editor. The SQL enables RLS so each authenticated user can access only their own study data.
+
+Add these to `.env.local`:
+
+```text
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+```
+
+Restart the development server. A magic-link sign-in box will appear on the Today page. Local persistence remains active as an offline/recovery layer.
+
+## Adaptive logic
+
+### Vocabulary
+
+Long-term review intervals come from `ts-fsrs`. Retrieval time is captured separately:
+
+- ≤3 sec correct recall → automatic `Easy`
+- >3 to ≤8 sec correct recall → automatic `Good`
+- >8 sec correct recall → automatic `Hard`
+- incorrect recall → `Again`
+
+This keeps latency useful as an automaticity signal without replacing actual recall accuracy.
+
+### Skill allocation
+
+Starting allocation outside class:
+
+- Listening 35%
+- Reading 35%
+- Lexical retrieval 20%
+- Speaking 10%
+
+Recent reading/listening results can shift up to 10 percentage points toward the weaker receptive skill. A large due-vocabulary backlog can temporarily add 5 points to lexical work, but contextual comprehension retains a floor.
+
+### Difficulty progression
+
+Reading and listening content scale with course week toward the long-term R4/L3+ targets rather than jumping immediately to target difficulty. Generated passages prioritize weak/current vocabulary but are instructed to preserve natural discourse rather than maximize keyword density.
+
+## Persistence model
+
+The browser stores a complete `StudyState`, including:
+
+- every lexical item
+- FSRS card state
+- every review event
+- retrieval latency
+- passages and listening items
+- reading attempts
+- listening attempts
+- current course week
+
+With Supabase enabled, that state is mirrored to a protected cloud snapshot for cross-device recovery. Vocabulary reviews are also appended individually to `review_events` so the long-term event log is not dependent on the latest snapshot alone.
+
+The broader normalized relational design remains in [`db/schema.sql`](db/schema.sql) for later analytics expansion.
+
+## Current engineering status
+
+Implemented core:
+
+1. Today dashboard
+2. Weekly intake
+3. FSRS timed vocabulary retrieval
+4. Reading Lab
+5. Listening Lab
+6. Adaptive allocation
+7. Weak-item analytics
+8. Local + optional cloud persistence
+9. AI content/TTS endpoints
+10. CI build validation
+
+Next priorities:
+
+1. automatic grading of reading/listening answers instead of self-scoring only
+2. dedicated ILR-2 speaking-maintenance workflow
+3. authentic-source ingestion and provenance tracking
+4. richer per-genre/register analytics
+5. export/backup UI
+6. PWA/offline caching
 
 ## Stack
 
 - Next.js App Router + TypeScript
-- PostgreSQL / Supabase-compatible schema
 - `ts-fsrs`
-- Zod
+- Supabase / PostgreSQL
+- OpenAI Responses API + text-to-speech (optional)
 - responsive PWA-ready UI
 
-See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the system blueprint.
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the technical blueprint.
