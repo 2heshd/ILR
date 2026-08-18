@@ -23,6 +23,9 @@ Adaptive Persian/Farsi learning system for a 36-week intensive course with targe
 - uses Persian browser speech recognition when available and allows transcript correction before grading
 - grades speaking transcripts for task completion, organization, grammatical control, vocabulary control, and a transcript-based fluency estimate
 - tracks weak/slow vocabulary plus longitudinal reading, listening, and speaking statistics
+- ingests authentic or adapted Persian sources into either receptive-skill lab with URL, title, publisher, publication date, topic, genre, register, and ILR provenance
+- stores only a short copyright-safe excerpt/transcript while keeping a link to the original source
+- extracts source-specific target vocabulary and reports attempts by publisher/source, genre, and register
 - saves automatically in the browser
 - optionally syncs the complete course state across devices with **Supabase magic-link authentication**
 - appends individual cloud vocabulary review events in addition to the recovery snapshot
@@ -89,6 +92,15 @@ AI enables:
 - reading/listening answer grading
 - ILR-2 speaking prompt generation
 - transcript-based speaking feedback
+- authentic-source classification, ILR estimation, target-vocabulary extraction, and grounded comprehension questions
+
+## Authentic source workflow
+
+Open **Sources** and choose Reading or Listening. Add the canonical URL, source title, publisher, publication date, and a short Persian excerpt or transcript (maximum 1,800 characters). Mark whether the stored text is unchanged/authentic or adapted/shortened. For listening, a direct audio URL is optional; otherwise the app can render the stored transcript with Persian TTS.
+
+Topic, genre, register, and ILR may be entered manually. With AI configured, the app refines those labels, extracts up to 15 terms that actually occur in the excerpt, and creates five excerpt-grounded comprehension questions. The source is added directly to the appropriate lab and retained in the source library. Analytics aggregate completed reading and listening attempts by publisher, genre, and register.
+
+This workflow deliberately does not fetch or mirror full articles. Keep only the minimum excerpt needed for study and use **Open original** for the complete work.
 
 Without the API key, vocabulary scheduling still works, the advanced-word fallback pool is used, browser Persian speech synthesis can handle listening audio, and comprehension/speaking attempts can be self-scored.
 
@@ -191,15 +203,15 @@ Implemented core:
 10. Local + optional cloud persistence
 11. AI content/grading/TTS endpoints
 12. CI production-build validation
+13. Authentic-source ingestion, provenance, source libraries, and genre/register analytics
 
 Next priorities:
 
-1. authentic-source ingestion with provenance and copyright-safe excerpt handling
-2. genre/register analytics and ILR trend estimates
-3. export/backup UI for CSV + JSON
-4. PWA/offline caching
-5. more granular listening controls for speed/noise/register
-6. weekly diagnostic report and recommended next-week adjustments
+1. ILR trend estimates by source class over time
+2. export/backup UI for CSV + JSON
+3. PWA/offline caching
+4. more granular listening controls for speed/noise/register
+5. weekly diagnostic report and recommended next-week adjustments
 
 ## Stack
 

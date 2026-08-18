@@ -3,11 +3,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import ComprehensionGrader from "@/components/ComprehensionGrader";
+import SourceIngestion from "@/components/SourceIngestion";
 import SpeakingLab from "@/components/SpeakingLab";
 import { adaptiveAllocation, selectContextWords, targetIlrForWeek } from "@/lib/adaptive";
 import { fallbackAdvanced, type AdvancedWord } from "@/lib/advanced";
 import { autoRatingForKnown, createSerializedCard, reviewFsrs } from "@/lib/fsrs";
 import { normalizePersian, parseWeeklyInput } from "@/lib/persian";
+import { sourceMetrics } from "@/lib/source-analytics";
 import { appendCloudReview, getSupabaseClient, loadCloudState, saveCloudState } from "@/lib/supabase";
 import type {
   ComprehensionGrade,
@@ -26,7 +28,7 @@ import type {
 const STORAGE_KEY = "ilr-persian-v3";
 const LEGACY_KEYS = ["ilr-persian-v2", "ilr-persian-v1"];
 
-type Tab = "today" | "reading" | "listening" | "speaking" | "analytics";
+type Tab = "today" | "sources" | "reading" | "listening" | "speaking" | "analytics";
 
 type GradingResult = {
   answers: string[];
@@ -56,9 +58,9 @@ function hydrateState(raw: Partial<StudyState> | null | undefined): StudyState {
     ...raw,
     words: raw?.words ?? [],
     reviews: raw?.reviews ?? [],
-    passages: raw?.passages ?? [],
+    passages: (raw?.passages ?? []).map((item) => ({ ...item, genre: item.genre ?? "generated practice", sourceType: item.sourceType ?? "generated" })),
     passageAttempts: raw?.passageAttempts ?? [],
-    listeningItems: raw?.listeningItems ?? [],
+    listeningItems: (raw?.listeningItems ?? []).map((item) => ({ ...item, genre: item.genre ?? "generated practice", sourceType: item.sourceType ?? "generated" })),
     listeningAttempts: raw?.listeningAttempts ?? [],
     speakingPrompts: raw?.speakingPrompts ?? [],
     speakingAttempts: raw?.speakingAttempts ?? [],
@@ -111,6 +113,8 @@ export default function Home() {
   const [readingRereads, setReadingRereads] = useState(0);
   const [listensCount, setListensCount] = useState(0);
   const [transcriptVisible, setTranscriptVisible] = useState(false);
+  const [activePassageId, setActivePassageId] = useState<string | null>(null);
+  const [activeListeningId, setActiveListeningId] = useState<string | null>(null);
   const startRef = useRef(Date.now());
 
   useEffect(() => {
@@ -184,8 +188,8 @@ export default function Home() {
   const mature = state.words.filter((word) => word.reviews >= 4 && word.correct / Math.max(1, word.reviews) >= 0.8).length;
   const retention = state.reviews.length ? Math.round(100 * state.reviews.filter((review) => review.correct).length / state.reviews.length) : 0;
   const medianRecall = median(state.reviews.slice(-250).map((review) => review.responseMs));
-  const latestPassage = state.passages.at(-1);
-  const latestListening = state.listeningItems.at(-1);
+  const latestPassage = state.passages.find((item) => item.id === activePassageId) ?? state.passages.at(-1);
+  const latestListening = state.listeningItems.find((item) => item.id === activeListeningId) ?? state.listeningItems.at(-1);
   const latestSpeakingPrompt = state.speakingPrompts.at(-1);
 
   useEffect(() => {
@@ -340,11 +344,14 @@ export default function Home() {
           ilrEstimate: targetIlr,
           topic: data.topic,
           register: data.register,
+          genre: "generated practice",
+          sourceType: "generated",
           targetWords: words,
           questions: data.questions ?? [],
           createdAt: new Date().toISOString(),
         };
         setState((currentState) => ({ ...currentState, passages: [...currentState.passages, passage] }));
+        setActivePassageId(passage.id);
         setReadingStartedAt(null);
         setReadingDurationMs(0);
         setReadingQuestionsOpen(false);
@@ -358,11 +365,14 @@ export default function Home() {
           ilrEstimate: targetIlr,
           topic: data.topic,
           register: data.register,
+          genre: "generated practice",
+          sourceType: "generated",
           targetWords: words,
           questions: data.questions ?? [],
           createdAt: new Date().toISOString(),
         };
         setState((currentState) => ({ ...currentState, listeningItems: [...currentState.listeningItems, item] }));
+        setActiveListeningId(item.id);
         setListensCount(0);
         setTranscriptVisible(false);
       }
@@ -404,6 +414,10 @@ export default function Home() {
     if (!latestListening) return;
     setListensCount((count) => count + 1);
     try {
+      if (latestListening.mediaUrl) {
+        await new Audio(latestListening.mediaUrl).play();
+        return;
+      }
       const response = await fetch("/api/speech", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -464,6 +478,26 @@ export default function Home() {
   const listeningAverage = Math.round(average(state.listeningAttempts.slice(-5).map((attempt) => attempt.comprehensionScore)));
   const speakingAverage = Math.round(average(state.speakingAttempts.slice(-5).map((attempt) => attempt.grade?.overallScore ?? attempt.selfScore ?? 0).filter(Boolean)));
   const speakingWords = selectContextWords(state, 8);
+  const sourceAnalytics = sourceMetrics(state.passages, state.passageAttempts, state.listeningItems, state.listeningAttempts, "source");
+  const genreAnalytics = sourceMetrics(state.passages, state.passageAttempts, state.listeningItems, state.listeningAttempts, "genre");
+  const registerAnalytics = sourceMetrics(state.passages, state.passageAttempts, state.listeningItems, state.listeningAttempts, "register");
+
+  function resetReadingLab(passageId: string) {
+    setActivePassageId(passageId);
+    setReadingStartedAt(null);
+    setReadingDurationMs(0);
+    setReadingQuestionsOpen(false);
+    setReadingUnknown(0);
+    setReadingRereads(0);
+    setTab("reading");
+  }
+
+  function resetListeningLab(itemId: string) {
+    setActiveListeningId(itemId);
+    setListensCount(0);
+    setTranscriptVisible(false);
+    setTab("listening");
+  }
 
   return <main>
     <header>
@@ -472,7 +506,7 @@ export default function Home() {
     </header>
 
     <nav className="tabs">
-      {(["today", "reading", "listening", "speaking", "analytics"] as Tab[]).map((name) => <button key={name} className={tab === name ? "tab active" : "tab"} onClick={() => setTab(name)}>{name}</button>)}
+      {(["today", "sources", "reading", "listening", "speaking", "analytics"] as Tab[]).map((name) => <button key={name} className={tab === name ? "tab active" : "tab"} onClick={() => setTab(name)}>{name}</button>)}
     </nav>
 
     {status && <div className="notice">{status}</div>}
@@ -533,12 +567,27 @@ export default function Home() {
       </div>
     </section>}
 
+    {tab === "sources" && <>
+      <SourceIngestion
+        knownWords={state.words.map((word) => word.displayForm)}
+        makeId={id}
+        onStatus={setStatus}
+        onReading={(passage) => { setState((currentState) => ({ ...currentState, passages: [...currentState.passages, passage] })); resetReadingLab(passage.id); }}
+        onListening={(item) => { setState((currentState) => ({ ...currentState, listeningItems: [...currentState.listeningItems, item] })); resetListeningLab(item.id); }}
+      />
+      <section className="grid source-library">
+        <div className="card span-6"><h2>Reading source library</h2><div className="queue">{state.passages.slice().reverse().map((item) => <button className="queue-button source-row" key={item.id} onClick={() => resetReadingLab(item.id)}><span><strong>{item.title}</strong><small>{item.publisher || "AI-generated"} · {item.genre} · {item.register} · ILR {item.ilrEstimate}</small></span><span className={`pill origin-${item.sourceType}`}>{item.sourceType}</span></button>)}</div>{!state.passages.length && <div className="empty">No reading sources yet.</div>}</div>
+        <div className="card span-6"><h2>Listening source library</h2><div className="queue">{state.listeningItems.slice().reverse().map((item) => <button className="queue-button source-row" key={item.id} onClick={() => resetListeningLab(item.id)}><span><strong>{item.title}</strong><small>{item.publisher || "AI-generated"} · {item.genre} · {item.register} · ILR {item.ilrEstimate}</small></span><span className={`pill origin-${item.sourceType}`}>{item.sourceType}</span></button>)}</div>{!state.listeningItems.length && <div className="empty">No listening sources yet.</div>}</div>
+      </section>
+    </>}
+
     {tab === "reading" && <section className="grid">
       <div className="card span-12 lab-header"><div><h2>Reading Lab</h2><p className="muted">Read once under time pressure, then answer without looking back. AI grades meaning, inference, and discourse separately.</p></div><button className="primary" onClick={() => generatePractice("reading")}>Generate adaptive passage</button></div>
       {latestPassage ? <>
         <div className="card span-7">
-          <div className="row spread"><div><div className="muted">ILR ~{latestPassage.ilrEstimate} · {latestPassage.topic}</div><h2>{latestPassage.title}</h2></div>{!readingStartedAt && !readingQuestionsOpen && <button className="primary" onClick={() => { setReadingStartedAt(Date.now()); setReadingDurationMs(0); }}>Start timer</button>}</div>
+          <div className="row spread"><div><div className="muted">ILR ~{latestPassage.ilrEstimate} · {latestPassage.topic} · {latestPassage.genre} · {latestPassage.register}</div><h2>{latestPassage.title}</h2><SourceLine item={latestPassage} /></div>{!readingStartedAt && !readingQuestionsOpen && <button className="primary" onClick={() => { setReadingStartedAt(Date.now()); setReadingDurationMs(0); }}>Start timer</button>}</div>
           <div className={readingStartedAt || readingQuestionsOpen ? "fa passage" : "fa passage blurred"}>{latestPassage.textFa}</div>
+          {!!latestPassage.targetWords.length && <div className="target-strip"><span className="muted">Extracted targets</span>{latestPassage.targetWords.map((word) => <span className="pill fa-inline" key={word}>{word}</span>)}</div>}
           {readingStartedAt && !readingQuestionsOpen && <div className="row"><button className="primary" onClick={finishReading}>Finish reading · hide passage next</button><label>Unknown words <input className="small-input" type="number" min="0" value={readingUnknown} onChange={(event) => setReadingUnknown(Number(event.target.value))}/></label><label>Rereads <input className="small-input" type="number" min="0" value={readingRereads} onChange={(event) => setReadingRereads(Number(event.target.value))}/></label></div>}
           {readingQuestionsOpen && <div className="locked-source"><strong>Passage locked for recall.</strong><span className="muted">Reading time: {(readingDurationMs / 1000).toFixed(0)}s · unknown words: {readingUnknown} · rereads: {readingRereads}</span></div>}
         </div>
@@ -559,9 +608,10 @@ export default function Home() {
       <div className="card span-12 lab-header"><div><h2>Listening Lab</h2><p className="muted">Audio first. Answer from what you heard. Repeat count and transcript reveal are preserved as diagnostic signals.</p></div><button className="primary" onClick={() => generatePractice("listening")}>Generate adaptive listening</button></div>
       {latestListening ? <>
         <div className="card span-7">
-          <div className="muted">ILR ~{latestListening.ilrEstimate} · {latestListening.topic}</div><h2>{latestListening.title}</h2>
+          <div className="muted">ILR ~{latestListening.ilrEstimate} · {latestListening.topic} · {latestListening.genre} · {latestListening.register}</div><h2>{latestListening.title}</h2><SourceLine item={latestListening} />
           <div className="audio-stage"><button className="primary big-button" onClick={playListening}>▶ Play Persian audio</button><span className="muted">listens: {listensCount}</span></div>
           <div className={transcriptVisible ? "fa passage" : "transcript-hidden"}>{transcriptVisible ? latestListening.transcriptFa : "Transcript hidden. Keep it hidden until after answering whenever possible."}</div>
+          {transcriptVisible && !!latestListening.targetWords.length && <div className="target-strip"><span className="muted">Extracted targets</span>{latestListening.targetWords.map((word) => <span className="pill fa-inline" key={word}>{word}</span>)}</div>}
           <div className="row"><button className="secondary" onClick={() => setTranscriptVisible(true)}>Reveal transcript</button>{transcriptVisible && <span className="pill">transcript reveal logged</span>}</div>
         </div>
         <div className="card span-5">
@@ -596,8 +646,20 @@ export default function Home() {
       <div className="card span-7"><h2>Weak / slow lexical items</h2><div className="word-list single">{weakWords.map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><span>{word.definition}</span><span>{Math.round(100 * word.correct / word.reviews)}% correct · {word.medianResponseMs ? `${(word.medianResponseMs / 1000).toFixed(1)}s median` : "no latency"} · {word.lapses} lapses</span></div>)}</div>{!weakWords.length && <div className="empty">Not enough review history yet.</div>}</div>
       <div className="card span-5"><h2>Performance history</h2><div className="queue"><div className="queue-item"><span>Reading attempts</span><strong>{state.passageAttempts.length}</strong></div><div className="queue-item"><span>Listening attempts</span><strong>{state.listeningAttempts.length}</strong></div><div className="queue-item"><span>Speaking attempts</span><strong>{state.speakingAttempts.length}</strong></div><div className="queue-item"><span>Speaking avg (5)</span><strong>{speakingAverage ? `${speakingAverage}%` : "—"}</strong></div><div className="queue-item"><span>Mature vocabulary</span><strong>{mature}</strong></div><div className="queue-item"><span>Current week</span><strong>{state.weekNumber}/36</strong></div></div></div>
       <div className="card span-12"><h2>Recent comprehension diagnostics</h2><div className="diagnostic-grid"><Diagnostic label="Reading inference" value={Math.round(average(state.passageAttempts.slice(-5).map((attempt) => attempt.inferenceScore)))} /><Diagnostic label="Reading discourse" value={Math.round(average(state.passageAttempts.slice(-5).map((attempt) => attempt.discourseScore)))} /><Diagnostic label="Listening detail" value={Math.round(average(state.listeningAttempts.slice(-5).map((attempt) => attempt.detailScore)))} /><Diagnostic label="Listening inference" value={Math.round(average(state.listeningAttempts.slice(-5).map((attempt) => attempt.inferenceScore)))} /></div></div>
+      <AnalyticsTable title="Attempts by source" rows={sourceAnalytics} />
+      <AnalyticsTable title="Attempts by genre" rows={genreAnalytics} />
+      <AnalyticsTable title="Attempts by register" rows={registerAnalytics} />
     </section>}
   </main>;
+}
+
+function SourceLine({ item }: { item: Passage | ListeningItem }) {
+  if (item.sourceType === "generated") return <div className="source-line"><span className="pill">generated</span></div>;
+  return <div className="source-line"><span className={`pill origin-${item.sourceType}`}>{item.sourceType}</span><span>{item.publisher}</span>{item.publishedAt && <span>{item.publishedAt}</span>}{item.sourceUrl && <a href={item.sourceUrl} target="_blank" rel="noreferrer">Open original ↗</a>}</div>;
+}
+
+function AnalyticsTable({ title, rows }: { title: string; rows: ReturnType<typeof sourceMetrics> }) {
+  return <div className="card span-4"><h2>{title}</h2>{rows.length ? <div className="queue">{rows.map((row) => <div className="queue-item" key={row.label}><span>{row.label}<small>{row.attempts} attempt{row.attempts === 1 ? "" : "s"}</small></span><strong>{row.average}%</strong></div>)}</div> : <div className="empty">Complete a source-based lab attempt to populate this view.</div>}</div>;
 }
 
 function Metric({ label, value }: { label: string; value: string }) {
