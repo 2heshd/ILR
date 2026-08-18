@@ -50,6 +50,24 @@ export type ReviewEvent = {
 export type PassageQuestion = {
   question: string;
   type: "detail" | "inference" | "discourse" | "main_idea";
+  referenceAnswer?: string;
+};
+
+export type GradedAnswer = {
+  questionIndex: number;
+  score: number;
+  feedback: string;
+  missedConcepts?: string[];
+};
+
+export type ComprehensionGrade = {
+  overallScore: number;
+  detailScore: number;
+  inferenceScore: number;
+  discourseScore: number;
+  mainIdeaScore: number;
+  answers: GradedAnswer[];
+  summary: string;
 };
 
 export type Passage = {
@@ -74,6 +92,9 @@ export type PassageAttempt = {
   discourseScore: number;
   unknownWordCount: number;
   rereads: number;
+  answers?: string[];
+  grade?: ComprehensionGrade;
+  gradingMode?: "ai" | "self";
 };
 
 export type ListeningItem = {
@@ -97,6 +118,44 @@ export type ListeningAttempt = {
   detailScore: number;
   inferenceScore: number;
   transcriptRevealed: boolean;
+  answers?: string[];
+  grade?: ComprehensionGrade;
+  gradingMode?: "ai" | "self";
+};
+
+export type SpeakingPrompt = {
+  id: string;
+  promptEn: string;
+  promptFa?: string;
+  topic: string;
+  ilrTarget: number;
+  functions: string[];
+  targetWords: string[];
+  createdAt: string;
+};
+
+export type SpeakingGrade = {
+  taskCompletion: number;
+  organization: number;
+  grammaticalControl: number;
+  vocabularyControl: number;
+  fluencyEstimate: number;
+  overallScore: number;
+  strengths: string[];
+  priorities: string[];
+  feedback: string;
+};
+
+export type SpeakingAttempt = {
+  id: string;
+  speakingPromptId: string;
+  attemptedAt: string;
+  durationMs: number;
+  transcript: string;
+  usedSpeechRecognition: boolean;
+  grade?: SpeakingGrade;
+  gradingMode: "ai" | "self";
+  selfScore?: number;
 };
 
 export type StudyState = {
@@ -107,4 +166,6 @@ export type StudyState = {
   passageAttempts: PassageAttempt[];
   listeningItems: ListeningItem[];
   listeningAttempts: ListeningAttempt[];
+  speakingPrompts: SpeakingPrompt[];
+  speakingAttempts: SpeakingAttempt[];
 };
