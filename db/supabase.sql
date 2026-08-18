@@ -10,7 +10,8 @@ create table if not exists public.study_snapshots (
 create table if not exists public.review_events (
   id uuid primary key,
   user_id uuid not null references auth.users(id) on delete cascade,
-  lexical_item_id uuid not null,
+  -- text intentionally supports any legacy local IDs during migration.
+  lexical_item_id text not null,
   reviewed_at timestamptz not null,
   modality text not null check (modality in ('visual','audio','production','cloze')),
   rating text not null check (rating in ('again','hard','good','easy')),
