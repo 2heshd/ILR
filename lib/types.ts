@@ -1,6 +1,8 @@
 export type SourceType = "dli" | "system_advanced" | "user";
 export type ReviewRating = "again" | "hard" | "good" | "easy";
 export type ReviewModality = "visual" | "audio" | "production" | "cloze";
+export type ContentOrigin = "authentic" | "adapted" | "generated";
+export type ContentModality = "reading" | "listening";
 
 export type SerializedFsrsCard = {
   due: string;
@@ -77,6 +79,12 @@ export type Passage = {
   ilrEstimate: number;
   topic: string;
   register: string;
+  genre: string;
+  sourceType: ContentOrigin;
+  sourceUrl?: string;
+  sourceTitle?: string;
+  publisher?: string;
+  publishedAt?: string;
   targetWords: string[];
   questions: PassageQuestion[];
   createdAt: string;
@@ -104,6 +112,13 @@ export type ListeningItem = {
   ilrEstimate: number;
   topic: string;
   register: string;
+  genre: string;
+  sourceType: ContentOrigin;
+  sourceUrl?: string;
+  sourceTitle?: string;
+  publisher?: string;
+  publishedAt?: string;
+  mediaUrl?: string;
   targetWords: string[];
   questions: PassageQuestion[];
   createdAt: string;
