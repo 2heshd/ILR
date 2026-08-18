@@ -2,12 +2,15 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
+import ComprehensionGrader from "@/components/ComprehensionGrader";
+import SpeakingLab from "@/components/SpeakingLab";
 import { adaptiveAllocation, selectContextWords, targetIlrForWeek } from "@/lib/adaptive";
 import { fallbackAdvanced, type AdvancedWord } from "@/lib/advanced";
 import { autoRatingForKnown, createSerializedCard, reviewFsrs } from "@/lib/fsrs";
 import { normalizePersian, parseWeeklyInput } from "@/lib/persian";
 import { appendCloudReview, getSupabaseClient, loadCloudState, saveCloudState } from "@/lib/supabase";
 import type {
+  ComprehensionGrade,
   LexicalItem,
   ListeningAttempt,
   ListeningItem,
@@ -15,13 +18,21 @@ import type {
   PassageAttempt,
   ReviewEvent,
   ReviewRating,
+  SpeakingAttempt,
+  SpeakingPrompt,
   StudyState,
 } from "@/lib/types";
 
-const STORAGE_KEY = "ilr-persian-v2";
-const LEGACY_KEY = "ilr-persian-v1";
+const STORAGE_KEY = "ilr-persian-v3";
+const LEGACY_KEYS = ["ilr-persian-v2", "ilr-persian-v1"];
 
-type Tab = "today" | "reading" | "listening" | "analytics";
+type Tab = "today" | "reading" | "listening" | "speaking" | "analytics";
+
+type GradingResult = {
+  answers: string[];
+  grade: ComprehensionGrade;
+  gradingMode: "ai" | "self";
+};
 
 const emptyState: StudyState = {
   weekNumber: 1,
@@ -31,6 +42,8 @@ const emptyState: StudyState = {
   passageAttempts: [],
   listeningItems: [],
   listeningAttempts: [],
+  speakingPrompts: [],
+  speakingAttempts: [],
 };
 
 function id() {
@@ -47,6 +60,8 @@ function hydrateState(raw: Partial<StudyState> | null | undefined): StudyState {
     passageAttempts: raw?.passageAttempts ?? [],
     listeningItems: raw?.listeningItems ?? [],
     listeningAttempts: raw?.listeningAttempts ?? [],
+    speakingPrompts: raw?.speakingPrompts ?? [],
+    speakingAttempts: raw?.speakingAttempts ?? [],
   };
   state.words = state.words.map((word) => {
     const fsrsCard = word.fsrsCard ?? createSerializedCard(new Date(word.introducedAt || Date.now()));
@@ -71,8 +86,9 @@ async function generateJson(body: Record<string, unknown>) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
-  if (!response.ok) throw new Error((await response.json()).error || "Generation failed");
-  return response.json();
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || "Generation failed");
+  return data;
 }
 
 export default function Home() {
@@ -89,15 +105,22 @@ export default function Home() {
   const [revealed, setRevealed] = useState(false);
   const [responseMs, setResponseMs] = useState(0);
   const [readingStartedAt, setReadingStartedAt] = useState<number | null>(null);
-  const [readingScoring, setReadingScoring] = useState(false);
-  const [readingScores, setReadingScores] = useState({ comprehension: 75, inference: 50, discourse: 50, unknown: 0, rereads: 0 });
+  const [readingDurationMs, setReadingDurationMs] = useState(0);
+  const [readingQuestionsOpen, setReadingQuestionsOpen] = useState(false);
+  const [readingUnknown, setReadingUnknown] = useState(0);
+  const [readingRereads, setReadingRereads] = useState(0);
   const [listensCount, setListensCount] = useState(0);
   const [transcriptVisible, setTranscriptVisible] = useState(false);
-  const [listeningScores, setListeningScores] = useState({ comprehension: 75, detail: 50, inference: 50 });
   const startRef = useRef(Date.now());
 
   useEffect(() => {
-    const raw = localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_KEY);
+    let raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      for (const key of LEGACY_KEYS) {
+        raw = localStorage.getItem(key);
+        if (raw) break;
+      }
+    }
     const local = hydrateState(raw ? JSON.parse(raw) : emptyState);
     setState(local);
     setLoaded(true);
@@ -153,16 +176,17 @@ export default function Home() {
   }, [state, loaded, cloudUser, cloudReady]);
 
   const due = useMemo(
-    () => state.words.filter((w) => new Date(w.dueAt).getTime() <= Date.now()),
+    () => state.words.filter((word) => new Date(word.dueAt).getTime() <= Date.now()),
     [state.words],
   );
   const current = due[reviewIndex % Math.max(1, due.length)];
   const allocation = useMemo(() => adaptiveAllocation(state), [state]);
-  const mature = state.words.filter((w) => w.reviews >= 4 && w.correct / Math.max(1, w.reviews) >= 0.8).length;
-  const retention = state.reviews.length ? Math.round(100 * state.reviews.filter((r) => r.correct).length / state.reviews.length) : 0;
-  const medianRecall = median(state.reviews.slice(-250).map((r) => r.responseMs));
+  const mature = state.words.filter((word) => word.reviews >= 4 && word.correct / Math.max(1, word.reviews) >= 0.8).length;
+  const retention = state.reviews.length ? Math.round(100 * state.reviews.filter((review) => review.correct).length / state.reviews.length) : 0;
+  const medianRecall = median(state.reviews.slice(-250).map((review) => review.responseMs));
   const latestPassage = state.passages.at(-1);
   const latestListening = state.listeningItems.at(-1);
+  const latestSpeakingPrompt = state.speakingPrompts.at(-1);
 
   useEffect(() => {
     setRevealed(false);
@@ -189,37 +213,37 @@ export default function Home() {
     const parsed = parseWeeklyInput(input);
     if (!parsed.length) return;
     setStatus("Preparing weekly vocabulary…");
-    const existing = new Set(state.words.map((w) => w.normalizedForm));
-    const incoming = parsed.filter((w) => !existing.has(normalizePersian(w.displayForm)));
+    const existing = new Set(state.words.map((word) => word.normalizedForm));
+    const incoming = parsed.filter((word) => !existing.has(normalizePersian(word.displayForm)));
 
     let enriched = incoming;
-    const missing = incoming.filter((w) => !w.definition || !w.romanization);
+    const missing = incoming.filter((word) => !word.definition || !word.romanization);
     if (missing.length) {
       try {
-        const data = await generateJson({ kind: "define_words", words: missing.map((w) => w.displayForm) });
+        const data = await generateJson({ kind: "define_words", words: missing.map((word) => word.displayForm) });
         const lookup = new Map<string, { definition?: string; romanization?: string }>(
-          (data.words ?? []).map((w: { displayForm: string; definition: string; romanization: string }) => [normalizePersian(w.displayForm), w] as const),
+          (data.words ?? []).map((word: { displayForm: string; definition: string; romanization: string }) => [normalizePersian(word.displayForm), word] as const),
         );
-        enriched = incoming.map((w) => ({
-          ...w,
-          definition: w.definition ?? lookup.get(normalizePersian(w.displayForm))?.definition,
-          romanization: w.romanization ?? lookup.get(normalizePersian(w.displayForm))?.romanization,
+        enriched = incoming.map((word) => ({
+          ...word,
+          definition: word.definition ?? lookup.get(normalizePersian(word.displayForm))?.definition,
+          romanization: word.romanization ?? lookup.get(normalizePersian(word.displayForm))?.romanization,
         }));
       } catch {
-        // User-supplied definitions remain usable when the AI endpoint is not configured.
+        // User-supplied definitions remain usable when AI is not configured.
       }
     }
 
-    enriched.forEach((w) => existing.add(normalizePersian(w.displayForm)));
+    enriched.forEach((word) => existing.add(normalizePersian(word.displayForm)));
     let advanced: AdvancedWord[] = [];
     try {
       const data = await generateJson({ kind: "advanced_words", weekNumber: state.weekNumber, existing: [...existing] });
-      advanced = (data.words ?? []).filter((w: AdvancedWord) => !existing.has(normalizePersian(w.displayForm))).slice(0, 5);
+      advanced = (data.words ?? []).filter((word: AdvancedWord) => !existing.has(normalizePersian(word.displayForm))).slice(0, 5);
     } catch {
       advanced = fallbackAdvanced(existing, 5);
     }
     if (advanced.length < 5) {
-      const blocked = new Set([...existing, ...advanced.map((w) => normalizePersian(w.displayForm))]);
+      const blocked = new Set([...existing, ...advanced.map((word) => normalizePersian(word.displayForm))]);
       advanced = [...advanced, ...fallbackAdvanced(blocked, 5 - advanced.length)];
     }
 
@@ -233,17 +257,28 @@ export default function Home() {
       const now = new Date();
       const fsrsCard = createSerializedCard(now);
       return {
-        id: id(), displayForm, normalizedForm: normalizePersian(displayForm), definition, romanization,
-        sourceType, sourceWeek: state.weekNumber, topic, introducedAt: now.toISOString(), reviews: 0,
-        correct: 0, lapses: 0, dueAt: fsrsCard.due, fsrsCard,
+        id: id(),
+        displayForm,
+        normalizedForm: normalizePersian(displayForm),
+        definition,
+        romanization,
+        sourceType,
+        sourceWeek: state.weekNumber,
+        topic,
+        introducedAt: now.toISOString(),
+        reviews: 0,
+        correct: 0,
+        lapses: 0,
+        dueAt: fsrsCard.due,
+        fsrsCard,
       };
     };
 
     const newWords = [
-      ...enriched.map((w) => makeWord(w.displayForm, w.definition, w.romanization, "dli")),
-      ...advanced.map((w) => makeWord(w.displayForm, w.definition, w.romanization, "system_advanced", w.topic)),
+      ...enriched.map((word) => makeWord(word.displayForm, word.definition, word.romanization, "dli")),
+      ...advanced.map((word) => makeWord(word.displayForm, word.definition, word.romanization, "system_advanced", word.topic)),
     ];
-    setState((s) => ({ ...s, words: [...s.words, ...newWords] }));
+    setState((currentState) => ({ ...currentState, words: [...currentState.words, ...newWords] }));
     setInput("");
     setShowIntake(false);
     setReviewIndex(0);
@@ -261,18 +296,25 @@ export default function Home() {
     const rating: ReviewRating = correct ? autoRatingForKnown(measured) : "again";
     const { before, after } = reviewFsrs(current.fsrsCard, rating, new Date());
     const event: ReviewEvent = {
-      id: id(), lexicalItemId: current.id, reviewedAt: new Date().toISOString(), correct, responseMs: measured,
-      rating, modality: "visual", schedulerBefore: before, schedulerAfter: after,
+      id: id(),
+      lexicalItemId: current.id,
+      reviewedAt: new Date().toISOString(),
+      correct,
+      responseMs: measured,
+      rating,
+      modality: "visual",
+      schedulerBefore: before,
+      schedulerAfter: after,
     };
-    setState((s) => ({
-      ...s,
-      reviews: [...s.reviews, event],
-      words: s.words.map((w) => w.id !== current.id ? w : {
-        ...w,
-        reviews: w.reviews + 1,
-        correct: w.correct + (correct ? 1 : 0),
+    setState((currentState) => ({
+      ...currentState,
+      reviews: [...currentState.reviews, event],
+      words: currentState.words.map((word) => word.id !== current.id ? word : {
+        ...word,
+        reviews: word.reviews + 1,
+        correct: word.correct + (correct ? 1 : 0),
         lapses: after.lapses,
-        medianResponseMs: median([...s.reviews.filter((r) => r.lexicalItemId === w.id).map((r) => r.responseMs), measured]),
+        medianResponseMs: median([...currentState.reviews.filter((review) => review.lexicalItemId === word.id).map((review) => review.responseMs), measured]),
         dueAt: after.due,
         stability: after.stability,
         difficulty: after.difficulty,
@@ -281,7 +323,7 @@ export default function Home() {
     }));
     const client = getSupabaseClient();
     if (client && cloudUser) appendCloudReview(client, cloudUser, event).catch(console.error);
-    setReviewIndex((i) => i + 1);
+    setReviewIndex((index) => index + 1);
   }
 
   async function generatePractice(kind: "reading" | "listening") {
@@ -292,20 +334,35 @@ export default function Home() {
       const data = await generateJson({ kind, weekNumber: state.weekNumber, targetWords: words, targetIlr });
       if (kind === "reading") {
         const passage: Passage = {
-          id: id(), title: data.title, textFa: data.textFa, ilrEstimate: targetIlr,
-          topic: data.topic, register: data.register, targetWords: words,
-          questions: data.questions ?? [], createdAt: new Date().toISOString(),
+          id: id(),
+          title: data.title,
+          textFa: data.textFa,
+          ilrEstimate: targetIlr,
+          topic: data.topic,
+          register: data.register,
+          targetWords: words,
+          questions: data.questions ?? [],
+          createdAt: new Date().toISOString(),
         };
-        setState((s) => ({ ...s, passages: [...s.passages, passage] }));
+        setState((currentState) => ({ ...currentState, passages: [...currentState.passages, passage] }));
         setReadingStartedAt(null);
-        setReadingScoring(false);
+        setReadingDurationMs(0);
+        setReadingQuestionsOpen(false);
+        setReadingUnknown(0);
+        setReadingRereads(0);
       } else {
         const item: ListeningItem = {
-          id: id(), title: data.title, transcriptFa: data.textFa, ilrEstimate: targetIlr,
-          topic: data.topic, register: data.register, targetWords: words,
-          questions: data.questions ?? [], createdAt: new Date().toISOString(),
+          id: id(),
+          title: data.title,
+          transcriptFa: data.textFa,
+          ilrEstimate: targetIlr,
+          topic: data.topic,
+          register: data.register,
+          targetWords: words,
+          questions: data.questions ?? [],
+          createdAt: new Date().toISOString(),
         };
-        setState((s) => ({ ...s, listeningItems: [...s.listeningItems, item] }));
+        setState((currentState) => ({ ...currentState, listeningItems: [...currentState.listeningItems, item] }));
         setListensCount(0);
         setTranscriptVisible(false);
       }
@@ -315,23 +372,37 @@ export default function Home() {
     }
   }
 
-  function saveReadingAttempt() {
-    if (!latestPassage || !readingStartedAt) return;
+  function finishReading() {
+    if (!readingStartedAt) return;
+    setReadingDurationMs(Date.now() - readingStartedAt);
+    setReadingQuestionsOpen(true);
+  }
+
+  function completeReading(result: GradingResult) {
+    if (!latestPassage || !readingDurationMs) return;
     const attempt: PassageAttempt = {
-      id: id(), passageId: latestPassage.id, attemptedAt: new Date().toISOString(),
-      durationMs: Date.now() - readingStartedAt, comprehensionScore: readingScores.comprehension,
-      inferenceScore: readingScores.inference, discourseScore: readingScores.discourse,
-      unknownWordCount: readingScores.unknown, rereads: readingScores.rereads,
+      id: id(),
+      passageId: latestPassage.id,
+      attemptedAt: new Date().toISOString(),
+      durationMs: readingDurationMs,
+      comprehensionScore: result.grade.overallScore,
+      inferenceScore: result.grade.inferenceScore,
+      discourseScore: result.grade.discourseScore,
+      unknownWordCount: readingUnknown,
+      rereads: readingRereads,
+      answers: result.answers,
+      grade: result.grade,
+      gradingMode: result.gradingMode,
     };
-    setState((s) => ({ ...s, passageAttempts: [...s.passageAttempts, attempt] }));
+    setState((currentState) => ({ ...currentState, passageAttempts: [...currentState.passageAttempts, attempt] }));
     setReadingStartedAt(null);
-    setReadingScoring(false);
-    setStatus("Reading attempt saved. The allocation will adapt from this result.");
+    setReadingDurationMs(0);
+    setStatus(`Reading saved · ${result.grade.overallScore}% comprehension. Adaptive allocation updated.`);
   }
 
   async function playListening() {
     if (!latestListening) return;
-    setListensCount((n) => n + 1);
+    setListensCount((count) => count + 1);
     try {
       const response = await fetch("/api/speech", {
         method: "POST",
@@ -351,41 +422,57 @@ export default function Home() {
     }
   }
 
-  function saveListeningAttempt() {
+  function completeListening(result: GradingResult) {
     if (!latestListening || listensCount === 0) return;
     const attempt: ListeningAttempt = {
-      id: id(), listeningItemId: latestListening.id, attemptedAt: new Date().toISOString(),
-      listensCount, comprehensionScore: listeningScores.comprehension, detailScore: listeningScores.detail,
-      inferenceScore: listeningScores.inference, transcriptRevealed: transcriptVisible,
+      id: id(),
+      listeningItemId: latestListening.id,
+      attemptedAt: new Date().toISOString(),
+      listensCount,
+      comprehensionScore: result.grade.overallScore,
+      detailScore: result.grade.detailScore,
+      inferenceScore: result.grade.inferenceScore,
+      transcriptRevealed: transcriptVisible,
+      answers: result.answers,
+      grade: result.grade,
+      gradingMode: result.gradingMode,
     };
-    setState((s) => ({ ...s, listeningAttempts: [...s.listeningAttempts, attempt] }));
-    setListensCount(0);
-    setTranscriptVisible(false);
-    setStatus("Listening attempt saved. First-listen performance now affects the adaptive plan.");
+    setState((currentState) => ({ ...currentState, listeningAttempts: [...currentState.listeningAttempts, attempt] }));
+    setStatus(`Listening saved · ${result.grade.overallScore}% comprehension after ${listensCount} listen${listensCount === 1 ? "" : "s"}.`);
+  }
+
+  function addSpeakingPrompt(prompt: SpeakingPrompt) {
+    setState((currentState) => ({ ...currentState, speakingPrompts: [...currentState.speakingPrompts, prompt] }));
+  }
+
+  function addSpeakingAttempt(attempt: SpeakingAttempt) {
+    setState((currentState) => ({ ...currentState, speakingAttempts: [...currentState.speakingAttempts, attempt] }));
   }
 
   function advanceWeek() {
-    setState((s) => ({ ...s, weekNumber: Math.min(36, s.weekNumber + 1) }));
+    setState((currentState) => ({ ...currentState, weekNumber: Math.min(36, currentState.weekNumber + 1) }));
     setStatus("Advanced to the next course week. Add the new required vocabulary when ready.");
   }
 
   if (!loaded) return <main>Loading…</main>;
 
   const weakWords = [...state.words]
-    .filter((w) => w.reviews >= 2)
+    .filter((word) => word.reviews >= 2)
     .sort((a, b) => (a.correct / a.reviews) - (b.correct / b.reviews) || (b.medianResponseMs ?? 0) - (a.medianResponseMs ?? 0))
     .slice(0, 10);
-  const readingAverage = Math.round(average(state.passageAttempts.slice(-5).map((a) => a.comprehensionScore)));
-  const listeningAverage = Math.round(average(state.listeningAttempts.slice(-5).map((a) => a.comprehensionScore)));
+  const readingAverage = Math.round(average(state.passageAttempts.slice(-5).map((attempt) => attempt.comprehensionScore)));
+  const listeningAverage = Math.round(average(state.listeningAttempts.slice(-5).map((attempt) => attempt.comprehensionScore)));
+  const speakingAverage = Math.round(average(state.speakingAttempts.slice(-5).map((attempt) => attempt.grade?.overallScore ?? attempt.selfScore ?? 0).filter(Boolean)));
+  const speakingWords = selectContextWords(state, 8);
 
   return <main>
     <header>
       <div><div className="muted">Week {state.weekNumber}/36 · adaptive Persian system</div><h1>ILR // {tab[0].toUpperCase() + tab.slice(1)}</h1></div>
-      <div className="row"><span className="pill">R4</span><span className="pill">L3+</span><span className="pill">S2</span><button className="primary" onClick={() => setShowIntake((v) => !v)}>+ Weekly words</button></div>
+      <div className="row"><span className="pill">R4</span><span className="pill">L3+</span><span className="pill">S2</span><button className="primary" onClick={() => setShowIntake((value) => !value)}>+ Weekly words</button></div>
     </header>
 
     <nav className="tabs">
-      {(["today", "reading", "listening", "analytics"] as Tab[]).map((name) => <button key={name} className={tab === name ? "tab active" : "tab"} onClick={() => setTab(name)}>{name}</button>)}
+      {(["today", "reading", "listening", "speaking", "analytics"] as Tab[]).map((name) => <button key={name} className={tab === name ? "tab active" : "tab"} onClick={() => setTab(name)}>{name}</button>)}
     </nav>
 
     {status && <div className="notice">{status}</div>}
@@ -393,7 +480,7 @@ export default function Home() {
     {showIntake && <section className="card intake">
       <h2>Week {state.weekNumber} intake</h2>
       <div className="muted">Paste every required DLI word. Missing definitions/romanization are auto-filled when AI is configured. Exactly 5 advanced terms are added.</div>
-      <textarea value={input} onChange={(e) => setInput(e.target.value)} placeholder={"کارمند — employee — kārmand\nبازداشت کردن — to arrest — bāzdāsht kardan\nآینده — future — āyande"} />
+      <textarea value={input} onChange={(event) => setInput(event.target.value)} placeholder={"کارمند — employee — kārmand\nبازداشت کردن — to arrest — bāzdāsht kardan\nآینده — future — āyande"} />
       <div className="row"><button className="primary" onClick={importWeek}>Import week + 5 advanced</button><button className="secondary" onClick={() => setShowIntake(false)}>Cancel</button></div>
     </section>}
 
@@ -426,7 +513,7 @@ export default function Home() {
 
       <div className="card span-8">
         <div className="row spread"><h2>Current vocabulary</h2><span className="muted">{mature} mature</span></div>
-        <div className="word-list">{state.words.slice(-14).reverse().map((w) => <div className="word" key={w.id}><strong>{w.displayForm}</strong><span>{w.romanization ? `${w.romanization} · ` : ""}{w.definition || "definition pending"}</span><span>W{w.sourceWeek} · {w.reviews} reviews · {w.sourceType === "system_advanced" ? "advanced" : "DLI"}</span></div>)}</div>
+        <div className="word-list">{state.words.slice(-14).reverse().map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><span>{word.romanization ? `${word.romanization} · ` : ""}{word.definition || "definition pending"}</span><span>W{word.sourceWeek} · {word.reviews} reviews · {word.sourceType === "system_advanced" ? "advanced" : "DLI"}</span></div>)}</div>
       </div>
 
       <div className="card span-4">
@@ -434,6 +521,7 @@ export default function Home() {
         <div className="queue">
           <button className="queue-button" onClick={() => setTab("reading")}><span>Reading lab</span><strong>{readingAverage || "start"}</strong></button>
           <button className="queue-button" onClick={() => setTab("listening")}><span>Listening lab</span><strong>{listeningAverage || "start"}</strong></button>
+          <button className="queue-button" onClick={() => setTab("speaking")}><span>Speaking maintenance</span><strong>{speakingAverage || "S2"}</strong></button>
           <button className="queue-button" onClick={() => setTab("analytics")}><span>Difficult items</span><strong>{weakWords.length}</strong></button>
           <button className="queue-button" onClick={advanceWeek} disabled={state.weekNumber >= 36}><span>Advance course week</span><strong>W{Math.min(36, state.weekNumber + 1)}</strong></button>
         </div>
@@ -441,55 +529,73 @@ export default function Home() {
 
       <div className="card span-12 sync-card">
         <div><h2>36-week persistence</h2><div className="muted">Local history is automatic. Add Supabase to sync across your Mac, phone, and other devices.</div></div>
-        {getSupabaseClient() ? cloudUser ? <div className="row"><span className="pill">cloud synced</span><span className="muted">{cloudUser.email}</span><button className="secondary" onClick={signOut}>Sign out</button></div> : <div className="row auth-row"><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email for magic-link sync"/><button className="primary" onClick={signIn}>Send magic link</button></div> : <span className="pill">local mode · add Supabase env vars for cloud</span>}
+        {getSupabaseClient() ? cloudUser ? <div className="row"><span className="pill">cloud synced</span><span className="muted">{cloudUser.email}</span><button className="secondary" onClick={signOut}>Sign out</button></div> : <div className="row auth-row"><input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Email for magic-link sync"/><button className="primary" onClick={signIn}>Send magic link</button></div> : <span className="pill">local mode · add Supabase env vars for cloud</span>}
       </div>
     </section>}
 
     {tab === "reading" && <section className="grid">
-      <div className="card span-12 lab-header"><div><h2>Reading Lab</h2><p className="muted">One coherent passage. Timed comprehension, inference, discourse, and unknown-word burden are tracked separately.</p></div><button className="primary" onClick={() => generatePractice("reading")}>Generate adaptive passage</button></div>
+      <div className="card span-12 lab-header"><div><h2>Reading Lab</h2><p className="muted">Read once under time pressure, then answer without looking back. AI grades meaning, inference, and discourse separately.</p></div><button className="primary" onClick={() => generatePractice("reading")}>Generate adaptive passage</button></div>
       {latestPassage ? <>
-        <div className="card span-8">
-          <div className="row spread"><div><div className="muted">ILR ~{latestPassage.ilrEstimate} · {latestPassage.topic}</div><h2>{latestPassage.title}</h2></div>{!readingStartedAt && !readingScoring && <button className="primary" onClick={() => setReadingStartedAt(Date.now())}>Start timer</button>}</div>
-          <div className={readingStartedAt || readingScoring ? "fa passage" : "fa passage blurred"}>{latestPassage.textFa}</div>
-          {readingStartedAt && !readingScoring && <button className="primary" onClick={() => setReadingScoring(true)}>Finish reading</button>}
-          {readingScoring && <div className="score-panel">
-            <Score label="Overall comprehension" value={readingScores.comprehension} onChange={(v) => setReadingScores((s) => ({ ...s, comprehension: v }))}/>
-            <Score label="Inference" value={readingScores.inference} onChange={(v) => setReadingScores((s) => ({ ...s, inference: v }))}/>
-            <Score label="Discourse / argument tracking" value={readingScores.discourse} onChange={(v) => setReadingScores((s) => ({ ...s, discourse: v }))}/>
-            <div className="row"><label>Unknown words <input className="small-input" type="number" min="0" value={readingScores.unknown} onChange={(e) => setReadingScores((s) => ({ ...s, unknown: Number(e.target.value) }))}/></label><label>Rereads <input className="small-input" type="number" min="0" value={readingScores.rereads} onChange={(e) => setReadingScores((s) => ({ ...s, rereads: Number(e.target.value) }))}/></label></div>
-            <button className="primary" onClick={saveReadingAttempt}>Save attempt</button>
-          </div>}
+        <div className="card span-7">
+          <div className="row spread"><div><div className="muted">ILR ~{latestPassage.ilrEstimate} · {latestPassage.topic}</div><h2>{latestPassage.title}</h2></div>{!readingStartedAt && !readingQuestionsOpen && <button className="primary" onClick={() => { setReadingStartedAt(Date.now()); setReadingDurationMs(0); }}>Start timer</button>}</div>
+          <div className={readingStartedAt || readingQuestionsOpen ? "fa passage" : "fa passage blurred"}>{latestPassage.textFa}</div>
+          {readingStartedAt && !readingQuestionsOpen && <div className="row"><button className="primary" onClick={finishReading}>Finish reading · hide passage next</button><label>Unknown words <input className="small-input" type="number" min="0" value={readingUnknown} onChange={(event) => setReadingUnknown(Number(event.target.value))}/></label><label>Rereads <input className="small-input" type="number" min="0" value={readingRereads} onChange={(event) => setReadingRereads(Number(event.target.value))}/></label></div>}
+          {readingQuestionsOpen && <div className="locked-source"><strong>Passage locked for recall.</strong><span className="muted">Reading time: {(readingDurationMs / 1000).toFixed(0)}s · unknown words: {readingUnknown} · rereads: {readingRereads}</span></div>}
         </div>
-        <div className="card span-4"><h2>Comprehension prompts</h2><ol className="questions">{latestPassage.questions.map((q, i) => <li key={i}><span className="muted">{q.type}</span>{q.question}</li>)}</ol></div>
+        <div className="card span-5">
+          {readingQuestionsOpen ? <ComprehensionGrader
+            key={latestPassage.id}
+            kind="reading"
+            sourceText={latestPassage.textFa}
+            questions={latestPassage.questions}
+            ilrEstimate={latestPassage.ilrEstimate}
+            onComplete={completeReading}
+          /> : <div className="empty">Questions unlock after you finish the timed reading. This prevents question-first scanning.</div>}
+        </div>
       </> : <div className="card span-12 empty">Generate the first passage after importing vocabulary. It will recycle weak/current terms at the week-adjusted difficulty.</div>}
     </section>}
 
     {tab === "listening" && <section className="grid">
-      <div className="card span-12 lab-header"><div><h2>Listening Lab</h2><p className="muted">Audio first. Transcript stays hidden; first-listen performance carries more diagnostic value than repeated listening.</p></div><button className="primary" onClick={() => generatePractice("listening")}>Generate adaptive listening</button></div>
+      <div className="card span-12 lab-header"><div><h2>Listening Lab</h2><p className="muted">Audio first. Answer from what you heard. Repeat count and transcript reveal are preserved as diagnostic signals.</p></div><button className="primary" onClick={() => generatePractice("listening")}>Generate adaptive listening</button></div>
       {latestListening ? <>
         <div className="card span-7">
           <div className="muted">ILR ~{latestListening.ilrEstimate} · {latestListening.topic}</div><h2>{latestListening.title}</h2>
           <div className="audio-stage"><button className="primary big-button" onClick={playListening}>▶ Play Persian audio</button><span className="muted">listens: {listensCount}</span></div>
-          <div className={transcriptVisible ? "fa passage" : "transcript-hidden"}>{transcriptVisible ? latestListening.transcriptFa : "Transcript hidden until you choose to reveal it."}</div>
-          <div className="row"><button className="secondary" onClick={() => setTranscriptVisible(true)}>Reveal transcript</button></div>
-          <div className="score-panel">
-            <Score label="Overall comprehension" value={listeningScores.comprehension} onChange={(v) => setListeningScores((s) => ({ ...s, comprehension: v }))}/>
-            <Score label="Detail" value={listeningScores.detail} onChange={(v) => setListeningScores((s) => ({ ...s, detail: v }))}/>
-            <Score label="Inference" value={listeningScores.inference} onChange={(v) => setListeningScores((s) => ({ ...s, inference: v }))}/>
-            <button className="primary" onClick={saveListeningAttempt} disabled={listensCount === 0}>Save attempt</button>
-          </div>
+          <div className={transcriptVisible ? "fa passage" : "transcript-hidden"}>{transcriptVisible ? latestListening.transcriptFa : "Transcript hidden. Keep it hidden until after answering whenever possible."}</div>
+          <div className="row"><button className="secondary" onClick={() => setTranscriptVisible(true)}>Reveal transcript</button>{transcriptVisible && <span className="pill">transcript reveal logged</span>}</div>
         </div>
-        <div className="card span-5"><h2>Questions</h2><ol className="questions">{latestListening.questions.map((q, i) => <li key={i}><span className="muted">{q.type}</span>{q.question}</li>)}</ol></div>
-      </> : <div className="card span-12 empty">Generate an item. OpenAI TTS is used when configured; otherwise the browser's Persian voice is the fallback.</div>}
+        <div className="card span-5">
+          {listensCount > 0 ? <ComprehensionGrader
+            key={latestListening.id}
+            kind="listening"
+            sourceText={latestListening.transcriptFa}
+            questions={latestListening.questions}
+            ilrEstimate={latestListening.ilrEstimate}
+            listensCount={listensCount}
+            transcriptRevealed={transcriptVisible}
+            onComplete={completeListening}
+          /> : <div className="empty">Play the audio at least once before answering.</div>}
+        </div>
+      </> : <div className="card span-12 empty">Generate an item. OpenAI TTS is used when configured; otherwise the browser&apos;s Persian voice is the fallback.</div>}
     </section>}
+
+    {tab === "speaking" && <SpeakingLab
+      weekNumber={state.weekNumber}
+      targetWords={speakingWords}
+      latestPrompt={latestSpeakingPrompt}
+      onPrompt={addSpeakingPrompt}
+      onAttempt={addSpeakingAttempt}
+      makeId={id}
+    />}
 
     {tab === "analytics" && <section className="grid">
       <Metric label="Words learned" value={String(state.words.length)} />
       <Metric label="Reviews logged" value={String(state.reviews.length)} />
       <Metric label="Reading avg (5)" value={readingAverage ? `${readingAverage}%` : "—"} />
       <Metric label="Listening avg (5)" value={listeningAverage ? `${listeningAverage}%` : "—"} />
-      <div className="card span-7"><h2>Weak / slow lexical items</h2><div className="word-list single">{weakWords.map((w) => <div className="word" key={w.id}><strong>{w.displayForm}</strong><span>{w.definition}</span><span>{Math.round(100 * w.correct / w.reviews)}% correct · {w.medianResponseMs ? `${(w.medianResponseMs / 1000).toFixed(1)}s median` : "no latency"} · {w.lapses} lapses</span></div>)}</div>{!weakWords.length && <div className="empty">Not enough review history yet.</div>}</div>
-      <div className="card span-5"><h2>Performance history</h2><div className="queue"><div className="queue-item"><span>Reading attempts</span><strong>{state.passageAttempts.length}</strong></div><div className="queue-item"><span>Listening attempts</span><strong>{state.listeningAttempts.length}</strong></div><div className="queue-item"><span>Mature vocabulary</span><strong>{mature}</strong></div><div className="queue-item"><span>Current week</span><strong>{state.weekNumber}/36</strong></div></div></div>
+      <div className="card span-7"><h2>Weak / slow lexical items</h2><div className="word-list single">{weakWords.map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><span>{word.definition}</span><span>{Math.round(100 * word.correct / word.reviews)}% correct · {word.medianResponseMs ? `${(word.medianResponseMs / 1000).toFixed(1)}s median` : "no latency"} · {word.lapses} lapses</span></div>)}</div>{!weakWords.length && <div className="empty">Not enough review history yet.</div>}</div>
+      <div className="card span-5"><h2>Performance history</h2><div className="queue"><div className="queue-item"><span>Reading attempts</span><strong>{state.passageAttempts.length}</strong></div><div className="queue-item"><span>Listening attempts</span><strong>{state.listeningAttempts.length}</strong></div><div className="queue-item"><span>Speaking attempts</span><strong>{state.speakingAttempts.length}</strong></div><div className="queue-item"><span>Speaking avg (5)</span><strong>{speakingAverage ? `${speakingAverage}%` : "—"}</strong></div><div className="queue-item"><span>Mature vocabulary</span><strong>{mature}</strong></div><div className="queue-item"><span>Current week</span><strong>{state.weekNumber}/36</strong></div></div></div>
+      <div className="card span-12"><h2>Recent comprehension diagnostics</h2><div className="diagnostic-grid"><Diagnostic label="Reading inference" value={Math.round(average(state.passageAttempts.slice(-5).map((attempt) => attempt.inferenceScore)))} /><Diagnostic label="Reading discourse" value={Math.round(average(state.passageAttempts.slice(-5).map((attempt) => attempt.discourseScore)))} /><Diagnostic label="Listening detail" value={Math.round(average(state.listeningAttempts.slice(-5).map((attempt) => attempt.detailScore)))} /><Diagnostic label="Listening inference" value={Math.round(average(state.listeningAttempts.slice(-5).map((attempt) => attempt.inferenceScore)))} /></div></div>
     </section>}
   </main>;
 }
@@ -498,6 +604,6 @@ function Metric({ label, value }: { label: string; value: string }) {
   return <div className="card span-3"><div className="muted">{label}</div><div className="stat">{value}</div></div>;
 }
 
-function Score({ label, value, onChange }: { label: string; value: number; onChange: (value: number) => void }) {
-  return <label className="score"><div className="row spread"><span>{label}</span><strong>{value}%</strong></div><input type="range" min="0" max="100" step="5" value={value} onChange={(e) => onChange(Number(e.target.value))}/></label>;
+function Diagnostic({ label, value }: { label: string; value: number }) {
+  return <div className="diagnostic"><span className="muted">{label}</span><strong>{value ? `${value}%` : "—"}</strong></div>;
 }
