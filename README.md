@@ -19,7 +19,7 @@ Adaptive Persian/Farsi learning system for a 35-week intensive course beginning 
 - gives answer-level corrective feedback and missed-concept diagnostics
 - provides a self-score fallback if AI grading is unavailable
 - shifts reading/listening study allocation toward the weaker receptive skill while preserving lexical and speaking floors
-- starts learners on a visible ILR 1-4 progression and generates practice slightly above their selected current level
+- starts every skill at Level 1 and keeps compact Reading, Listening, and Speaking level controls in the top-right corner
 - recommends moving up after at least four recent receptive attempts average 80% or better
 - includes a dedicated **ILR-2 speaking-maintenance lab** with 3-minute connected-response tasks
 - uses Persian browser speech recognition when available and allows transcript correction before grading
@@ -125,9 +125,9 @@ NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 ```
 
-The Account page supports unique usernames plus email/password authentication. After sign-in, the complete learning state saves automatically to the user's private `study_snapshots` row while local storage remains available as an offline fallback.
+The combined Progress and Account page supports unique usernames plus email/password authentication. After sign-in, the complete learning state saves automatically to the user's private `study_snapshots` row while local storage remains available as an offline fallback.
 
-Restart the development server. Create an account or sign in from the Account page. Local persistence remains active as an offline/recovery layer.
+Restart the development server. Create an account or sign in from the Progress page. Local persistence remains active as an offline/recovery layer.
 
 ## Adaptive logic
 
@@ -178,7 +178,7 @@ Recent reading/listening results can shift up to 10 percentage points toward the
 
 ### Difficulty progression
 
-The learner selects a current ILR milestone from 1-4 (new profiles begin at ILR 1). Reading and listening practice targets 0.25 above that level, with a small additional course-time step every 12 weeks, capped at Reading 4 and Listening 3.5. After at least four recent receptive attempts average 80% or better, the dashboard recommends advancing to the next milestone. Generated passages prioritize weak/current vocabulary but are instructed to preserve natural discourse rather than maximize keyword density.
+The learner selects independent Reading, Listening, and Speaking levels from 1-4 in the top-right controls; new profiles begin at Level 1 in all three skills. Generated passages target the chosen level and aim for 80-90% content-vocabulary coverage from the learner's full active word inventory, including words first introduced that day. The remaining 10-20% provides controlled unfamiliar vocabulary while preserving natural discourse.
 
 ## Persistence model
 

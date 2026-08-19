@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { SPEAKING_PROMPTS } from "@/lib/speaking-prompts";
 import type { IlrLevel, SpeakingAttempt, SpeakingGrade, SpeakingPrompt } from "@/lib/types";
 
 type Props = {
   weekNumber: number;
   level: IlrLevel;
-  onLevelChange: (level: IlrLevel) => void;
   targetWords: string[];
   latestPrompt?: SpeakingPrompt;
   onPrompt: (prompt: SpeakingPrompt) => void;
@@ -14,33 +14,10 @@ type Props = {
   makeId: () => string;
 };
 
-const PROMPTS: Record<IlrLevel, Array<{ prompt: string; topic: string; functions: string[] }>> = {
-  1: [
-    { prompt: "Introduce yourself in Persian. Say where you live, what you do, and what you usually do each day.", topic: "daily life", functions: ["introduce", "describe", "present time"] },
-    { prompt: "Describe your home or neighborhood. Mention three places and explain where they are.", topic: "places", functions: ["describe", "locate", "simple detail"] },
-    { prompt: "Talk about what you did yesterday and what you plan to do tomorrow.", topic: "routine", functions: ["past time", "future time", "sequence"] },
-  ],
-  2: [
-    { prompt: "Describe a recent problem, explain what caused it, what you did, and what you would change next time.", topic: "problem solving", functions: ["narrate", "explain", "past and future"] },
-    { prompt: "Compare two places where you have lived or visited. Explain the advantages of each and which you prefer.", topic: "comparison", functions: ["compare", "support an opinion", "connected speech"] },
-    { prompt: "Explain a change at work, school, or in your community and how it affects people.", topic: "community", functions: ["explain", "cause and effect", "give examples"] },
-  ],
-  3: [
-    { prompt: "Explain a public policy you think should change. Describe the problem, defend your position, and address one objection.", topic: "public policy", functions: ["argue", "support", "address objections"] },
-    { prompt: "Discuss how rising prices affect different groups in society and propose a practical response.", topic: "economics", functions: ["analyze", "compare impacts", "recommend"] },
-    { prompt: "Assess the benefits and risks of relying on technology in education or government services.", topic: "technology", functions: ["evaluate", "qualify", "support conclusions"] },
-  ],
-  4: [
-    { prompt: "Give a nuanced analysis of whether national security can justify limits on public access to information. Define the competing principles and reconcile them.", topic: "security and rights", functions: ["analyze nuance", "shift register", "synthesize"] },
-    { prompt: "Evaluate how a government should balance short-term economic stability with long-term structural reform, including unintended consequences.", topic: "economic policy", functions: ["evaluate", "hypothesize", "handle abstraction"] },
-    { prompt: "Discuss how language used by institutions can shape public trust. Distinguish persuasion, explanation, and manipulation.", topic: "public discourse", functions: ["distinguish", "interpret", "develop a precise argument"] },
-  ],
-};
-
 const TARGET_SECONDS: Record<IlrLevel, number> = { 1: 45, 2: 90, 3: 150, 4: 240 };
 
 function makePrompt(level: IlrLevel, index: number, weekNumber: number, targetWords: string[], makeId: () => string): SpeakingPrompt {
-  const item = PROMPTS[level][(index + weekNumber - 1) % PROMPTS[level].length];
+  const item = SPEAKING_PROMPTS[level][(index + weekNumber - 1) % SPEAKING_PROMPTS[level].length];
   return {
     id: makeId(),
     promptEn: item.prompt,
@@ -94,7 +71,7 @@ async function convertToWav(blob: Blob) {
   }
 }
 
-export default function SpeakingLab({ weekNumber, level, onLevelChange, targetWords, latestPrompt, onPrompt, onAttempt, makeId }: Props) {
+export default function SpeakingLab({ weekNumber, level, targetWords, latestPrompt, onPrompt, onAttempt, makeId }: Props) {
   const [promptIndex, setPromptIndex] = useState(0);
   const [recording, setRecording] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -131,7 +108,7 @@ export default function SpeakingLab({ weekNumber, level, onLevelChange, targetWo
   }, [audioUrl]);
 
   function nextPrompt() {
-    const next = (promptIndex + 1) % PROMPTS[level].length;
+    const next = (promptIndex + 1) % SPEAKING_PROMPTS[level].length;
     setPromptIndex(next);
     onPrompt(makePrompt(level, next, weekNumber, targetWords, makeId));
     setAudioBlob(null);
@@ -222,13 +199,6 @@ export default function SpeakingLab({ weekNumber, level, onLevelChange, targetWo
   const target = TARGET_SECONDS[level];
 
   return <section className="speaking-workspace">
-    <header className="speaking-header">
-      <div><span className="eyebrow">Speaking</span><h2>Respond in Persian.</h2></div>
-      <div className="skill-level-selector" aria-label="Speaking level">
-        {([1, 2, 3, 4] as IlrLevel[]).map((value) => <button key={value} className={level === value ? "active" : ""} onClick={() => onLevelChange(value)}>Level {value}</button>)}
-      </div>
-    </header>
-
     {latestPrompt && <>
       <div className="speaking-prompt">
         <div className="row spread"><span className="muted">Level {level} · {latestPrompt.topic}</span><button className="text-button" onClick={nextPrompt}>Different prompt</button></div>

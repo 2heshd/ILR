@@ -10,6 +10,45 @@
   --accent: #42ca78;
 }
 
+.header-level-controls {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--rule);
+}
+
+.header-level-controls label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 34px;
+  padding-left: 9px;
+  border-right: 1px solid var(--rule);
+  color: var(--dim);
+  font-size: 10px;
+}
+
+.header-level-controls label:last-child {
+  border-right: 0;
+}
+
+.header-level-controls select {
+  width: 34px;
+  height: 32px;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: var(--white);
+  font: inherit;
+  appearance: none;
+  text-align: center;
+  cursor: pointer;
+}
+
+.header-level-controls select:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: -1px;
+}
+
 /* Independent levels and audio-first speaking */
 .skill-level-panel {
   display: grid;

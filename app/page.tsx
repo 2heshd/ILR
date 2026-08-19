@@ -35,7 +35,7 @@ const STORAGE_KEY = "ilr-persian-v3";
 const ONBOARDING_KEY = "ilr-persian-onboarding-v1";
 const LEGACY_KEYS = ["ilr-persian-v2", "ilr-persian-v1"];
 
-type Tab = "today" | "sources" | "reading" | "listening" | "speaking" | "anki" | "analytics" | "account";
+type Tab = "today" | "sources" | "reading" | "listening" | "speaking" | "anki" | "analytics";
 
 const TAB_LABELS: Record<Tab, string> = {
   today: "Today",
@@ -45,7 +45,6 @@ const TAB_LABELS: Record<Tab, string> = {
   speaking: "Speaking",
   anki: "Anki",
   analytics: "Progress",
-  account: "Account",
 };
 
 type GradingResult = {
@@ -450,9 +449,13 @@ export default function Home() {
   async function generatePractice(kind: "reading" | "listening") {
     setStatus(`Generating adaptive ${kind}…`);
     try {
-      const words = selectContextWords(state, 12);
+      const words = selectContextWords(state, 80);
       const targetIlr = state.skillLevels[kind];
       const data = await generateJson({ kind, weekNumber: state.weekNumber, targetWords: words, targetIlr });
+      const generatedTargets = [
+        ...(Array.isArray(data.knownWordsUsed) ? data.knownWordsUsed : words.slice(0, 12)),
+        ...(Array.isArray(data.newWordsIntroduced) ? data.newWordsIntroduced : []),
+      ].filter((word): word is string => typeof word === "string").slice(0, 16);
       if (kind === "reading") {
         const passage: Passage = {
           id: id(),
@@ -463,7 +466,7 @@ export default function Home() {
           register: data.register,
           genre: "generated practice",
           sourceType: "generated",
-          targetWords: words,
+          targetWords: generatedTargets,
           questions: data.questions ?? [],
           createdAt: new Date().toISOString(),
         };
@@ -484,7 +487,7 @@ export default function Home() {
           register: data.register,
           genre: "generated practice",
           sourceType: "generated",
-          targetWords: words,
+          targetWords: generatedTargets,
           questions: data.questions ?? [],
           createdAt: new Date().toISOString(),
         };
@@ -709,7 +712,7 @@ export default function Home() {
   return <main>
     <header>
       <h1>{TAB_LABELS[tab]}</h1>
-      <div className="row"><span className="pill current-ilr-pill">R{state.skillLevels.reading} · L{state.skillLevels.listening} · S{state.skillLevels.speaking}</span>{(state.words.length > 0 || tab !== "today") && <button className="primary" onClick={() => { setTab("today"); setShowIntake((value) => !value); }}>Add words</button>}</div>
+      <div className="row"><HeaderLevelControls levels={state.skillLevels} onChange={setSkillLevel} />{(state.words.length > 0 || tab !== "today") && <button className="primary" onClick={() => { setTab("today"); setShowIntake((value) => !value); }}>Add words</button>}</div>
     </header>
 
     <nav className="tabs" aria-label="Study index">
@@ -718,7 +721,7 @@ export default function Home() {
       <div className="nav-section-heading"><span><i>▲</i> Study</span><span>−</span></div>
       <div className="nav-dash" />
       <div className="nav-items">
-        {(["today", "sources", "reading", "listening", "speaking", "anki", "analytics", "account"] as Tab[]).map((name) => <button key={name} className={tab === name ? "tab active" : "tab"} onClick={() => setTab(name)}><span className="nav-bullet">{tab === name ? "●" : "·"}</span>{TAB_LABELS[name]}</button>)}
+        {(["today", "sources", "reading", "listening", "speaking", "anki", "analytics"] as Tab[]).map((name) => <button key={name} className={tab === name ? "tab active" : "tab"} onClick={() => setTab(name)}><span className="nav-bullet">{tab === name ? "●" : "·"}</span>{TAB_LABELS[name]}</button>)}
       </div>
       <div className="nav-course">
         <span>Week {state.weekNumber}/{COURSE_META.weeks}</span>
@@ -743,8 +746,6 @@ export default function Home() {
       <Metric label="Retention" value={`${retention}%`} />
       <Metric label="Median recall" value={medianRecall ? `${(medianRecall / 1000).toFixed(1)}s` : "—"} />
 
-      <SkillLevelPanel levels={state.skillLevels} onChange={setSkillLevel} />
-
       <div className="card span-7 dashboard-primary">
         <div className="row spread"><h2>{state.words.length ? "Review" : "Start here"}</h2>{state.words.length > 0 && <span className="pill">3s automatic · 8s solid · 15s ceiling</span>}</div>
         {current ? <>
@@ -762,7 +763,7 @@ export default function Home() {
 
       <div className="card span-5 dashboard-secondary">
         <h2>Adaptive allocation</h2>
-        <p className="muted">Choose the level you want for each skill. All three begin at Level 1 and change only when you change them.</p>
+        <p className="muted">Reading, Listening, and Speaking all begin at Level 1. Change them from the compact controls in the top-right corner.</p>
         {Object.entries(allocation).map(([name, value]) => <div key={name} className="allocation"><div className="row spread"><span>{name}</span><span className="muted">{value}%</span></div><div className="progress"><div style={{ width: `${value}%` }} /></div></div>)}
       </div>
 
@@ -807,7 +808,7 @@ export default function Home() {
     </section>}
 
     {tab === "reading" && <section className="grid">
-      <div className="card span-12 lab-header"><div><h2>Reading</h2><SkillLevelSelector value={state.skillLevels.reading} onChange={(level) => setSkillLevel("reading", level)} /></div><button className="primary" onClick={() => generatePractice("reading")}>New passage</button></div>
+      <div className="card span-12 lab-header"><h2>Reading</h2><button className="primary" onClick={() => generatePractice("reading")}>New passage</button></div>
       {latestPassage ? <>
         <div className="card span-7">
           <div className="row spread"><div><div className="muted">ILR ~{latestPassage.ilrEstimate} · {latestPassage.topic} · {latestPassage.genre} · {latestPassage.register}</div><h2>{latestPassage.title}</h2><SourceLine item={latestPassage} /></div>{!readingStartedAt && !readingQuestionsOpen && <button className="primary" onClick={() => { setReadingStartedAt(Date.now()); setReadingDurationMs(0); }}>Start timer</button>}</div>
@@ -830,7 +831,7 @@ export default function Home() {
     </section>}
 
     {tab === "listening" && <section className="grid">
-      <div className="card span-12 lab-header"><div><h2>Listening</h2><SkillLevelSelector value={state.skillLevels.listening} onChange={(level) => setSkillLevel("listening", level)} /></div><button className="primary" onClick={() => generatePractice("listening")}>New audio</button></div>
+      <div className="card span-12 lab-header"><h2>Listening</h2><button className="primary" onClick={() => generatePractice("listening")}>New audio</button></div>
       {latestListening ? <>
         <div className="card span-7">
           <div className="muted">ILR ~{latestListening.ilrEstimate} · {latestListening.topic} · {latestListening.genre} · {latestListening.register}</div><h2>{latestListening.title}</h2><SourceLine item={latestListening} />
@@ -857,7 +858,6 @@ export default function Home() {
     {tab === "speaking" && <SpeakingLab
       weekNumber={state.weekNumber}
       level={state.skillLevels.speaking}
-      onLevelChange={(level) => setSkillLevel("speaking", level)}
       targetWords={speakingWords}
       latestPrompt={latestSpeakingPrompt}
       onPrompt={addSpeakingPrompt}
@@ -873,16 +873,6 @@ export default function Home() {
       onReviews={addAnkiReviews}
     />}
 
-    {tab === "account" && <AccountWorkspace
-      user={cloudUser}
-      username={cloudUsername}
-      cloudReady={cloudReady}
-      status={status}
-      onSignIn={signIn}
-      onSignUp={signUp}
-      onSignOut={signOut}
-    />}
-
     {tab === "analytics" && !showProgressDetails && <section className="guided-workspace"><div className="guided-overview">
       <span className="next-number">01</span><h2>Know why you&apos;re improving.</h2>
       <p>Progress is based on evidence from practice—not a streak or time spent in the app. The system looks for faster recall, stronger comprehension, and reliable performance across different material.</p>
@@ -896,7 +886,6 @@ export default function Home() {
       <Metric label="Reviews logged" value={String(state.reviews.length)} />
       <Metric label="Reading avg (5)" value={readingAverage ? `${readingAverage}%` : "—"} />
       <Metric label="Listening avg (5)" value={listeningAverage ? `${listeningAverage}%` : "—"} />
-      <SkillLevelPanel levels={state.skillLevels} onChange={setSkillLevel} />
       <div className="card span-7"><h2>Weak / slow lexical items</h2><div className="word-list single">{weakWords.map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><span>{word.definition}</span><span>{Math.round(100 * word.correct / word.reviews)}% correct · {word.medianResponseMs ? `${(word.medianResponseMs / 1000).toFixed(1)}s median` : "no latency"} · {word.lapses} lapses</span></div>)}</div>{!weakWords.length && <div className="empty">Not enough review history yet.</div>}</div>
       <div className="card span-5"><h2>Performance history</h2><div className="queue"><div className="queue-item"><span>Reading attempts</span><strong>{state.passageAttempts.length}</strong></div><div className="queue-item"><span>Listening attempts</span><strong>{state.listeningAttempts.length}</strong></div><div className="queue-item"><span>Speaking attempts</span><strong>{state.speakingAttempts.length}</strong></div><div className="queue-item"><span>Speaking avg (5)</span><strong>{speakingAverage ? `${speakingAverage}%` : "—"}</strong></div><div className="queue-item"><span>Mature vocabulary</span><strong>{mature}</strong></div><div className="queue-item"><span>Current week</span><strong>{state.weekNumber}/{COURSE_META.weeks}</strong></div></div></div>
       <div className="card span-12"><h2>Recent comprehension diagnostics</h2><div className="diagnostic-grid"><Diagnostic label="Reading inference" value={Math.round(average(state.passageAttempts.slice(-5).map((attempt) => attempt.inferenceScore)))} /><Diagnostic label="Reading discourse" value={Math.round(average(state.passageAttempts.slice(-5).map((attempt) => attempt.discourseScore)))} /><Diagnostic label="Listening detail" value={Math.round(average(state.listeningAttempts.slice(-5).map((attempt) => attempt.detailScore)))} /><Diagnostic label="Listening inference" value={Math.round(average(state.listeningAttempts.slice(-5).map((attempt) => attempt.inferenceScore)))} /></div></div>
@@ -904,6 +893,16 @@ export default function Home() {
       <AnalyticsTable title="Attempts by genre" rows={genreAnalytics} />
       <AnalyticsTable title="Attempts by register" rows={registerAnalytics} />
     </section></>}
+
+    {tab === "analytics" && <AccountWorkspace
+      user={cloudUser}
+      username={cloudUsername}
+      cloudReady={cloudReady}
+      status={status}
+      onSignIn={signIn}
+      onSignUp={signUp}
+      onSignOut={signOut}
+    />}
   </main>;
 }
 
@@ -912,32 +911,21 @@ function SourceLine({ item }: { item: Passage | ListeningItem }) {
   return <div className="source-line"><span className={`pill origin-${item.sourceType}`}>{item.sourceType}</span><span>{item.publisher}</span>{item.publishedAt && <span>{item.publishedAt}</span>}{item.sourceUrl && <a href={item.sourceUrl} target="_blank" rel="noreferrer">Open original ↗</a>}</div>;
 }
 
-const ILR_DESCRIPTIONS: Record<IlrLevel, string> = {
-  1: "Basic facts and short, familiar messages",
-  2: "Routine topics and connected main ideas",
-  3: "Complex professional and abstract material",
-  4: "Nuanced, extended, highly sophisticated discourse",
-};
-
-function SkillLevelSelector({ value, onChange }: { value: IlrLevel; onChange: (level: IlrLevel) => void }) {
-  return <div className="skill-level-selector" aria-label="Choose ILR level">
-    {([1, 2, 3, 4] as IlrLevel[]).map((level) => <button type="button" key={level} className={value === level ? "active" : ""} onClick={() => onChange(level)} aria-pressed={value === level}>{level}</button>)}
-  </div>;
-}
-
-function SkillLevelPanel({
+function HeaderLevelControls({
   levels,
   onChange,
 }: {
   levels: StudyState["skillLevels"];
   onChange: (skill: "reading" | "listening" | "speaking", level: IlrLevel) => void;
 }) {
-  return <div className="card span-12 skill-level-panel">
-    <div><h2>Practice levels</h2><p className="muted">Each section starts at 1. Change it whenever you want.</p></div>
-    {(["reading", "listening", "speaking"] as const).map((skill) => <div className="skill-level-row" key={skill}>
-      <span><strong>{TAB_LABELS[skill]}</strong><small>{ILR_DESCRIPTIONS[levels[skill]]}</small></span>
-      <SkillLevelSelector value={levels[skill]} onChange={(level) => onChange(skill, level)} />
-    </div>)}
+  const labels = { reading: "R", listening: "L", speaking: "S" } as const;
+  return <div className="header-level-controls" aria-label="Practice levels">
+    {(["reading", "listening", "speaking"] as const).map((skill) => <label key={skill} title={`${TAB_LABELS[skill]} level`}>
+      <span>{labels[skill]}</span>
+      <select value={levels[skill]} onChange={(event) => onChange(skill, Number(event.target.value) as IlrLevel)} aria-label={`${TAB_LABELS[skill]} level`}>
+        {([1, 2, 3, 4] as IlrLevel[]).map((level) => <option key={level} value={level}>{level}</option>)}
+      </select>
+    </label>)}
   </div>;
 }
 

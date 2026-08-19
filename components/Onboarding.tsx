@@ -9,7 +9,7 @@ type Props = {
 const RESPONSES = [
   {
     title: "The system trains recall, not recognition.",
-    body: "It starts at your current level and places most practice just above it. That keeps the work challenging enough to create growth without making every session overwhelming. Your level can move from 1 through 4 as your comprehension becomes consistently strong.",
+    body: "Reading, Listening, and Speaking each start at Level 1. The compact R, L, and S controls in the top-right corner let you change each skill independently from 1 through 4 whenever you want.",
   },
   {
     title: "Vocabulary appears when memory needs it.",
@@ -29,7 +29,7 @@ const RESPONSES = [
   },
   {
     title: "Progress is evidence, not a streak.",
-    body: "The app tracks reviews, accuracy, recall time, lapses, difficult words, comprehension scores, listening behavior, and speaking attempts across the full 35-week course. Reading, listening, and speaking each begin at Level 1, and you can change any one of them whenever you want. It also compares performance by source, genre, and register. History saves locally, can sync across devices, and can exchange words and review history with Anki without replacing either scheduler.",
+    body: "The app tracks reviews, accuracy, recall time, lapses, difficult words, comprehension scores, listening behavior, and speaking attempts across the full 35-week course. Progress details and account controls share one page, so syncing and performance history stay together. It also compares performance by source, genre, and register. History saves locally, can sync across devices, and can exchange words and review history with Anki without replacing either scheduler.",
   },
 ] as const;
 
