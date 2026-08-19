@@ -107,7 +107,8 @@ function hydrateState(raw: Partial<StudyState> | null | undefined): StudyState {
   };
   state.words = state.words.map((word) => {
     const fsrsCard = word.fsrsCard ?? createSerializedCard(new Date(word.introducedAt || Date.now()));
-    return { ...word, fsrsCard, dueAt: word.dueAt || fsrsCard.due };
+    const knowledgeState = word.knowledgeState ?? (word.sourceWeek < state.weekNumber ? "known" : "learning");
+    return { ...word, knowledgeState, fsrsCard, dueAt: word.dueAt || fsrsCard.due };
   });
   return state;
 }
@@ -374,6 +375,7 @@ export default function Home() {
           definition: entry.en,
           sourceType: "course",
           sourceWeek: targetWeek,
+          knowledgeState: targetWeek < state.weekNumber ? "known" : "learning",
           courseEntryId: entry.id,
           courseListNumber: entry.list,
           courseLesson: entry.lesson,
@@ -655,8 +657,15 @@ export default function Home() {
   }
 
   function advanceWeek() {
-    setState((currentState) => ({ ...currentState, weekNumber: Math.min(COURSE_META.weeks, currentState.weekNumber + 1) }));
-    setStatus("Advanced to the next course week. Its vocabulary is ready when you are.");
+    setState((currentState) => {
+      const completedWeek = currentState.weekNumber;
+      return {
+        ...currentState,
+        weekNumber: Math.min(COURSE_META.weeks, completedWeek + 1),
+        words: currentState.words.map((word) => word.sourceWeek <= completedWeek ? { ...word, knowledgeState: "known" as const } : word),
+      };
+    });
+    setStatus("Advanced to the next course week. Earlier vocabulary is now marked known and remains active in reviews, Reading, and Listening.");
   }
 
   if (!loaded) return <main>Loading…</main>;
@@ -769,7 +778,7 @@ export default function Home() {
 
       <div className="card span-8 dashboard-secondary">
         <div className="row spread"><h2>Current vocabulary</h2><span className="muted">{mature} mature</span></div>
-        <div className="word-list">{state.words.slice(-14).reverse().map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><span>{word.romanization ? `${word.romanization} · ` : ""}{word.definition || "definition pending"}</span><span>W{word.sourceWeek} · {word.reviews} reviews · {word.sourceType === "system_advanced" ? "advanced" : word.sourceType === "course" || word.sourceType === "dli" ? "course" : "personal / Anki"}</span></div>)}</div>
+        <div className="word-list">{state.words.slice(-14).reverse().map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><span>{word.romanization ? `${word.romanization} · ` : ""}{word.definition || "definition pending"}</span><span>W{word.sourceWeek} · {word.knowledgeState ?? "learning"} · {word.reviews} reviews · {word.sourceType === "system_advanced" ? "advanced" : word.sourceType === "course" || word.sourceType === "dli" ? "course" : "personal / Anki"}</span></div>)}</div>
       </div>
 
       {state.words.length > 0 && <div className="card span-4 dashboard-control">

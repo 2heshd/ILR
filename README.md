@@ -180,6 +180,8 @@ Recent reading/listening results can shift up to 10 percentage points toward the
 
 The learner selects independent Reading, Listening, and Speaking levels from 1-4 in the top-right controls; new profiles begin at Level 1 in all three skills. Generated passages target the chosen level and aim for 80-90% content-vocabulary coverage from the learner's full active word inventory, including words first introduced that day. The remaining 10-20% provides controlled unfamiliar vocabulary while preserving natural discourse.
 
+Advancing the course marks vocabulary from completed weeks as known without removing it from practice. Context selection then favors an approximately 85/15 blend of known earlier vocabulary and current-week learning vocabulary, filling from whichever pool is available, so previous material continues to appear in Reading and Listening.
+
 ## Persistence model
 
 The browser/cloud snapshot stores the complete `StudyState`, including:

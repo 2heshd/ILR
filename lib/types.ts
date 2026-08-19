@@ -38,6 +38,7 @@ export type LexicalItem = {
   definition?: string;
   sourceType: SourceType;
   sourceWeek: number;
+  knowledgeState?: "learning" | "known";
   courseEntryId?: number;
   courseListNumber?: number;
   courseLesson?: string;

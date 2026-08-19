@@ -42,13 +42,20 @@ export function targetIlrForWeek(weekNumber: number, skill: "reading" | "listeni
 }
 
 export function selectContextWords(state: StudyState, count = 12) {
-  return [...state.words]
-    .sort((a, b) => {
+  const ranked = [...state.words].sort((a, b) => {
       const aWeak = a.reviews ? a.correct / a.reviews : 0;
       const bWeak = b.reviews ? b.correct / b.reviews : 0;
       const weekBias = b.sourceWeek - a.sourceWeek;
       return aWeak - bWeak || weekBias;
-    })
-    .slice(0, count)
-    .map((w) => w.displayForm);
+    });
+  const known = ranked.filter((word) => word.knowledgeState === "known" || word.sourceWeek < state.weekNumber);
+  const knownIds = new Set(known.map((word) => word.id));
+  const learning = ranked.filter((word) => !knownIds.has(word.id));
+  const knownTarget = Math.round(count * 0.85);
+  const selected = [...known.slice(0, knownTarget), ...learning.slice(0, count - Math.min(knownTarget, known.length))];
+  if (selected.length < count) {
+    const selectedIds = new Set(selected.map((word) => word.id));
+    selected.push(...ranked.filter((word) => !selectedIds.has(word.id)).slice(0, count - selected.length));
+  }
+  return selected.slice(0, count).map((word) => word.displayForm);
 }
