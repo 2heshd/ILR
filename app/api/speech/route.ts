@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { openAiErrorResponse } from "@/lib/openai-error";
+import { isMeaningfulPersianText, sanitizePersianSpeechText } from "@/lib/persian-speech";
 
 export const runtime = "nodejs";
 
@@ -9,17 +10,18 @@ export async function POST(request: Request) {
   }
 
   const { text } = (await request.json()) as { text?: string };
-  if (!text || text.length > 4096) {
-    return Response.json({ error: "Invalid text." }, { status: 400 });
+  if (!text || text.length > 4096 || !isMeaningfulPersianText(text)) {
+    return Response.json({ error: "A valid Persian transcript is required." }, { status: 400 });
   }
+  const speechText = sanitizePersianSpeechText(text);
 
   try {
     const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const audio = await client.audio.speech.create({
-      model: "gpt-4o-mini-tts",
-      voice: "marin",
-      input: text,
-      instructions: "Speak in natural educated Iranian Persian at normal broadcast pace. Do not exaggerate pronunciation or pause unnaturally between words.",
+      model: process.env.OPENAI_TTS_MODEL || "gpt-4o-mini-tts",
+      voice: process.env.OPENAI_TTS_VOICE || "marin",
+      input: speechText,
+      instructions: "Read only the supplied Persian text. Speak in natural educated Iranian Persian at a normal broadcast pace. Never describe punctuation, say the words dot or ellipsis, translate the text, or add commentary.",
       response_format: "mp3",
     });
     return new Response(await audio.arrayBuffer(), {

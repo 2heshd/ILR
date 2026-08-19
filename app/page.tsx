@@ -15,6 +15,7 @@ import type { AnkiReviewRow, AnkiVocabularyRow } from "@/lib/anki";
 import { COURSE_META, loadCourseWeek } from "@/lib/course";
 import { autoRatingForKnown, createSerializedCard, reviewFsrs } from "@/lib/fsrs";
 import { normalizePersian, parseWeeklyInput } from "@/lib/persian";
+import { isMeaningfulPersianText, sanitizePersianSpeechText } from "@/lib/persian-speech";
 import { sourceMetrics } from "@/lib/source-analytics";
 import { appendCloudReview, getSupabaseClient, loadCloudState, loadUsername, saveCloudState } from "@/lib/supabase";
 import type {
@@ -463,6 +464,7 @@ export default function Home() {
       const words = selectContextWords(state, 80);
       const targetIlr = state.skillLevels[kind];
       const data = await generateJson({ kind, weekNumber: state.weekNumber, targetWords: words, targetIlr });
+      if (!isMeaningfulPersianText(data.textFa)) throw new Error(`The generated ${kind} item had no valid Persian text. Please try again.`);
       const generatedTargets = [
         ...(Array.isArray(data.knownWordsUsed) ? data.knownWordsUsed : words.slice(0, 12)),
         ...(Array.isArray(data.newWordsIntroduced) ? data.newWordsIntroduced : []),
@@ -543,27 +545,52 @@ export default function Home() {
 
   async function playListening() {
     if (!latestListening) return;
-    setListensCount((count) => count + 1);
+    if (!isMeaningfulPersianText(latestListening.transcriptFa)) {
+      setStatus("That saved Listening item has an invalid transcript. Creating a clean replacement…");
+      await generatePractice("listening");
+      return;
+    }
+    const speechText = sanitizePersianSpeechText(latestListening.transcriptFa);
+    setStatus("Preparing Persian audio…");
     try {
       if (latestListening.mediaUrl) {
         await new Audio(latestListening.mediaUrl).play();
+        setListensCount((count) => count + 1);
+        setStatus("Playing source audio.");
         return;
       }
       const response = await fetch("/api/speech", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: latestListening.transcriptFa }),
+        body: JSON.stringify({ text: speechText }),
       });
-      if (!response.ok) throw new Error("TTS unavailable");
-      const url = URL.createObjectURL(await response.blob());
+      const contentType = response.headers.get("content-type") || "";
+      if (!response.ok || !contentType.startsWith("audio/")) {
+        const message = contentType.includes("json") ? (await response.json()).error : "Persian audio could not be generated.";
+        throw new Error(message || "Persian audio could not be generated.");
+      }
+      const blob = await response.blob();
+      if (blob.size < 1000) throw new Error("The generated audio file was empty.");
+      const url = URL.createObjectURL(blob);
       const audio = new Audio(url);
       audio.onended = () => URL.revokeObjectURL(url);
       await audio.play();
-    } catch {
-      const utterance = new SpeechSynthesisUtterance(latestListening.transcriptFa);
-      utterance.lang = "fa-IR";
-      utterance.rate = 1;
-      speechSynthesis.speak(utterance);
+      setListensCount((count) => count + 1);
+      setStatus("Playing Persian audio.");
+    } catch (error) {
+      const persianVoice = typeof speechSynthesis === "undefined" ? undefined : speechSynthesis.getVoices().find((voice) => voice.lang.toLowerCase().startsWith("fa"));
+      if (persianVoice) {
+        const utterance = new SpeechSynthesisUtterance(speechText);
+        utterance.lang = persianVoice.lang;
+        utterance.voice = persianVoice;
+        utterance.rate = 0.95;
+        speechSynthesis.cancel();
+        speechSynthesis.speak(utterance);
+        setListensCount((count) => count + 1);
+        setStatus("Playing with the device’s Persian voice.");
+      } else {
+        setStatus(error instanceof Error ? error.message : "Persian audio is unavailable. Try again in a moment.");
+      }
     }
   }
 
