@@ -5,6 +5,7 @@ import type { User } from "@supabase/supabase-js";
 import AccountWorkspace from "@/components/AccountWorkspace";
 import AnkiWorkspace from "@/components/AnkiWorkspace";
 import ComprehensionGrader from "@/components/ComprehensionGrader";
+import InteractivePersianText from "@/components/InteractivePersianText";
 import Onboarding from "@/components/Onboarding";
 import SourceIngestion from "@/components/SourceIngestion";
 import SpeakingLab from "@/components/SpeakingLab";
@@ -29,6 +30,7 @@ import type {
   SpeakingAttempt,
   SpeakingPrompt,
   StudyState,
+  WordKnowledgeState,
 } from "@/lib/types";
 
 const STORAGE_KEY = "ilr-persian-v3";
@@ -433,6 +435,13 @@ export default function Home() {
       reviews: [...currentState.reviews, event],
       words: currentState.words.map((word) => word.id !== current.id ? word : {
         ...word,
+        knowledgeState: !correct
+          ? "new"
+          : measured <= 3_000 && word.reviews + 1 >= 5 && (word.correct + 1) / (word.reviews + 1) >= 0.9
+            ? "automatic"
+            : word.reviews + 1 >= 2 && (word.correct + 1) / (word.reviews + 1) >= 0.75
+              ? "known"
+              : "learning",
         reviews: word.reviews + 1,
         correct: word.correct + (correct ? 1 : 0),
         lapses: after.lapses,
@@ -656,13 +665,70 @@ export default function Home() {
     setState((currentState) => ({ ...currentState, speakingAttempts: [...currentState.speakingAttempts, attempt] }));
   }
 
+  async function setWordKnowledge(displayForm: string, knowledgeState: WordKnowledgeState) {
+    const normalizedForm = normalizePersian(displayForm);
+    const existingBeforeUpdate = state.words.find((word) => word.normalizedForm === normalizedForm);
+    const due = new Date();
+    if (knowledgeState === "known") due.setDate(due.getDate() + 30);
+    if (knowledgeState === "automatic") due.setDate(due.getDate() + 180);
+    setState((currentState) => {
+      const existing = currentState.words.find((word) => word.normalizedForm === normalizedForm);
+      if (existing) {
+        return {
+          ...currentState,
+          words: currentState.words.map((word) => word.id !== existing.id ? word : {
+            ...word,
+            knowledgeState,
+            dueAt: due.toISOString(),
+            fsrsCard: word.fsrsCard ? { ...word.fsrsCard, due: due.toISOString() } : createSerializedCard(due),
+          }),
+        };
+      }
+      const fsrsCard = createSerializedCard(due);
+      const word: LexicalItem = {
+        id: id(),
+        displayForm,
+        normalizedForm,
+        sourceType: "user",
+        sourceWeek: currentState.weekNumber,
+        knowledgeState,
+        introducedAt: new Date().toISOString(),
+        reviews: 0,
+        correct: 0,
+        lapses: 0,
+        dueAt: fsrsCard.due,
+        fsrsCard,
+      };
+      return { ...currentState, words: [...currentState.words, word] };
+    });
+    setStatus(`${displayForm} marked ${knowledgeState}. Its recall schedule and future practice were updated.`);
+    if (!existingBeforeUpdate?.definition) {
+      try {
+        const data = await generateJson({ kind: "define_words", words: [displayForm] });
+        const definition = data.words?.[0];
+        if (definition) {
+          setState((currentState) => ({
+            ...currentState,
+            words: currentState.words.map((word) => word.normalizedForm !== normalizedForm ? word : {
+              ...word,
+              definition: definition.definition || word.definition,
+              romanization: definition.romanization || word.romanization,
+            }),
+          }));
+        }
+      } catch {
+        // Status is still saved; definition enrichment can happen later.
+      }
+    }
+  }
+
   function advanceWeek() {
     setState((currentState) => {
       const completedWeek = currentState.weekNumber;
       return {
         ...currentState,
         weekNumber: Math.min(COURSE_META.weeks, completedWeek + 1),
-        words: currentState.words.map((word) => word.sourceWeek <= completedWeek ? { ...word, knowledgeState: "known" as const } : word),
+        words: currentState.words.map((word) => word.sourceWeek <= completedWeek && word.knowledgeState !== "automatic" ? { ...word, knowledgeState: "known" as const } : word),
       };
     });
     setStatus("Advanced to the next course week. Earlier vocabulary is now marked known and remains active in reviews, Reading, and Listening.");
@@ -821,7 +887,7 @@ export default function Home() {
       {latestPassage ? <>
         <div className="card span-7">
           <div className="row spread"><div><div className="muted">ILR ~{latestPassage.ilrEstimate} · {latestPassage.topic} · {latestPassage.genre} · {latestPassage.register}</div><h2>{latestPassage.title}</h2><SourceLine item={latestPassage} /></div>{!readingStartedAt && !readingQuestionsOpen && <button className="primary" onClick={() => { setReadingStartedAt(Date.now()); setReadingDurationMs(0); }}>Start timer</button>}</div>
-          <div className={readingStartedAt || readingQuestionsOpen ? "fa passage" : "fa passage blurred"}>{latestPassage.textFa}</div>
+          <InteractivePersianText text={latestPassage.textFa} words={state.words} onStatus={setWordKnowledge} disabled={!readingStartedAt || readingQuestionsOpen} className={readingStartedAt || readingQuestionsOpen ? "fa passage" : "fa passage blurred"} />
           {!!latestPassage.targetWords.length && <div className="target-strip"><span className="muted">Extracted targets</span>{latestPassage.targetWords.map((word) => <span className="pill fa-inline" key={word}>{word}</span>)}</div>}
           {readingStartedAt && !readingQuestionsOpen && <div className="row"><button className="primary" onClick={finishReading}>Finish reading · hide passage next</button><label>Unknown words <input className="small-input" type="number" min="0" value={readingUnknown} onChange={(event) => setReadingUnknown(Number(event.target.value))}/></label><label>Rereads <input className="small-input" type="number" min="0" value={readingRereads} onChange={(event) => setReadingRereads(Number(event.target.value))}/></label></div>}
           {readingQuestionsOpen && <div className="locked-source"><strong>Passage locked for recall.</strong><span className="muted">Reading time: {(readingDurationMs / 1000).toFixed(0)}s · unknown words: {readingUnknown} · rereads: {readingRereads}</span></div>}
@@ -845,7 +911,7 @@ export default function Home() {
         <div className="card span-7">
           <div className="muted">ILR ~{latestListening.ilrEstimate} · {latestListening.topic} · {latestListening.genre} · {latestListening.register}</div><h2>{latestListening.title}</h2><SourceLine item={latestListening} />
           <div className="audio-stage"><button className="primary big-button" onClick={playListening}>▶ Play Persian audio</button><span className="muted">listens: {listensCount}</span></div>
-          <div className={transcriptVisible ? "fa passage" : "transcript-hidden"}>{transcriptVisible ? latestListening.transcriptFa : "Transcript hidden"}</div>
+          {transcriptVisible ? <InteractivePersianText text={latestListening.transcriptFa} words={state.words} onStatus={setWordKnowledge} className="fa passage" /> : <div className="transcript-hidden">Transcript hidden</div>}
           {transcriptVisible && !!latestListening.targetWords.length && <div className="target-strip"><span className="muted">Extracted targets</span>{latestListening.targetWords.map((word) => <span className="pill fa-inline" key={word}>{word}</span>)}</div>}
           <div className="row"><button className="secondary" onClick={() => setTranscriptVisible(true)}>Reveal transcript</button>{transcriptVisible && <span className="pill">transcript reveal logged</span>}</div>
         </div>

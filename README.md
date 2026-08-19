@@ -12,6 +12,7 @@ Adaptive Persian/Farsi learning system for a 35-week intensive course beginning 
 - measures retrieval latency and turns a correct response into an automatic Easy/Good/Hard grade based on speed
 - keeps vocabulary recall to two decisions: **Reveal → I was right / I was wrong**
 - builds adaptive reading passages that recycle current + weak older vocabulary
+- makes every Persian passage word clickable with saved New, Learning, Known, and Automatic states tied directly to recall scheduling
 - locks the reading passage after the timed phase, then requires answers from memory
 - automatically grades reading answers for main idea, detail, inference, and discourse when AI is configured
 - builds adaptive listening passages with the transcript hidden until reveal

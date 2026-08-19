@@ -17,7 +17,7 @@ const RESPONSES = [
   },
   {
     title: "Reading and listening are memory-first.",
-    body: "Reading is timed, then the passage is locked before you answer. Listening records repeat count and whether you revealed the transcript. Answers are scored for main idea, detail, inference, and discourse—not just exact wording. Practice difficulty and study time shift toward the weaker skill while vocabulary and speaking keep a protected minimum.",
+    body: "During Reading—or after revealing a Listening transcript—click any Persian word and mark it New, Learning, Known, or Automatic. That status saves with the vocabulary, changes its recall schedule, and influences future practice. Reading is timed, then the passage is locked before you answer; comprehension is scored for main idea, detail, inference, and discourse.",
   },
   {
     title: "Real material stays connected to its source.",

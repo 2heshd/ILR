@@ -4,6 +4,7 @@ export type ReviewModality = "visual" | "audio" | "production" | "cloze";
 export type ContentOrigin = "authentic" | "adapted" | "generated";
 export type ContentModality = "reading" | "listening";
 export type IlrLevel = 1 | 2 | 3 | 4;
+export type WordKnowledgeState = "new" | "learning" | "known" | "automatic";
 
 export type AnkiSettings = {
   endpoint: string;
@@ -38,7 +39,7 @@ export type LexicalItem = {
   definition?: string;
   sourceType: SourceType;
   sourceWeek: number;
-  knowledgeState?: "learning" | "known";
+  knowledgeState?: WordKnowledgeState;
   courseEntryId?: number;
   courseListNumber?: number;
   courseLesson?: string;

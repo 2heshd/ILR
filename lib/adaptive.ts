@@ -48,7 +48,7 @@ export function selectContextWords(state: StudyState, count = 12) {
       const weekBias = b.sourceWeek - a.sourceWeek;
       return aWeak - bWeak || weekBias;
     });
-  const known = ranked.filter((word) => word.knowledgeState === "known" || word.sourceWeek < state.weekNumber);
+  const known = ranked.filter((word) => word.knowledgeState === "known" || word.knowledgeState === "automatic" || word.sourceWeek < state.weekNumber);
   const knownIds = new Set(known.map((word) => word.id));
   const learning = ranked.filter((word) => !knownIds.has(word.id));
   const knownTarget = Math.round(count * 0.85);
