@@ -1,4 +1,4 @@
-import type { StudyState } from "./types";
+import type { IlrLevel, StudyState } from "./types";
 
 function avg(values: number[]) {
   return values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0;
@@ -35,10 +35,10 @@ export function adaptiveAllocation(state: StudyState) {
   return { listening, reading, lexical, speaking };
 }
 
-export function targetIlrForWeek(weekNumber: number, skill: "reading" | "listening") {
-  const start = skill === "reading" ? 1.5 : 1.25;
+export function targetIlrForWeek(weekNumber: number, skill: "reading" | "listening", currentIlr: IlrLevel = 1) {
   const cap = skill === "reading" ? 4 : 3.5;
-  return Math.min(cap, Math.round((start + weekNumber / 14) * 4) / 4);
+  const courseStep = Math.min(0.5, Math.floor(Math.max(0, weekNumber - 1) / 12) * 0.25);
+  return Math.min(cap, currentIlr + 0.25 + courseStep);
 }
 
 export function selectContextWords(state: StudyState, count = 12) {

@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { openAiErrorResponse } from "@/lib/openai-error";
 
 export const runtime = "nodejs";
 
@@ -26,6 +27,6 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error(error);
-    return Response.json({ error: "Speech generation failed." }, { status: 500 });
+    return openAiErrorResponse(error, "Speech generation failed.");
   }
 }

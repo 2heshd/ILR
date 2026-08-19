@@ -2,20 +2,26 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
+import AccountWorkspace from "@/components/AccountWorkspace";
+import AnkiWorkspace from "@/components/AnkiWorkspace";
 import ComprehensionGrader from "@/components/ComprehensionGrader";
+import Onboarding from "@/components/Onboarding";
 import SourceIngestion from "@/components/SourceIngestion";
 import SpeakingLab from "@/components/SpeakingLab";
-import { adaptiveAllocation, selectContextWords, targetIlrForWeek } from "@/lib/adaptive";
+import { adaptiveAllocation, selectContextWords } from "@/lib/adaptive";
 import { fallbackAdvanced, type AdvancedWord } from "@/lib/advanced";
+import type { AnkiReviewRow, AnkiVocabularyRow } from "@/lib/anki";
+import { COURSE_META, loadCourseWeek } from "@/lib/course";
 import { autoRatingForKnown, createSerializedCard, reviewFsrs } from "@/lib/fsrs";
 import { normalizePersian, parseWeeklyInput } from "@/lib/persian";
 import { sourceMetrics } from "@/lib/source-analytics";
-import { appendCloudReview, getSupabaseClient, loadCloudState, saveCloudState } from "@/lib/supabase";
+import { appendCloudReview, getSupabaseClient, loadCloudState, loadUsername, saveCloudState } from "@/lib/supabase";
 import type {
   ComprehensionGrade,
   LexicalItem,
   ListeningAttempt,
   ListeningItem,
+  IlrLevel,
   Passage,
   PassageAttempt,
   ReviewEvent,
@@ -26,9 +32,21 @@ import type {
 } from "@/lib/types";
 
 const STORAGE_KEY = "ilr-persian-v3";
+const ONBOARDING_KEY = "ilr-persian-onboarding-v1";
 const LEGACY_KEYS = ["ilr-persian-v2", "ilr-persian-v1"];
 
-type Tab = "today" | "sources" | "reading" | "listening" | "speaking" | "analytics";
+type Tab = "today" | "sources" | "reading" | "listening" | "speaking" | "anki" | "analytics" | "account";
+
+const TAB_LABELS: Record<Tab, string> = {
+  today: "Today",
+  sources: "Sources",
+  reading: "Reading",
+  listening: "Listening",
+  speaking: "Speaking",
+  anki: "Anki",
+  analytics: "Progress",
+  account: "Account",
+};
 
 type GradingResult = {
   answers: string[];
@@ -38,6 +56,10 @@ type GradingResult = {
 
 const emptyState: StudyState = {
   weekNumber: 1,
+  currentIlr: 1,
+  skillLevels: { reading: 1, listening: 1, speaking: 1 },
+  course: { catalogId: COURSE_META.id, sourceFile: COURSE_META.sourceFile, importedWeeks: [] },
+  anki: { endpoint: "http://127.0.0.1:8765", deckName: "" },
   words: [],
   reviews: [],
   passages: [],
@@ -53,10 +75,29 @@ function id() {
 }
 
 function hydrateState(raw: Partial<StudyState> | null | undefined): StudyState {
+  const catalogChanged = Boolean(raw?.course?.catalogId && raw.course.catalogId !== COURSE_META.id);
+  const importedWeeks = catalogChanged
+    ? (raw?.course?.importedWeeks ?? []).filter((week) => week > 1).map((week) => week - 1)
+    : (raw?.course?.importedWeeks ?? []);
   const state: StudyState = {
     ...emptyState,
     ...raw,
-    words: raw?.words ?? [],
+    currentIlr: raw?.currentIlr ?? 1,
+    skillLevels: {
+      reading: raw?.skillLevels?.reading ?? 1,
+      listening: raw?.skillLevels?.listening ?? 1,
+      speaking: raw?.skillLevels?.speaking ?? 1,
+    },
+    course: {
+      ...emptyState.course,
+      ...(raw?.course ?? {}),
+      catalogId: COURSE_META.id,
+      importedWeeks,
+    },
+    anki: { ...emptyState.anki, ...(raw?.anki ?? {}) },
+    words: (raw?.words ?? [])
+      .filter((word) => !word.courseLesson?.startsWith("Introductory Unit"))
+      .map((word) => catalogChanged && word.courseLesson && word.sourceWeek > 1 ? { ...word, sourceWeek: word.sourceWeek - 1 } : word),
     reviews: raw?.reviews ?? [],
     passages: (raw?.passages ?? []).map((item) => ({ ...item, genre: item.genre ?? "generated practice", sourceType: item.sourceType ?? "generated" })),
     passageAttempts: raw?.passageAttempts ?? [],
@@ -82,6 +123,12 @@ function average(values: number[]) {
   return values.length ? values.reduce((sum, n) => sum + n, 0) / values.length : 0;
 }
 
+function courseWordKey(value: string) {
+  return normalizePersian(value)
+    .normalize("NFKC")
+    .replace(/[\u064b-\u065f\u0670\s‌]+/g, "");
+}
+
 async function generateJson(body: Record<string, unknown>) {
   const response = await fetch("/api/generate", {
     method: "POST",
@@ -98,11 +145,15 @@ export default function Home() {
   const [loaded, setLoaded] = useState(false);
   const [tab, setTab] = useState<Tab>("today");
   const [showIntake, setShowIntake] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [sourceView, setSourceView] = useState<"reading" | "listening" | "library" | null>(null);
+  const [showProgressDetails, setShowProgressDetails] = useState(false);
+  const [courseBusy, setCourseBusy] = useState(false);
   const [input, setInput] = useState("");
   const [status, setStatus] = useState("");
   const [cloudUser, setCloudUser] = useState<User | null>(null);
+  const [cloudUsername, setCloudUsername] = useState<string | null>(null);
   const [cloudReady, setCloudReady] = useState(false);
-  const [email, setEmail] = useState("");
   const [reviewIndex, setReviewIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [responseMs, setResponseMs] = useState(0);
@@ -127,6 +178,7 @@ export default function Home() {
     }
     const local = hydrateState(raw ? JSON.parse(raw) : emptyState);
     setState(local);
+    setShowOnboarding(localStorage.getItem(ONBOARDING_KEY) !== "complete");
     setLoaded(true);
 
     const supabase = getSupabaseClient();
@@ -140,6 +192,7 @@ export default function Home() {
         if (!active) return;
         if (cloud) setState(hydrateState(cloud));
         else await saveCloudState(supabase!, user, local);
+        setCloudUsername(await loadUsername(supabase!, user));
         setCloudReady(true);
       } catch (error) {
         console.error(error);
@@ -155,6 +208,7 @@ export default function Home() {
       if (session?.user) void connect(session.user);
       else {
         setCloudUser(null);
+        setCloudUsername(null);
         setCloudReady(false);
       }
     });
@@ -198,14 +252,22 @@ export default function Home() {
     startRef.current = Date.now();
   }, [current?.id]);
 
-  async function signIn() {
+  async function signIn(email: string, password: string) {
     const supabase = getSupabaseClient();
-    if (!supabase || !email.trim()) return;
-    const { error } = await supabase.auth.signInWithOtp({
-      email: email.trim(),
-      options: { emailRedirectTo: window.location.origin },
+    if (!supabase) return;
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setStatus(error ? error.message : "Signed in. Your course is syncing now.");
+  }
+
+  async function signUp(username: string, email: string, password: string) {
+    const supabase = getSupabaseClient();
+    if (!supabase) return;
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { username } },
     });
-    setStatus(error ? error.message : "Magic link sent. Open it on any device to sync this course.");
+    setStatus(error ? error.message : data.session ? "Account created. Your course is syncing now." : "Account created. Check your email once to confirm it, then sign in.");
   }
 
   async function signOut() {
@@ -279,7 +341,7 @@ export default function Home() {
     };
 
     const newWords = [
-      ...enriched.map((word) => makeWord(word.displayForm, word.definition, word.romanization, "dli")),
+      ...enriched.map((word) => makeWord(word.displayForm, word.definition, word.romanization, "course")),
       ...advanced.map((word) => makeWord(word.displayForm, word.definition, word.romanization, "system_advanced", word.topic)),
     ];
     setState((currentState) => ({ ...currentState, words: [...currentState.words, ...newWords] }));
@@ -287,6 +349,61 @@ export default function Home() {
     setShowIntake(false);
     setReviewIndex(0);
     setStatus(`Added ${enriched.length} required words + ${advanced.length} advanced words for Week ${state.weekNumber}.`);
+  }
+
+  async function importCourseWeek(targetWeek = state.weekNumber) {
+    if (state.course.importedWeeks.includes(targetWeek)) return;
+    setCourseBusy(true);
+    setStatus(`Preparing Week ${targetWeek} course vocabulary…`);
+    try {
+      const entries = await loadCourseWeek(targetWeek);
+      const existing = new Set(state.words.map((word) => courseWordKey(word.displayForm)));
+      const incoming = entries.filter((entry) => {
+        const key = courseWordKey(entry.fa);
+        if (!key || existing.has(key)) return false;
+        existing.add(key);
+        return true;
+      }).map((entry, index): LexicalItem => {
+        const now = new Date();
+        const scheduledAt = new Date(now);
+        scheduledAt.setDate(now.getDate() + Math.min(6, Math.floor(index / 25)));
+        const fsrsCard = createSerializedCard(scheduledAt);
+        return {
+          id: id(),
+          displayForm: entry.fa,
+          normalizedForm: normalizePersian(entry.fa),
+          definition: entry.en,
+          sourceType: "course",
+          sourceWeek: targetWeek,
+          courseEntryId: entry.id,
+          courseListNumber: entry.list,
+          courseLesson: entry.lesson,
+          topic: entry.lesson,
+          introducedAt: now.toISOString(),
+          reviews: 0,
+          correct: 0,
+          lapses: 0,
+          dueAt: fsrsCard.due,
+          fsrsCard,
+        };
+      });
+
+      setState((currentState) => ({
+        ...currentState,
+        course: {
+          ...currentState.course,
+          importedWeeks: [...new Set([...currentState.course.importedWeeks, targetWeek])].sort((a, b) => a - b),
+        },
+        words: [...currentState.words, ...incoming],
+      }));
+      setReviewIndex(0);
+      const duplicates = entries.length - incoming.length;
+      setStatus(`Week ${targetWeek} ready · ${incoming.length} new words · ${Math.min(25, incoming.length)} due today${duplicates ? ` · ${duplicates} repeats skipped` : ""}.`);
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Course vocabulary could not be loaded.");
+    } finally {
+      setCourseBusy(false);
+    }
   }
 
   function reveal() {
@@ -334,7 +451,7 @@ export default function Home() {
     setStatus(`Generating adaptive ${kind}…`);
     try {
       const words = selectContextWords(state, 12);
-      const targetIlr = targetIlrForWeek(state.weekNumber, kind);
+      const targetIlr = state.skillLevels[kind];
       const data = await generateJson({ kind, weekNumber: state.weekNumber, targetWords: words, targetIlr });
       if (kind === "reading") {
         const passage: Passage = {
@@ -455,6 +572,77 @@ export default function Home() {
     setStatus(`Listening saved · ${result.grade.overallScore}% comprehension after ${listensCount} listen${listensCount === 1 ? "" : "s"}.`);
   }
 
+  function addAnkiWords(rows: AnkiVocabularyRow[]) {
+    const existing = new Set(state.words.map((word) => word.normalizedForm));
+    const incoming = rows.filter((row) => {
+      const normalized = normalizePersian(row.displayForm);
+      if (!normalized || existing.has(normalized)) return false;
+      existing.add(normalized);
+      return true;
+    }).map((row): LexicalItem => {
+      const now = new Date();
+      const fsrsCard = createSerializedCard(now);
+      return {
+        id: id(),
+        displayForm: row.displayForm,
+        normalizedForm: normalizePersian(row.displayForm),
+        definition: row.definition,
+        romanization: row.romanization,
+        sourceType: "user",
+        sourceWeek: state.weekNumber,
+        topic: "anki",
+        introducedAt: now.toISOString(),
+        reviews: 0,
+        correct: 0,
+        lapses: 0,
+        dueAt: fsrsCard.due,
+        fsrsCard,
+      };
+    });
+    if (incoming.length) setState((currentState) => ({ ...currentState, words: [...currentState.words, ...incoming] }));
+    return incoming.length;
+  }
+
+  function addAnkiReviews(rows: AnkiReviewRow[]) {
+    const wordByForm = new Map(state.words.map((word) => [word.normalizedForm, word]));
+    const existing = new Set(state.reviews.map((review) => review.id));
+    const events = rows.flatMap((row): ReviewEvent[] => {
+      const word = wordByForm.get(normalizePersian(row.displayForm));
+      const eventId = `anki-${row.externalId}`;
+      if (!word || existing.has(eventId)) return [];
+      existing.add(eventId);
+      return [{
+        id: eventId,
+        lexicalItemId: word.id,
+        reviewedAt: row.reviewedAt,
+        correct: row.correct,
+        responseMs: row.responseMs,
+        rating: row.rating,
+        modality: "visual",
+      }];
+    });
+    if (!events.length) return 0;
+    const byWord = new Map<string, ReviewEvent[]>();
+    events.forEach((event) => byWord.set(event.lexicalItemId, [...(byWord.get(event.lexicalItemId) ?? []), event]));
+    setState((currentState) => ({
+      ...currentState,
+      reviews: [...currentState.reviews, ...events],
+      words: currentState.words.map((word) => {
+        const imported = byWord.get(word.id);
+        if (!imported?.length) return word;
+        const latencies = [...currentState.reviews.filter((review) => review.lexicalItemId === word.id).map((review) => review.responseMs), ...imported.map((review) => review.responseMs)];
+        return {
+          ...word,
+          reviews: word.reviews + imported.length,
+          correct: word.correct + imported.filter((event) => event.correct).length,
+          lapses: word.lapses + imported.filter((event) => !event.correct).length,
+          medianResponseMs: median(latencies),
+        };
+      }),
+    }));
+    return events.length;
+  }
+
   function addSpeakingPrompt(prompt: SpeakingPrompt) {
     setState((currentState) => ({ ...currentState, speakingPrompts: [...currentState.speakingPrompts, prompt] }));
   }
@@ -464,8 +652,8 @@ export default function Home() {
   }
 
   function advanceWeek() {
-    setState((currentState) => ({ ...currentState, weekNumber: Math.min(36, currentState.weekNumber + 1) }));
-    setStatus("Advanced to the next course week. Add the new required vocabulary when ready.");
+    setState((currentState) => ({ ...currentState, weekNumber: Math.min(COURSE_META.weeks, currentState.weekNumber + 1) }));
+    setStatus("Advanced to the next course week. Its vocabulary is ready when you are.");
   }
 
   if (!loaded) return <main>Loading…</main>;
@@ -481,6 +669,9 @@ export default function Home() {
   const sourceAnalytics = sourceMetrics(state.passages, state.passageAttempts, state.listeningItems, state.listeningAttempts, "source");
   const genreAnalytics = sourceMetrics(state.passages, state.passageAttempts, state.listeningItems, state.listeningAttempts, "genre");
   const registerAnalytics = sourceMetrics(state.passages, state.passageAttempts, state.listeningItems, state.listeningAttempts, "register");
+  const currentCourseWeekImported = state.course.importedWeeks.includes(state.weekNumber);
+  const currentCourseWordCount = COURSE_META.weekCounts[state.weekNumber - 1];
+  const currentCourseLessonCount = COURSE_META.weekLessonCounts[state.weekNumber - 1];
 
   function resetReadingLab(passageId: string) {
     setActivePassageId(passageId);
@@ -499,33 +690,63 @@ export default function Home() {
     setTab("listening");
   }
 
+  function finishOnboarding() {
+    localStorage.setItem(ONBOARDING_KEY, "complete");
+    setShowOnboarding(false);
+  }
+
+  function setSkillLevel(skill: "reading" | "listening" | "speaking", level: IlrLevel) {
+    setState((currentState) => ({
+      ...currentState,
+      skillLevels: { ...currentState.skillLevels, [skill]: level },
+    }));
+    setStatus(`${TAB_LABELS[skill]} set to ILR ${level}.`);
+  }
+
+  if (!loaded) return <div className="onboarding-loading" />;
+  if (showOnboarding) return <Onboarding onFinish={finishOnboarding} />;
+
   return <main>
     <header>
-      <div><div className="muted">Week {state.weekNumber}/36 · adaptive Persian system</div><h1>ILR // {tab[0].toUpperCase() + tab.slice(1)}</h1></div>
-      <div className="row"><span className="pill">R4</span><span className="pill">L3+</span><span className="pill">S2</span><button className="primary" onClick={() => setShowIntake((value) => !value)}>+ Weekly words</button></div>
+      <h1>{TAB_LABELS[tab]}</h1>
+      <div className="row"><span className="pill current-ilr-pill">R{state.skillLevels.reading} · L{state.skillLevels.listening} · S{state.skillLevels.speaking}</span>{(state.words.length > 0 || tab !== "today") && <button className="primary" onClick={() => { setTab("today"); setShowIntake((value) => !value); }}>Add words</button>}</div>
     </header>
 
-    <nav className="tabs">
-      {(["today", "sources", "reading", "listening", "speaking", "analytics"] as Tab[]).map((name) => <button key={name} className={tab === name ? "tab active" : "tab"} onClick={() => setTab(name)}>{name}</button>)}
+    <nav className="tabs" aria-label="Study index">
+      <div className="nav-section-heading"><span><i className="nav-flower">✺</i> Index</span><span>+</span></div>
+      <div className="nav-dash" />
+      <div className="nav-section-heading"><span><i>▲</i> Study</span><span>−</span></div>
+      <div className="nav-dash" />
+      <div className="nav-items">
+        {(["today", "sources", "reading", "listening", "speaking", "anki", "analytics", "account"] as Tab[]).map((name) => <button key={name} className={tab === name ? "tab active" : "tab"} onClick={() => setTab(name)}><span className="nav-bullet">{tab === name ? "●" : "·"}</span>{TAB_LABELS[name]}</button>)}
+      </div>
+      <div className="nav-course">
+        <span>Week {state.weekNumber}/{COURSE_META.weeks}</span>
+        <span>Reading {state.skillLevels.reading} · Listening {state.skillLevels.listening}</span>
+        <span>Speaking {state.skillLevels.speaking}</span>
+      </div>
+      <button className="guide-button" onClick={() => setShowOnboarding(true)} aria-label="Open getting started guide">?</button>
     </nav>
 
     {status && <div className="notice">{status}</div>}
 
     {showIntake && <section className="card intake">
       <h2>Week {state.weekNumber} intake</h2>
-      <div className="muted">Paste every required DLI word. Missing definitions/romanization are auto-filled when AI is configured. Exactly 5 advanced terms are added.</div>
+      <div className="muted">Paste your weekly course words. Missing definitions and romanization can be filled automatically. Five advanced terms are added.</div>
       <textarea value={input} onChange={(event) => setInput(event.target.value)} placeholder={"کارمند — employee — kārmand\nبازداشت کردن — to arrest — bāzdāsht kardan\nآینده — future — āyande"} />
       <div className="row"><button className="primary" onClick={importWeek}>Import week + 5 advanced</button><button className="secondary" onClick={() => setShowIntake(false)}>Cancel</button></div>
     </section>}
 
-    {tab === "today" && <section className="grid">
+    {tab === "today" && !showIntake && <section className="grid today-grid">
       <Metric label="Due now" value={String(due.length)} />
       <Metric label="Total words" value={String(state.words.length)} />
       <Metric label="Retention" value={`${retention}%`} />
       <Metric label="Median recall" value={medianRecall ? `${(medianRecall / 1000).toFixed(1)}s` : "—"} />
 
-      <div className="card span-7">
-        <div className="row spread"><h2>Timed recognition</h2><span className="pill">3s automatic · 8s solid · 15s ceiling</span></div>
+      <SkillLevelPanel levels={state.skillLevels} onChange={setSkillLevel} />
+
+      <div className="card span-7 dashboard-primary">
+        <div className="row spread"><h2>{state.words.length ? "Review" : "Start here"}</h2>{state.words.length > 0 && <span className="pill">3s automatic · 8s solid · 15s ceiling</span>}</div>
         {current ? <>
           <div className="fa hero-fa">{current.displayForm}</div>
           {!revealed ? <button className="primary" onClick={reveal}>Reveal meaning</button> : <>
@@ -536,53 +757,57 @@ export default function Home() {
             </div>
             <div className="row"><button className="danger" onClick={() => rateKnown(false)}>I was wrong</button><button className="primary" onClick={() => rateKnown(true)}>I was right</button></div>
           </>}
-        </> : <div className="empty">No vocabulary due. Context practice stays active even on a zero-review day.</div>}
+        </> : !currentCourseWeekImported ? <div className="next-action course-ready"><span className="next-number">01</span><h3>Start Unit 1.</h3><p>Week {state.weekNumber} contains {currentCourseWordCount} entries from {currentCourseLessonCount} lesson lists. Introductory-unit vocabulary has been removed. The first 25 words become available today; the rest arrive gradually through the week.</p><div className="course-ready-meta"><span>{COURSE_META.entries.toLocaleString()} course entries</span><span>{COURSE_META.lessonLists} lesson lists</span><span>{COURSE_META.weeks} weeks</span></div><button className="primary" onClick={() => void importCourseWeek()} disabled={courseBusy}>{courseBusy ? "Preparing…" : state.weekNumber === 1 ? "Start Unit 1" : `Start Week ${state.weekNumber}`}</button></div> : state.words.length ? <div className="next-action"><h3>You&apos;re caught up.</h3><p>Choose Reading or Listening from the menu for your next session.</p></div> : <div className="next-action"><span className="next-number">01</span><h3>Add your first words.</h3><p>Add vocabulary manually to create your review schedule.</p><button className="primary" onClick={() => setShowIntake(true)}>Add words</button></div>}
       </div>
 
-      <div className="card span-5">
+      <div className="card span-5 dashboard-secondary">
         <h2>Adaptive allocation</h2>
-        <p className="muted">Context work has a hard floor so flashcards cannot crowd out R4/L3+ development.</p>
+        <p className="muted">Choose the level you want for each skill. All three begin at Level 1 and change only when you change them.</p>
         {Object.entries(allocation).map(([name, value]) => <div key={name} className="allocation"><div className="row spread"><span>{name}</span><span className="muted">{value}%</span></div><div className="progress"><div style={{ width: `${value}%` }} /></div></div>)}
       </div>
 
-      <div className="card span-8">
+      <div className="card span-8 dashboard-secondary">
         <div className="row spread"><h2>Current vocabulary</h2><span className="muted">{mature} mature</span></div>
-        <div className="word-list">{state.words.slice(-14).reverse().map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><span>{word.romanization ? `${word.romanization} · ` : ""}{word.definition || "definition pending"}</span><span>W{word.sourceWeek} · {word.reviews} reviews · {word.sourceType === "system_advanced" ? "advanced" : "DLI"}</span></div>)}</div>
+        <div className="word-list">{state.words.slice(-14).reverse().map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><span>{word.romanization ? `${word.romanization} · ` : ""}{word.definition || "definition pending"}</span><span>W{word.sourceWeek} · {word.reviews} reviews · {word.sourceType === "system_advanced" ? "advanced" : word.sourceType === "course" || word.sourceType === "dli" ? "course" : "personal / Anki"}</span></div>)}</div>
       </div>
 
-      <div className="card span-4">
+      {state.words.length > 0 && <div className="card span-4 dashboard-control">
         <h2>Course control</h2>
         <div className="queue">
           <button className="queue-button" onClick={() => setTab("reading")}><span>Reading lab</span><strong>{readingAverage || "start"}</strong></button>
           <button className="queue-button" onClick={() => setTab("listening")}><span>Listening lab</span><strong>{listeningAverage || "start"}</strong></button>
-          <button className="queue-button" onClick={() => setTab("speaking")}><span>Speaking maintenance</span><strong>{speakingAverage || "S2"}</strong></button>
+          <button className="queue-button" onClick={() => setTab("speaking")}><span>Speaking</span><strong>{speakingAverage || `S${state.skillLevels.speaking}`}</strong></button>
           <button className="queue-button" onClick={() => setTab("analytics")}><span>Difficult items</span><strong>{weakWords.length}</strong></button>
-          <button className="queue-button" onClick={advanceWeek} disabled={state.weekNumber >= 36}><span>Advance course week</span><strong>W{Math.min(36, state.weekNumber + 1)}</strong></button>
+          <button className="queue-button" onClick={advanceWeek} disabled={state.weekNumber >= COURSE_META.weeks}><span>Advance course week</span><strong>W{Math.min(COURSE_META.weeks, state.weekNumber + 1)}</strong></button>
         </div>
-      </div>
+      </div>}
 
-      <div className="card span-12 sync-card">
-        <div><h2>36-week persistence</h2><div className="muted">Local history is automatic. Add Supabase to sync across your Mac, phone, and other devices.</div></div>
-        {getSupabaseClient() ? cloudUser ? <div className="row"><span className="pill">cloud synced</span><span className="muted">{cloudUser.email}</span><button className="secondary" onClick={signOut}>Sign out</button></div> : <div className="row auth-row"><input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Email for magic-link sync"/><button className="primary" onClick={signIn}>Send magic link</button></div> : <span className="pill">local mode · add Supabase env vars for cloud</span>}
-      </div>
     </section>}
 
-    {tab === "sources" && <>
-      <SourceIngestion
+    {tab === "sources" && <section className="guided-workspace">
+      {!sourceView && <div className="guided-overview">
+        <span className="next-number">01</span><h2>Train with real Persian.</h2>
+        <p>Add a short excerpt or transcript from a real source. The app turns it into level-appropriate practice while keeping its origin attached.</p>
+        <div className="guided-capabilities"><div><span>Preserve</span><p>Keep title, publisher, date, link, and authentic or adapted status.</p></div><div><span>Analyze</span><p>Identify topic, genre, register, level, questions, and useful vocabulary.</p></div><div><span>Practice</span><p>Send the material directly into Reading or Listening.</p></div><div><span>Compare</span><p>See which sources, genres, and registers are improving or causing difficulty.</p></div></div>
+        <div className="row guided-paths"><button className="primary" onClick={() => setSourceView("reading")}>Add reading source</button><button className="primary" onClick={() => setSourceView("listening")}>Add listening source</button><button className="secondary" onClick={() => setSourceView("library")}>View library</button></div>
+      </div>}
+      {(sourceView === "reading" || sourceView === "listening") && <><button className="back-link" onClick={() => setSourceView(null)}>← Back</button><SourceIngestion
+        key={sourceView}
+        initialModality={sourceView}
         knownWords={state.words.map((word) => word.displayForm)}
         makeId={id}
         onStatus={setStatus}
         onReading={(passage) => { setState((currentState) => ({ ...currentState, passages: [...currentState.passages, passage] })); resetReadingLab(passage.id); }}
         onListening={(item) => { setState((currentState) => ({ ...currentState, listeningItems: [...currentState.listeningItems, item] })); resetListeningLab(item.id); }}
-      />
-      <section className="grid source-library">
+      /></>}
+      {sourceView === "library" && <><button className="back-link" onClick={() => setSourceView(null)}>← Back</button><section className="grid source-library">
         <div className="card span-6"><h2>Reading source library</h2><div className="queue">{state.passages.slice().reverse().map((item) => <button className="queue-button source-row" key={item.id} onClick={() => resetReadingLab(item.id)}><span><strong>{item.title}</strong><small>{item.publisher || "AI-generated"} · {item.genre} · {item.register} · ILR {item.ilrEstimate}</small></span><span className={`pill origin-${item.sourceType}`}>{item.sourceType}</span></button>)}</div>{!state.passages.length && <div className="empty">No reading sources yet.</div>}</div>
         <div className="card span-6"><h2>Listening source library</h2><div className="queue">{state.listeningItems.slice().reverse().map((item) => <button className="queue-button source-row" key={item.id} onClick={() => resetListeningLab(item.id)}><span><strong>{item.title}</strong><small>{item.publisher || "AI-generated"} · {item.genre} · {item.register} · ILR {item.ilrEstimate}</small></span><span className={`pill origin-${item.sourceType}`}>{item.sourceType}</span></button>)}</div>{!state.listeningItems.length && <div className="empty">No listening sources yet.</div>}</div>
-      </section>
-    </>}
+      </section></>}
+    </section>}
 
     {tab === "reading" && <section className="grid">
-      <div className="card span-12 lab-header"><div><h2>Reading Lab</h2><p className="muted">Read once under time pressure, then answer without looking back. AI grades meaning, inference, and discourse separately.</p></div><button className="primary" onClick={() => generatePractice("reading")}>Generate adaptive passage</button></div>
+      <div className="card span-12 lab-header"><div><h2>Reading</h2><SkillLevelSelector value={state.skillLevels.reading} onChange={(level) => setSkillLevel("reading", level)} /></div><button className="primary" onClick={() => generatePractice("reading")}>New passage</button></div>
       {latestPassage ? <>
         <div className="card span-7">
           <div className="row spread"><div><div className="muted">ILR ~{latestPassage.ilrEstimate} · {latestPassage.topic} · {latestPassage.genre} · {latestPassage.register}</div><h2>{latestPassage.title}</h2><SourceLine item={latestPassage} /></div>{!readingStartedAt && !readingQuestionsOpen && <button className="primary" onClick={() => { setReadingStartedAt(Date.now()); setReadingDurationMs(0); }}>Start timer</button>}</div>
@@ -599,18 +824,18 @@ export default function Home() {
             questions={latestPassage.questions}
             ilrEstimate={latestPassage.ilrEstimate}
             onComplete={completeReading}
-          /> : <div className="empty">Questions unlock after you finish the timed reading. This prevents question-first scanning.</div>}
+          /> : <div className="empty">Finish reading to unlock questions.</div>}
         </div>
-      </> : <div className="card span-12 empty">Generate the first passage after importing vocabulary. It will recycle weak/current terms at the week-adjusted difficulty.</div>}
+      </> : <div className="card span-12 empty">No passage. Generate one to begin.</div>}
     </section>}
 
     {tab === "listening" && <section className="grid">
-      <div className="card span-12 lab-header"><div><h2>Listening Lab</h2><p className="muted">Audio first. Answer from what you heard. Repeat count and transcript reveal are preserved as diagnostic signals.</p></div><button className="primary" onClick={() => generatePractice("listening")}>Generate adaptive listening</button></div>
+      <div className="card span-12 lab-header"><div><h2>Listening</h2><SkillLevelSelector value={state.skillLevels.listening} onChange={(level) => setSkillLevel("listening", level)} /></div><button className="primary" onClick={() => generatePractice("listening")}>New audio</button></div>
       {latestListening ? <>
         <div className="card span-7">
           <div className="muted">ILR ~{latestListening.ilrEstimate} · {latestListening.topic} · {latestListening.genre} · {latestListening.register}</div><h2>{latestListening.title}</h2><SourceLine item={latestListening} />
           <div className="audio-stage"><button className="primary big-button" onClick={playListening}>▶ Play Persian audio</button><span className="muted">listens: {listensCount}</span></div>
-          <div className={transcriptVisible ? "fa passage" : "transcript-hidden"}>{transcriptVisible ? latestListening.transcriptFa : "Transcript hidden. Keep it hidden until after answering whenever possible."}</div>
+          <div className={transcriptVisible ? "fa passage" : "transcript-hidden"}>{transcriptVisible ? latestListening.transcriptFa : "Transcript hidden"}</div>
           {transcriptVisible && !!latestListening.targetWords.length && <div className="target-strip"><span className="muted">Extracted targets</span>{latestListening.targetWords.map((word) => <span className="pill fa-inline" key={word}>{word}</span>)}</div>}
           <div className="row"><button className="secondary" onClick={() => setTranscriptVisible(true)}>Reveal transcript</button>{transcriptVisible && <span className="pill">transcript reveal logged</span>}</div>
         </div>
@@ -626,11 +851,13 @@ export default function Home() {
             onComplete={completeListening}
           /> : <div className="empty">Play the audio at least once before answering.</div>}
         </div>
-      </> : <div className="card span-12 empty">Generate an item. OpenAI TTS is used when configured; otherwise the browser&apos;s Persian voice is the fallback.</div>}
+      </> : <div className="card span-12 empty">No audio. Generate one to begin.</div>}
     </section>}
 
     {tab === "speaking" && <SpeakingLab
       weekNumber={state.weekNumber}
+      level={state.skillLevels.speaking}
+      onLevelChange={(level) => setSkillLevel("speaking", level)}
       targetWords={speakingWords}
       latestPrompt={latestSpeakingPrompt}
       onPrompt={addSpeakingPrompt}
@@ -638,24 +865,80 @@ export default function Home() {
       makeId={id}
     />}
 
-    {tab === "analytics" && <section className="grid">
+    {tab === "anki" && <AnkiWorkspace
+      settings={state.anki ?? emptyState.anki}
+      words={state.words}
+      onSettings={(anki) => setState((currentState) => ({ ...currentState, anki }))}
+      onWords={addAnkiWords}
+      onReviews={addAnkiReviews}
+    />}
+
+    {tab === "account" && <AccountWorkspace
+      user={cloudUser}
+      username={cloudUsername}
+      cloudReady={cloudReady}
+      status={status}
+      onSignIn={signIn}
+      onSignUp={signUp}
+      onSignOut={signOut}
+    />}
+
+    {tab === "analytics" && !showProgressDetails && <section className="guided-workspace"><div className="guided-overview">
+      <span className="next-number">01</span><h2>Know why you&apos;re improving.</h2>
+      <p>Progress is based on evidence from practice—not a streak or time spent in the app. The system looks for faster recall, stronger comprehension, and reliable performance across different material.</p>
+      <div className="guided-capabilities"><div><span>Recall</span><p>Accuracy, response time, lapses, mature words, and difficult vocabulary.</p></div><div><span>Comprehension</span><p>Main idea, detail, inference, and discourse across Reading and Listening.</p></div><div><span>Coverage</span><p>Performance by source, genre, register, and skill—not only one average.</p></div><div><span>Readiness</span><p>A level-up signal after at least four recent attempts average 80% or better.</p></div></div>
+      <div className="progress-snapshot"><span><small>Words</small><strong>{state.words.length}</strong></span><span><small>Reviews</small><strong>{state.reviews.length}</strong></span><span><small>Reading</small><strong>{readingAverage ? `${readingAverage}%` : "—"}</strong></span><span><small>Listening</small><strong>{listeningAverage ? `${listeningAverage}%` : "—"}</strong></span></div>
+      <button className="primary" onClick={() => setShowProgressDetails(true)}>View detailed progress</button>
+    </div></section>}
+
+    {tab === "analytics" && showProgressDetails && <><button className="back-link progress-back" onClick={() => setShowProgressDetails(false)}>← Back</button><section className="grid analytics-grid">
       <Metric label="Words learned" value={String(state.words.length)} />
       <Metric label="Reviews logged" value={String(state.reviews.length)} />
       <Metric label="Reading avg (5)" value={readingAverage ? `${readingAverage}%` : "—"} />
       <Metric label="Listening avg (5)" value={listeningAverage ? `${listeningAverage}%` : "—"} />
+      <SkillLevelPanel levels={state.skillLevels} onChange={setSkillLevel} />
       <div className="card span-7"><h2>Weak / slow lexical items</h2><div className="word-list single">{weakWords.map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><span>{word.definition}</span><span>{Math.round(100 * word.correct / word.reviews)}% correct · {word.medianResponseMs ? `${(word.medianResponseMs / 1000).toFixed(1)}s median` : "no latency"} · {word.lapses} lapses</span></div>)}</div>{!weakWords.length && <div className="empty">Not enough review history yet.</div>}</div>
-      <div className="card span-5"><h2>Performance history</h2><div className="queue"><div className="queue-item"><span>Reading attempts</span><strong>{state.passageAttempts.length}</strong></div><div className="queue-item"><span>Listening attempts</span><strong>{state.listeningAttempts.length}</strong></div><div className="queue-item"><span>Speaking attempts</span><strong>{state.speakingAttempts.length}</strong></div><div className="queue-item"><span>Speaking avg (5)</span><strong>{speakingAverage ? `${speakingAverage}%` : "—"}</strong></div><div className="queue-item"><span>Mature vocabulary</span><strong>{mature}</strong></div><div className="queue-item"><span>Current week</span><strong>{state.weekNumber}/36</strong></div></div></div>
+      <div className="card span-5"><h2>Performance history</h2><div className="queue"><div className="queue-item"><span>Reading attempts</span><strong>{state.passageAttempts.length}</strong></div><div className="queue-item"><span>Listening attempts</span><strong>{state.listeningAttempts.length}</strong></div><div className="queue-item"><span>Speaking attempts</span><strong>{state.speakingAttempts.length}</strong></div><div className="queue-item"><span>Speaking avg (5)</span><strong>{speakingAverage ? `${speakingAverage}%` : "—"}</strong></div><div className="queue-item"><span>Mature vocabulary</span><strong>{mature}</strong></div><div className="queue-item"><span>Current week</span><strong>{state.weekNumber}/{COURSE_META.weeks}</strong></div></div></div>
       <div className="card span-12"><h2>Recent comprehension diagnostics</h2><div className="diagnostic-grid"><Diagnostic label="Reading inference" value={Math.round(average(state.passageAttempts.slice(-5).map((attempt) => attempt.inferenceScore)))} /><Diagnostic label="Reading discourse" value={Math.round(average(state.passageAttempts.slice(-5).map((attempt) => attempt.discourseScore)))} /><Diagnostic label="Listening detail" value={Math.round(average(state.listeningAttempts.slice(-5).map((attempt) => attempt.detailScore)))} /><Diagnostic label="Listening inference" value={Math.round(average(state.listeningAttempts.slice(-5).map((attempt) => attempt.inferenceScore)))} /></div></div>
       <AnalyticsTable title="Attempts by source" rows={sourceAnalytics} />
       <AnalyticsTable title="Attempts by genre" rows={genreAnalytics} />
       <AnalyticsTable title="Attempts by register" rows={registerAnalytics} />
-    </section>}
+    </section></>}
   </main>;
 }
 
 function SourceLine({ item }: { item: Passage | ListeningItem }) {
   if (item.sourceType === "generated") return <div className="source-line"><span className="pill">generated</span></div>;
   return <div className="source-line"><span className={`pill origin-${item.sourceType}`}>{item.sourceType}</span><span>{item.publisher}</span>{item.publishedAt && <span>{item.publishedAt}</span>}{item.sourceUrl && <a href={item.sourceUrl} target="_blank" rel="noreferrer">Open original ↗</a>}</div>;
+}
+
+const ILR_DESCRIPTIONS: Record<IlrLevel, string> = {
+  1: "Basic facts and short, familiar messages",
+  2: "Routine topics and connected main ideas",
+  3: "Complex professional and abstract material",
+  4: "Nuanced, extended, highly sophisticated discourse",
+};
+
+function SkillLevelSelector({ value, onChange }: { value: IlrLevel; onChange: (level: IlrLevel) => void }) {
+  return <div className="skill-level-selector" aria-label="Choose ILR level">
+    {([1, 2, 3, 4] as IlrLevel[]).map((level) => <button type="button" key={level} className={value === level ? "active" : ""} onClick={() => onChange(level)} aria-pressed={value === level}>{level}</button>)}
+  </div>;
+}
+
+function SkillLevelPanel({
+  levels,
+  onChange,
+}: {
+  levels: StudyState["skillLevels"];
+  onChange: (skill: "reading" | "listening" | "speaking", level: IlrLevel) => void;
+}) {
+  return <div className="card span-12 skill-level-panel">
+    <div><h2>Practice levels</h2><p className="muted">Each section starts at 1. Change it whenever you want.</p></div>
+    {(["reading", "listening", "speaking"] as const).map((skill) => <div className="skill-level-row" key={skill}>
+      <span><strong>{TAB_LABELS[skill]}</strong><small>{ILR_DESCRIPTIONS[levels[skill]]}</small></span>
+      <SkillLevelSelector value={levels[skill]} onChange={(level) => onChange(skill, level)} />
+    </div>)}
+  </div>;
 }
 
 function AnalyticsTable({ title, rows }: { title: string; rows: ReturnType<typeof sourceMetrics> }) {

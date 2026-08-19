@@ -23,7 +23,7 @@ create table if not exists lexical_items (
   primary_definition text,
   register text,
   topic text,
-  source_type text not null check (source_type in ('dli','system_advanced','user')),
+  source_type text not null check (source_type in ('course','dli','system_advanced','user')),
   source_week integer not null,
   formal_variant text,
   colloquial_variant text,

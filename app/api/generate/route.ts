@@ -1,10 +1,11 @@
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
+import { openAiErrorResponse } from "@/lib/openai-error";
 
 export const runtime = "nodejs";
 
 type GenerateBody = {
-  kind: "advanced_words" | "define_words" | "reading" | "listening" | "speaking";
+  kind: "advanced_words" | "define_words" | "reading" | "listening";
   words?: string[];
   weekNumber?: number;
   existing?: string[];
@@ -30,27 +31,11 @@ export async function POST(request: Request) {
   if (body.kind === "define_words") {
     prompt = `Return JSON only. Define and romanize these Persian vocabulary items for a serious learner: ${(body.words ?? []).join(", ")}. Preserve the exact Persian display form. Give the most useful concise English meaning in context; for verbs use an infinitive beginning with "to". Romanization should be readable and consistent.\n\nReturn this exact shape:\n{"words":[{"displayForm":"...","definition":"...","romanization":"..."}]}`;
   } else if (body.kind === "advanced_words") {
-    prompt = `You are building a 36-week Persian course for an advanced government linguist. Return JSON only.\n\nWeek: ${body.weekNumber ?? 1}\nAlready learned terms (never repeat these): ${(body.existing ?? []).join(", ")}\n\nChoose EXACTLY 5 high-value Persian lexical items appropriate for eventual ILR 3-4 reading/listening. Rotate among government, politics, economics, diplomacy, law, security, policy, international relations, and formal media discourse. Prefer reusable formal vocabulary, collocations, and institutional terms rather than obscure trivia. Do not choose trivial morphological duplicates of existing items.\n\nReturn this exact shape:\n{"words":[{"displayForm":"...","definition":"...","romanization":"...","topic":"..."}]}`;
-  } else if (body.kind === "speaking") {
-    prompt = `Create one Persian speaking-maintenance task for a learner targeting ILR Speaking 2 while prioritizing Reading 4 and Listening 3+. Return JSON only.
-
-Course week: ${body.weekNumber ?? 1}
-Target/recycled vocabulary: ${(body.targetWords ?? []).join(", ")}
-
-Requirements:
-- task should be doable in about 2-4 minutes
-- target ILR 2 functions: narration/description in paragraph-length discourse, routine social/work situations, past/present/future time frames, explanation and comparison
-- favor practical topics plus occasional government/economics/current-events themes, but do not require ILR 3 speaking
-- ask for connected speech, not isolated sentences
-- identify 3-5 communicative functions to practice
-- use target words only where natural
-
-Return exactly:
-{"promptEn":"...","promptFa":"...","topic":"...","functions":["..."],"targetWords":["..."]}`;
+    prompt = `You are building a 35-week Persian course for an advanced government linguist. Return JSON only.\n\nWeek: ${body.weekNumber ?? 1}\nAlready learned terms (never repeat these): ${(body.existing ?? []).join(", ")}\n\nChoose EXACTLY 5 high-value Persian lexical items appropriate for eventual ILR 3-4 reading/listening. Rotate among government, politics, economics, diplomacy, law, security, policy, international relations, and formal media discourse. Prefer reusable formal vocabulary, collocations, and institutional terms rather than obscure trivia. Do not choose trivial morphological duplicates of existing items.\n\nReturn this exact shape:\n{"words":[{"displayForm":"...","definition":"...","romanization":"...","topic":"..."}]}`;
   } else {
     const mode = body.kind === "reading" ? "reading" : "listening";
     const sentenceCount = body.kind === "reading" ? "12-16" : "10-14";
-    prompt = `Create one Persian ${mode} practice item for a learner targeting ILR Reading 4 / Listening 3+ / Speaking 2. Return JSON only.\n\nTarget ILR difficulty: ${body.targetIlr ?? 2}\nTarget/recycled words to use naturally where possible: ${(body.targetWords ?? []).join(", ")}\n\nRequirements:\n- formal educated Iranian Persian suitable for news, government, economics, policy, diplomacy, security, or society\n- ${sentenceCount} natural connected sentences forming ONE coherent passage, not standalone example sentences\n- use a mix of current and previously learned target words, but never force unnatural density\n- include discourse relations, inference opportunities, and at least one sentence whose meaning depends on context\n- avoid English inside the Persian passage\n- produce 5 comprehension questions in ENGLISH: one main idea, two detail, one inference, one discourse/author-intent\n- for each question include a concise hidden reference answer used only for grading\n\nReturn this exact shape:\n{"title":"English title","textFa":"Persian paragraph","topic":"...","register":"formal-news","questions":[{"question":"...","type":"main_idea|detail|inference|discourse","referenceAnswer":"..."}]}`;
+    prompt = `Create one Persian ${mode} practice item at the learner's selected proficiency level. Return JSON only.\n\nTarget ILR difficulty: ${body.targetIlr ?? 1}\nTarget/recycled words to use naturally where possible: ${(body.targetWords ?? []).join(", ")}\n\nRequirements:\n- natural educated Iranian Persian suitable for the selected ILR level\n- ${sentenceCount} natural connected sentences forming ONE coherent passage, not standalone example sentences\n- use familiar daily-life language at Level 1 and progressively introduce formal news, government, economics, policy, diplomacy, security, or social themes at higher levels\n- use a mix of current and previously learned target words, but never force unnatural density\n- include discourse relations and inference opportunities appropriate to the selected level\n- avoid English inside the Persian passage\n- produce 5 comprehension questions in ENGLISH: one main idea, two detail, one inference, one discourse/author-intent\n- for each question include a concise hidden reference answer used only for grading\n\nReturn this exact shape:\n{"title":"English title","textFa":"Persian paragraph","topic":"...","register":"...","questions":[{"question":"...","type":"main_idea|detail|inference|discourse","referenceAnswer":"..."}]}`;
   }
 
   try {
@@ -58,6 +43,6 @@ Return exactly:
     return NextResponse.json(parseJson(response.output_text));
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: "Generation failed." }, { status: 500 });
+    return openAiErrorResponse(error, "Generation failed.");
   }
 }

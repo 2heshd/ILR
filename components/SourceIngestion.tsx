@@ -15,6 +15,7 @@ type IngestResult = {
 };
 
 type Props = {
+  initialModality?: ContentModality;
   knownWords: string[];
   makeId: () => string;
   onReading: (passage: Passage) => void;
@@ -32,8 +33,8 @@ function fallbackQuestions(title: string): PassageQuestion[] {
   ];
 }
 
-export default function SourceIngestion({ knownWords, makeId, onReading, onListening, onStatus }: Props) {
-  const [modality, setModality] = useState<ContentModality>("reading");
+export default function SourceIngestion({ initialModality = "reading", knownWords, makeId, onReading, onListening, onStatus }: Props) {
+  const [modality, setModality] = useState<ContentModality>(initialModality);
   const [sourceType, setSourceType] = useState<Exclude<ContentOrigin, "generated">>("authentic");
   const [title, setTitle] = useState("");
   const [publisher, setPublisher] = useState("");
@@ -120,10 +121,9 @@ export default function SourceIngestion({ knownWords, makeId, onReading, onListe
     setBusy(false);
   }
 
-  return <section className="grid">
+  return <section className="grid source-ingestion">
     <div className="card span-12">
-      <h2>Authentic source intake</h2>
-      <p className="muted">For Iranian news, government, economics, policy, or security material. Save a short excerpt or transcript plus provenance—not a full copyrighted article. The original remains one click away.</p>
+      <h2>Add source</h2>
       <div className="form-grid">
         <label>Lab<select value={modality} onChange={(event) => setModality(event.target.value as ContentModality)}><option value="reading">Reading</option><option value="listening">Listening</option></select></label>
         <label>Text status<select value={sourceType} onChange={(event) => setSourceType(event.target.value as Exclude<ContentOrigin, "generated">)}><option value="authentic">Authentic / unchanged</option><option value="adapted">Adapted / shortened</option></select></label>
@@ -140,7 +140,7 @@ export default function SourceIngestion({ knownWords, makeId, onReading, onListe
       <label className="source-text-label">Persian {modality === "reading" ? "excerpt" : "transcript excerpt"} · {textFa.length}/{MAX_EXCERPT_CHARS}
         <textarea className="fa" maxLength={MAX_EXCERPT_CHARS} value={textFa} onChange={(event) => setTextFa(event.target.value)} placeholder="یک گزیده کوتاه فارسی را اینجا قرار دهید…" />
       </label>
-      <div className="row"><button className="primary" onClick={ingest} disabled={busy}>{busy ? "Analyzing…" : "Analyze + add to lab"}</button><span className="muted">AI refines topic, genre, register, ILR, questions, and vocabulary when configured; manual values remain usable without it.</span></div>
+      <button className="primary" onClick={ingest} disabled={busy}>{busy ? "Analyzing…" : "Add to lab"}</button>
     </div>
   </section>;
 }

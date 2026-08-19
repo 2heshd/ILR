@@ -1,10 +1,10 @@
 # ILR
 
-Adaptive Persian/Farsi learning system for a 36-week intensive course with target outcomes of **ILR Reading 4 / Listening 3+ / Speaking 2**.
+Adaptive Persian/Farsi learning system for a 35-week intensive course beginning at Unit 1, with independently selectable levels 1–4 for reading, listening, and speaking.
 
 ## What the app does now
 
-- imports the required weekly DLI vocabulary in one paste
+- imports required weekly course vocabulary in one paste
 - normalizes Persian spelling variants and blocks duplicates
 - fills missing English definitions + romanization when AI is configured
 - adds exactly **5 advanced government/politics/economics/security/diplomacy terms** per week without repeating learned items
@@ -19,6 +19,8 @@ Adaptive Persian/Farsi learning system for a 36-week intensive course with targe
 - gives answer-level corrective feedback and missed-concept diagnostics
 - provides a self-score fallback if AI grading is unavailable
 - shifts reading/listening study allocation toward the weaker receptive skill while preserving lexical and speaking floors
+- starts learners on a visible ILR 1-4 progression and generates practice slightly above their selected current level
+- recommends moving up after at least four recent receptive attempts average 80% or better
 - includes a dedicated **ILR-2 speaking-maintenance lab** with 3-minute connected-response tasks
 - uses Persian browser speech recognition when available and allows transcript correction before grading
 - grades speaking transcripts for task completion, organization, grammatical control, vocabulary control, and a transcript-based fluency estimate
@@ -26,8 +28,10 @@ Adaptive Persian/Farsi learning system for a 36-week intensive course with targe
 - ingests authentic or adapted Persian sources into either receptive-skill lab with URL, title, publisher, publication date, topic, genre, register, and ILR provenance
 - stores only a short copyright-safe excerpt/transcript while keeping a link to the original source
 - extracts source-specific target vocabulary and reports attempts by publisher/source, genre, and register
+- exchanges vocabulary with Anki through CSV/TSV files or the local AnkiConnect add-on
+- pulls Anki review history into local recall analytics without changing either app's scheduler
 - saves automatically in the browser
-- optionally syncs the complete course state across devices with **Supabase magic-link authentication**
+- optionally syncs the complete course state across devices with **Supabase username/password accounts**
 - appends individual cloud vocabulary review events in addition to the recovery snapshot
 
 ## Run locally
@@ -44,6 +48,12 @@ npm run dev
 Open `http://localhost:3000`.
 
 The app works immediately in local mode. AI generation/grading and cloud sync are optional layers.
+
+## Anki workflow
+
+Open **Anki** in the app index. You can import or export a tab-separated deck file without any add-on. The expected columns are `Front`, `Back`, and `Romanization`; headerless files use that same order.
+
+For direct desktop sync, install the AnkiConnect add-on, keep Anki Desktop open, connect to `http://127.0.0.1:8765`, and choose a deck. The app can pull cards, push missing words, and import review history. It never rewrites Anki scheduling data: Anki and the app keep separate schedulers, while completed Anki reviews are copied into the app's recall history and analytics.
 
 ## Weekly vocabulary input
 
@@ -63,7 +73,7 @@ Preferred if definitions are already available:
 آینده — future — āyande
 ```
 
-If `OPENAI_API_KEY` is configured, missing definitions/romanization are filled automatically and the system can generate advanced vocabulary, adaptive reading/listening material, speaking prompts, audio, and automatic scoring.
+If `OPENAI_API_KEY` is configured, missing definitions/romanization are filled automatically and the system can generate advanced vocabulary, adaptive reading/listening material, speaking prompts, audio, and automatic scoring. The key is read only by server routes and is never included in browser code.
 
 ## Optional AI setup
 
@@ -115,7 +125,9 @@ NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 ```
 
-Restart the development server. A magic-link sign-in box will appear on the Today page. Local persistence remains active as an offline/recovery layer.
+The Account page supports unique usernames plus email/password authentication. After sign-in, the complete learning state saves automatically to the user's private `study_snapshots` row while local storage remains available as an offline fallback.
+
+Restart the development server. Create an account or sign in from the Account page. Local persistence remains active as an offline/recovery layer.
 
 ## Adaptive logic
 
@@ -166,7 +178,7 @@ Recent reading/listening results can shift up to 10 percentage points toward the
 
 ### Difficulty progression
 
-Reading and listening content scale with course week toward the long-term R4/L3+ targets rather than jumping immediately to target difficulty. Generated passages prioritize weak/current vocabulary but are instructed to preserve natural discourse rather than maximize keyword density.
+The learner selects a current ILR milestone from 1-4 (new profiles begin at ILR 1). Reading and listening practice targets 0.25 above that level, with a small additional course-time step every 12 weeks, capped at Reading 4 and Listening 3.5. After at least four recent receptive attempts average 80% or better, the dashboard recommends advancing to the next milestone. Generated passages prioritize weak/current vocabulary but are instructed to preserve natural discourse rather than maximize keyword density.
 
 ## Persistence model
 

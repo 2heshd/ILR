@@ -23,6 +23,16 @@ export async function loadCloudState(client: SupabaseClient, user: User): Promis
   return (data?.state as StudyState | undefined) ?? null;
 }
 
+export async function loadUsername(client: SupabaseClient, user: User): Promise<string | null> {
+  const { data, error } = await client
+    .from("profiles")
+    .select("username")
+    .eq("id", user.id)
+    .maybeSingle();
+  if (error) throw error;
+  return typeof data?.username === "string" ? data.username : null;
+}
+
 export async function saveCloudState(client: SupabaseClient, user: User, state: StudyState) {
   const { error } = await client.from("study_snapshots").upsert({
     user_id: user.id,

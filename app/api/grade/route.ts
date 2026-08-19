@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
+import { openAiErrorResponse } from "@/lib/openai-error";
 
 export const runtime = "nodejs";
 
@@ -126,6 +127,6 @@ Return exactly:
     });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: "Grading failed." }, { status: 500 });
+    return openAiErrorResponse(error, "Grading failed.");
   }
 }

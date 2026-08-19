@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import type { SpeakingAttempt, SpeakingGrade, SpeakingPrompt } from "@/lib/types";
+import { useEffect, useRef, useState } from "react";
+import type { IlrLevel, SpeakingAttempt, SpeakingGrade, SpeakingPrompt } from "@/lib/types";
 
 type Props = {
   weekNumber: number;
+  level: IlrLevel;
+  onLevelChange: (level: IlrLevel) => void;
   targetWords: string[];
   latestPrompt?: SpeakingPrompt;
   onPrompt: (prompt: SpeakingPrompt) => void;
@@ -12,247 +14,253 @@ type Props = {
   makeId: () => string;
 };
 
-type RecognitionResult = { isFinal: boolean; 0: { transcript: string } };
-type RecognitionEvent = { results: ArrayLike<RecognitionResult> };
-type Recognition = {
-  lang: string;
-  continuous: boolean;
-  interimResults: boolean;
-  onresult: ((event: RecognitionEvent) => void) | null;
-  onend: (() => void) | null;
-  onerror: (() => void) | null;
-  start: () => void;
-  stop: () => void;
+const PROMPTS: Record<IlrLevel, Array<{ prompt: string; topic: string; functions: string[] }>> = {
+  1: [
+    { prompt: "Introduce yourself in Persian. Say where you live, what you do, and what you usually do each day.", topic: "daily life", functions: ["introduce", "describe", "present time"] },
+    { prompt: "Describe your home or neighborhood. Mention three places and explain where they are.", topic: "places", functions: ["describe", "locate", "simple detail"] },
+    { prompt: "Talk about what you did yesterday and what you plan to do tomorrow.", topic: "routine", functions: ["past time", "future time", "sequence"] },
+  ],
+  2: [
+    { prompt: "Describe a recent problem, explain what caused it, what you did, and what you would change next time.", topic: "problem solving", functions: ["narrate", "explain", "past and future"] },
+    { prompt: "Compare two places where you have lived or visited. Explain the advantages of each and which you prefer.", topic: "comparison", functions: ["compare", "support an opinion", "connected speech"] },
+    { prompt: "Explain a change at work, school, or in your community and how it affects people.", topic: "community", functions: ["explain", "cause and effect", "give examples"] },
+  ],
+  3: [
+    { prompt: "Explain a public policy you think should change. Describe the problem, defend your position, and address one objection.", topic: "public policy", functions: ["argue", "support", "address objections"] },
+    { prompt: "Discuss how rising prices affect different groups in society and propose a practical response.", topic: "economics", functions: ["analyze", "compare impacts", "recommend"] },
+    { prompt: "Assess the benefits and risks of relying on technology in education or government services.", topic: "technology", functions: ["evaluate", "qualify", "support conclusions"] },
+  ],
+  4: [
+    { prompt: "Give a nuanced analysis of whether national security can justify limits on public access to information. Define the competing principles and reconcile them.", topic: "security and rights", functions: ["analyze nuance", "shift register", "synthesize"] },
+    { prompt: "Evaluate how a government should balance short-term economic stability with long-term structural reform, including unintended consequences.", topic: "economic policy", functions: ["evaluate", "hypothesize", "handle abstraction"] },
+    { prompt: "Discuss how language used by institutions can shape public trust. Distinguish persuasion, explanation, and manipulation.", topic: "public discourse", functions: ["distinguish", "interpret", "develop a precise argument"] },
+  ],
 };
-type RecognitionCtor = new () => Recognition;
 
-type SpeechWindow = Window & {
-  SpeechRecognition?: RecognitionCtor;
-  webkitSpeechRecognition?: RecognitionCtor;
-};
+const TARGET_SECONDS: Record<IlrLevel, number> = { 1: 45, 2: 90, 3: 150, 4: 240 };
 
-const FALLBACKS = [
-  "Describe a problem you had recently, explain what caused it, what you did, and what you will do differently next time.",
-  "Compare living in two different places. Explain advantages, disadvantages, and which you would choose in the future.",
-  "Explain a recent change in prices, work, school, or transportation and describe how it affects ordinary people.",
-  "Narrate a trip or important day in the past, then explain your current situation and your plans for the near future.",
-];
-
-function fallbackPrompt(weekNumber: number, targetWords: string[], makeId: () => string): SpeakingPrompt {
+function makePrompt(level: IlrLevel, index: number, weekNumber: number, targetWords: string[], makeId: () => string): SpeakingPrompt {
+  const item = PROMPTS[level][(index + weekNumber - 1) % PROMPTS[level].length];
   return {
     id: makeId(),
-    promptEn: FALLBACKS[(weekNumber - 1) % FALLBACKS.length],
-    topic: "daily-life / explanation",
-    ilrTarget: 2,
-    functions: ["narrate", "describe", "explain", "use connected discourse"],
-    targetWords: targetWords.slice(0, 5),
+    promptEn: item.prompt,
+    topic: item.topic,
+    ilrTarget: level,
+    functions: item.functions,
+    targetWords: targetWords.slice(0, level <= 1 ? 3 : 5),
     createdAt: new Date().toISOString(),
   };
 }
 
-export default function SpeakingLab({ weekNumber, targetWords, latestPrompt, onPrompt, onAttempt, makeId }: Props) {
-  const [busy, setBusy] = useState(false);
-  const [status, setStatus] = useState("");
-  const [running, setRunning] = useState(false);
-  const [startedAt, setStartedAt] = useState<number | null>(null);
-  const [seconds, setSeconds] = useState(180);
-  const [transcript, setTranscript] = useState("");
-  const [usedRecognition, setUsedRecognition] = useState(false);
-  const [grade, setGrade] = useState<SpeakingGrade | null>(null);
-  const [selfScore, setSelfScore] = useState(70);
-  const recognitionRef = useRef<Recognition | null>(null);
+function writeString(view: DataView, offset: number, value: string) {
+  for (let i = 0; i < value.length; i += 1) view.setUint8(offset + i, value.charCodeAt(i));
+}
 
-  const recognitionAvailable = useMemo(() => {
-    if (typeof window === "undefined") return false;
-    const w = window as SpeechWindow;
-    return Boolean(w.SpeechRecognition || w.webkitSpeechRecognition);
-  }, []);
+async function convertToWav(blob: Blob) {
+  const AudioContextClass = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  if (!AudioContextClass) throw new Error("Audio conversion is not supported in this browser.");
+  const context = new AudioContextClass();
+  try {
+    const decoded = await context.decodeAudioData(await blob.arrayBuffer());
+    const samples = new Float32Array(decoded.length);
+    for (let channel = 0; channel < decoded.numberOfChannels; channel += 1) {
+      const input = decoded.getChannelData(channel);
+      for (let i = 0; i < input.length; i += 1) samples[i] += input[i] / decoded.numberOfChannels;
+    }
+    const buffer = new ArrayBuffer(44 + samples.length * 2);
+    const view = new DataView(buffer);
+    writeString(view, 0, "RIFF");
+    view.setUint32(4, 36 + samples.length * 2, true);
+    writeString(view, 8, "WAVE");
+    writeString(view, 12, "fmt ");
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
+    view.setUint16(22, 1, true);
+    view.setUint32(24, decoded.sampleRate, true);
+    view.setUint32(28, decoded.sampleRate * 2, true);
+    view.setUint16(32, 2, true);
+    view.setUint16(34, 16, true);
+    writeString(view, 36, "data");
+    view.setUint32(40, samples.length * 2, true);
+    let offset = 44;
+    for (const sample of samples) {
+      const value = Math.max(-1, Math.min(1, sample));
+      view.setInt16(offset, value < 0 ? value * 0x8000 : value * 0x7fff, true);
+      offset += 2;
+    }
+    return new Blob([buffer], { type: "audio/wav" });
+  } finally {
+    void context.close();
+  }
+}
+
+export default function SpeakingLab({ weekNumber, level, onLevelChange, targetWords, latestPrompt, onPrompt, onAttempt, makeId }: Props) {
+  const [promptIndex, setPromptIndex] = useState(0);
+  const [recording, setRecording] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [elapsed, setElapsed] = useState(0);
+  const [status, setStatus] = useState("");
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [audioUrl, setAudioUrl] = useState("");
+  const [grade, setGrade] = useState<SpeakingGrade | null>(null);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const startedAtRef = useRef(0);
 
   useEffect(() => {
-    if (!running) return;
-    const timer = window.setInterval(() => {
-      setSeconds((current) => {
-        if (current <= 1) {
-          window.clearInterval(timer);
-          setRunning(false);
-          recognitionRef.current?.stop();
-          return 0;
-        }
-        return current - 1;
-      });
-    }, 1000);
+    if (!latestPrompt || latestPrompt.ilrTarget !== level) {
+      onPrompt(makePrompt(level, 0, weekNumber, targetWords, makeId));
+      setPromptIndex(0);
+      setAudioBlob(null);
+      setGrade(null);
+      setElapsed(0);
+    }
+  }, [level, latestPrompt, makeId, onPrompt, targetWords, weekNumber]);
+
+  useEffect(() => {
+    if (!recording) return;
+    const timer = window.setInterval(() => setElapsed(Math.floor((Date.now() - startedAtRef.current) / 1000)), 250);
     return () => window.clearInterval(timer);
-  }, [running]);
+  }, [recording]);
 
-  useEffect(() => () => recognitionRef.current?.stop(), []);
+  useEffect(() => () => {
+    recorderRef.current?.stop();
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+    if (audioUrl) URL.revokeObjectURL(audioUrl);
+  }, [audioUrl]);
 
-  async function generatePrompt() {
-    setBusy(true);
-    setStatus("Generating ILR-2 speaking task…");
+  function nextPrompt() {
+    const next = (promptIndex + 1) % PROMPTS[level].length;
+    setPromptIndex(next);
+    onPrompt(makePrompt(level, next, weekNumber, targetWords, makeId));
+    setAudioBlob(null);
     setGrade(null);
-    setTranscript("");
+    setElapsed(0);
+    setStatus("");
+  }
+
+  async function startRecording() {
+    if (!latestPrompt || !navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+      setStatus("Microphone recording is not supported in this browser.");
+      return;
+    }
     try {
-      const response = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ kind: "speaking", weekNumber, targetWords }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Prompt generation failed.");
-      const prompt: SpeakingPrompt = {
-        id: makeId(),
-        promptEn: data.promptEn,
-        promptFa: data.promptFa,
-        topic: data.topic || "general",
-        ilrTarget: 2,
-        functions: Array.isArray(data.functions) ? data.functions : [],
-        targetWords: Array.isArray(data.targetWords) ? data.targetWords : targetWords.slice(0, 5),
-        createdAt: new Date().toISOString(),
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      chunksRef.current = [];
+      recorder.ondataavailable = (event) => { if (event.data.size) chunksRef.current.push(event.data); };
+      recorder.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: recorder.mimeType || "audio/webm" });
+        setAudioBlob(blob);
+        setAudioUrl((oldUrl) => {
+          if (oldUrl) URL.revokeObjectURL(oldUrl);
+          return URL.createObjectURL(blob);
+        });
+        stream.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
+        setStatus("Recording ready. Listen back or send it for feedback.");
       };
-      onPrompt(prompt);
-      setStatus("Speaking task ready.");
+      streamRef.current = stream;
+      recorderRef.current = recorder;
+      startedAtRef.current = Date.now();
+      setElapsed(0);
+      setAudioBlob(null);
+      setGrade(null);
+      setStatus("Recording… speak naturally in Persian.");
+      recorder.start();
+      setRecording(true);
     } catch {
-      const prompt = fallbackPrompt(weekNumber, targetWords, makeId);
-      onPrompt(prompt);
-      setStatus("Using built-in ILR-2 task. AI generation is optional.");
-    } finally {
-      setBusy(false);
+      setStatus("Microphone access was not granted. Allow microphone access and try again.");
     }
   }
 
-  function start() {
-    if (!latestPrompt) return;
-    setSeconds(180);
-    setStartedAt(Date.now());
-    setTranscript("");
-    setGrade(null);
-    setRunning(true);
-    setStatus("Speak continuously. Aim for connected paragraph-length discourse.");
-
-    const w = window as SpeechWindow;
-    const Ctor = w.SpeechRecognition || w.webkitSpeechRecognition;
-    if (!Ctor) return;
-    try {
-      const recognition = new Ctor();
-      recognition.lang = "fa-IR";
-      recognition.continuous = true;
-      recognition.interimResults = false;
-      recognition.onresult = (event) => {
-        const parts: string[] = [];
-        for (let i = 0; i < event.results.length; i += 1) {
-          if (event.results[i].isFinal) parts.push(event.results[i][0].transcript);
-        }
-        if (parts.length) setTranscript((current) => `${current} ${parts.join(" ")}`.trim());
-      };
-      recognition.onend = () => setRunning(false);
-      recognition.onerror = () => setStatus("Speech recognition stopped. You can still finish aloud and type/edit the transcript below.");
-      recognitionRef.current = recognition;
-      recognition.start();
-      setUsedRecognition(true);
-    } catch {
-      setUsedRecognition(false);
-    }
+  function stopRecording() {
+    recorderRef.current?.stop();
+    recorderRef.current = null;
+    setRecording(false);
   }
 
-  function stop() {
-    recognitionRef.current?.stop();
-    recognitionRef.current = null;
-    setRunning(false);
-    setStatus("Response stopped. Review the transcript, then grade it.");
-  }
-
-  async function gradeResponse() {
-    if (!latestPrompt || !transcript.trim()) return;
+  async function gradeRecording() {
+    if (!audioBlob || !latestPrompt) return;
     setBusy(true);
-    setStatus("Grading ILR-2 task performance…");
-    const durationMs = startedAt ? Date.now() - startedAt : (180 - seconds) * 1000;
+    setStatus("Listening to your response…");
     try {
-      const response = await fetch("/api/grade", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          kind: "speaking",
-          prompt: latestPrompt.promptEn,
-          transcript,
-          ilrTarget: 2,
-          targetWords: latestPrompt.targetWords,
-          durationMs,
-        }),
-      });
+      const wav = await convertToWav(audioBlob);
+      const form = new FormData();
+      form.append("audio", wav, "speaking.wav");
+      form.append("prompt", latestPrompt.promptEn);
+      form.append("ilrTarget", String(level));
+      form.append("durationMs", String(elapsed * 1000));
+      form.append("targetWords", JSON.stringify(latestPrompt.targetWords));
+      const response = await fetch("/api/speaking-grade", { method: "POST", body: form });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Speaking grading failed.");
+      if (!response.ok) throw new Error(data.error || "Speaking feedback failed.");
       const result = data as SpeakingGrade;
       setGrade(result);
       onAttempt({
-        id: makeId(), speakingPromptId: latestPrompt.id, attemptedAt: new Date().toISOString(),
-        durationMs, transcript, usedSpeechRecognition: usedRecognition, grade: result, gradingMode: "ai",
+        id: makeId(),
+        speakingPromptId: latestPrompt.id,
+        attemptedAt: new Date().toISOString(),
+        durationMs: elapsed * 1000,
+        transcript: result.transcript,
+        usedSpeechRecognition: false,
+        audioEvaluated: true,
+        grade: result,
+        gradingMode: "ai",
       });
-      setStatus("Speaking attempt graded and saved.");
-    } catch (cause) {
-      setStatus(cause instanceof Error ? `${cause.message} Use self-score below.` : "AI grading unavailable. Use self-score below.");
+      setStatus("Feedback saved to your progress.");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Speaking feedback is unavailable right now.");
     } finally {
       setBusy(false);
     }
   }
 
-  function saveSelf() {
-    if (!latestPrompt || !transcript.trim()) return;
-    const durationMs = startedAt ? Date.now() - startedAt : (180 - seconds) * 1000;
-    onAttempt({
-      id: makeId(), speakingPromptId: latestPrompt.id, attemptedAt: new Date().toISOString(),
-      durationMs, transcript, usedSpeechRecognition: usedRecognition, gradingMode: "self", selfScore,
-    });
-    setStatus("Self-scored speaking attempt saved.");
-  }
+  const minutes = Math.floor(elapsed / 60);
+  const seconds = String(elapsed % 60).padStart(2, "0");
+  const target = TARGET_SECONDS[level];
 
-  const minutes = Math.floor(seconds / 60);
-  const secs = String(seconds % 60).padStart(2, "0");
+  return <section className="speaking-workspace">
+    <header className="speaking-header">
+      <div><span className="eyebrow">Speaking</span><h2>Respond in Persian.</h2></div>
+      <div className="skill-level-selector" aria-label="Speaking level">
+        {([1, 2, 3, 4] as IlrLevel[]).map((value) => <button key={value} className={level === value ? "active" : ""} onClick={() => onLevelChange(value)}>Level {value}</button>)}
+      </div>
+    </header>
 
-  return <section className="grid">
-    <div className="card span-12 lab-header">
-      <div><h2>Speaking Maintenance · ILR 2</h2><p className="muted">Small allocation, high specificity: 2-4 minute connected responses, not endless production flashcards.</p></div>
-      <button className="primary" onClick={generatePrompt} disabled={busy}>{busy ? "Working…" : "New speaking task"}</button>
-    </div>
+    {latestPrompt && <>
+      <div className="speaking-prompt">
+        <div className="row spread"><span className="muted">Level {level} · {latestPrompt.topic}</span><button className="text-button" onClick={nextPrompt}>Different prompt</button></div>
+        <h1>{latestPrompt.promptEn}</h1>
+        <p>{latestPrompt.functions.join(" · ")}</p>
+      </div>
 
-    {latestPrompt ? <>
-      <div className="card span-7">
-        <div className="muted">ILR 2 · {latestPrompt.topic}</div>
-        <h2>{latestPrompt.promptEn}</h2>
-        {latestPrompt.promptFa && <div className="fa speaking-fa">{latestPrompt.promptFa}</div>}
-        <div className="function-tags">{latestPrompt.functions.map((item) => <span className="pill" key={item}>{item}</span>)}</div>
-        {latestPrompt.targetWords.length > 0 && <p className="muted">Use naturally if useful: <span className="fa-inline">{latestPrompt.targetWords.join(" · ")}</span></p>}
+      <div className="speaking-recorder">
+        <button className={`mic-button ${recording ? "recording" : ""}`} onClick={recording ? stopRecording : startRecording} disabled={busy} aria-label={recording ? "Stop recording" : "Start recording"}>
+          <span aria-hidden="true">{recording ? "■" : "●"}</span>
+          {recording ? "Stop" : audioBlob ? "Record again" : "Record"}
+        </button>
+        <strong className="recording-time">{minutes}:{seconds}</strong>
+        <span className="muted">Suggested: {Math.floor(target / 60)}:{String(target % 60).padStart(2, "0")}</span>
+      </div>
 
-        <div className="speaking-timer">{minutes}:{secs}</div>
-        <div className="row">
-          {!running ? <button className="primary" onClick={start}>Start 3-minute response</button> : <button className="danger" onClick={stop}>Stop response</button>}
-          <span className="muted">{recognitionAvailable ? "Persian speech recognition available" : "Speak aloud; type the transcript after"}</span>
+      {audioUrl && !recording && <div className="speaking-audio"><audio controls src={audioUrl}/><button className="primary" onClick={gradeRecording} disabled={busy}>{busy ? "Reviewing…" : "Get feedback"}</button></div>}
+      {status && <p className="speaking-status">{status}</p>}
+
+      {grade && <section className="speaking-feedback">
+        <div className="row spread"><div><span className="eyebrow">Audio coaching estimate</span><h2>{grade.overallScore}%</h2></div><p>{grade.feedback}</p></div>
+        <div className="speaking-metrics">
+          <span><small>Task</small><strong>{grade.taskCompletion}</strong></span>
+          <span><small>Grammar</small><strong>{grade.grammaticalControl}</strong></span>
+          <span><small>Fluency</small><strong>{grade.fluencyEstimate}</strong></span>
+          <span><small>Rhythm</small><strong>{grade.rhythmPacing}</strong></span>
+          <span><small>Tone</small><strong>{grade.toneDelivery}</strong></span>
+          <span><small>Clarity</small><strong>{grade.pronunciationClarity}</strong></span>
         </div>
-        {status && <div className="mini-notice">{status}</div>}
-      </div>
-
-      <div className="card span-5">
-        <h2>Transcript + feedback</h2>
-        <p className="muted">Edit recognition errors before grading. Transcript grading cannot judge pronunciation.</p>
-        <textarea className="fa transcript-editor" dir="rtl" value={transcript} onChange={(event) => setTranscript(event.target.value)} placeholder="متن پاسخ شما…"/>
-        {!grade && <div className="row">
-          <button className="primary" onClick={gradeResponse} disabled={busy || running || !transcript.trim()}>Grade response</button>
-        </div>}
-        {!grade && transcript.trim() && <label className="score">
-          <div className="row spread"><span>Fallback self-score</span><strong>{selfScore}%</strong></div>
-          <input type="range" min="0" max="100" step="5" value={selfScore} onChange={(event) => setSelfScore(Number(event.target.value))}/>
-          <button className="secondary" type="button" onClick={saveSelf}>Save self-score</button>
-        </label>}
-        {grade && <div className="grade-summary">
-          <div className="grade-metrics compact">
-            <span><small>overall</small><strong>{grade.overallScore}%</strong></span>
-            <span><small>task</small><strong>{grade.taskCompletion}%</strong></span>
-            <span><small>grammar</small><strong>{grade.grammaticalControl}%</strong></span>
-            <span><small>vocab</small><strong>{grade.vocabularyControl}%</strong></span>
-          </div>
-          <p>{grade.feedback}</p>
-          {grade.priorities.length > 0 && <div><strong>Next priorities</strong><ul>{grade.priorities.map((item) => <li key={item}>{item}</li>)}</ul></div>}
-        </div>}
-      </div>
-    </> : <div className="card span-12 empty">Generate a short task. Speaking stays at a maintenance dose because the primary targets are R4 and L3+.</div>}
+        {grade.transcript && <details><summary>Transcript</summary><p className="fa" dir="rtl">{grade.transcript}</p></details>}
+        {grade.priorities.length > 0 && <p><strong>Next:</strong> {grade.priorities.join(" · ")}</p>}
+      </section>}
+    </>}
   </section>;
 }

@@ -1,8 +1,21 @@
-export type SourceType = "dli" | "system_advanced" | "user";
+export type SourceType = "course" | "dli" | "system_advanced" | "user";
 export type ReviewRating = "again" | "hard" | "good" | "easy";
 export type ReviewModality = "visual" | "audio" | "production" | "cloze";
 export type ContentOrigin = "authentic" | "adapted" | "generated";
 export type ContentModality = "reading" | "listening";
+export type IlrLevel = 1 | 2 | 3 | 4;
+
+export type AnkiSettings = {
+  endpoint: string;
+  deckName: string;
+  lastSyncAt?: string;
+};
+
+export type CourseCatalogState = {
+  catalogId: string;
+  sourceFile: string;
+  importedWeeks: number[];
+};
 
 export type SerializedFsrsCard = {
   due: string;
@@ -25,6 +38,9 @@ export type LexicalItem = {
   definition?: string;
   sourceType: SourceType;
   sourceWeek: number;
+  courseEntryId?: number;
+  courseListNumber?: number;
+  courseLesson?: string;
   topic?: string;
   introducedAt: string;
   reviews: number;
@@ -155,7 +171,11 @@ export type SpeakingGrade = {
   grammaticalControl: number;
   vocabularyControl: number;
   fluencyEstimate: number;
+  pronunciationClarity: number;
+  rhythmPacing: number;
+  toneDelivery: number;
   overallScore: number;
+  transcript: string;
   strengths: string[];
   priorities: string[];
   feedback: string;
@@ -168,6 +188,7 @@ export type SpeakingAttempt = {
   durationMs: number;
   transcript: string;
   usedSpeechRecognition: boolean;
+  audioEvaluated?: boolean;
   grade?: SpeakingGrade;
   gradingMode: "ai" | "self";
   selfScore?: number;
@@ -175,6 +196,14 @@ export type SpeakingAttempt = {
 
 export type StudyState = {
   weekNumber: number;
+  currentIlr: IlrLevel;
+  skillLevels: {
+    reading: IlrLevel;
+    listening: IlrLevel;
+    speaking: IlrLevel;
+  };
+  course: CourseCatalogState;
+  anki: AnkiSettings;
   words: LexicalItem[];
   reviews: ReviewEvent[];
   passages: Passage[];

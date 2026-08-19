@@ -22,7 +22,7 @@ Why not Anki-only:
 
 Why custom app:
 
-- One source of truth for the full 36-week history.
+- One source of truth for the full 35-week Unit 1+ history.
 - Can still use FSRS rather than inventing a scheduler.
 - Can adapt reading/listening/speaking workload based on observed performance.
 - Better mobile/PWA workflow for daily use.

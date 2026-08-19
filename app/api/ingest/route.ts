@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
+import { openAiErrorResponse } from "@/lib/openai-error";
 
 export const runtime = "nodejs";
 const MAX_EXCERPT_CHARS = 1800;
@@ -59,6 +60,6 @@ Return exactly:
     return NextResponse.json(parseJson(response.output_text));
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: "Source analysis failed." }, { status: 500 });
+    return openAiErrorResponse(error, "Source analysis failed.");
   }
 }
