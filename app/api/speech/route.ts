@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import { openAiErrorResponse } from "@/lib/openai-error";
-import { isMeaningfulPersianText, sanitizePersianSpeechText } from "@/lib/persian-speech";
+import { isPlayablePersianText, sanitizePersianSpeechText } from "@/lib/persian-speech";
 
 export const runtime = "nodejs";
 
@@ -10,7 +10,7 @@ export async function POST(request: Request) {
   }
 
   const { text } = (await request.json()) as { text?: string };
-  if (!text || text.length > 4096 || !isMeaningfulPersianText(text)) {
+  if (!isPlayablePersianText(text)) {
     return Response.json({ error: "A valid Persian transcript is required." }, { status: 400 });
   }
   const speechText = sanitizePersianSpeechText(text);

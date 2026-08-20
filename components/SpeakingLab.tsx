@@ -147,8 +147,11 @@ export default function SpeakingLab({ weekNumber, level, targetWords, latestProm
       setStatus("Recording… speak naturally in Persian.");
       recorder.start();
       setRecording(true);
-    } catch {
-      setStatus("Microphone access was not granted. Allow microphone access and try again.");
+    } catch (error) {
+      const name = error instanceof DOMException ? error.name : "";
+      if (name === "NotFoundError") setStatus("No microphone was found. Connect a microphone and try again.");
+      else if (name === "NotReadableError" || name === "AbortError") setStatus("The microphone is busy in another app. Close the other app and try again.");
+      else setStatus("Microphone is blocked for this site. Allow it in the browser’s site settings, then reload and try again.");
     }
   }
 
@@ -217,6 +220,7 @@ export default function SpeakingLab({ weekNumber, level, targetWords, latestProm
 
       {audioUrl && !recording && <div className="speaking-audio"><audio controls src={audioUrl}/><button className="primary" onClick={gradeRecording} disabled={busy}>{busy ? "Reviewing…" : "Get feedback"}</button></div>}
       {status && <p className="speaking-status">{status}</p>}
+      {status.startsWith("Microphone is blocked") && <p className="muted permission-help">On Mac, also open System Settings → Privacy &amp; Security → Microphone and allow access for the browser or app you are using.</p>}
 
       {grade && <section className="speaking-feedback">
         <div className="row spread"><div><span className="eyebrow">Audio coaching estimate</span><h2>{grade.overallScore}%</h2></div><p>{grade.feedback}</p></div>

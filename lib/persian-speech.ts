@@ -14,3 +14,10 @@ export function isMeaningfulPersianText(input: unknown) {
   const letters = cleaned.match(PERSIAN_LETTERS)?.length ?? 0;
   return cleaned.length >= 20 && letters >= 12;
 }
+
+export function isPlayablePersianText(input: unknown): input is string {
+  if (typeof input !== "string") return false;
+  const cleaned = sanitizePersianSpeechText(input);
+  const letters = cleaned.match(PERSIAN_LETTERS)?.length ?? 0;
+  return cleaned.length > 0 && cleaned.length <= 4096 && letters >= 1;
+}

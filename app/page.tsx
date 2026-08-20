@@ -195,6 +195,27 @@ export default function Home() {
   const [activePassageId, setActivePassageId] = useState<string | null>(null);
   const [activeListeningId, setActiveListeningId] = useState<string | null>(null);
   const startRef = useRef(Date.now());
+  const playbackRef = useRef<HTMLAudioElement | null>(null);
+  const playbackUrlRef = useRef<string | null>(null);
+
+  function releasePlayback() {
+    playbackRef.current?.pause();
+    playbackRef.current = null;
+    if (playbackUrlRef.current) URL.revokeObjectURL(playbackUrlRef.current);
+    playbackUrlRef.current = null;
+  }
+
+  async function playAudioBlob(blob: Blob) {
+    releasePlayback();
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    playbackRef.current = audio;
+    playbackUrlRef.current = url;
+    audio.preload = "auto";
+    audio.volume = 1;
+    audio.onended = releasePlayback;
+    await audio.play();
+  }
 
   useEffect(() => {
     let raw = localStorage.getItem(STORAGE_KEY);
@@ -248,6 +269,8 @@ export default function Home() {
       listener.subscription.unsubscribe();
     };
   }, []);
+
+  useEffect(() => () => releasePlayback(), []);
 
   useEffect(() => {
     if (!loaded) return;
@@ -495,17 +518,27 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: sanitizePersianSpeechText(current.displayForm) }),
       });
-      if (!response.ok) throw new Error("audio unavailable");
-      const url = URL.createObjectURL(await response.blob());
-      const audio = new Audio(url);
-      audio.onended = () => URL.revokeObjectURL(url);
-      await audio.play();
-    } catch {
-      if (typeof speechSynthesis === "undefined") return setStatus("Word audio is unavailable on this device.");
+      const contentType = response.headers.get("content-type") || "";
+      if (!response.ok || !contentType.startsWith("audio/")) {
+        const message = contentType.includes("json") ? (await response.json()).error : "Word audio is unavailable.";
+        throw new Error(message || "Word audio is unavailable.");
+      }
+      const blob = await response.blob();
+      if (blob.size < 500) throw new Error("The generated word audio was empty.");
+      await playAudioBlob(blob);
+      setStatus("Playing word audio.");
+    } catch (error) {
+      const persianVoice = typeof speechSynthesis === "undefined" ? undefined : speechSynthesis.getVoices().find((voice) => voice.lang.toLowerCase().startsWith("fa"));
+      if (!persianVoice) {
+        setStatus(error instanceof Error ? error.message : "Word audio is unavailable on this device.");
+        return;
+      }
       const utterance = new SpeechSynthesisUtterance(current.displayForm);
-      utterance.lang = "fa-IR";
+      utterance.lang = persianVoice.lang;
+      utterance.voice = persianVoice;
       speechSynthesis.cancel();
       speechSynthesis.speak(utterance);
+      setStatus("Playing with the device’s Persian voice.");
     }
   }
 
@@ -673,7 +706,12 @@ export default function Home() {
     setStatus("Preparing Persian audio…");
     try {
       if (latestListening.mediaUrl) {
-        await new Audio(latestListening.mediaUrl).play();
+        releasePlayback();
+        const audio = new Audio(latestListening.mediaUrl);
+        playbackRef.current = audio;
+        audio.preload = "auto";
+        audio.volume = 1;
+        await audio.play();
         setListensCount((count) => count + 1);
         setStatus("Playing source audio.");
         return;
@@ -690,10 +728,7 @@ export default function Home() {
       }
       const blob = await response.blob();
       if (blob.size < 1000) throw new Error("The generated audio file was empty.");
-      const url = URL.createObjectURL(blob);
-      const audio = new Audio(url);
-      audio.onended = () => URL.revokeObjectURL(url);
-      await audio.play();
+      await playAudioBlob(blob);
       setListensCount((count) => count + 1);
       setStatus("Playing Persian audio.");
     } catch (error) {
