@@ -23,7 +23,7 @@
   height: 34px;
   padding-left: 9px;
   border-right: 1px solid var(--rule);
-  color: var(--dim);
+  color: var(--muted);
   font-size: 10px;
 }
 
@@ -826,7 +826,7 @@ textarea {
   flex-wrap: wrap;
   gap: 10px 26px;
   margin: -4px 0 26px;
-  color: var(--muted);
+  color: var(--dim);
   font-size: 10px;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -1269,6 +1269,28 @@ textarea {
   grid-template-columns: repeat(4, 1fr);
   gap: 28px;
   margin: 0 0 44px;
+}
+
+.mode-button {
+  border: 0;
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  color: var(--dim);
+  padding: 6px 2px;
+}
+
+.mode-button.active {
+  border-bottom-color: var(--accent);
+  color: var(--white);
+}
+
+.audio-recall {
+  min-height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 14px;
 }
 
 .progress-snapshot span {

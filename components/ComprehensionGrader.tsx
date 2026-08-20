@@ -29,6 +29,7 @@ function emptyGrade(score: number): ComprehensionGrade {
     mainIdeaScore: score,
     answers: [],
     summary: "Self-scored because automatic grading was unavailable.",
+    failureTypes: [],
   };
 }
 
@@ -138,6 +139,8 @@ export default function ComprehensionGrader({
         <span><small>discourse</small><strong>{grade.discourseScore}%</strong></span>
       </div>
       <p>{grade.summary}</p>
+      {!!grade.failureTypes?.length && <p className="muted">Detected: {grade.failureTypes.map((item) => item.replace("_", " / ")).join(" · ")}</p>}
+      {grade.recommendedRepair && <p><strong>Next repair:</strong> {grade.recommendedRepair}</p>}
     </div>}
   </div>;
 }

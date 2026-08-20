@@ -9,6 +9,7 @@ type Body = {
   modality?: "reading" | "listening";
   title?: string;
   publisher?: string;
+  author?: string;
   sourceUrl?: string;
   sourceType?: "authentic" | "adapted";
   publishedAt?: string;
@@ -42,17 +43,17 @@ export async function POST(request: Request) {
   const prompt = `Analyze this user-supplied short Persian source excerpt for an advanced language-learning lab. Do not reproduce or extend the copyrighted source; analyze only the supplied excerpt. Return JSON only.
 
 Modality: ${body.modality ?? "reading"}
-Provenance: ${body.title} — ${body.publisher} (${body.publishedAt || "date unknown"})
+Provenance: ${body.title} — ${body.publisher}${body.author ? ` — ${body.author}` : ""} (${body.publishedAt || "date unknown"})
 Source status: ${body.sourceType ?? "authentic"}
 User hints: topic=${body.topic || "none"}; genre=${body.genre || "none"}; register=${body.register || "none"}; ILR=${body.ilrEstimate ?? "none"}
 Learner vocabulary: ${(body.knownWords ?? []).slice(0, 300).join(", ")}
 Persian excerpt:
 ${body.textFa}
 
-Classify topic, genre, and register with concise stable labels. Estimate ILR reading/listening difficulty from 0-5 in quarter steps. Extract up to 15 high-value Persian target words or multiword terms that actually occur in the excerpt, prioritizing learner vocabulary when present. Create exactly five English comprehension questions: main idea, two detail, inference, and discourse/author intent. Include a concise reference answer grounded only in the excerpt.
+Classify topic, genre, and register with concise stable labels. Estimate ILR reading/listening difficulty from 0-5 in quarter steps. Extract up to 15 high-value Persian target words or multiword terms that actually occur in the excerpt, prioritizing learner vocabulary when present. Add up to six concise cultural/context tags only when supported by the excerpt. Create exactly five English comprehension questions: main idea, two detail, inference, and discourse/author intent. Include a concise reference answer grounded only in the excerpt.
 
 Return exactly:
-{"topic":"...","genre":"...","register":"...","ilrEstimate":2.5,"targetWords":["..."],"questions":[{"question":"...","type":"main_idea|detail|inference|discourse","referenceAnswer":"..."}]}`;
+{"topic":"...","genre":"...","register":"...","ilrEstimate":2.5,"targetWords":["..."],"culturalTags":["..."],"questions":[{"question":"...","type":"main_idea|detail|inference|discourse","referenceAnswer":"..."}]}`;
 
   try {
     const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });

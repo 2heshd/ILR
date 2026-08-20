@@ -5,6 +5,15 @@ export type ContentOrigin = "authentic" | "adapted" | "generated";
 export type ContentModality = "reading" | "listening";
 export type IlrLevel = 1 | 2 | 3 | 4;
 export type WordKnowledgeState = "new" | "learning" | "known" | "automatic";
+export type LexicalTier = "A" | "B" | "C";
+export type PracticeMode = "controlled" | "transfer";
+export type ErrorCategory = "lexical" | "acoustic" | "syntactic" | "discourse" | "cultural_pragmatic";
+
+export type ModalityMastery = {
+  reviews: number;
+  correct: number;
+  medianResponseMs?: number;
+};
 
 export type AnkiSettings = {
   endpoint: string;
@@ -39,7 +48,9 @@ export type LexicalItem = {
   definition?: string;
   sourceType: SourceType;
   sourceWeek: number;
+  tier?: LexicalTier;
   knowledgeState?: WordKnowledgeState;
+  modalityMastery?: Partial<Record<ReviewModality, ModalityMastery>>;
   courseEntryId?: number;
   courseListNumber?: number;
   courseLesson?: string;
@@ -53,6 +64,7 @@ export type LexicalItem = {
   stability?: number;
   difficulty?: number;
   fsrsCard?: SerializedFsrsCard;
+  modalityCards?: Partial<Record<ReviewModality, SerializedFsrsCard>>;
 };
 
 export type ReviewEvent = {
@@ -65,6 +77,9 @@ export type ReviewEvent = {
   modality: ReviewModality;
   schedulerBefore?: SerializedFsrsCard;
   schedulerAfter?: SerializedFsrsCard;
+  timerWindowMs?: number;
+  hintUsed?: boolean;
+  context?: string;
 };
 
 export type PassageQuestion = {
@@ -88,6 +103,8 @@ export type ComprehensionGrade = {
   mainIdeaScore: number;
   answers: GradedAnswer[];
   summary: string;
+  failureTypes?: ErrorCategory[];
+  recommendedRepair?: string;
 };
 
 export type Passage = {
@@ -99,10 +116,15 @@ export type Passage = {
   register: string;
   genre: string;
   sourceType: ContentOrigin;
+  practiceMode?: PracticeMode;
   sourceUrl?: string;
   sourceTitle?: string;
   publisher?: string;
+  author?: string;
   publishedAt?: string;
+  wordCount?: number;
+  unknownTokenRatio?: number;
+  culturalTags?: string[];
   targetWords: string[];
   questions: PassageQuestion[];
   createdAt: string;
@@ -121,6 +143,8 @@ export type PassageAttempt = {
   answers?: string[];
   grade?: ComprehensionGrade;
   gradingMode?: "ai" | "self";
+  firstPass: boolean;
+  errorCategories?: ErrorCategory[];
 };
 
 export type ListeningItem = {
@@ -132,11 +156,17 @@ export type ListeningItem = {
   register: string;
   genre: string;
   sourceType: ContentOrigin;
+  practiceMode?: PracticeMode;
   sourceUrl?: string;
   sourceTitle?: string;
   publisher?: string;
+  author?: string;
   publishedAt?: string;
   mediaUrl?: string;
+  audioDurationSec?: number;
+  wordCount?: number;
+  unknownTokenRatio?: number;
+  culturalTags?: string[];
   targetWords: string[];
   questions: PassageQuestion[];
   createdAt: string;
@@ -154,6 +184,8 @@ export type ListeningAttempt = {
   answers?: string[];
   grade?: ComprehensionGrade;
   gradingMode?: "ai" | "self";
+  firstPass: boolean;
+  errorCategories?: ErrorCategory[];
 };
 
 export type SpeakingPrompt = {

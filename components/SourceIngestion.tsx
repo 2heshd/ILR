@@ -12,6 +12,7 @@ type IngestResult = {
   ilrEstimate: number;
   targetWords: string[];
   questions: PassageQuestion[];
+  culturalTags?: string[];
 };
 
 type Props = {
@@ -40,7 +41,9 @@ export default function SourceIngestion({ initialModality = "reading", knownWord
   const [publisher, setPublisher] = useState("");
   const [sourceUrl, setSourceUrl] = useState("");
   const [publishedAt, setPublishedAt] = useState("");
+  const [author, setAuthor] = useState("");
   const [mediaUrl, setMediaUrl] = useState("");
+  const [audioDurationSec, setAudioDurationSec] = useState(0);
   const [textFa, setTextFa] = useState("");
   const [topic, setTopic] = useState("");
   const [genre, setGenre] = useState("");
@@ -75,12 +78,13 @@ export default function SourceIngestion({ initialModality = "reading", knownWord
       ilrEstimate,
       targetWords: knownWords.filter((word) => textFa.includes(word)).slice(0, 15),
       questions: fallbackQuestions(title),
+      culturalTags: [],
     };
     try {
       const response = await fetch("/api/ingest", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ modality, title, publisher, sourceUrl, publishedAt, sourceType, textFa, knownWords, topic, genre, register, ilrEstimate }),
+        body: JSON.stringify({ modality, title, publisher, author, sourceUrl, publishedAt, sourceType, textFa, knownWords, topic, genre, register, ilrEstimate }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Source analysis failed.");
@@ -92,11 +96,15 @@ export default function SourceIngestion({ initialModality = "reading", knownWord
         ilrEstimate: Math.min(5, Math.max(0, Number(proposed.ilrEstimate) || analysis.ilrEstimate)),
         targetWords: (proposed.targetWords ?? []).filter((word) => typeof word === "string" && textFa.includes(word)).slice(0, 15),
         questions: (proposed.questions ?? []).slice(0, 5),
+        culturalTags: (proposed.culturalTags ?? []).filter((tag) => typeof tag === "string").slice(0, 6),
       };
     } catch (error) {
       onStatus(`${error instanceof Error ? error.message : "Source analysis unavailable"} Saved with manual/fallback classification.`);
     }
 
+    const tokens = textFa.trim().split(/\s+/).filter(Boolean);
+    const knownSet = new Set(knownWords);
+    const knownTokenCount = tokens.filter((token) => [...knownSet].some((word) => token.includes(word))).length;
     const common = {
       id: makeId(),
       title: title.trim(),
@@ -108,13 +116,17 @@ export default function SourceIngestion({ initialModality = "reading", knownWord
       sourceUrl: sourceUrl.trim(),
       sourceTitle: title.trim(),
       publisher: publisher.trim(),
+      author: author.trim() || undefined,
       publishedAt: publishedAt || undefined,
+      wordCount: tokens.length,
+      unknownTokenRatio: tokens.length ? Number((1 - knownTokenCount / tokens.length).toFixed(3)) : 0,
+      culturalTags: analysis.culturalTags,
       targetWords: analysis.targetWords,
       questions: analysis.questions.length ? analysis.questions : fallbackQuestions(title),
       createdAt: new Date().toISOString(),
     };
     if (modality === "reading") onReading({ ...common, textFa: textFa.trim() });
-    else onListening({ ...common, transcriptFa: textFa.trim(), mediaUrl: mediaUrl.trim() || undefined });
+    else onListening({ ...common, transcriptFa: textFa.trim(), mediaUrl: mediaUrl.trim() || undefined, audioDurationSec: audioDurationSec || undefined });
 
     setTextFa("");
     onStatus(`Ingested copyright-safe ${sourceType} ${modality} source with provenance, classification, and ${analysis.targetWords.length} target terms.`);
@@ -129,9 +141,11 @@ export default function SourceIngestion({ initialModality = "reading", knownWord
         <label>Text status<select value={sourceType} onChange={(event) => setSourceType(event.target.value as Exclude<ContentOrigin, "generated">)}><option value="authentic">Authentic / unchanged</option><option value="adapted">Adapted / shortened</option></select></label>
         <label>Source title<input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Article or segment title" /></label>
         <label>Publisher<input value={publisher} onChange={(event) => setPublisher(event.target.value)} placeholder="IRNA, CBI, Majlis…" /></label>
+        <label>Author (optional)<input value={author} onChange={(event) => setAuthor(event.target.value)} placeholder="Byline or speaker" /></label>
         <label className="wide">Canonical source URL<input type="url" value={sourceUrl} onChange={(event) => setSourceUrl(event.target.value)} placeholder="https://…" /></label>
         <label>Publication date<input type="date" value={publishedAt} onChange={(event) => setPublishedAt(event.target.value)} /></label>
         {modality === "listening" && <label>Direct audio URL (optional)<input type="url" value={mediaUrl} onChange={(event) => setMediaUrl(event.target.value)} placeholder="https://…/audio.mp3" /></label>}
+        {modality === "listening" && <label>Duration in seconds<input type="number" min="0" value={audioDurationSec || ""} onChange={(event) => setAudioDurationSec(Number(event.target.value))} placeholder="90" /></label>}
         <label>Topic (optional)<input value={topic} onChange={(event) => setTopic(event.target.value)} placeholder="economics" /></label>
         <label>Genre (optional)<input value={genre} onChange={(event) => setGenre(event.target.value)} placeholder="news report" /></label>
         <label>Register (optional)<input value={register} onChange={(event) => setRegister(event.target.value)} placeholder="formal-broadcast" /></label>

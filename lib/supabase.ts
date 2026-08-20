@@ -33,6 +33,42 @@ export async function loadUsername(client: SupabaseClient, user: User): Promise<
   return typeof data?.username === "string" ? data.username : null;
 }
 
+function mergeById<T extends { id: string }>(cloud: T[], local: T[]) {
+  const merged = new Map(cloud.map((item) => [item.id, item]));
+  local.forEach((item) => merged.set(item.id, { ...merged.get(item.id), ...item }));
+  return [...merged.values()];
+}
+
+export function mergeStudyStates(cloud: StudyState, local: StudyState): StudyState {
+  return {
+    ...cloud,
+    weekNumber: Math.max(cloud.weekNumber, local.weekNumber),
+    currentIlr: local.currentIlr ?? cloud.currentIlr,
+    skillLevels: { ...cloud.skillLevels, ...local.skillLevels },
+    course: {
+      ...cloud.course,
+      ...local.course,
+      importedWeeks: [...new Set([...(cloud.course?.importedWeeks ?? []), ...(local.course?.importedWeeks ?? [])])].sort((a, b) => a - b),
+    },
+    anki: { ...cloud.anki, ...local.anki },
+    words: mergeById(cloud.words ?? [], local.words ?? []),
+    reviews: mergeById(cloud.reviews ?? [], local.reviews ?? []),
+    passages: mergeById(cloud.passages ?? [], local.passages ?? []),
+    passageAttempts: mergeById(cloud.passageAttempts ?? [], local.passageAttempts ?? []),
+    listeningItems: mergeById(cloud.listeningItems ?? [], local.listeningItems ?? []),
+    listeningAttempts: mergeById(cloud.listeningAttempts ?? [], local.listeningAttempts ?? []),
+    speakingPrompts: mergeById(cloud.speakingPrompts ?? [], local.speakingPrompts ?? []),
+    speakingAttempts: mergeById(cloud.speakingAttempts ?? [], local.speakingAttempts ?? []),
+  };
+}
+
+export async function updateUsername(client: SupabaseClient, user: User, username: string) {
+  const { error: profileError } = await client.from("profiles").upsert({ id: user.id, username, updated_at: new Date().toISOString() });
+  if (profileError) throw profileError;
+  const { error: metadataError } = await client.auth.updateUser({ data: { username } });
+  if (metadataError) throw metadataError;
+}
+
 export async function saveCloudState(client: SupabaseClient, user: User, state: StudyState) {
   const { error } = await client.from("study_snapshots").upsert({
     user_id: user.id,

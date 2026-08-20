@@ -9,7 +9,7 @@ import InteractivePersianText from "@/components/InteractivePersianText";
 import Onboarding from "@/components/Onboarding";
 import SourceIngestion from "@/components/SourceIngestion";
 import SpeakingLab from "@/components/SpeakingLab";
-import { adaptiveAllocation, selectContextWords } from "@/lib/adaptive";
+import { adaptiveAllocation, currentTrainingPhase, dominantBottleneck, selectContextWords } from "@/lib/adaptive";
 import { fallbackAdvanced, type AdvancedWord } from "@/lib/advanced";
 import type { AnkiReviewRow, AnkiVocabularyRow } from "@/lib/anki";
 import { COURSE_META, loadCourseWeek } from "@/lib/course";
@@ -17,7 +17,7 @@ import { autoRatingForKnown, createSerializedCard, reviewFsrs } from "@/lib/fsrs
 import { normalizePersian, parseWeeklyInput } from "@/lib/persian";
 import { isMeaningfulPersianText, sanitizePersianSpeechText } from "@/lib/persian-speech";
 import { sourceMetrics } from "@/lib/source-analytics";
-import { appendCloudReview, getSupabaseClient, loadCloudState, loadUsername, saveCloudState } from "@/lib/supabase";
+import { appendCloudReview, getSupabaseClient, loadCloudState, loadUsername, mergeStudyStates, saveCloudState, updateUsername } from "@/lib/supabase";
 import type {
   ComprehensionGrade,
   LexicalItem,
@@ -26,7 +26,9 @@ import type {
   IlrLevel,
   Passage,
   PassageAttempt,
+  PracticeMode,
   ReviewEvent,
+  ReviewModality,
   ReviewRating,
   SpeakingAttempt,
   SpeakingPrompt,
@@ -102,16 +104,25 @@ function hydrateState(raw: Partial<StudyState> | null | undefined): StudyState {
       .map((word) => catalogChanged && word.courseLesson && word.sourceWeek > 1 ? { ...word, sourceWeek: word.sourceWeek - 1 } : word),
     reviews: raw?.reviews ?? [],
     passages: (raw?.passages ?? []).map((item) => ({ ...item, genre: item.genre ?? "generated practice", sourceType: item.sourceType ?? "generated" })),
-    passageAttempts: raw?.passageAttempts ?? [],
+    passageAttempts: (raw?.passageAttempts ?? []).map((attempt) => ({ ...attempt, firstPass: attempt.firstPass ?? true })),
     listeningItems: (raw?.listeningItems ?? []).map((item) => ({ ...item, genre: item.genre ?? "generated practice", sourceType: item.sourceType ?? "generated" })),
-    listeningAttempts: raw?.listeningAttempts ?? [],
+    listeningAttempts: (raw?.listeningAttempts ?? []).map((attempt) => ({ ...attempt, firstPass: attempt.firstPass ?? !attempt.transcriptRevealed })),
     speakingPrompts: raw?.speakingPrompts ?? [],
     speakingAttempts: raw?.speakingAttempts ?? [],
   };
   state.words = state.words.map((word) => {
     const fsrsCard = word.fsrsCard ?? createSerializedCard(new Date(word.introducedAt || Date.now()));
     const knowledgeState = word.knowledgeState ?? (word.sourceWeek < state.weekNumber ? "known" : "learning");
-    return { ...word, knowledgeState, fsrsCard, dueAt: word.dueAt || fsrsCard.due };
+    const tier = word.tier ?? (word.sourceType === "system_advanced" ? "A" : word.sourceType === "course" ? "B" : "C");
+    return {
+      ...word,
+      tier,
+      modalityMastery: word.modalityMastery ?? {},
+      modalityCards: word.modalityCards ?? { visual: fsrsCard },
+      knowledgeState,
+      fsrsCard,
+      dueAt: word.dueAt || fsrsCard.due,
+    };
   });
   return state;
 }
@@ -130,6 +141,19 @@ function courseWordKey(value: string) {
   return normalizePersian(value)
     .normalize("NFKC")
     .replace(/[\u064b-\u065f\u0670\s‌]+/g, "");
+}
+
+function friendlyAccountError(error: unknown) {
+  const message = error instanceof Error
+    ? error.message
+    : error && typeof error === "object" && "message" in error
+      ? String(error.message)
+      : String(error || "Account request failed.");
+  if (/duplicate|unique|already registered|already exists/i.test(message)) return "That email or username is already in use.";
+  if (/invalid login credentials/i.test(message)) return "Email or password is incorrect.";
+  if (/email not confirmed/i.test(message)) return "Confirm your email before signing in.";
+  if (/password/i.test(message) && /short|least|weak/i.test(message)) return "Use a stronger password with at least 8 characters.";
+  return message;
 }
 
 async function generateJson(body: Record<string, unknown>) {
@@ -158,6 +182,7 @@ export default function Home() {
   const [cloudUsername, setCloudUsername] = useState<string | null>(null);
   const [cloudReady, setCloudReady] = useState(false);
   const [reviewIndex, setReviewIndex] = useState(0);
+  const [reviewModality, setReviewModality] = useState<Extract<ReviewModality, "visual" | "audio">>("visual");
   const [revealed, setRevealed] = useState(false);
   const [responseMs, setResponseMs] = useState(0);
   const [readingStartedAt, setReadingStartedAt] = useState<number | null>(null);
@@ -193,8 +218,11 @@ export default function Home() {
       try {
         const cloud = await loadCloudState(supabase!, user);
         if (!active) return;
-        if (cloud) setState(hydrateState(cloud));
-        else await saveCloudState(supabase!, user, local);
+        if (cloud) {
+          const merged = hydrateState(mergeStudyStates(cloud, local));
+          setState(merged);
+          await saveCloudState(supabase!, user, merged);
+        } else await saveCloudState(supabase!, user, local);
         setCloudUsername(await loadUsername(supabase!, user));
         setCloudReady(true);
       } catch (error) {
@@ -237,11 +265,13 @@ export default function Home() {
   }, [state, loaded, cloudUser, cloudReady]);
 
   const due = useMemo(
-    () => state.words.filter((word) => new Date(word.dueAt).getTime() <= Date.now()),
-    [state.words],
+    () => state.words.filter((word) => new Date(word.modalityCards?.[reviewModality]?.due ?? word.dueAt).getTime() <= Date.now()),
+    [state.words, reviewModality],
   );
   const current = due[reviewIndex % Math.max(1, due.length)];
   const allocation = useMemo(() => adaptiveAllocation(state), [state]);
+  const trainingPhase = useMemo(() => currentTrainingPhase(state.weekNumber), [state.weekNumber]);
+  const bottleneck = useMemo(() => dominantBottleneck(state), [state]);
   const mature = state.words.filter((word) => word.reviews >= 4 && word.correct / Math.max(1, word.reviews) >= 0.8).length;
   const retention = state.reviews.length ? Math.round(100 * state.reviews.filter((review) => review.correct).length / state.reviews.length) : 0;
   const medianRecall = median(state.reviews.slice(-250).map((review) => review.responseMs));
@@ -253,13 +283,13 @@ export default function Home() {
     setRevealed(false);
     setResponseMs(0);
     startRef.current = Date.now();
-  }, [current?.id]);
+  }, [current?.id, reviewModality]);
 
   async function signIn(email: string, password: string) {
     const supabase = getSupabaseClient();
     if (!supabase) return;
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setStatus(error ? error.message : "Signed in. Your course is syncing now.");
+    setStatus(error ? friendlyAccountError(error) : "Signed in. Your course is syncing now.");
   }
 
   async function signUp(username: string, email: string, password: string) {
@@ -270,12 +300,50 @@ export default function Home() {
       password,
       options: { data: { username } },
     });
-    setStatus(error ? error.message : data.session ? "Account created. Your course is syncing now." : "Account created. Check your email once to confirm it, then sign in.");
+    if (error) {
+      setStatus(friendlyAccountError(error));
+      return;
+    }
+    if (data.session && data.user) {
+      try {
+        await updateUsername(supabase, data.user, username);
+      } catch (profileError) {
+        setStatus(friendlyAccountError(profileError));
+        return;
+      }
+    }
+    setStatus(data.session ? "Account created. Your course is syncing now." : "Account created. Check your email once to confirm it, then sign in.");
   }
 
   async function signOut() {
     const supabase = getSupabaseClient();
     if (supabase) await supabase.auth.signOut();
+  }
+
+  async function resetPassword(email: string) {
+    const supabase = getSupabaseClient();
+    if (!supabase) return;
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
+    setStatus(error ? friendlyAccountError(error) : "Password reset link sent. Check your email.");
+  }
+
+  async function changePassword(password: string) {
+    const supabase = getSupabaseClient();
+    if (!supabase) return;
+    const { error } = await supabase.auth.updateUser({ password });
+    setStatus(error ? friendlyAccountError(error) : "Password updated.");
+  }
+
+  async function changeUsername(username: string) {
+    const supabase = getSupabaseClient();
+    if (!supabase || !cloudUser) return;
+    try {
+      await updateUsername(supabase, cloudUser, username);
+      setCloudUsername(username);
+      setStatus("Username updated.");
+    } catch (error) {
+      setStatus(friendlyAccountError(error));
+    }
   }
 
   async function importWeek() {
@@ -333,6 +401,7 @@ export default function Home() {
         romanization,
         sourceType,
         sourceWeek: state.weekNumber,
+        tier: sourceType === "system_advanced" ? "A" : "B",
         topic,
         introducedAt: now.toISOString(),
         reviews: 0,
@@ -340,6 +409,7 @@ export default function Home() {
         lapses: 0,
         dueAt: fsrsCard.due,
         fsrsCard,
+        modalityCards: { visual: fsrsCard, audio: fsrsCard },
       };
     };
 
@@ -378,6 +448,7 @@ export default function Home() {
           definition: entry.en,
           sourceType: "course",
           sourceWeek: targetWeek,
+          tier: "B",
           knowledgeState: targetWeek < state.weekNumber ? "known" : "learning",
           courseEntryId: entry.id,
           courseListNumber: entry.list,
@@ -389,6 +460,7 @@ export default function Home() {
           lapses: 0,
           dueAt: fsrsCard.due,
           fsrsCard,
+          modalityCards: { visual: fsrsCard, audio: fsrsCard },
         };
       });
 
@@ -415,11 +487,33 @@ export default function Home() {
     setRevealed(true);
   }
 
+  async function playCurrentWord() {
+    if (!current) return;
+    try {
+      const response = await fetch("/api/speech", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: sanitizePersianSpeechText(current.displayForm) }),
+      });
+      if (!response.ok) throw new Error("audio unavailable");
+      const url = URL.createObjectURL(await response.blob());
+      const audio = new Audio(url);
+      audio.onended = () => URL.revokeObjectURL(url);
+      await audio.play();
+    } catch {
+      if (typeof speechSynthesis === "undefined") return setStatus("Word audio is unavailable on this device.");
+      const utterance = new SpeechSynthesisUtterance(current.displayForm);
+      utterance.lang = "fa-IR";
+      speechSynthesis.cancel();
+      speechSynthesis.speak(utterance);
+    }
+  }
+
   async function rateKnown(correct: boolean) {
     if (!current) return;
     const measured = responseMs || Date.now() - startRef.current;
     const rating: ReviewRating = correct ? autoRatingForKnown(measured) : "again";
-    const { before, after } = reviewFsrs(current.fsrsCard, rating, new Date());
+    const { before, after } = reviewFsrs(current.modalityCards?.[reviewModality] ?? (reviewModality === "visual" ? current.fsrsCard : undefined), rating, new Date());
     const event: ReviewEvent = {
       id: id(),
       lexicalItemId: current.id,
@@ -427,15 +521,30 @@ export default function Home() {
       correct,
       responseMs: measured,
       rating,
-      modality: "visual",
+      modality: reviewModality,
       schedulerBefore: before,
       schedulerAfter: after,
+      timerWindowMs: 15_000,
+      hintUsed: false,
+      context: "timed-recall",
     };
     setState((currentState) => ({
       ...currentState,
       reviews: [...currentState.reviews, event],
       words: currentState.words.map((word) => word.id !== current.id ? word : {
         ...word,
+        modalityMastery: {
+          ...word.modalityMastery,
+          [reviewModality]: {
+            reviews: (word.modalityMastery?.[reviewModality]?.reviews ?? 0) + 1,
+            correct: (word.modalityMastery?.[reviewModality]?.correct ?? 0) + (correct ? 1 : 0),
+            medianResponseMs: median([
+              ...currentState.reviews.filter((review) => review.lexicalItemId === word.id && review.modality === reviewModality).map((review) => review.responseMs),
+              measured,
+            ]),
+          },
+        },
+        modalityCards: { ...word.modalityCards, [reviewModality]: after },
         knowledgeState: !correct
           ? "new"
           : measured <= 3_000 && word.reviews + 1 >= 5 && (word.correct + 1) / (word.reviews + 1) >= 0.9
@@ -447,10 +556,10 @@ export default function Home() {
         correct: word.correct + (correct ? 1 : 0),
         lapses: after.lapses,
         medianResponseMs: median([...currentState.reviews.filter((review) => review.lexicalItemId === word.id).map((review) => review.responseMs), measured]),
-        dueAt: after.due,
+        dueAt: reviewModality === "visual" ? after.due : word.dueAt,
         stability: after.stability,
         difficulty: after.difficulty,
-        fsrsCard: after,
+        fsrsCard: reviewModality === "visual" ? after : word.fsrsCard,
       }),
     }));
     const client = getSupabaseClient();
@@ -458,17 +567,19 @@ export default function Home() {
     setReviewIndex((index) => index + 1);
   }
 
-  async function generatePractice(kind: "reading" | "listening") {
-    setStatus(`Generating adaptive ${kind}…`);
+  async function generatePractice(kind: "reading" | "listening", practiceMode: PracticeMode = "controlled") {
+    setStatus(`Generating ${practiceMode === "transfer" ? "fresh transfer" : "controlled"} ${kind}…`);
     try {
       const words = selectContextWords(state, 80);
       const targetIlr = state.skillLevels[kind];
-      const data = await generateJson({ kind, weekNumber: state.weekNumber, targetWords: words, targetIlr });
+      const data = await generateJson({ kind, weekNumber: state.weekNumber, targetWords: words, targetIlr, practiceMode });
       if (!isMeaningfulPersianText(data.textFa)) throw new Error(`The generated ${kind} item had no valid Persian text. Please try again.`);
       const generatedTargets = [
         ...(Array.isArray(data.knownWordsUsed) ? data.knownWordsUsed : words.slice(0, 12)),
         ...(Array.isArray(data.newWordsIntroduced) ? data.newWordsIntroduced : []),
       ].filter((word): word is string => typeof word === "string").slice(0, 16);
+      const generatedWordCount = data.textFa.trim().split(/\s+/).filter(Boolean).length;
+      const unknownCount = Array.isArray(data.newWordsIntroduced) ? data.newWordsIntroduced.length : 0;
       if (kind === "reading") {
         const passage: Passage = {
           id: id(),
@@ -477,8 +588,11 @@ export default function Home() {
           ilrEstimate: targetIlr,
           topic: data.topic,
           register: data.register,
-          genre: "generated practice",
+          genre: practiceMode === "transfer" ? "fresh transfer" : "controlled coverage",
           sourceType: "generated",
+          practiceMode,
+          wordCount: generatedWordCount,
+          unknownTokenRatio: generatedWordCount ? Number((unknownCount / generatedWordCount).toFixed(3)) : 0,
           targetWords: generatedTargets,
           questions: data.questions ?? [],
           createdAt: new Date().toISOString(),
@@ -498,8 +612,11 @@ export default function Home() {
           ilrEstimate: targetIlr,
           topic: data.topic,
           register: data.register,
-          genre: "generated practice",
+          genre: practiceMode === "transfer" ? "fresh transfer" : "controlled coverage",
           sourceType: "generated",
+          practiceMode,
+          wordCount: generatedWordCount,
+          unknownTokenRatio: generatedWordCount ? Number((unknownCount / generatedWordCount).toFixed(3)) : 0,
           targetWords: generatedTargets,
           questions: data.questions ?? [],
           createdAt: new Date().toISOString(),
@@ -509,7 +626,7 @@ export default function Home() {
         setListensCount(0);
         setTranscriptVisible(false);
       }
-      setStatus(`Adaptive ${kind} ready.`);
+      setStatus(`${practiceMode === "transfer" ? "Fresh transfer" : "Controlled coverage"} ${kind} ready.`);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Generation failed.");
     }
@@ -536,6 +653,8 @@ export default function Home() {
       answers: result.answers,
       grade: result.grade,
       gradingMode: result.gradingMode,
+      firstPass: true,
+      errorCategories: result.grade.failureTypes,
     };
     setState((currentState) => ({ ...currentState, passageAttempts: [...currentState.passageAttempts, attempt] }));
     setReadingStartedAt(null);
@@ -608,6 +727,8 @@ export default function Home() {
       answers: result.answers,
       grade: result.grade,
       gradingMode: result.gradingMode,
+      firstPass: !transcriptVisible,
+      errorCategories: result.grade.failureTypes,
     };
     setState((currentState) => ({ ...currentState, listeningAttempts: [...currentState.listeningAttempts, attempt] }));
     setStatus(`Listening saved · ${result.grade.overallScore}% comprehension after ${listensCount} listen${listensCount === 1 ? "" : "s"}.`);
@@ -631,6 +752,7 @@ export default function Home() {
         romanization: row.romanization,
         sourceType: "user",
         sourceWeek: state.weekNumber,
+        tier: "B",
         topic: "anki",
         introducedAt: now.toISOString(),
         reviews: 0,
@@ -638,6 +760,7 @@ export default function Home() {
         lapses: 0,
         dueAt: fsrsCard.due,
         fsrsCard,
+        modalityCards: { visual: fsrsCard, audio: fsrsCard },
       };
     });
     if (incoming.length) setState((currentState) => ({ ...currentState, words: [...currentState.words, ...incoming] }));
@@ -708,6 +831,7 @@ export default function Home() {
             knowledgeState,
             dueAt: due.toISOString(),
             fsrsCard: word.fsrsCard ? { ...word.fsrsCard, due: due.toISOString() } : createSerializedCard(due),
+            modalityCards: Object.fromEntries(Object.entries(word.modalityCards ?? {}).map(([modality, card]) => [modality, { ...card, due: due.toISOString() }])),
           }),
         };
       }
@@ -718,6 +842,7 @@ export default function Home() {
         normalizedForm,
         sourceType: "user",
         sourceWeek: currentState.weekNumber,
+        tier: "C",
         knowledgeState,
         introducedAt: new Date().toISOString(),
         reviews: 0,
@@ -725,6 +850,7 @@ export default function Home() {
         lapses: 0,
         dueAt: fsrsCard.due,
         fsrsCard,
+        modalityCards: { visual: fsrsCard, audio: fsrsCard },
       };
       return { ...currentState, words: [...currentState.words, word] };
     });
@@ -774,6 +900,15 @@ export default function Home() {
   const sourceAnalytics = sourceMetrics(state.passages, state.passageAttempts, state.listeningItems, state.listeningAttempts, "source");
   const genreAnalytics = sourceMetrics(state.passages, state.passageAttempts, state.listeningItems, state.listeningAttempts, "genre");
   const registerAnalytics = sourceMetrics(state.passages, state.passageAttempts, state.listeningItems, state.listeningAttempts, "register");
+  const topicAnalytics = sourceMetrics(state.passages, state.passageAttempts, state.listeningItems, state.listeningAttempts, "topic");
+  const difficultyAnalytics = sourceMetrics(state.passages, state.passageAttempts, state.listeningItems, state.listeningAttempts, "difficulty");
+  const originAnalytics = sourceMetrics(state.passages, state.passageAttempts, state.listeningItems, state.listeningAttempts, "origin");
+  const visualReviews = state.reviews.filter((review) => review.modality === "visual");
+  const audioReviews = state.reviews.filter((review) => review.modality === "audio");
+  const visualRetention = Math.round(100 * visualReviews.filter((review) => review.correct).length / Math.max(1, visualReviews.length));
+  const audioRetention = Math.round(100 * audioReviews.filter((review) => review.correct).length / Math.max(1, audioReviews.length));
+  const firstListenScore = Math.round(average(state.listeningAttempts.filter((attempt) => attempt.firstPass && attempt.listensCount === 1).slice(-5).map((attempt) => attempt.comprehensionScore)));
+  const transcriptRate = Math.round(100 * state.listeningAttempts.filter((attempt) => attempt.transcriptRevealed).length / Math.max(1, state.listeningAttempts.length));
   const currentCourseWeekImported = state.course.importedWeeks.includes(state.weekNumber);
   const currentCourseWordCount = COURSE_META.weekCounts[state.weekNumber - 1];
   const currentCourseLessonCount = COURSE_META.weekLessonCounts[state.weekNumber - 1];
@@ -849,9 +984,9 @@ export default function Home() {
       <Metric label="Median recall" value={medianRecall ? `${(medianRecall / 1000).toFixed(1)}s` : "—"} />
 
       <div className="card span-7 dashboard-primary">
-        <div className="row spread"><h2>{state.words.length ? "Review" : "Start here"}</h2>{state.words.length > 0 && <span className="pill">3s automatic · 8s solid · 15s ceiling</span>}</div>
+        <div className="row spread"><h2>{state.words.length ? "Review" : "Start here"}</h2>{state.words.length > 0 && <div className="row"><button className={reviewModality === "visual" ? "mode-button active" : "mode-button"} onClick={() => setReviewModality("visual")}>Text</button><button className={reviewModality === "audio" ? "mode-button active" : "mode-button"} onClick={() => setReviewModality("audio")}>Audio</button><span className="pill">3s · 8s · 15s</span></div>}</div>
         {current ? <>
-          <div className="fa hero-fa">{current.displayForm}</div>
+          {reviewModality === "visual" ? <div className="fa hero-fa">{current.displayForm}</div> : <div className="audio-recall"><button className="primary" onClick={() => void playCurrentWord()}>Play word</button><span className="muted">Identify it by sound before revealing.</span></div>}
           {!revealed ? <button className="primary" onClick={reveal}>Reveal meaning</button> : <>
             <div className="answer-block">
               <strong>{current.definition || "Definition missing — add it during intake or enable AI enrichment."}</strong>
@@ -865,7 +1000,7 @@ export default function Home() {
 
       <div className="card span-5 dashboard-secondary">
         <h2>Adaptive allocation</h2>
-        <p className="muted">Reading, Listening, and Speaking all begin at Level 1. Change them from the compact controls in the top-right corner.</p>
+        <p className="muted">{trainingPhase.label} · {trainingPhase.focus}. Bottleneck: {bottleneck.label} ({bottleneck.evidence}).</p>
         {Object.entries(allocation).map(([name, value]) => <div key={name} className="allocation"><div className="row spread"><span>{name}</span><span className="muted">{value}%</span></div><div className="progress"><div style={{ width: `${value}%` }} /></div></div>)}
       </div>
 
@@ -910,7 +1045,7 @@ export default function Home() {
     </section>}
 
     {tab === "reading" && <section className="grid">
-      <div className="card span-12 lab-header"><h2>Reading</h2><button className="primary" onClick={() => generatePractice("reading")}>New passage</button></div>
+      <div className="card span-12 lab-header"><div><h2>Reading</h2><span className="muted">Controlled reinforces your words. Fresh transfer measures proficiency.</span></div><div className="row"><button className="secondary" onClick={() => generatePractice("reading", "controlled")}>Controlled</button><button className="primary" onClick={() => generatePractice("reading", "transfer")}>Fresh transfer</button></div></div>
       {latestPassage ? <>
         <div className="card span-7">
           <div className="row spread"><div><div className="muted">ILR ~{latestPassage.ilrEstimate} · {latestPassage.topic} · {latestPassage.genre} · {latestPassage.register}</div><h2>{latestPassage.title}</h2><SourceLine item={latestPassage} /></div>{!readingStartedAt && !readingQuestionsOpen && <button className="primary" onClick={() => { setReadingStartedAt(Date.now()); setReadingDurationMs(0); }}>Start timer</button>}</div>
@@ -933,7 +1068,7 @@ export default function Home() {
     </section>}
 
     {tab === "listening" && <section className="grid">
-      <div className="card span-12 lab-header"><h2>Listening</h2><button className="primary" onClick={() => generatePractice("listening")}>New audio</button></div>
+      <div className="card span-12 lab-header"><div><h2>Listening</h2><span className="muted">Start audio-only. Fresh transfer tests unfamiliar speech.</span></div><div className="row"><button className="secondary" onClick={() => generatePractice("listening", "controlled")}>Controlled</button><button className="primary" onClick={() => generatePractice("listening", "transfer")}>Fresh transfer</button></div></div>
       {latestListening ? <>
         <div className="card span-7">
           <div className="muted">ILR ~{latestListening.ilrEstimate} · {latestListening.topic} · {latestListening.genre} · {latestListening.register}</div><h2>{latestListening.title}</h2><SourceLine item={latestListening} />
@@ -978,7 +1113,7 @@ export default function Home() {
     {tab === "analytics" && !showProgressDetails && <section className="guided-workspace"><div className="guided-overview">
       <span className="next-number">01</span><h2>Know why you&apos;re improving.</h2>
       <p>Progress is based on evidence from practice—not a streak or time spent in the app. The system looks for faster recall, stronger comprehension, and reliable performance across different material.</p>
-      <div className="guided-capabilities"><div><span>Recall</span><p>Accuracy, response time, lapses, mature words, and difficult vocabulary.</p></div><div><span>Comprehension</span><p>Main idea, detail, inference, and discourse across Reading and Listening.</p></div><div><span>Coverage</span><p>Performance by source, genre, register, and skill—not only one average.</p></div><div><span>Readiness</span><p>A level-up signal after at least four recent attempts average 80% or better.</p></div></div>
+      <div className="guided-capabilities"><div><span>Recall</span><p>Separate text and audio accuracy, response time, lapses, and difficult vocabulary.</p></div><div><span>Comprehension</span><p>Main idea, detail, inference, discourse, first-pass listening, and transcript dependence.</p></div><div><span>Coverage</span><p>Performance by topic, source, genre, register, origin, and difficulty.</p></div><div><span>Readiness</span><p>Fresh target-level attempts—not familiar practice—control level-up decisions.</p></div></div>
       <div className="progress-snapshot"><span><small>Words</small><strong>{state.words.length}</strong></span><span><small>Reviews</small><strong>{state.reviews.length}</strong></span><span><small>Reading</small><strong>{readingAverage ? `${readingAverage}%` : "—"}</strong></span><span><small>Listening</small><strong>{listeningAverage ? `${listeningAverage}%` : "—"}</strong></span></div>
       <button className="primary" onClick={() => setShowProgressDetails(true)}>View detailed progress</button>
     </div></section>}
@@ -988,12 +1123,16 @@ export default function Home() {
       <Metric label="Reviews logged" value={String(state.reviews.length)} />
       <Metric label="Reading avg (5)" value={readingAverage ? `${readingAverage}%` : "—"} />
       <Metric label="Listening avg (5)" value={listeningAverage ? `${listeningAverage}%` : "—"} />
+      <div className="card span-12"><h2>Current training phase</h2><div className="queue"><div className="queue-item"><span>{trainingPhase.label}<small>{trainingPhase.focus}</small></span><strong>{trainingPhase.authenticTarget}% authentic target</strong></div><div className="queue-item"><span>Adaptive bottleneck<small>{bottleneck.evidence}</small></span><strong>{bottleneck.label}</strong></div></div></div>
       <div className="card span-7"><h2>Weak / slow lexical items</h2><div className="word-list single">{weakWords.map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><span>{word.definition}</span><span>{Math.round(100 * word.correct / word.reviews)}% correct · {word.medianResponseMs ? `${(word.medianResponseMs / 1000).toFixed(1)}s median` : "no latency"} · {word.lapses} lapses</span></div>)}</div>{!weakWords.length && <div className="empty">Not enough review history yet.</div>}</div>
       <div className="card span-5"><h2>Performance history</h2><div className="queue"><div className="queue-item"><span>Reading attempts</span><strong>{state.passageAttempts.length}</strong></div><div className="queue-item"><span>Listening attempts</span><strong>{state.listeningAttempts.length}</strong></div><div className="queue-item"><span>Speaking attempts</span><strong>{state.speakingAttempts.length}</strong></div><div className="queue-item"><span>Speaking avg (5)</span><strong>{speakingAverage ? `${speakingAverage}%` : "—"}</strong></div><div className="queue-item"><span>Mature vocabulary</span><strong>{mature}</strong></div><div className="queue-item"><span>Current week</span><strong>{state.weekNumber}/{COURSE_META.weeks}</strong></div></div></div>
-      <div className="card span-12"><h2>Recent comprehension diagnostics</h2><div className="diagnostic-grid"><Diagnostic label="Reading inference" value={Math.round(average(state.passageAttempts.slice(-5).map((attempt) => attempt.inferenceScore)))} /><Diagnostic label="Reading discourse" value={Math.round(average(state.passageAttempts.slice(-5).map((attempt) => attempt.discourseScore)))} /><Diagnostic label="Listening detail" value={Math.round(average(state.listeningAttempts.slice(-5).map((attempt) => attempt.detailScore)))} /><Diagnostic label="Listening inference" value={Math.round(average(state.listeningAttempts.slice(-5).map((attempt) => attempt.inferenceScore)))} /></div></div>
+      <div className="card span-12"><h2>Recent diagnostics</h2><div className="diagnostic-grid"><Diagnostic label="Text retention" value={visualRetention} /><Diagnostic label="Audio retention" value={audioReviews.length ? audioRetention : 0} /><Diagnostic label="First-listen score" value={firstListenScore} /><Diagnostic label="Transcript reveal" value={transcriptRate} /><Diagnostic label="Reading inference" value={Math.round(average(state.passageAttempts.slice(-5).map((attempt) => attempt.inferenceScore)))} /><Diagnostic label="Reading discourse" value={Math.round(average(state.passageAttempts.slice(-5).map((attempt) => attempt.discourseScore)))} /><Diagnostic label="Listening detail" value={Math.round(average(state.listeningAttempts.slice(-5).map((attempt) => attempt.detailScore)))} /><Diagnostic label="Listening inference" value={Math.round(average(state.listeningAttempts.slice(-5).map((attempt) => attempt.inferenceScore)))} /></div></div>
       <AnalyticsTable title="Attempts by source" rows={sourceAnalytics} />
       <AnalyticsTable title="Attempts by genre" rows={genreAnalytics} />
       <AnalyticsTable title="Attempts by register" rows={registerAnalytics} />
+      <AnalyticsTable title="Attempts by topic" rows={topicAnalytics} />
+      <AnalyticsTable title="Attempts by difficulty" rows={difficultyAnalytics} />
+      <AnalyticsTable title="Authentic vs generated" rows={originAnalytics} />
     </section></>}
 
     {tab === "analytics" && <AccountWorkspace
@@ -1004,13 +1143,16 @@ export default function Home() {
       onSignIn={signIn}
       onSignUp={signUp}
       onSignOut={signOut}
+      onResetPassword={resetPassword}
+      onChangePassword={changePassword}
+      onChangeUsername={changeUsername}
     />}
   </main>;
 }
 
 function SourceLine({ item }: { item: Passage | ListeningItem }) {
-  if (item.sourceType === "generated") return <div className="source-line"><span className="pill">generated</span></div>;
-  return <div className="source-line"><span className={`pill origin-${item.sourceType}`}>{item.sourceType}</span><span>{item.publisher}</span>{item.publishedAt && <span>{item.publishedAt}</span>}{item.sourceUrl && <a href={item.sourceUrl} target="_blank" rel="noreferrer">Open original ↗</a>}</div>;
+  if (item.sourceType === "generated") return <div className="source-line"><span className="pill">{item.practiceMode === "transfer" ? "fresh transfer" : "controlled"}</span></div>;
+  return <div className="source-line"><span className={`pill origin-${item.sourceType}`}>{item.sourceType}</span><span>{item.publisher}</span>{item.author && <span>{item.author}</span>}{item.publishedAt && <span>{item.publishedAt}</span>}{item.wordCount && <span>{item.wordCount} words</span>}{item.unknownTokenRatio !== undefined && <span>{Math.round(item.unknownTokenRatio * 100)}% unknown load</span>}{item.sourceUrl && <a href={item.sourceUrl} target="_blank" rel="noreferrer">Open original ↗</a>}</div>;
 }
 
 function HeaderLevelControls({

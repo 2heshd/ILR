@@ -1,7 +1,7 @@
 import type { ListeningAttempt, ListeningItem, Passage, PassageAttempt } from "./types";
 
 export type SourceMetric = { label: string; attempts: number; average: number };
-type Dimension = "source" | "genre" | "register";
+type Dimension = "source" | "genre" | "register" | "topic" | "difficulty" | "origin";
 
 export function sourceMetrics(
   passages: Passage[],
@@ -13,6 +13,8 @@ export function sourceMetrics(
   const scores: Record<string, number[]> = {};
   const labelFor = (item: Passage | ListeningItem) => {
     if (dimension === "source") return item.publisher || (item.sourceType === "generated" ? "AI-generated" : "Unknown source");
+    if (dimension === "difficulty") return `ILR ${Math.floor(item.ilrEstimate)}–${Math.min(4, Math.floor(item.ilrEstimate) + 0.75)}`;
+    if (dimension === "origin") return item.sourceType;
     return item[dimension] || "Unclassified";
   };
   const add = (label: string, score: number) => { (scores[label] ??= []).push(score); };

@@ -104,8 +104,10 @@ ${JSON.stringify(questions)}
 
 Grade meaning, not wording. Accept concise paraphrases. Do not penalize English grammar. A blank, non-responsive, contradicted, or guessed answer should score low. For inference/discourse items, require the inference or relationship actually supported by the source. Score each 0-100 and provide one short corrective feedback sentence. Then calculate dimension scores using only relevant question types. Overall should reflect comprehension across the item, not a simple optimism-biased average.
 
+Diagnose only failure types supported by the answers: lexical (meaning unknown), acoustic (known visually but missed in speech; listening only), syntactic (words known but clause structure misparsed), discourse (sentence relations/stance/intent missed), or cultural_pragmatic (literal meaning understood but implication/context missed). Recommend one short surgical repair. Do not label every low score as vocabulary failure.
+
 Return exactly:
-{"overallScore":0,"detailScore":0,"inferenceScore":0,"discourseScore":0,"mainIdeaScore":0,"answers":[{"questionIndex":0,"score":0,"feedback":"...","missedConcepts":["..."]}],"summary":"..."}`;
+{"overallScore":0,"detailScore":0,"inferenceScore":0,"discourseScore":0,"mainIdeaScore":0,"answers":[{"questionIndex":0,"score":0,"feedback":"...","missedConcepts":["..."]}],"summary":"...","failureTypes":["lexical|acoustic|syntactic|discourse|cultural_pragmatic"],"recommendedRepair":"..."}`;
 
     const response = await client.responses.create({ model, store: false, input: prompt });
     const result = parseJson(response.output_text);
@@ -124,6 +126,10 @@ Return exactly:
           }))
         : [],
       summary: String(result.summary ?? ""),
+      failureTypes: Array.isArray(result.failureTypes)
+        ? result.failureTypes.filter((value: unknown) => ["lexical", "acoustic", "syntactic", "discourse", "cultural_pragmatic"].includes(String(value))).slice(0, 3)
+        : [],
+      recommendedRepair: String(result.recommendedRepair ?? ""),
     });
   } catch (error) {
     console.error(error);
