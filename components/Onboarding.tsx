@@ -59,7 +59,7 @@ export default function Onboarding({ onFinish }: Props) {
 
   return <main className="onboarding-shell">
     <section className="onboarding-window">
-      <div className="onboarding-top"><span className="window-dots">● ● ●</span><span>Getting started</span><button onClick={onFinish}>Skip</button></div>
+      <div className="onboarding-top"><span className="window-dots">● ● ●</span><span>Cursos</span><button onClick={onFinish}>Skip</button></div>
       <div className={`onboarding-stage ${started ? "chat" : "intro"}`}>
         {!started ? <section className="onboarding-copy"><h1 aria-label={phrase}>{typedText}<i className="typing-cursor" /></h1></section> : <div className="guide-conversation">
           <div className="user-chat-message"><span>You</span><p>{question}</p></div>

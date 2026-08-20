@@ -12,8 +12,8 @@ const googleSansCode = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "ILR Persian",
-  description: "Adaptive Persian study system for ILR R4 / L3+ / S2",
+  title: "Cursos",
+  description: "Adaptive Persian study system for reading, listening, speaking, and recall",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

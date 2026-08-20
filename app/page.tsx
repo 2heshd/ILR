@@ -1046,8 +1046,8 @@ export default function Home() {
       <div className="row"><HeaderLevelControls levels={state.skillLevels} onChange={setSkillLevel} />{(state.words.length > 0 || tab !== "today") && <button className="primary" onClick={() => { setTab("today"); setShowIntake((value) => !value); }}>Add words</button>}</div>
     </header>
 
-    <nav className="tabs" aria-label="Study index">
-      <div className="nav-section-heading"><span><i className="nav-flower">✺</i> Index</span><span>+</span></div>
+    <nav className="tabs" aria-label="Cursos navigation">
+      <div className="nav-section-heading"><span><i className="nav-flower">✺</i> Cursos</span><span>+</span></div>
       <div className="nav-dash" />
       <div className="nav-section-heading"><span><i>▲</i> Study</span><span>−</span></div>
       <div className="nav-dash" />
