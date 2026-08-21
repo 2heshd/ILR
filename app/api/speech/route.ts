@@ -21,7 +21,8 @@ export async function POST(request: Request) {
       model: process.env.OPENAI_TTS_MODEL || "gpt-4o-mini-tts",
       voice: process.env.OPENAI_TTS_VOICE || "marin",
       input: speechText,
-      instructions: "Read only the supplied Persian text. Speak in natural educated Iranian Persian at a normal broadcast pace. Never describe punctuation, say the words dot or ellipsis, translate the text, or add commentary.",
+      instructions: "Read only the supplied Persian text. Speak in natural educated Iranian Persian at a clear, slightly slower-than-normal broadcast pace for an intermediate learner. Keep natural phrasing and rhythm. Never describe punctuation, say the words dot or ellipsis, translate the text, or add commentary.",
+      speed: 0.88,
       response_format: "mp3",
     });
     return new Response(await audio.arrayBuffer(), {
