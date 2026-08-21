@@ -111,14 +111,18 @@ function hydrateState(raw: Partial<StudyState> | null | undefined): StudyState {
     speakingAttempts: raw?.speakingAttempts ?? [],
   };
   state.words = state.words.map((word) => {
-    const fsrsCard = word.fsrsCard ?? createSerializedCard(new Date(word.introducedAt || Date.now()));
+    const savedCards = [word.fsrsCard, word.modalityCards?.visual, word.modalityCards?.audio].flatMap((card) => card ? [card] : []);
+    const fsrsCard = savedCards.reduce((latest, card) => (
+      new Date(card.due).getTime() > new Date(latest.due).getTime() ? card : latest
+    ), createSerializedCard(new Date(word.introducedAt || Date.now())));
     const knowledgeState = word.knowledgeState ?? (word.sourceWeek < state.weekNumber ? "known" : "learning");
     const tier = word.tier ?? (word.sourceType === "system_advanced" ? "A" : word.sourceType === "course" ? "B" : "C");
     return {
       ...word,
       tier,
       modalityMastery: word.modalityMastery ?? {},
-      modalityCards: word.modalityCards ?? { visual: fsrsCard },
+      // Keep modality analytics separate while sharing one spacing schedule.
+      modalityCards: { ...word.modalityCards, visual: fsrsCard, audio: fsrsCard },
       knowledgeState,
       fsrsCard,
       dueAt: word.dueAt || fsrsCard.due,
@@ -228,7 +232,7 @@ export default function Home() {
     const memory = speechCacheRef.current.get(cacheKey);
     if (memory) return memory;
     if (!("caches" in window)) return null;
-    const stored = await caches.open("persian-audio-v1").then((cache) => cache.match(speechCacheRequest(cacheKey)));
+    const stored = await caches.open("persian-audio-v2").then((cache) => cache.match(speechCacheRequest(`v2-${cacheKey}`)));
     if (!stored) return null;
     const blob = await stored.blob();
     if (blob.size < 500) return null;
@@ -257,8 +261,8 @@ export default function Home() {
       if (blob.size < 500) throw new Error("The generated audio file was empty.");
       speechCacheRef.current.set(cacheKey, blob);
       if ("caches" in window) {
-        const cache = await caches.open("persian-audio-v1");
-        await cache.put(speechCacheRequest(cacheKey), new Response(blob, { headers: { "Content-Type": "audio/mpeg" } }));
+        const cache = await caches.open("persian-audio-v2");
+        await cache.put(speechCacheRequest(`v2-${cacheKey}`), new Response(blob, { headers: { "Content-Type": "audio/mpeg" } }));
       }
       return blob;
     })().finally(() => speechRequestsRef.current.delete(cacheKey));
@@ -274,7 +278,7 @@ export default function Home() {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = persianVoice.lang;
     utterance.voice = persianVoice;
-    utterance.rate = 0.95;
+    utterance.rate = 0.85;
     speechSynthesis.cancel();
     speechSynthesis.speak(utterance);
     return true;
@@ -608,7 +612,7 @@ export default function Home() {
     // Response time remains useful analytics, but must not turn a correct answer
     // into a short-term "hard" card that reappears during the same session.
     const rating: ReviewRating = correct ? "good" : "again";
-    const { before, after } = reviewFsrs(current.modalityCards?.[reviewModality] ?? (reviewModality === "visual" ? current.fsrsCard : undefined), rating, new Date());
+    const { before, after } = reviewFsrs(current.fsrsCard ?? current.modalityCards?.[reviewModality], rating, new Date());
     const event: ReviewEvent = {
       id: id(),
       lexicalItemId: current.id,
@@ -639,7 +643,7 @@ export default function Home() {
             ]),
           },
         },
-        modalityCards: { ...word.modalityCards, [reviewModality]: after },
+        modalityCards: { ...word.modalityCards, visual: after, audio: after },
         knowledgeState: !correct
           ? "new"
           : measured <= 3_000 && word.reviews + 1 >= 5 && (word.correct + 1) / (word.reviews + 1) >= 0.9
@@ -651,10 +655,10 @@ export default function Home() {
         correct: word.correct + (correct ? 1 : 0),
         lapses: after.lapses,
         medianResponseMs: median([...currentState.reviews.filter((review) => review.lexicalItemId === word.id).map((review) => review.responseMs), measured]),
-        dueAt: reviewModality === "visual" ? after.due : word.dueAt,
+        dueAt: after.due,
         stability: after.stability,
         difficulty: after.difficulty,
-        fsrsCard: reviewModality === "visual" ? after : word.fsrsCard,
+        fsrsCard: after,
       }),
     }));
     const client = getSupabaseClient();
