@@ -13,7 +13,7 @@ import { adaptiveAllocation, currentTrainingPhase, dominantBottleneck, selectCon
 import { fallbackAdvanced, type AdvancedWord } from "@/lib/advanced";
 import type { AnkiReviewRow, AnkiVocabularyRow } from "@/lib/anki";
 import { COURSE_META, loadCourseWeek } from "@/lib/course";
-import { autoRatingForKnown, createSerializedCard, reviewFsrs } from "@/lib/fsrs";
+import { createSerializedCard, reviewFsrs } from "@/lib/fsrs";
 import { normalizePersian, parseWeeklyInput } from "@/lib/persian";
 import { isMeaningfulPersianText, sanitizePersianSpeechText } from "@/lib/persian-speech";
 import { sourceMetrics } from "@/lib/source-analytics";
@@ -183,7 +183,6 @@ export default function Home() {
   const [cloudUser, setCloudUser] = useState<User | null>(null);
   const [cloudUsername, setCloudUsername] = useState<string | null>(null);
   const [cloudReady, setCloudReady] = useState(false);
-  const [reviewIndex, setReviewIndex] = useState(0);
   const [reviewModality, setReviewModality] = useState<Extract<ReviewModality, "visual" | "audio">>("visual");
   const [revealed, setRevealed] = useState(false);
   const [responseMs, setResponseMs] = useState(0);
@@ -352,10 +351,12 @@ export default function Home() {
   }, [state, loaded, cloudUser, cloudReady]);
 
   const due = useMemo(
-    () => state.words.filter((word) => new Date(word.modalityCards?.[reviewModality]?.due ?? word.dueAt).getTime() <= Date.now()),
+    () => state.words
+      .filter((word) => new Date(word.modalityCards?.[reviewModality]?.due ?? word.dueAt).getTime() <= Date.now())
+      .sort((a, b) => new Date(a.modalityCards?.[reviewModality]?.due ?? a.dueAt).getTime() - new Date(b.modalityCards?.[reviewModality]?.due ?? b.dueAt).getTime()),
     [state.words, reviewModality],
   );
-  const current = due[reviewIndex % Math.max(1, due.length)];
+  const current = due[0];
   const allocation = useMemo(() => adaptiveAllocation(state), [state]);
   const trainingPhase = useMemo(() => currentTrainingPhase(state.weekNumber), [state.weekNumber]);
   const bottleneck = useMemo(() => dominantBottleneck(state), [state]);
@@ -514,7 +515,6 @@ export default function Home() {
     setState((currentState) => ({ ...currentState, words: [...currentState.words, ...newWords] }));
     setInput("");
     setShowIntake(false);
-    setReviewIndex(0);
     setStatus(`Added ${enriched.length} required words + ${advanced.length} advanced words for Week ${state.weekNumber}.`);
   }
 
@@ -566,7 +566,6 @@ export default function Home() {
         },
         words: [...currentState.words, ...incoming],
       }));
-      setReviewIndex(0);
       const duplicates = entries.length - incoming.length;
       setStatus(`Week ${targetWeek} ready · ${incoming.length} new words · ${Math.min(25, incoming.length)} due today${duplicates ? ` · ${duplicates} repeats skipped` : ""}.`);
     } catch (error) {
@@ -605,7 +604,10 @@ export default function Home() {
   async function rateKnown(correct: boolean) {
     if (!current) return;
     const measured = responseMs || Date.now() - startRef.current;
-    const rating: ReviewRating = correct ? autoRatingForKnown(measured) : "again";
+    // A learner's explicit correctness judgment should determine the schedule.
+    // Response time remains useful analytics, but must not turn a correct answer
+    // into a short-term "hard" card that reappears during the same session.
+    const rating: ReviewRating = correct ? "good" : "again";
     const { before, after } = reviewFsrs(current.modalityCards?.[reviewModality] ?? (reviewModality === "visual" ? current.fsrsCard : undefined), rating, new Date());
     const event: ReviewEvent = {
       id: id(),
@@ -657,7 +659,6 @@ export default function Home() {
     }));
     const client = getSupabaseClient();
     if (client && cloudUser) appendCloudReview(client, cloudUser, event).catch(console.error);
-    setReviewIndex((index) => index + 1);
   }
 
   async function generatePractice(kind: "reading" | "listening", practiceMode: PracticeMode = "controlled") {
@@ -1085,7 +1086,7 @@ export default function Home() {
             <div className="answer-block">
               <strong>{current.definition || "Definition missing — add it during intake or enable AI enrichment."}</strong>
               {current.romanization && <span className="muted">{current.romanization}</span>}
-              <span className="muted">Recall time {(responseMs / 1000).toFixed(1)}s · correct answers auto-grade {autoRatingForKnown(responseMs)}</span>
+              <span className="muted">Recall time {(responseMs / 1000).toFixed(1)}s · correct answers move to the next review</span>
             </div>
             <div className="row"><button className="danger" onClick={() => rateKnown(false)}>I was wrong</button><button className="primary" onClick={() => rateKnown(true)}>I was right</button></div>
           </>}
