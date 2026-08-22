@@ -1436,6 +1436,33 @@ textarea {
   gap: 28px;
 }
 
+.gist-listening {
+  display: grid;
+  align-content: center;
+  gap: 28px;
+  min-height: 460px;
+  padding: 36px 0 24px;
+}
+
+.gist-audio-stage {
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+  min-height: 190px;
+  padding: 48px 24px;
+  border-block: 1px solid var(--soft-rule);
+}
+
+.gist-audio-stage span {
+  color: var(--dim);
+  font-size: 11px;
+}
+
+.gist-listening .inference-gist input:disabled {
+  color: var(--dim);
+  border-color: var(--rule);
+}
+
 .progress-snapshot span {
   display: grid;
   gap: 8px;
