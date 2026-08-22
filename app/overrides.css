@@ -1506,7 +1506,6 @@ body.rapid-focus-open {
   font-weight: 300;
   line-height: 1;
   text-align: center;
-  animation: rapid-caption-pulse .38s ease-out;
 }
 
 .rapid-caption-word.idle {
@@ -1526,11 +1525,6 @@ body.rapid-focus-open {
 .rapid-caption-controls .primary {
   min-width: 140px;
   padding: 16px 28px;
-}
-
-@keyframes rapid-caption-pulse {
-  from { opacity: .15; transform: scale(.98); }
-  to { opacity: 1; transform: scale(1); }
 }
 
 .progress-snapshot span {
