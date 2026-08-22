@@ -83,22 +83,7 @@ function id() {
   return crypto.randomUUID();
 }
 
-function persianCaptionWords(text: string) {
-  return text.match(PERSIAN_WORD_PATTERN)?.filter((part) => IS_PERSIAN_WORD.test(part)) ?? [];
-}
-
-function captionWordAtProgress(words: string[], progress: number) {
-  if (!words.length) return "";
-  const weights = words.map((word) => Math.max(1, [...word].length));
-  const total = weights.reduce((sum, weight) => sum + weight, 0);
-  const target = Math.max(0, Math.min(0.999, progress)) * total;
-  let elapsed = 0;
-  for (let index = 0; index < words.length; index += 1) {
-    elapsed += weights[index];
-    if (target < elapsed) return words[index];
-  }
-  return words.at(-1) ?? "";
-}
+type TimedCaption = { word: string; start: number; end: number };
 
 function hydrateState(raw: Partial<StudyState> | null | undefined): StudyState {
   const catalogChanged = Boolean(raw?.course?.catalogId && raw.course.catalogId !== COURSE_META.id);
@@ -296,15 +281,14 @@ export default function Home() {
   const playbackRef = useRef<HTMLAudioElement | null>(null);
   const playbackUrlRef = useRef<string | null>(null);
   const rapidFrameRef = useRef<number | null>(null);
-  const rapidTimerRef = useRef<number | null>(null);
   const speechCacheRef = useRef(new Map<string, Blob>());
   const speechRequestsRef = useRef(new Map<string, Promise<Blob>>());
+  const speechTimingsRef = useRef(new Map<string, TimedCaption[]>());
+  const speechTimingRequestsRef = useRef(new Map<string, Promise<{ audio: Blob; timings: TimedCaption[] }>>());
 
   function releasePlayback() {
     if (rapidFrameRef.current !== null) window.cancelAnimationFrame(rapidFrameRef.current);
-    if (rapidTimerRef.current !== null) window.clearInterval(rapidTimerRef.current);
     rapidFrameRef.current = null;
-    rapidTimerRef.current = null;
     playbackRef.current?.pause();
     playbackRef.current = null;
     if (playbackUrlRef.current) URL.revokeObjectURL(playbackUrlRef.current);
@@ -370,6 +354,61 @@ export default function Home() {
     })().finally(() => speechRequestsRef.current.delete(cacheKey));
 
     speechRequestsRef.current.set(cacheKey, request);
+    return request;
+  }
+
+  function speechTimingCacheRequest(cacheKey: string) {
+    return new Request(`${window.location.origin}/__speech-timing-cache/${encodeURIComponent(cacheKey)}`);
+  }
+
+  async function readCachedSpeechTimings(cacheKey: string) {
+    const memory = speechTimingsRef.current.get(cacheKey);
+    if (memory) return memory;
+    if (!("caches" in window)) return null;
+    const stored = await caches.open("persian-speech-timings-v1").then((cache) => cache.match(speechTimingCacheRequest(cacheKey)));
+    if (!stored) return null;
+    const data = (await stored.json()) as { words?: TimedCaption[] };
+    if (!data.words?.length) return null;
+    speechTimingsRef.current.set(cacheKey, data.words);
+    return data.words;
+  }
+
+  async function prepareAlignedSpeech(text: string, cacheKey: string) {
+    const [cachedAudio, cachedTimings] = await Promise.all([readCachedSpeech(cacheKey), readCachedSpeechTimings(cacheKey)]);
+    if (cachedAudio && cachedTimings) return { audio: cachedAudio, timings: cachedTimings };
+    const pending = speechTimingRequestsRef.current.get(cacheKey);
+    if (pending) return pending;
+
+    const request = (async () => {
+      const response = await fetch("/api/speech-timings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      const data = (await response.json()) as { audioBase64?: string; mimeType?: string; words?: TimedCaption[]; error?: string };
+      if (!response.ok || !data.audioBase64 || !data.words?.length) throw new Error(data.error || "Exact word timing is unavailable.");
+      const binary = window.atob(data.audioBase64);
+      const bytes = new Uint8Array(binary.length);
+      for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+      const audio = new Blob([bytes], { type: data.mimeType || "audio/mpeg" });
+      speechCacheRef.current.set(cacheKey, audio);
+      speechTimingsRef.current.set(cacheKey, data.words);
+      if ("caches" in window) {
+        const [audioCache, timingCache] = await Promise.all([
+          caches.open("persian-audio-v2"),
+          caches.open("persian-speech-timings-v1"),
+        ]);
+        await Promise.all([
+          audioCache.put(speechCacheRequest(`v2-${cacheKey}`), new Response(audio, { headers: { "Content-Type": audio.type } })),
+          timingCache.put(speechTimingCacheRequest(cacheKey), new Response(JSON.stringify({ words: data.words }), {
+            headers: { "Content-Type": "application/json" },
+          })),
+        ]);
+      }
+      return { audio, timings: data.words };
+    })().finally(() => speechTimingRequestsRef.current.delete(cacheKey));
+
+    speechTimingRequestsRef.current.set(cacheKey, request);
     return request;
   }
 
@@ -992,11 +1031,11 @@ export default function Home() {
     releasePlayback();
   }
 
-  async function playRapidAudioElement(audio: HTMLAudioElement, objectUrl?: string) {
+  async function playRapidAudioElement(audio: HTMLAudioElement, timings: TimedCaption[], objectUrl?: string) {
     releasePlayback();
-    const words = persianCaptionWords(latestListening?.transcriptFa ?? "");
     let finished = false;
     let lastWord = "";
+    let timingIndex = -1;
     playbackRef.current = audio;
     playbackUrlRef.current = objectUrl ?? null;
     audio.preload = "auto";
@@ -1014,9 +1053,11 @@ export default function Home() {
     };
     setRapidPlaying(true);
     const updateCaption = () => {
-      const duration = Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : 1;
-      const word = captionWordAtProgress(words, (audio.currentTime + 0.12) / duration);
-      if (word && word !== lastWord) {
+      const now = audio.currentTime;
+      while (timingIndex + 1 < timings.length && timings[timingIndex + 1].start <= now) timingIndex += 1;
+      const activeTiming = timingIndex >= 0 && now <= timings[timingIndex].end ? timings[timingIndex] : null;
+      const word = activeTiming?.word ?? "";
+      if (word !== lastWord) {
         lastWord = word;
         setRapidCaptionWord(word);
       }
@@ -1027,83 +1068,19 @@ export default function Home() {
     setStatus("Playing with one-word Persian captions.");
   }
 
-  function playRapidDeviceVoice(text: string) {
-    if (typeof speechSynthesis === "undefined") return false;
-    const persianVoice = speechSynthesis.getVoices().find((voice) => voice.lang.toLowerCase().startsWith("fa"));
-    if (!persianVoice) return false;
-    releasePlayback();
-    const words = persianCaptionWords(text);
-    const indexedWords = [...text.matchAll(PERSIAN_WORD_PATTERN)].filter((match) => IS_PERSIAN_WORD.test(match[0]));
-    let lastBoundaryAt = 0;
-    let fallbackIndex = 0;
-    let finished = false;
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = persianVoice.lang;
-    utterance.voice = persianVoice;
-    utterance.rate = 0.85;
-    utterance.onboundary = (event) => {
-      lastBoundaryAt = performance.now();
-      const matchIndex = indexedWords.findLastIndex((part) => (part.index ?? 0) <= event.charIndex);
-      if (matchIndex >= 0) {
-        fallbackIndex = matchIndex;
-        setRapidCaptionWord(indexedWords[matchIndex][0]);
-      }
-    };
-    utterance.onend = () => {
-      if (finished) return;
-      finished = true;
-      finishRapidListen();
-    };
-    utterance.onerror = () => {
-      if (finished) return;
-      finished = true;
-      releasePlayback();
-      setStatus("The device voice stopped. Try the audio again.");
-    };
-    setRapidPlaying(true);
-    if (words.length) {
-      setRapidCaptionWord(words[0]);
-      rapidTimerRef.current = window.setInterval(() => {
-        if (lastBoundaryAt && performance.now() - lastBoundaryAt < 650) return;
-        fallbackIndex = Math.min(words.length - 1, fallbackIndex + 1);
-        setRapidCaptionWord(words[fallbackIndex]);
-      }, 400);
-    }
-    speechSynthesis.cancel();
-    speechSynthesis.speak(utterance);
-    setStatus("Playing with one-word Persian captions.");
-    return true;
-  }
-
   async function playRapidListening() {
     if (!latestListening || audioBusy || rapidPlaying) return;
     const speechText = sanitizePersianSpeechText(latestListening.transcriptFa);
-    const cacheKey = `listening-${latestListening.id}`;
+    const cacheKey = `aligned-${latestListening.id}`;
     setAudioBusy(true);
-    setStatus("Starting rapid Persian captions…");
+    setStatus("Aligning every word to the audio…");
     try {
-      if (latestListening.mediaUrl) {
-        await playRapidAudioElement(new Audio(latestListening.mediaUrl));
-      } else {
-        const cached = await readCachedSpeech(cacheKey);
-        if (cached) {
-          const url = URL.createObjectURL(cached);
-          await playRapidAudioElement(new Audio(url), url);
-        } else if (playRapidDeviceVoice(speechText)) {
-          void prepareSpeech(speechText, cacheKey).catch(() => {
-            // Device speech keeps Rapid Captions available while studio audio prepares.
-          });
-        } else {
-          const blob = await prepareSpeech(speechText, cacheKey);
-          const url = URL.createObjectURL(blob);
-          await playRapidAudioElement(new Audio(url), url);
-        }
-      }
+      const { audio, timings } = await prepareAlignedSpeech(speechText, cacheKey);
+      const url = URL.createObjectURL(audio);
+      await playRapidAudioElement(new Audio(url), timings, url);
     } catch (error) {
-      if (!playRapidDeviceVoice(speechText)) {
-        releasePlayback();
-        setStatus(error instanceof Error ? error.message : "Persian audio is unavailable.");
-      }
+      releasePlayback();
+      setStatus(error instanceof Error ? error.message : "Exact word timing is unavailable.");
     } finally {
       setAudioBusy(false);
     }
