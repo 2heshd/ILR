@@ -39,6 +39,8 @@ import type {
 const STORAGE_KEY = "ilr-persian-v3";
 const ONBOARDING_KEY = "ilr-persian-onboarding-v1";
 const LEGACY_KEYS = ["ilr-persian-v2", "ilr-persian-v1"];
+const PERSIAN_WORD_PATTERN = /([\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06FA-\u06FC\u200C]+)/g;
+const IS_PERSIAN_WORD = /^[\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06FA-\u06FC\u200C]+$/;
 
 type Tab = "today" | "sources" | "reading" | "listening" | "speaking" | "anki" | "analytics";
 
@@ -149,6 +151,30 @@ function courseWordKey(value: string) {
     .replace(/[\u064b-\u065f\u0670\s‌]+/g, "");
 }
 
+function progressiveListeningText(text: string, words: LexicalItem[], revealPercent: number) {
+  const parts = text.split(PERSIAN_WORD_PATTERN);
+  const byWord = new Map(words.map((word) => [word.normalizedForm, word]));
+  const unknownWords = [...new Set(parts
+    .filter((part) => IS_PERSIAN_WORD.test(part))
+    .map((part) => normalizePersian(part))
+    .filter((part) => {
+      const status = byWord.get(part)?.knowledgeState;
+      return status !== "known" && status !== "automatic";
+    }))];
+  const revealCount = Math.ceil(unknownWords.length * revealPercent / 100);
+  const revealed = new Set(unknownWords.slice(0, revealCount));
+  return {
+    text: parts.map((part) => {
+      if (!IS_PERSIAN_WORD.test(part)) return part;
+      const normalized = normalizePersian(part);
+      const status = byWord.get(normalized)?.knowledgeState;
+      return status !== "known" && status !== "automatic" && revealed.has(normalized) ? part : "•••";
+    }).join(""),
+    unknownCount: unknownWords.length,
+    revealedCount: revealCount,
+  };
+}
+
 function friendlyAccountError(error: unknown) {
   const message = error instanceof Error
     ? error.message
@@ -198,7 +224,7 @@ export default function Home() {
   const [readingUnknown, setReadingUnknown] = useState(0);
   const [readingRereads, setReadingRereads] = useState(0);
   const [listensCount, setListensCount] = useState(0);
-  const [transcriptVisible, setTranscriptVisible] = useState(false);
+  const [transcriptRevealStep, setTranscriptRevealStep] = useState(0);
   const [activePassageId, setActivePassageId] = useState<string | null>(null);
   const [activeListeningId, setActiveListeningId] = useState<string | null>(null);
   const startRef = useRef(Date.now());
@@ -371,6 +397,12 @@ export default function Home() {
   const medianRecall = median(state.reviews.slice(-250).map((review) => review.responseMs));
   const latestPassage = state.passages.find((item) => item.id === activePassageId) ?? state.passages.at(-1);
   const latestListening = state.listeningItems.find((item) => item.id === activeListeningId) ?? state.listeningItems.at(-1);
+  const transcriptRevealPercent = Math.min(100, transcriptRevealStep * 30);
+  const transcriptVisible = transcriptRevealStep > 0;
+  const listeningReveal = useMemo(
+    () => latestListening ? progressiveListeningText(latestListening.transcriptFa, state.words, transcriptRevealPercent) : null,
+    [latestListening, state.words, transcriptRevealPercent],
+  );
   const latestSpeakingPrompt = state.speakingPrompts.at(-1);
 
   useEffect(() => {
@@ -536,11 +568,9 @@ export default function Home() {
         if (!key || existing.has(key)) return false;
         existing.add(key);
         return true;
-      }).map((entry, index): LexicalItem => {
+      }).map((entry): LexicalItem => {
         const now = new Date();
-        const scheduledAt = new Date(now);
-        scheduledAt.setDate(now.getDate() + Math.min(6, Math.floor(index / 25)));
-        const fsrsCard = createSerializedCard(scheduledAt);
+        const fsrsCard = createSerializedCard(now);
         return {
           id: id(),
           displayForm: entry.fa,
@@ -573,7 +603,7 @@ export default function Home() {
         words: [...currentState.words, ...incoming],
       }));
       const duplicates = entries.length - incoming.length;
-      setStatus(`Week ${targetWeek} ready · ${incoming.length} new words · ${Math.min(25, incoming.length)} due today${duplicates ? ` · ${duplicates} repeats skipped` : ""}.`);
+      setStatus(`Week ${targetWeek} ready · all ${incoming.length} new words available today${duplicates ? ` · ${duplicates} repeats skipped` : ""}.`);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Course vocabulary could not be loaded.");
     } finally {
@@ -726,7 +756,7 @@ export default function Home() {
         setState((currentState) => ({ ...currentState, listeningItems: [...currentState.listeningItems, item] }));
         setActiveListeningId(item.id);
         setListensCount(0);
-        setTranscriptVisible(false);
+        setTranscriptRevealStep(0);
         void prepareSpeech(item.transcriptFa, `listening-${item.id}`).catch(() => {
           // The device voice is the no-wait fallback if this background request fails.
         });
@@ -1027,7 +1057,7 @@ export default function Home() {
   function resetListeningLab(itemId: string) {
     setActiveListeningId(itemId);
     setListensCount(0);
-    setTranscriptVisible(false);
+    setTranscriptRevealStep(0);
     setTab("listening");
   }
 
@@ -1096,7 +1126,7 @@ export default function Home() {
             </div>
             <div className="row"><button className="danger" onClick={() => rateKnown(false)}>I was wrong</button><button className="primary" onClick={() => rateKnown(true)}>I was right</button></div>
           </>}
-        </> : !currentCourseWeekImported ? <div className="next-action course-ready"><span className="next-number">01</span><h3>Start Unit 1.</h3><p>Week {state.weekNumber} contains {currentCourseWordCount} entries from {currentCourseLessonCount} lesson lists. Introductory-unit vocabulary has been removed. The first 25 words become available today; the rest arrive gradually through the week.</p><div className="course-ready-meta"><span>{COURSE_META.entries.toLocaleString()} course entries</span><span>{COURSE_META.lessonLists} lesson lists</span><span>{COURSE_META.weeks} weeks</span></div><button className="primary" onClick={() => void importCourseWeek()} disabled={courseBusy}>{courseBusy ? "Preparing…" : state.weekNumber === 1 ? "Start Unit 1" : `Start Week ${state.weekNumber}`}</button></div> : state.words.length ? <div className="next-action"><h3>You&apos;re caught up.</h3><p>Choose Reading or Listening from the menu for your next session.</p></div> : <div className="next-action"><span className="next-number">01</span><h3>Add your first words.</h3><p>Add vocabulary manually to create your review schedule.</p><button className="primary" onClick={() => setShowIntake(true)}>Add words</button></div>}
+        </> : !currentCourseWeekImported ? <div className="next-action course-ready"><span className="next-number">01</span><h3>Start Unit 1.</h3><p>Week {state.weekNumber} contains {currentCourseWordCount} entries from {currentCourseLessonCount} lesson lists. Introductory-unit vocabulary has been removed. Every word becomes available immediately, with no daily cap.</p><div className="course-ready-meta"><span>{COURSE_META.entries.toLocaleString()} course entries</span><span>{COURSE_META.lessonLists} lesson lists</span><span>{COURSE_META.weeks} weeks</span></div><button className="primary" onClick={() => void importCourseWeek()} disabled={courseBusy}>{courseBusy ? "Preparing…" : state.weekNumber === 1 ? "Start Unit 1" : `Start Week ${state.weekNumber}`}</button></div> : state.words.length ? <div className="next-action"><h3>You&apos;re caught up.</h3><p>Choose Reading or Listening from the menu for your next session.</p></div> : <div className="next-action"><span className="next-number">01</span><h3>Add your first words.</h3><p>Add vocabulary manually to create your review schedule.</p><button className="primary" onClick={() => setShowIntake(true)}>Add words</button></div>}
       </div>
 
       <div className="card span-5 dashboard-secondary">
@@ -1174,9 +1204,11 @@ export default function Home() {
         <div className="card span-7">
           <div className="muted">ILR ~{latestListening.ilrEstimate} · {latestListening.topic} · {latestListening.genre} · {latestListening.register}</div><h2>{latestListening.title}</h2><SourceLine item={latestListening} />
           <div className="audio-stage"><button className="primary big-button" disabled={audioBusy} onClick={playListening}>{audioBusy ? "Starting…" : "▶ Play Persian audio"}</button><span className="muted">listens: {listensCount}</span></div>
-          {transcriptVisible ? <InteractivePersianText text={latestListening.transcriptFa} words={state.words} onStatus={setWordKnowledge} className="fa passage" /> : <div className="transcript-hidden">Transcript hidden</div>}
-          {transcriptVisible && !!latestListening.targetWords.length && <div className="target-strip"><span className="muted">Extracted targets</span>{latestListening.targetWords.map((word) => <span className="pill fa-inline" key={word}>{word}</span>)}</div>}
-          <div className="row"><button className="secondary" onClick={() => setTranscriptVisible(true)}>Reveal transcript</button>{transcriptVisible && <span className="pill">transcript reveal logged</span>}</div>
+          {transcriptVisible && listeningReveal ? <InteractivePersianText text={listeningReveal.text} words={state.words} onStatus={setWordKnowledge} className="fa passage progressive-transcript" /> : <div className="transcript-hidden">Transcript hidden</div>}
+          <div className="row">
+            <button className="secondary" disabled={transcriptRevealPercent >= 100 || listeningReveal?.unknownCount === 0} onClick={() => setTranscriptRevealStep((step) => Math.min(4, step + 1))}>{transcriptRevealPercent === 0 ? "Reveal 30% of unknown words" : transcriptRevealPercent < 90 ? "Reveal 30% more" : transcriptRevealPercent < 100 ? "Reveal final 10%" : "All unknown words revealed"}</button>
+            {transcriptVisible && listeningReveal && <span className="pill">{listeningReveal.revealedCount}/{listeningReveal.unknownCount} unknown words · reveal logged</span>}
+          </div>
         </div>
         <div className="card span-5">
           {listensCount > 0 ? <ComprehensionGrader
