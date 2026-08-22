@@ -145,6 +145,9 @@ export type PassageAttempt = {
   gradingMode?: "ai" | "self";
   firstPass: boolean;
   errorCategories?: ErrorCategory[];
+  readingMode?: "full" | "inference";
+  maskedPercent?: number;
+  sentenceGists?: string[];
 };
 
 export type ListeningItem = {
