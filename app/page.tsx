@@ -5,6 +5,7 @@ import type { User } from "@supabase/supabase-js";
 import AccountWorkspace from "@/components/AccountWorkspace";
 import AnkiWorkspace from "@/components/AnkiWorkspace";
 import ComprehensionGrader from "@/components/ComprehensionGrader";
+import GistListening from "@/components/GistListening";
 import InferenceReadingText, { persianSentences } from "@/components/InferenceReadingText";
 import InteractivePersianText from "@/components/InteractivePersianText";
 import Onboarding from "@/components/Onboarding";
@@ -261,6 +262,11 @@ export default function Home() {
   const [readingUnknown, setReadingUnknown] = useState(0);
   const [readingRereads, setReadingRereads] = useState(0);
   const [listensCount, setListensCount] = useState(0);
+  const [listeningMode, setListeningMode] = useState<"full" | "gist">("full");
+  const [listeningGists, setListeningGists] = useState<string[]>([]);
+  const [gistSentenceListenCounts, setGistSentenceListenCounts] = useState<number[]>([]);
+  const [gistAnsweredAfterListens, setGistAnsweredAfterListens] = useState<number[]>([]);
+  const [gistHintedSentenceIndexes, setGistHintedSentenceIndexes] = useState<number[]>([]);
   const [transcriptRevealStep, setTranscriptRevealStep] = useState(0);
   const [activePassageId, setActivePassageId] = useState<string | null>(null);
   const [activeListeningId, setActiveListeningId] = useState<string | null>(null);
@@ -813,6 +819,10 @@ export default function Home() {
         setState((currentState) => ({ ...currentState, listeningItems: [...currentState.listeningItems, item] }));
         setActiveListeningId(item.id);
         setListensCount(0);
+        setListeningGists([]);
+        setGistSentenceListenCounts([]);
+        setGistAnsweredAfterListens([]);
+        setGistHintedSentenceIndexes([]);
         setTranscriptRevealStep(0);
         void prepareSpeech(item.transcriptFa, `listening-${item.id}`).catch(() => {
           // The device voice is the no-wait fallback if this background request fails.
@@ -905,6 +915,59 @@ export default function Home() {
     }
   }
 
+  async function playGistSentence(index: number) {
+    if (!latestListening || audioBusy || (gistSentenceListenCounts[index] ?? 0) >= 2) return;
+    const sentence = persianSentences(latestListening.transcriptFa)[index];
+    if (!sentence) return;
+    const speechText = sanitizePersianSpeechText(sentence);
+    const cacheKey = `gist-${latestListening.id}-${index}`;
+    setAudioBusy(true);
+    setStatus(`Starting sentence ${index + 1}…`);
+    try {
+      const cached = await readCachedSpeech(cacheKey);
+      if (cached) await playAudioBlob(cached);
+      else if (playWithDeviceVoice(speechText)) {
+        void prepareSpeech(speechText, cacheKey).catch(() => {
+          // The device voice keeps the first play immediate if studio audio is slow.
+        });
+      } else {
+        await playAudioBlob(await prepareSpeech(speechText, cacheKey));
+      }
+      setGistSentenceListenCounts((current) => Array.from(
+        { length: persianSentences(latestListening.transcriptFa).length },
+        (_, sentenceIndex) => sentenceIndex === index ? (current[sentenceIndex] ?? 0) + 1 : (current[sentenceIndex] ?? 0),
+      ));
+      setListensCount((count) => count + 1);
+      setStatus(`Sentence ${index + 1} played. Capture only its main idea.`);
+    } catch (error) {
+      if (playWithDeviceVoice(speechText)) {
+        setGistSentenceListenCounts((current) => Array.from(
+          { length: persianSentences(latestListening.transcriptFa).length },
+          (_, sentenceIndex) => sentenceIndex === index ? (current[sentenceIndex] ?? 0) + 1 : (current[sentenceIndex] ?? 0),
+        ));
+        setListensCount((count) => count + 1);
+        setStatus(`Sentence ${index + 1} played with the device voice.`);
+      } else setStatus(error instanceof Error ? error.message : "Sentence audio is unavailable.");
+    } finally {
+      setAudioBusy(false);
+    }
+  }
+
+  function updateListeningGist(index: number, value: string) {
+    setListeningGists((current) => {
+      const next = Array.from({ length: persianSentences(latestListening?.transcriptFa ?? "").length }, (_, sentenceIndex) => (
+        sentenceIndex === index ? value : (current[sentenceIndex] ?? "")
+      ));
+      if (!current[index]?.trim() && value.trim()) {
+        setGistAnsweredAfterListens((counts) => Array.from(
+          { length: next.length },
+          (_, sentenceIndex) => sentenceIndex === index ? (gistSentenceListenCounts[index] ?? 0) : (counts[sentenceIndex] ?? 0),
+        ));
+      }
+      return next;
+    });
+  }
+
   function completeListening(result: GradingResult) {
     if (!latestListening || listensCount === 0) return;
     const attempt: ListeningAttempt = {
@@ -919,11 +982,20 @@ export default function Home() {
       answers: result.answers,
       grade: result.grade,
       gradingMode: result.gradingMode,
-      firstPass: !transcriptVisible,
+      firstPass: listeningMode === "gist"
+        ? gistAnsweredAfterListens.length > 0 && gistAnsweredAfterListens.every((count) => count === 1) && gistHintedSentenceIndexes.length === 0
+        : !transcriptVisible,
       errorCategories: result.grade.failureTypes,
+      listeningMode,
+      sentenceGists: listeningMode === "gist" ? listeningGists : undefined,
+      sentenceListenCounts: listeningMode === "gist" ? gistSentenceListenCounts : undefined,
+      gistAnsweredAfterListens: listeningMode === "gist" ? gistAnsweredAfterListens : undefined,
+      gistHintedSentenceIndexes: listeningMode === "gist" ? gistHintedSentenceIndexes : undefined,
     };
     setState((currentState) => ({ ...currentState, listeningAttempts: [...currentState.listeningAttempts, attempt] }));
-    setStatus(`Listening saved · ${result.grade.overallScore}% comprehension after ${listensCount} listen${listensCount === 1 ? "" : "s"}.`);
+    setStatus(listeningMode === "gist"
+      ? `Gist listening saved · ${result.grade.overallScore}% comprehension · ${gistAnsweredAfterListens.filter((count) => count === 1).length}/${listeningGists.length} captured after one listen · ${gistHintedSentenceIndexes.length} vocabulary aids.`
+      : `Listening saved · ${result.grade.overallScore}% comprehension after ${listensCount} listen${listensCount === 1 ? "" : "s"}.`);
   }
 
   function addAnkiWords(rows: AnkiVocabularyRow[]) {
@@ -1105,6 +1177,10 @@ export default function Home() {
   const transcriptRate = Math.round(100 * state.listeningAttempts.filter((attempt) => attempt.transcriptRevealed).length / Math.max(1, state.listeningAttempts.length));
   const inferenceAttempts = state.passageAttempts.filter((attempt) => attempt.readingMode === "inference");
   const inferenceAverage = Math.round(average(inferenceAttempts.slice(-5).map((attempt) => attempt.comprehensionScore)));
+  const gistListeningAttempts = state.listeningAttempts.filter((attempt) => attempt.listeningMode === "gist");
+  const gistListeningAverage = Math.round(average(gistListeningAttempts.slice(-5).map((attempt) => attempt.comprehensionScore)));
+  const recentGistAnswerCounts = gistListeningAttempts.slice(-5).flatMap((attempt) => attempt.gistAnsweredAfterListens ?? []);
+  const firstListenGistRate = Math.round(100 * recentGistAnswerCounts.filter((count) => count === 1).length / Math.max(1, recentGistAnswerCounts.length));
   const currentCourseWeekImported = state.course.importedWeeks.includes(state.weekNumber);
   const currentCourseWordCount = COURSE_META.weekCounts[state.weekNumber - 1];
   const currentCourseLessonCount = COURSE_META.weekLessonCounts[state.weekNumber - 1];
@@ -1115,6 +1191,17 @@ export default function Home() {
   const activeReadingQuestions = readingMode === "inference" && focusedReadingQuestions.length
     ? focusedReadingQuestions
     : (latestPassage?.questions ?? []);
+  const gistListeningSentences = latestListening ? persianSentences(latestListening.transcriptFa) : [];
+  const gistListeningReady = listeningMode === "gist"
+    && gistListeningSentences.length > 0
+    && listeningGists.length === gistListeningSentences.length
+    && listeningGists.every((gist) => gist.trim())
+    && gistSentenceListenCounts.length === gistListeningSentences.length
+    && gistSentenceListenCounts.every((count) => count >= 1);
+  const focusedListeningQuestions = latestListening?.questions.filter((question) => question.type !== "detail") ?? [];
+  const activeListeningQuestions = listeningMode === "gist" && focusedListeningQuestions.length
+    ? focusedListeningQuestions
+    : (latestListening?.questions ?? []);
 
   function resetReadingLab(passageId: string) {
     setActivePassageId(passageId);
@@ -1130,6 +1217,10 @@ export default function Home() {
   function resetListeningLab(itemId: string) {
     setActiveListeningId(itemId);
     setListensCount(0);
+    setListeningGists([]);
+    setGistSentenceListenCounts([]);
+    setGistAnsweredAfterListens([]);
+    setGistHintedSentenceIndexes([]);
     setTranscriptRevealStep(0);
     setTab("listening");
   }
@@ -1295,28 +1386,30 @@ export default function Home() {
     </section>}
 
     {tab === "listening" && <section className="grid">
-      <div className="card span-12 lab-header"><div><h2>Listening</h2><span className="muted">Start audio-only. Fresh transfer tests unfamiliar speech.</span></div><div className="row"><button className="secondary" disabled={generationBusy !== null} onClick={() => generatePractice("listening", "controlled")}>{generationBusy === "listening" ? "Generating…" : "Controlled"}</button><button className="primary" disabled={generationBusy !== null} onClick={() => generatePractice("listening", "transfer")}>{generationBusy === "listening" ? "Generating…" : "Fresh transfer"}</button></div></div>
+      <div className="card span-12 lab-header"><div><h2>Listening</h2><span className="muted">Full tests the complete passage. Gist trains meaning under imperfect hearing.</span></div><div className="row"><button className={listeningMode === "full" ? "mode-button active" : "mode-button"} onClick={() => { releasePlayback(); setListeningMode("full"); setListensCount(0); setListeningGists([]); setGistSentenceListenCounts([]); setGistAnsweredAfterListens([]); setGistHintedSentenceIndexes([]); }}>Full audio</button><button className={listeningMode === "gist" ? "mode-button active" : "mode-button"} onClick={() => { releasePlayback(); setListeningMode("gist"); setListensCount(0); setTranscriptRevealStep(0); setListeningGists([]); setGistSentenceListenCounts([]); setGistAnsweredAfterListens([]); setGistHintedSentenceIndexes([]); }}>Gist</button><button className="secondary" disabled={generationBusy !== null} onClick={() => generatePractice("listening", "controlled")}>{generationBusy === "listening" ? "Generating…" : "Controlled"}</button><button className="primary" disabled={generationBusy !== null} onClick={() => generatePractice("listening", "transfer")}>{generationBusy === "listening" ? "Generating…" : "Fresh transfer"}</button></div></div>
       {latestListening ? <>
         <div className="card span-7">
           <div className="muted">ILR ~{latestListening.ilrEstimate} · {latestListening.topic} · {latestListening.genre} · {latestListening.register}</div><h2>{latestListening.title}</h2><SourceLine item={latestListening} />
-          <div className="audio-stage"><button className="primary big-button" disabled={audioBusy} onClick={playListening}>{audioBusy ? "Starting…" : "▶ Play Persian audio"}</button><span className="muted">listens: {listensCount}</span></div>
-          {transcriptVisible && listeningReveal ? <InteractivePersianText text={listeningReveal.text} words={state.words} onStatus={setWordKnowledge} className="fa passage progressive-transcript" /> : <div className="transcript-hidden">Transcript hidden</div>}
-          <div className="row">
-            <button className="secondary" disabled={transcriptRevealPercent >= 100 || listeningReveal?.unknownCount === 0} onClick={() => setTranscriptRevealStep((step) => Math.min(4, step + 1))}>{transcriptRevealPercent === 0 ? "Reveal 30% of unknown words" : transcriptRevealPercent < 90 ? "Reveal 30% more" : transcriptRevealPercent < 100 ? "Reveal final 10%" : "All unknown words revealed"}</button>
-            {transcriptVisible && listeningReveal && <span className="pill">{listeningReveal.revealedCount}/{listeningReveal.unknownCount} unknown words · reveal logged</span>}
-          </div>
+          {listeningMode === "gist" ? <GistListening sentences={gistListeningSentences} words={state.words} gists={listeningGists} listenCounts={gistSentenceListenCounts} hintedSentenceIndexes={gistHintedSentenceIndexes} busy={audioBusy} onPlay={(index) => void playGistSentence(index)} onGistChange={updateListeningGist} onHint={(index) => setGistHintedSentenceIndexes((current) => [...new Set([...current, index])])} /> : <>
+            <div className="audio-stage"><button className="primary big-button" disabled={audioBusy} onClick={playListening}>{audioBusy ? "Starting…" : "▶ Play Persian audio"}</button><span className="muted">listens: {listensCount}</span></div>
+            {transcriptVisible && listeningReveal ? <InteractivePersianText text={listeningReveal.text} words={state.words} onStatus={setWordKnowledge} className="fa passage progressive-transcript" /> : <div className="transcript-hidden">Transcript hidden</div>}
+            <div className="row">
+              <button className="secondary" disabled={transcriptRevealPercent >= 100 || listeningReveal?.unknownCount === 0} onClick={() => setTranscriptRevealStep((step) => Math.min(4, step + 1))}>{transcriptRevealPercent === 0 ? "Reveal 30% of unknown words" : transcriptRevealPercent < 90 ? "Reveal 30% more" : transcriptRevealPercent < 100 ? "Reveal final 10%" : "All unknown words revealed"}</button>
+              {transcriptVisible && listeningReveal && <span className="pill">{listeningReveal.revealedCount}/{listeningReveal.unknownCount} unknown words · reveal logged</span>}
+            </div>
+          </>}
         </div>
         <div className="card span-5">
-          {listensCount > 0 ? <ComprehensionGrader
-            key={latestListening.id}
+          {(listeningMode === "gist" ? gistListeningReady : listensCount > 0) ? <ComprehensionGrader
+            key={`${latestListening.id}-${listeningMode}`}
             kind="listening"
             sourceText={latestListening.transcriptFa}
-            questions={latestListening.questions}
+            questions={activeListeningQuestions}
             ilrEstimate={latestListening.ilrEstimate}
             listensCount={listensCount}
-            transcriptRevealed={transcriptVisible}
+            transcriptRevealed={listeningMode === "full" && transcriptVisible}
             onComplete={completeListening}
-          /> : <div className="empty">Play the audio at least once before answering.</div>}
+          /> : <div className="empty">{listeningMode === "gist" ? "Listen and capture all six sentence gists to unlock the focused check." : "Play the audio at least once before answering."}</div>}
         </div>
       </> : <div className="card span-12 empty">No audio. Generate one to begin.</div>}
     </section>}
@@ -1354,8 +1447,8 @@ export default function Home() {
       <Metric label="Listening avg (5)" value={listeningAverage ? `${listeningAverage}%` : "—"} />
       <div className="card span-12"><h2>Current training phase</h2><div className="queue"><div className="queue-item"><span>{trainingPhase.label}<small>{trainingPhase.focus}</small></span><strong>{trainingPhase.authenticTarget}% authentic target</strong></div><div className="queue-item"><span>Adaptive bottleneck<small>{bottleneck.evidence}</small></span><strong>{bottleneck.label}</strong></div></div></div>
       <div className="card span-7"><h2>Weak / slow lexical items</h2><div className="word-list single">{weakWords.map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><span>{word.definition}</span><span>{Math.round(100 * word.correct / word.reviews)}% correct · {word.medianResponseMs ? `${(word.medianResponseMs / 1000).toFixed(1)}s median` : "no latency"} · {word.lapses} lapses</span></div>)}</div>{!weakWords.length && <div className="empty">Not enough review history yet.</div>}</div>
-      <div className="card span-5"><h2>Performance history</h2><div className="queue"><div className="queue-item"><span>Reading attempts</span><strong>{state.passageAttempts.length}</strong></div><div className="queue-item"><span>Inference-mode attempts</span><strong>{inferenceAttempts.length}</strong></div><div className="queue-item"><span>Listening attempts</span><strong>{state.listeningAttempts.length}</strong></div><div className="queue-item"><span>Speaking attempts</span><strong>{state.speakingAttempts.length}</strong></div><div className="queue-item"><span>Speaking avg (5)</span><strong>{speakingAverage ? `${speakingAverage}%` : "—"}</strong></div><div className="queue-item"><span>Mature vocabulary</span><strong>{mature}</strong></div><div className="queue-item"><span>Current week</span><strong>{state.weekNumber}/{COURSE_META.weeks}</strong></div></div></div>
-      <div className="card span-12"><h2>Recent diagnostics</h2><div className="diagnostic-grid"><Diagnostic label="Text retention" value={visualRetention} /><Diagnostic label="Audio retention" value={audioReviews.length ? audioRetention : 0} /><Diagnostic label="Pattern retention" value={patternReviews.length ? patternRetention : 0} /><Diagnostic label="Inference-mode avg" value={inferenceAttempts.length ? inferenceAverage : 0} /><Diagnostic label="First-listen score" value={firstListenScore} /><Diagnostic label="Transcript reveal" value={transcriptRate} /><Diagnostic label="Reading inference" value={Math.round(average(state.passageAttempts.slice(-5).map((attempt) => attempt.inferenceScore)))} /><Diagnostic label="Reading discourse" value={Math.round(average(state.passageAttempts.slice(-5).map((attempt) => attempt.discourseScore)))} /><Diagnostic label="Listening detail" value={Math.round(average(state.listeningAttempts.slice(-5).map((attempt) => attempt.detailScore)))} /><Diagnostic label="Listening inference" value={Math.round(average(state.listeningAttempts.slice(-5).map((attempt) => attempt.inferenceScore)))} /></div></div>
+      <div className="card span-5"><h2>Performance history</h2><div className="queue"><div className="queue-item"><span>Reading attempts</span><strong>{state.passageAttempts.length}</strong></div><div className="queue-item"><span>Inference-mode attempts</span><strong>{inferenceAttempts.length}</strong></div><div className="queue-item"><span>Listening attempts</span><strong>{state.listeningAttempts.length}</strong></div><div className="queue-item"><span>Gist-listening attempts</span><strong>{gistListeningAttempts.length}</strong></div><div className="queue-item"><span>Speaking attempts</span><strong>{state.speakingAttempts.length}</strong></div><div className="queue-item"><span>Speaking avg (5)</span><strong>{speakingAverage ? `${speakingAverage}%` : "—"}</strong></div><div className="queue-item"><span>Mature vocabulary</span><strong>{mature}</strong></div><div className="queue-item"><span>Current week</span><strong>{state.weekNumber}/{COURSE_META.weeks}</strong></div></div></div>
+      <div className="card span-12"><h2>Recent diagnostics</h2><div className="diagnostic-grid"><Diagnostic label="Text retention" value={visualRetention} /><Diagnostic label="Audio retention" value={audioReviews.length ? audioRetention : 0} /><Diagnostic label="Pattern retention" value={patternReviews.length ? patternRetention : 0} /><Diagnostic label="Inference-mode avg" value={inferenceAttempts.length ? inferenceAverage : 0} /><Diagnostic label="Gist-listening avg" value={gistListeningAttempts.length ? gistListeningAverage : 0} /><Diagnostic label="First-listen gists" value={recentGistAnswerCounts.length ? firstListenGistRate : 0} /><Diagnostic label="First-listen score" value={firstListenScore} /><Diagnostic label="Transcript reveal" value={transcriptRate} /><Diagnostic label="Reading inference" value={Math.round(average(state.passageAttempts.slice(-5).map((attempt) => attempt.inferenceScore)))} /><Diagnostic label="Reading discourse" value={Math.round(average(state.passageAttempts.slice(-5).map((attempt) => attempt.discourseScore)))} /><Diagnostic label="Listening detail" value={Math.round(average(state.listeningAttempts.slice(-5).map((attempt) => attempt.detailScore)))} /><Diagnostic label="Listening inference" value={Math.round(average(state.listeningAttempts.slice(-5).map((attempt) => attempt.inferenceScore)))} /></div></div>
       <AnalyticsTable title="Attempts by source" rows={sourceAnalytics} />
       <AnalyticsTable title="Attempts by genre" rows={genreAnalytics} />
       <AnalyticsTable title="Attempts by register" rows={registerAnalytics} />
