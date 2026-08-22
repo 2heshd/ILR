@@ -284,7 +284,7 @@ export default function Home() {
   const speechCacheRef = useRef(new Map<string, Blob>());
   const speechRequestsRef = useRef(new Map<string, Promise<Blob>>());
   const speechTimingsRef = useRef(new Map<string, TimedCaption[]>());
-  const speechTimingRequestsRef = useRef(new Map<string, Promise<TimedCaption[]>>());
+  const speechTimingRequestsRef = useRef(new Map<string, Promise<{ audio: Blob; timings: TimedCaption[] }>>());
 
   function releasePlayback() {
     if (rapidFrameRef.current !== null) window.cancelAnimationFrame(rapidFrameRef.current);
@@ -373,27 +373,39 @@ export default function Home() {
     return data.words;
   }
 
-  async function prepareSpeechTimings(audio: Blob, text: string, cacheKey: string) {
-    const cached = await readCachedSpeechTimings(cacheKey);
-    if (cached) return cached;
+  async function prepareAlignedSpeech(text: string, cacheKey: string) {
+    const [cachedAudio, cachedTimings] = await Promise.all([readCachedSpeech(cacheKey), readCachedSpeechTimings(cacheKey)]);
+    if (cachedAudio && cachedTimings) return { audio: cachedAudio, timings: cachedTimings };
     const pending = speechTimingRequestsRef.current.get(cacheKey);
     if (pending) return pending;
 
     const request = (async () => {
-      const form = new FormData();
-      form.append("audio", new File([audio], "persian-speech.mp3", { type: audio.type || "audio/mpeg" }));
-      form.append("text", text);
-      const response = await fetch("/api/speech-timings", { method: "POST", body: form });
-      const data = (await response.json()) as { words?: TimedCaption[]; error?: string };
-      if (!response.ok || !data.words?.length) throw new Error(data.error || "Exact word timing is unavailable.");
+      const response = await fetch("/api/speech-timings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      const data = (await response.json()) as { audioBase64?: string; mimeType?: string; words?: TimedCaption[]; error?: string };
+      if (!response.ok || !data.audioBase64 || !data.words?.length) throw new Error(data.error || "Exact word timing is unavailable.");
+      const binary = window.atob(data.audioBase64);
+      const bytes = new Uint8Array(binary.length);
+      for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+      const audio = new Blob([bytes], { type: data.mimeType || "audio/mpeg" });
+      speechCacheRef.current.set(cacheKey, audio);
       speechTimingsRef.current.set(cacheKey, data.words);
       if ("caches" in window) {
-        const cache = await caches.open("persian-speech-timings-v1");
-        await cache.put(speechTimingCacheRequest(cacheKey), new Response(JSON.stringify({ words: data.words }), {
-          headers: { "Content-Type": "application/json" },
-        }));
+        const [audioCache, timingCache] = await Promise.all([
+          caches.open("persian-audio-v2"),
+          caches.open("persian-speech-timings-v1"),
+        ]);
+        await Promise.all([
+          audioCache.put(speechCacheRequest(`v2-${cacheKey}`), new Response(audio, { headers: { "Content-Type": audio.type } })),
+          timingCache.put(speechTimingCacheRequest(cacheKey), new Response(JSON.stringify({ words: data.words }), {
+            headers: { "Content-Type": "application/json" },
+          })),
+        ]);
       }
-      return data.words;
+      return { audio, timings: data.words };
     })().finally(() => speechTimingRequestsRef.current.delete(cacheKey));
 
     speechTimingRequestsRef.current.set(cacheKey, request);
@@ -1059,20 +1071,12 @@ export default function Home() {
   async function playRapidListening() {
     if (!latestListening || audioBusy || rapidPlaying) return;
     const speechText = sanitizePersianSpeechText(latestListening.transcriptFa);
-    const cacheKey = `listening-${latestListening.id}`;
+    const cacheKey = `aligned-${latestListening.id}`;
     setAudioBusy(true);
     setStatus("Aligning every word to the audio…");
     try {
-      let audioBlob: Blob;
-      if (latestListening.mediaUrl) {
-        const response = await fetch(latestListening.mediaUrl);
-        if (!response.ok) throw new Error("The source audio could not be loaded for exact alignment.");
-        audioBlob = await response.blob();
-      } else {
-        audioBlob = (await readCachedSpeech(cacheKey)) ?? await prepareSpeech(speechText, cacheKey);
-      }
-      const timings = await prepareSpeechTimings(audioBlob, speechText, `v1-${cacheKey}`);
-      const url = URL.createObjectURL(audioBlob);
+      const { audio, timings } = await prepareAlignedSpeech(speechText, cacheKey);
+      const url = URL.createObjectURL(audio);
       await playRapidAudioElement(new Audio(url), timings, url);
     } catch (error) {
       releasePlayback();
