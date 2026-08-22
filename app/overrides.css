@@ -1331,7 +1331,7 @@ textarea {
   height: 100%;
   background: var(--accent);
   transform-origin: left;
-  animation: pattern-flash-countdown 3s linear forwards;
+  animation: pattern-flash-countdown 1s linear forwards;
 }
 
 .pattern-answer,

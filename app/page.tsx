@@ -462,7 +462,7 @@ export default function Home() {
       startRef.current = Date.now();
       setPatternPhase("answer");
       window.requestAnimationFrame(() => patternInputRef.current?.focus());
-    }, 3_000);
+    }, 1_000);
     return () => window.clearTimeout(timer);
   }, [current?.id, reviewModality]);
 
@@ -1279,7 +1279,7 @@ export default function Home() {
       <Metric label="Median recall" value={medianRecall ? `${(medianRecall / 1000).toFixed(1)}s` : "—"} />
 
       <div className="card span-7 dashboard-primary">
-        <div className="row spread"><h2>{state.words.length ? "Review" : "Start here"}</h2>{state.words.length > 0 && <div className="row"><button className={reviewModality === "visual" ? "mode-button active" : "mode-button"} onClick={() => setReviewModality("visual")}>Text</button><button className={reviewModality === "audio" ? "mode-button active" : "mode-button"} onClick={() => setReviewModality("audio")}>Audio</button><button className={reviewModality === "cloze" ? "mode-button active" : "mode-button"} onClick={() => setReviewModality("cloze")}>Patterns</button><span className="pill">{reviewModality === "cloze" ? "3s flash · type" : "3s · 8s · 15s"}</span></div>}</div>
+        <div className="row spread"><h2>{state.words.length ? "Review" : "Start here"}</h2>{state.words.length > 0 && <div className="row"><button className={reviewModality === "visual" ? "mode-button active" : "mode-button"} onClick={() => setReviewModality("visual")}>Text</button><button className={reviewModality === "audio" ? "mode-button active" : "mode-button"} onClick={() => setReviewModality("audio")}>Audio</button><button className={reviewModality === "cloze" ? "mode-button active" : "mode-button"} onClick={() => setReviewModality("cloze")}>Patterns</button><span className="pill">{reviewModality === "cloze" ? "1s flash · type" : "3s · 8s · 15s"}</span></div>}</div>
         {current ? <>
           {reviewModality === "cloze" ? <div className="pattern-recall" aria-live="polite">
             {patternPhase === "flash" && <div className="pattern-flash">
