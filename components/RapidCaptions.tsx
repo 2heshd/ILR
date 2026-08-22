@@ -6,11 +6,12 @@ type Props = {
   currentWord: string;
   captionListens: number;
   playing: boolean;
+  preparing: boolean;
   onPlay: () => void;
   onExit: () => void;
 };
 
-export default function RapidCaptions({ currentWord, captionListens, playing, onPlay, onExit }: Props) {
+export default function RapidCaptions({ currentWord, captionListens, playing, preparing, onPlay, onExit }: Props) {
   const onExitRef = useRef(onExit);
   onExitRef.current = onExit;
 
@@ -26,16 +27,16 @@ export default function RapidCaptions({ currentWord, captionListens, playing, on
     };
   }, []);
 
-  return <div className={playing ? "rapid-captions playing" : "rapid-captions"} role="dialog" aria-modal="true" aria-label="Rapid Persian captions">
+  return <div className={playing || preparing ? "rapid-captions playing" : "rapid-captions"} role="dialog" aria-modal="true" aria-label="Rapid Persian captions">
     <button className="rapid-caption-exit" onClick={onExit} aria-label="Exit Rapid Captions">Exit ×</button>
 
     <div className="rapid-caption-stage" aria-live="assertive" aria-atomic="true">
       <span key={currentWord || (playing ? "playing" : "idle")} className={currentWord ? "rapid-caption-word fa" : "rapid-caption-word idle"} dir="rtl">
-        {currentWord || (playing ? "" : captionListens ? "تمام" : "آماده")}
+        {currentWord || (preparing ? "SYNCING…" : playing ? "" : captionListens ? "تمام" : "آماده")}
       </span>
     </div>
 
-    {!playing && <div className="rapid-caption-controls">
+    {!playing && !preparing && <div className="rapid-caption-controls">
       <button className="primary" onClick={onPlay}>
         {captionListens ? "↻ Replay" : "▶ Start"}
       </button>
