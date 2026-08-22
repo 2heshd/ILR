@@ -113,7 +113,7 @@ function hydrateState(raw: Partial<StudyState> | null | undefined): StudyState {
     speakingAttempts: raw?.speakingAttempts ?? [],
   };
   state.words = state.words.map((word) => {
-    const savedCards = [word.fsrsCard, word.modalityCards?.visual, word.modalityCards?.audio].flatMap((card) => card ? [card] : []);
+    const savedCards = [word.fsrsCard, word.modalityCards?.visual, word.modalityCards?.audio, word.modalityCards?.cloze].flatMap((card) => card ? [card] : []);
     const savedCard = savedCards.length
       ? savedCards.reduce((latest, card) => (
         new Date(card.due).getTime() > new Date(latest.due).getTime() ? card : latest
@@ -128,7 +128,7 @@ function hydrateState(raw: Partial<StudyState> | null | undefined): StudyState {
       tier,
       modalityMastery: word.modalityMastery ?? {},
       // Keep modality analytics separate while sharing one spacing schedule.
-      modalityCards: { ...word.modalityCards, visual: fsrsCard, audio: fsrsCard },
+      modalityCards: { ...word.modalityCards, visual: fsrsCard, audio: fsrsCard, cloze: fsrsCard },
       knowledgeState,
       fsrsCard,
       dueAt: word.dueAt || fsrsCard.due,
@@ -151,6 +151,35 @@ function courseWordKey(value: string) {
   return normalizePersian(value)
     .normalize("NFKC")
     .replace(/[\u064b-\u065f\u0670\s‌]+/g, "");
+}
+
+function isPatternItem(word: LexicalItem) {
+  return word.displayForm.trim().split(/[\s\u200c]+/).filter(Boolean).length > 1;
+}
+
+function normalizeEnglishAnswer(value: string) {
+  return value
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\([^)]*\)/g, " ")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/^(?:to|a|an|the)\s+/, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function answerMatchesDefinition(answer: string, definition?: string) {
+  const normalizedAnswer = normalizeEnglishAnswer(answer);
+  if (!normalizedAnswer || !definition) return false;
+  return definition
+    .split(/\s*(?:[;,/|]|\bor\b)\s*/i)
+    .map(normalizeEnglishAnswer)
+    .filter(Boolean)
+    .some((expected) => expected === normalizedAnswer || (
+      Math.min(expected.length, normalizedAnswer.length) >= 4
+      && (expected.includes(normalizedAnswer) || normalizedAnswer.includes(expected))
+    ));
 }
 
 function progressiveListeningText(text: string, words: LexicalItem[], revealPercent: number) {
@@ -217,9 +246,12 @@ export default function Home() {
   const [cloudUser, setCloudUser] = useState<User | null>(null);
   const [cloudUsername, setCloudUsername] = useState<string | null>(null);
   const [cloudReady, setCloudReady] = useState(false);
-  const [reviewModality, setReviewModality] = useState<Extract<ReviewModality, "visual" | "audio">>("visual");
+  const [reviewModality, setReviewModality] = useState<Extract<ReviewModality, "visual" | "audio" | "cloze">>("visual");
   const [revealed, setRevealed] = useState(false);
   const [responseMs, setResponseMs] = useState(0);
+  const [patternPhase, setPatternPhase] = useState<"flash" | "answer" | "result">("flash");
+  const [patternInput, setPatternInput] = useState("");
+  const [patternMatched, setPatternMatched] = useState(false);
   const [readingStartedAt, setReadingStartedAt] = useState<number | null>(null);
   const [readingDurationMs, setReadingDurationMs] = useState(0);
   const [readingQuestionsOpen, setReadingQuestionsOpen] = useState(false);
@@ -230,6 +262,7 @@ export default function Home() {
   const [activePassageId, setActivePassageId] = useState<string | null>(null);
   const [activeListeningId, setActiveListeningId] = useState<string | null>(null);
   const startRef = useRef(Date.now());
+  const patternInputRef = useRef<HTMLInputElement | null>(null);
   const playbackRef = useRef<HTMLAudioElement | null>(null);
   const playbackUrlRef = useRef<string | null>(null);
   const speechCacheRef = useRef(new Map<string, Blob>());
@@ -384,12 +417,13 @@ export default function Home() {
     return () => window.clearTimeout(timer);
   }, [state, loaded, cloudUser, cloudReady]);
 
-  const due = useMemo(
-    () => state.words
+  const due = useMemo(() => {
+    const scheduled = state.words
       .filter((word) => new Date(word.modalityCards?.[reviewModality]?.due ?? word.dueAt).getTime() <= Date.now())
-      .sort((a, b) => new Date(a.modalityCards?.[reviewModality]?.due ?? a.dueAt).getTime() - new Date(b.modalityCards?.[reviewModality]?.due ?? b.dueAt).getTime()),
-    [state.words, reviewModality],
-  );
+      .sort((a, b) => new Date(a.modalityCards?.[reviewModality]?.due ?? a.dueAt).getTime() - new Date(b.modalityCards?.[reviewModality]?.due ?? b.dueAt).getTime());
+    if (reviewModality !== "cloze") return scheduled;
+    return [...scheduled.filter(isPatternItem), ...scheduled.filter((word) => !isPatternItem(word))];
+  }, [state.words, reviewModality]);
   const current = due[0];
   const allocation = useMemo(() => adaptiveAllocation(state), [state]);
   const trainingPhase = useMemo(() => currentTrainingPhase(state.weekNumber), [state.weekNumber]);
@@ -410,7 +444,17 @@ export default function Home() {
   useEffect(() => {
     setRevealed(false);
     setResponseMs(0);
+    setPatternInput("");
+    setPatternMatched(false);
+    setPatternPhase("flash");
     startRef.current = Date.now();
+    if (reviewModality !== "cloze" || !current) return;
+    const timer = window.setTimeout(() => {
+      startRef.current = Date.now();
+      setPatternPhase("answer");
+      window.requestAnimationFrame(() => patternInputRef.current?.focus());
+    }, 3_000);
+    return () => window.clearTimeout(timer);
   }, [current?.id, reviewModality]);
 
   useEffect(() => {
@@ -544,7 +588,7 @@ export default function Home() {
         lapses: 0,
         dueAt: fsrsCard.due,
         fsrsCard,
-        modalityCards: { visual: fsrsCard, audio: fsrsCard },
+        modalityCards: { visual: fsrsCard, audio: fsrsCard, cloze: fsrsCard },
       };
     };
 
@@ -592,7 +636,7 @@ export default function Home() {
           lapses: 0,
           dueAt: fsrsCard.due,
           fsrsCard,
-          modalityCards: { visual: fsrsCard, audio: fsrsCard },
+          modalityCards: { visual: fsrsCard, audio: fsrsCard, cloze: fsrsCard },
         };
       });
 
@@ -616,6 +660,13 @@ export default function Home() {
   function reveal() {
     setResponseMs(Date.now() - startRef.current);
     setRevealed(true);
+  }
+
+  function submitPatternAnswer() {
+    if (!current || !patternInput.trim()) return;
+    setResponseMs(Date.now() - startRef.current);
+    setPatternMatched(answerMatchesDefinition(patternInput, current.definition));
+    setPatternPhase("result");
   }
 
   async function playCurrentWord() {
@@ -657,9 +708,9 @@ export default function Home() {
       modality: reviewModality,
       schedulerBefore: before,
       schedulerAfter: after,
-      timerWindowMs: 15_000,
+      timerWindowMs: reviewModality === "cloze" ? 3_000 : 15_000,
       hintUsed: false,
-      context: "timed-recall",
+      context: reviewModality === "cloze" ? "pattern-recall" : "timed-recall",
     };
     setState((currentState) => ({
       ...currentState,
@@ -677,7 +728,7 @@ export default function Home() {
             ]),
           },
         },
-        modalityCards: { ...word.modalityCards, visual: after, audio: after },
+        modalityCards: { ...word.modalityCards, visual: after, audio: after, cloze: after },
         knowledgeState: !correct
           ? "new"
           : measured <= 3_000 && word.reviews + 1 >= 5 && (word.correct + 1) / (word.reviews + 1) >= 0.9
@@ -893,7 +944,7 @@ export default function Home() {
         lapses: 0,
         dueAt: fsrsCard.due,
         fsrsCard,
-        modalityCards: { visual: fsrsCard, audio: fsrsCard },
+        modalityCards: { visual: fsrsCard, audio: fsrsCard, cloze: fsrsCard },
       };
     });
     if (incoming.length) setState((currentState) => ({ ...currentState, words: [...currentState.words, ...incoming] }));
@@ -983,7 +1034,7 @@ export default function Home() {
         lapses: 0,
         dueAt: fsrsCard.due,
         fsrsCard,
-        modalityCards: { visual: fsrsCard, audio: fsrsCard },
+        modalityCards: { visual: fsrsCard, audio: fsrsCard, cloze: fsrsCard },
       };
       return { ...currentState, words: [...currentState.words, word] };
     });
@@ -1038,8 +1089,10 @@ export default function Home() {
   const originAnalytics = sourceMetrics(state.passages, state.passageAttempts, state.listeningItems, state.listeningAttempts, "origin");
   const visualReviews = state.reviews.filter((review) => review.modality === "visual");
   const audioReviews = state.reviews.filter((review) => review.modality === "audio");
+  const patternReviews = state.reviews.filter((review) => review.modality === "cloze");
   const visualRetention = Math.round(100 * visualReviews.filter((review) => review.correct).length / Math.max(1, visualReviews.length));
   const audioRetention = Math.round(100 * audioReviews.filter((review) => review.correct).length / Math.max(1, audioReviews.length));
+  const patternRetention = Math.round(100 * patternReviews.filter((review) => review.correct).length / Math.max(1, patternReviews.length));
   const firstListenScore = Math.round(average(state.listeningAttempts.filter((attempt) => attempt.firstPass && attempt.listensCount === 1).slice(-5).map((attempt) => attempt.comprehensionScore)));
   const transcriptRate = Math.round(100 * state.listeningAttempts.filter((attempt) => attempt.transcriptRevealed).length / Math.max(1, state.listeningAttempts.length));
   const currentCourseWeekImported = state.course.importedWeeks.includes(state.weekNumber);
@@ -1117,16 +1170,39 @@ export default function Home() {
       <Metric label="Median recall" value={medianRecall ? `${(medianRecall / 1000).toFixed(1)}s` : "—"} />
 
       <div className="card span-7 dashboard-primary">
-        <div className="row spread"><h2>{state.words.length ? "Review" : "Start here"}</h2>{state.words.length > 0 && <div className="row"><button className={reviewModality === "visual" ? "mode-button active" : "mode-button"} onClick={() => setReviewModality("visual")}>Text</button><button className={reviewModality === "audio" ? "mode-button active" : "mode-button"} onClick={() => setReviewModality("audio")}>Audio</button><span className="pill">3s · 8s · 15s</span></div>}</div>
+        <div className="row spread"><h2>{state.words.length ? "Review" : "Start here"}</h2>{state.words.length > 0 && <div className="row"><button className={reviewModality === "visual" ? "mode-button active" : "mode-button"} onClick={() => setReviewModality("visual")}>Text</button><button className={reviewModality === "audio" ? "mode-button active" : "mode-button"} onClick={() => setReviewModality("audio")}>Audio</button><button className={reviewModality === "cloze" ? "mode-button active" : "mode-button"} onClick={() => setReviewModality("cloze")}>Patterns</button><span className="pill">{reviewModality === "cloze" ? "3s flash · type" : "3s · 8s · 15s"}</span></div>}</div>
         {current ? <>
-          {reviewModality === "visual" ? <div className="fa hero-fa">{current.displayForm}</div> : <div className="audio-recall"><button className="primary" onClick={() => void playCurrentWord()}>Play word</button><span className="muted">Identify it by sound before revealing.</span></div>}
-          {!revealed ? <button className="primary" onClick={reveal}>Reveal meaning</button> : <>
-            <div className="answer-block">
-              <strong>{current.definition || "Definition missing — add it during intake or enable AI enrichment."}</strong>
-              {current.romanization && <span className="muted">{current.romanization}</span>}
-              <span className="muted">Recall time {(responseMs / 1000).toFixed(1)}s · correct answers move to the next review</span>
-            </div>
-            <div className="row"><button className="danger" onClick={() => rateKnown(false)}>I was wrong</button><button className="primary" onClick={() => rateKnown(true)}>I was right</button></div>
+          {reviewModality === "cloze" ? <div className="pattern-recall" aria-live="polite">
+            {patternPhase === "flash" && <div className="pattern-flash">
+              <span>{isPatternItem(current) ? "Phrase / compound" : "Word"} · memorize</span>
+              <div className="fa hero-fa">{current.displayForm}</div>
+              <div className="pattern-flash-meter" aria-hidden="true"><i /></div>
+            </div>}
+            {patternPhase === "answer" && <form className="pattern-answer" onSubmit={(event) => { event.preventDefault(); submitPatternAnswer(); }}>
+              <label htmlFor="pattern-answer">The phrase is hidden. Type its English meaning.</label>
+              <input ref={patternInputRef} id="pattern-answer" value={patternInput} onChange={(event) => setPatternInput(event.target.value)} placeholder="Type the meaning…" autoComplete="off" />
+              <button className="primary" type="submit" disabled={!patternInput.trim()}>Check answer</button>
+            </form>}
+            {patternPhase === "result" && <div className="pattern-result">
+              <span className={patternMatched ? "pattern-signal match" : "pattern-signal"}>{patternMatched ? "Likely match" : "Check your meaning"}</span>
+              <div className="answer-block">
+                <span className="muted">You typed</span><strong>{patternInput}</strong>
+                <span className="muted">Expected</span><strong>{current.definition || "Definition missing"}</strong>
+                {current.romanization && <span className="muted">{current.romanization}</span>}
+                <span className="muted">Answer time {(responseMs / 1000).toFixed(1)}s</span>
+              </div>
+              <div className="row"><button className="danger" onClick={() => rateKnown(false)}>Needs work</button><button className="primary" onClick={() => rateKnown(true)}>Got it</button></div>
+            </div>}
+          </div> : <>
+            {reviewModality === "visual" ? <div className="fa hero-fa">{current.displayForm}</div> : <div className="audio-recall"><button className="primary" onClick={() => void playCurrentWord()}>Play word</button><span className="muted">Identify it by sound before revealing.</span></div>}
+            {!revealed ? <button className="primary" onClick={reveal}>Reveal meaning</button> : <>
+              <div className="answer-block">
+                <strong>{current.definition || "Definition missing — add it during intake or enable AI enrichment."}</strong>
+                {current.romanization && <span className="muted">{current.romanization}</span>}
+                <span className="muted">Recall time {(responseMs / 1000).toFixed(1)}s · correct answers move to the next review</span>
+              </div>
+              <div className="row"><button className="danger" onClick={() => rateKnown(false)}>I was wrong</button><button className="primary" onClick={() => rateKnown(true)}>I was right</button></div>
+            </>}
           </>}
         </> : !currentCourseWeekImported ? <div className="next-action course-ready"><span className="next-number">01</span><h3>Start Unit 1.</h3><p>Week {state.weekNumber} contains {currentCourseWordCount} entries from {currentCourseLessonCount} lesson lists. Introductory-unit vocabulary has been removed. Every word becomes available immediately, with no daily cap.</p><div className="course-ready-meta"><span>{COURSE_META.entries.toLocaleString()} course entries</span><span>{COURSE_META.lessonLists} lesson lists</span><span>{COURSE_META.weeks} weeks</span></div><button className="primary" onClick={() => void importCourseWeek()} disabled={courseBusy}>{courseBusy ? "Preparing…" : state.weekNumber === 1 ? "Start Unit 1" : `Start Week ${state.weekNumber}`}</button></div> : state.words.length ? <div className="next-action"><h3>You&apos;re caught up.</h3><p>Choose Reading or Listening from the menu for your next session.</p></div> : <div className="next-action"><span className="next-number">01</span><h3>Add your first words.</h3><p>Add vocabulary manually to create your review schedule.</p><button className="primary" onClick={() => setShowIntake(true)}>Add words</button></div>}
       </div>
@@ -1248,7 +1324,7 @@ export default function Home() {
     {tab === "analytics" && !showProgressDetails && <section className="guided-workspace"><div className="guided-overview">
       <span className="next-number">01</span><h2>Know why you&apos;re improving.</h2>
       <p>Progress is based on evidence from practice—not a streak or time spent in the app. The system looks for faster recall, stronger comprehension, and reliable performance across different material.</p>
-      <div className="guided-capabilities"><div><span>Recall</span><p>Separate text and audio accuracy, response time, lapses, and difficult vocabulary.</p></div><div><span>Comprehension</span><p>Main idea, detail, inference, discourse, first-pass listening, and transcript dependence.</p></div><div><span>Coverage</span><p>Performance by topic, source, genre, register, origin, and difficulty.</p></div><div><span>Readiness</span><p>Fresh target-level attempts—not familiar practice—control level-up decisions.</p></div></div>
+      <div className="guided-capabilities"><div><span>Recall</span><p>Separate text, audio, and rapid-pattern accuracy, response time, lapses, and difficult vocabulary.</p></div><div><span>Comprehension</span><p>Main idea, detail, inference, discourse, first-pass listening, and transcript dependence.</p></div><div><span>Coverage</span><p>Performance by topic, source, genre, register, origin, and difficulty.</p></div><div><span>Readiness</span><p>Fresh target-level attempts—not familiar practice—control level-up decisions.</p></div></div>
       <div className="progress-snapshot"><span><small>Words</small><strong>{state.words.length}</strong></span><span><small>Reviews</small><strong>{state.reviews.length}</strong></span><span><small>Reading</small><strong>{readingAverage ? `${readingAverage}%` : "—"}</strong></span><span><small>Listening</small><strong>{listeningAverage ? `${listeningAverage}%` : "—"}</strong></span></div>
       <button className="primary" onClick={() => setShowProgressDetails(true)}>View detailed progress</button>
     </div></section>}
@@ -1261,7 +1337,7 @@ export default function Home() {
       <div className="card span-12"><h2>Current training phase</h2><div className="queue"><div className="queue-item"><span>{trainingPhase.label}<small>{trainingPhase.focus}</small></span><strong>{trainingPhase.authenticTarget}% authentic target</strong></div><div className="queue-item"><span>Adaptive bottleneck<small>{bottleneck.evidence}</small></span><strong>{bottleneck.label}</strong></div></div></div>
       <div className="card span-7"><h2>Weak / slow lexical items</h2><div className="word-list single">{weakWords.map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><span>{word.definition}</span><span>{Math.round(100 * word.correct / word.reviews)}% correct · {word.medianResponseMs ? `${(word.medianResponseMs / 1000).toFixed(1)}s median` : "no latency"} · {word.lapses} lapses</span></div>)}</div>{!weakWords.length && <div className="empty">Not enough review history yet.</div>}</div>
       <div className="card span-5"><h2>Performance history</h2><div className="queue"><div className="queue-item"><span>Reading attempts</span><strong>{state.passageAttempts.length}</strong></div><div className="queue-item"><span>Listening attempts</span><strong>{state.listeningAttempts.length}</strong></div><div className="queue-item"><span>Speaking attempts</span><strong>{state.speakingAttempts.length}</strong></div><div className="queue-item"><span>Speaking avg (5)</span><strong>{speakingAverage ? `${speakingAverage}%` : "—"}</strong></div><div className="queue-item"><span>Mature vocabulary</span><strong>{mature}</strong></div><div className="queue-item"><span>Current week</span><strong>{state.weekNumber}/{COURSE_META.weeks}</strong></div></div></div>
-      <div className="card span-12"><h2>Recent diagnostics</h2><div className="diagnostic-grid"><Diagnostic label="Text retention" value={visualRetention} /><Diagnostic label="Audio retention" value={audioReviews.length ? audioRetention : 0} /><Diagnostic label="First-listen score" value={firstListenScore} /><Diagnostic label="Transcript reveal" value={transcriptRate} /><Diagnostic label="Reading inference" value={Math.round(average(state.passageAttempts.slice(-5).map((attempt) => attempt.inferenceScore)))} /><Diagnostic label="Reading discourse" value={Math.round(average(state.passageAttempts.slice(-5).map((attempt) => attempt.discourseScore)))} /><Diagnostic label="Listening detail" value={Math.round(average(state.listeningAttempts.slice(-5).map((attempt) => attempt.detailScore)))} /><Diagnostic label="Listening inference" value={Math.round(average(state.listeningAttempts.slice(-5).map((attempt) => attempt.inferenceScore)))} /></div></div>
+      <div className="card span-12"><h2>Recent diagnostics</h2><div className="diagnostic-grid"><Diagnostic label="Text retention" value={visualRetention} /><Diagnostic label="Audio retention" value={audioReviews.length ? audioRetention : 0} /><Diagnostic label="Pattern retention" value={patternReviews.length ? patternRetention : 0} /><Diagnostic label="First-listen score" value={firstListenScore} /><Diagnostic label="Transcript reveal" value={transcriptRate} /><Diagnostic label="Reading inference" value={Math.round(average(state.passageAttempts.slice(-5).map((attempt) => attempt.inferenceScore)))} /><Diagnostic label="Reading discourse" value={Math.round(average(state.passageAttempts.slice(-5).map((attempt) => attempt.discourseScore)))} /><Diagnostic label="Listening detail" value={Math.round(average(state.listeningAttempts.slice(-5).map((attempt) => attempt.detailScore)))} /><Diagnostic label="Listening inference" value={Math.round(average(state.listeningAttempts.slice(-5).map((attempt) => attempt.inferenceScore)))} /></div></div>
       <AnalyticsTable title="Attempts by source" rows={sourceAnalytics} />
       <AnalyticsTable title="Attempts by genre" rows={genreAnalytics} />
       <AnalyticsTable title="Attempts by register" rows={registerAnalytics} />
