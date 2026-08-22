@@ -1463,68 +1463,74 @@ textarea {
   border-color: var(--rule);
 }
 
+body.rapid-focus-open {
+  overflow: hidden;
+}
+
 .rapid-captions {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
   display: grid;
-  gap: 28px;
-  min-height: 460px;
-  padding: 36px 0 24px;
+  grid-template-rows: 40px 1fr 80px;
+  min-height: 100dvh;
+  padding: 24px 32px;
+  color: #f4f4f1;
+  background: #050505;
+}
+
+.rapid-caption-exit {
+  justify-self: end;
+  align-self: start;
+  padding: 8px 0;
+  color: #777;
+  background: transparent;
+  border: 0;
+  font-size: 10px;
+}
+
+.rapid-captions.playing .rapid-caption-exit {
+  opacity: .25;
 }
 
 .rapid-caption-stage {
   display: grid;
-  min-height: 230px;
+  min-height: 0;
   place-items: center;
-  border-block: 1px solid var(--soft-rule);
 }
 
 .rapid-caption-word {
-  color: var(--white);
-  font-size: clamp(44px, 8vw, 88px);
+  max-width: 90vw;
+  color: #f4f4f1;
+  font-size: clamp(72px, 16vw, 220px);
   font-weight: 300;
   line-height: 1;
   text-align: center;
+  animation: rapid-caption-pulse .38s ease-out;
 }
 
 .rapid-caption-word.idle {
-  color: var(--dim);
-  font-size: 16px;
+  color: #555;
+  font-size: clamp(22px, 4vw, 44px);
 }
 
 .rapid-caption-controls {
   display: flex;
-  flex-wrap: wrap;
+  justify-content: center;
   align-items: center;
-  gap: 12px;
-}
-
-.rapid-caption-controls .muted {
-  margin-left: auto;
+  gap: 18px;
+  color: #666;
   font-size: 10px;
 }
 
-.rapid-caption-gist {
-  display: grid;
-  gap: 10px;
-  color: var(--dim);
-  font-size: 10px;
-  text-transform: uppercase;
+.rapid-caption-controls .primary {
+  min-width: 140px;
+  padding: 16px 28px;
 }
 
-.rapid-caption-gist input {
-  width: 100%;
-  padding: 13px 0;
-  color: var(--white);
-  background: transparent;
-  border: 0;
-  border-bottom: 1px solid var(--white);
-  border-radius: 0;
-  font-size: 18px;
-  text-transform: none;
-}
-
-.rapid-caption-gist input:disabled {
-  color: var(--dim);
-  border-color: var(--rule);
+@keyframes rapid-caption-pulse {
+  from { opacity: .15; transform: scale(.98); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 .progress-snapshot span {
