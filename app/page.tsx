@@ -5,6 +5,7 @@ import type { User } from "@supabase/supabase-js";
 import AccountWorkspace from "@/components/AccountWorkspace";
 import AnkiWorkspace from "@/components/AnkiWorkspace";
 import ComprehensionGrader from "@/components/ComprehensionGrader";
+import InferenceReadingText, { persianSentences } from "@/components/InferenceReadingText";
 import InteractivePersianText from "@/components/InteractivePersianText";
 import Onboarding from "@/components/Onboarding";
 import SourceIngestion from "@/components/SourceIngestion";
@@ -255,6 +256,8 @@ export default function Home() {
   const [readingStartedAt, setReadingStartedAt] = useState<number | null>(null);
   const [readingDurationMs, setReadingDurationMs] = useState(0);
   const [readingQuestionsOpen, setReadingQuestionsOpen] = useState(false);
+  const [readingMode, setReadingMode] = useState<"full" | "inference">("full");
+  const [sentenceGists, setSentenceGists] = useState<string[]>([]);
   const [readingUnknown, setReadingUnknown] = useState(0);
   const [readingRereads, setReadingRereads] = useState(0);
   const [listensCount, setListensCount] = useState(0);
@@ -787,6 +790,7 @@ export default function Home() {
         setReadingStartedAt(null);
         setReadingDurationMs(0);
         setReadingQuestionsOpen(false);
+        setSentenceGists([]);
         setReadingUnknown(0);
         setReadingRereads(0);
       } else {
@@ -845,10 +849,14 @@ export default function Home() {
       gradingMode: result.gradingMode,
       firstPass: true,
       errorCategories: result.grade.failureTypes,
+      readingMode,
+      maskedPercent: readingMode === "inference" ? 30 : 0,
+      sentenceGists: readingMode === "inference" ? sentenceGists : undefined,
     };
     setState((currentState) => ({ ...currentState, passageAttempts: [...currentState.passageAttempts, attempt] }));
     setReadingStartedAt(null);
     setReadingDurationMs(0);
+    setSentenceGists([]);
     setStatus(`Reading saved · ${result.grade.overallScore}% comprehension. Adaptive allocation updated.`);
   }
 
@@ -1095,15 +1103,25 @@ export default function Home() {
   const patternRetention = Math.round(100 * patternReviews.filter((review) => review.correct).length / Math.max(1, patternReviews.length));
   const firstListenScore = Math.round(average(state.listeningAttempts.filter((attempt) => attempt.firstPass && attempt.listensCount === 1).slice(-5).map((attempt) => attempt.comprehensionScore)));
   const transcriptRate = Math.round(100 * state.listeningAttempts.filter((attempt) => attempt.transcriptRevealed).length / Math.max(1, state.listeningAttempts.length));
+  const inferenceAttempts = state.passageAttempts.filter((attempt) => attempt.readingMode === "inference");
+  const inferenceAverage = Math.round(average(inferenceAttempts.slice(-5).map((attempt) => attempt.comprehensionScore)));
   const currentCourseWeekImported = state.course.importedWeeks.includes(state.weekNumber);
   const currentCourseWordCount = COURSE_META.weekCounts[state.weekNumber - 1];
   const currentCourseLessonCount = COURSE_META.weekLessonCounts[state.weekNumber - 1];
+  const inferenceSentenceCount = latestPassage ? persianSentences(latestPassage.textFa).length : 0;
+  const inferenceReady = readingMode !== "inference"
+    || (sentenceGists.length === inferenceSentenceCount && sentenceGists.every((gist) => gist.trim()));
+  const focusedReadingQuestions = latestPassage?.questions.filter((question) => question.type !== "detail") ?? [];
+  const activeReadingQuestions = readingMode === "inference" && focusedReadingQuestions.length
+    ? focusedReadingQuestions
+    : (latestPassage?.questions ?? []);
 
   function resetReadingLab(passageId: string) {
     setActivePassageId(passageId);
     setReadingStartedAt(null);
     setReadingDurationMs(0);
     setReadingQuestionsOpen(false);
+    setSentenceGists([]);
     setReadingUnknown(0);
     setReadingRereads(0);
     setTab("reading");
@@ -1254,21 +1272,21 @@ export default function Home() {
     </section>}
 
     {tab === "reading" && <section className="grid">
-      <div className="card span-12 lab-header"><div><h2>Reading</h2><span className="muted">Controlled reinforces your words. Fresh transfer measures proficiency.</span></div><div className="row"><button className="secondary" disabled={generationBusy !== null} onClick={() => generatePractice("reading", "controlled")}>{generationBusy === "reading" ? "Generating…" : "Controlled"}</button><button className="primary" disabled={generationBusy !== null} onClick={() => generatePractice("reading", "transfer")}>{generationBusy === "reading" ? "Generating…" : "Fresh transfer"}</button></div></div>
+      <div className="card span-12 lab-header"><div><h2>Reading</h2><span className="muted">Controlled reinforces your words. Inference trains fast gist reading.</span></div><div className="row"><button className={readingMode === "full" ? "mode-button active" : "mode-button"} disabled={Boolean(readingStartedAt || readingQuestionsOpen)} onClick={() => { setReadingMode("full"); setSentenceGists([]); }}>Full text</button><button className={readingMode === "inference" ? "mode-button active" : "mode-button"} disabled={Boolean(readingStartedAt || readingQuestionsOpen)} onClick={() => { setReadingMode("inference"); setSentenceGists([]); }}>Inference</button><button className="secondary" disabled={generationBusy !== null} onClick={() => generatePractice("reading", "controlled")}>{generationBusy === "reading" ? "Generating…" : "Controlled"}</button><button className="primary" disabled={generationBusy !== null} onClick={() => generatePractice("reading", "transfer")}>{generationBusy === "reading" ? "Generating…" : "Fresh transfer"}</button></div></div>
       {latestPassage ? <>
         <div className="card span-7">
           <div className="row spread"><div><div className="muted">ILR ~{latestPassage.ilrEstimate} · {latestPassage.topic} · {latestPassage.genre} · {latestPassage.register}</div><h2>{latestPassage.title}</h2><SourceLine item={latestPassage} /></div>{!readingStartedAt && !readingQuestionsOpen && <button className="primary" onClick={() => { setReadingStartedAt(Date.now()); setReadingDurationMs(0); }}>Start timer</button>}</div>
-          <InteractivePersianText text={latestPassage.textFa} words={state.words} onStatus={setWordKnowledge} disabled={!readingStartedAt || readingQuestionsOpen} className={readingStartedAt || readingQuestionsOpen ? "fa passage" : "fa passage blurred"} />
-          {!!latestPassage.targetWords.length && <div className="target-strip"><span className="muted">Extracted targets</span>{latestPassage.targetWords.map((word) => <span className="pill fa-inline" key={word}>{word}</span>)}</div>}
-          {readingStartedAt && !readingQuestionsOpen && <div className="row"><button className="primary" onClick={finishReading}>Finish reading · hide passage next</button><label>Unknown words <input className="small-input" type="number" min="0" value={readingUnknown} onChange={(event) => setReadingUnknown(Number(event.target.value))}/></label><label>Rereads <input className="small-input" type="number" min="0" value={readingRereads} onChange={(event) => setReadingRereads(Number(event.target.value))}/></label></div>}
-          {readingQuestionsOpen && <div className="locked-source"><strong>Passage locked for recall.</strong><span className="muted">Reading time: {(readingDurationMs / 1000).toFixed(0)}s · unknown words: {readingUnknown} · rereads: {readingRereads}</span></div>}
+          {!readingQuestionsOpen && (readingMode === "inference" ? <InferenceReadingText text={latestPassage.textFa} words={state.words} targetWords={latestPassage.targetWords} gists={sentenceGists} onGistsChange={setSentenceGists} disabled={!readingStartedAt} /> : <InteractivePersianText text={latestPassage.textFa} words={state.words} onStatus={setWordKnowledge} disabled={!readingStartedAt} className={readingStartedAt ? "fa passage" : "fa passage blurred"} />)}
+          {readingMode === "full" && !!latestPassage.targetWords.length && <div className="target-strip"><span className="muted">Extracted targets</span>{latestPassage.targetWords.map((word) => <span className="pill fa-inline" key={word}>{word}</span>)}</div>}
+          {readingStartedAt && !readingQuestionsOpen && <div className="row"><button className="primary" disabled={!inferenceReady} onClick={finishReading}>Finish reading · hide passage next</button>{readingMode === "inference" && !inferenceReady && <span className="muted">Capture the gist of each sentence first.</span>}<label>Unknown words <input className="small-input" type="number" min="0" value={readingUnknown} onChange={(event) => setReadingUnknown(Number(event.target.value))}/></label><label>Rereads <input className="small-input" type="number" min="0" value={readingRereads} onChange={(event) => setReadingRereads(Number(event.target.value))}/></label></div>}
+          {readingQuestionsOpen && <div className="locked-source"><strong>{readingMode === "inference" ? "Sentence gists saved. Passage locked for recall." : "Passage locked for recall."}</strong><span className="muted">Reading time: {(readingDurationMs / 1000).toFixed(0)}s · unknown words: {readingUnknown} · rereads: {readingRereads}</span></div>}
         </div>
         <div className="card span-5">
           {readingQuestionsOpen ? <ComprehensionGrader
-            key={latestPassage.id}
+            key={`${latestPassage.id}-${readingMode}`}
             kind="reading"
             sourceText={latestPassage.textFa}
-            questions={latestPassage.questions}
+            questions={activeReadingQuestions}
             ilrEstimate={latestPassage.ilrEstimate}
             onComplete={completeReading}
           /> : <div className="empty">Finish reading to unlock questions.</div>}
@@ -1336,8 +1354,8 @@ export default function Home() {
       <Metric label="Listening avg (5)" value={listeningAverage ? `${listeningAverage}%` : "—"} />
       <div className="card span-12"><h2>Current training phase</h2><div className="queue"><div className="queue-item"><span>{trainingPhase.label}<small>{trainingPhase.focus}</small></span><strong>{trainingPhase.authenticTarget}% authentic target</strong></div><div className="queue-item"><span>Adaptive bottleneck<small>{bottleneck.evidence}</small></span><strong>{bottleneck.label}</strong></div></div></div>
       <div className="card span-7"><h2>Weak / slow lexical items</h2><div className="word-list single">{weakWords.map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><span>{word.definition}</span><span>{Math.round(100 * word.correct / word.reviews)}% correct · {word.medianResponseMs ? `${(word.medianResponseMs / 1000).toFixed(1)}s median` : "no latency"} · {word.lapses} lapses</span></div>)}</div>{!weakWords.length && <div className="empty">Not enough review history yet.</div>}</div>
-      <div className="card span-5"><h2>Performance history</h2><div className="queue"><div className="queue-item"><span>Reading attempts</span><strong>{state.passageAttempts.length}</strong></div><div className="queue-item"><span>Listening attempts</span><strong>{state.listeningAttempts.length}</strong></div><div className="queue-item"><span>Speaking attempts</span><strong>{state.speakingAttempts.length}</strong></div><div className="queue-item"><span>Speaking avg (5)</span><strong>{speakingAverage ? `${speakingAverage}%` : "—"}</strong></div><div className="queue-item"><span>Mature vocabulary</span><strong>{mature}</strong></div><div className="queue-item"><span>Current week</span><strong>{state.weekNumber}/{COURSE_META.weeks}</strong></div></div></div>
-      <div className="card span-12"><h2>Recent diagnostics</h2><div className="diagnostic-grid"><Diagnostic label="Text retention" value={visualRetention} /><Diagnostic label="Audio retention" value={audioReviews.length ? audioRetention : 0} /><Diagnostic label="Pattern retention" value={patternReviews.length ? patternRetention : 0} /><Diagnostic label="First-listen score" value={firstListenScore} /><Diagnostic label="Transcript reveal" value={transcriptRate} /><Diagnostic label="Reading inference" value={Math.round(average(state.passageAttempts.slice(-5).map((attempt) => attempt.inferenceScore)))} /><Diagnostic label="Reading discourse" value={Math.round(average(state.passageAttempts.slice(-5).map((attempt) => attempt.discourseScore)))} /><Diagnostic label="Listening detail" value={Math.round(average(state.listeningAttempts.slice(-5).map((attempt) => attempt.detailScore)))} /><Diagnostic label="Listening inference" value={Math.round(average(state.listeningAttempts.slice(-5).map((attempt) => attempt.inferenceScore)))} /></div></div>
+      <div className="card span-5"><h2>Performance history</h2><div className="queue"><div className="queue-item"><span>Reading attempts</span><strong>{state.passageAttempts.length}</strong></div><div className="queue-item"><span>Inference-mode attempts</span><strong>{inferenceAttempts.length}</strong></div><div className="queue-item"><span>Listening attempts</span><strong>{state.listeningAttempts.length}</strong></div><div className="queue-item"><span>Speaking attempts</span><strong>{state.speakingAttempts.length}</strong></div><div className="queue-item"><span>Speaking avg (5)</span><strong>{speakingAverage ? `${speakingAverage}%` : "—"}</strong></div><div className="queue-item"><span>Mature vocabulary</span><strong>{mature}</strong></div><div className="queue-item"><span>Current week</span><strong>{state.weekNumber}/{COURSE_META.weeks}</strong></div></div></div>
+      <div className="card span-12"><h2>Recent diagnostics</h2><div className="diagnostic-grid"><Diagnostic label="Text retention" value={visualRetention} /><Diagnostic label="Audio retention" value={audioReviews.length ? audioRetention : 0} /><Diagnostic label="Pattern retention" value={patternReviews.length ? patternRetention : 0} /><Diagnostic label="Inference-mode avg" value={inferenceAttempts.length ? inferenceAverage : 0} /><Diagnostic label="First-listen score" value={firstListenScore} /><Diagnostic label="Transcript reveal" value={transcriptRate} /><Diagnostic label="Reading inference" value={Math.round(average(state.passageAttempts.slice(-5).map((attempt) => attempt.inferenceScore)))} /><Diagnostic label="Reading discourse" value={Math.round(average(state.passageAttempts.slice(-5).map((attempt) => attempt.discourseScore)))} /><Diagnostic label="Listening detail" value={Math.round(average(state.listeningAttempts.slice(-5).map((attempt) => attempt.detailScore)))} /><Diagnostic label="Listening inference" value={Math.round(average(state.listeningAttempts.slice(-5).map((attempt) => attempt.inferenceScore)))} /></div></div>
       <AnalyticsTable title="Attempts by source" rows={sourceAnalytics} />
       <AnalyticsTable title="Attempts by genre" rows={genreAnalytics} />
       <AnalyticsTable title="Attempts by register" rows={registerAnalytics} />
