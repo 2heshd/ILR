@@ -49,6 +49,26 @@
   outline-offset: -1px;
 }
 
+.sync-indicator {
+  min-height: 34px;
+  padding: 0;
+  color: var(--dim);
+  background: transparent;
+  border: 0;
+  font-size: 9px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.sync-indicator.ready {
+  color: var(--accent);
+}
+
+.sync-indicator:hover {
+  color: var(--white);
+}
+
 .interactive-text-wrap {
   position: relative;
 }
@@ -2465,6 +2485,11 @@ input[type="range"] {
     padding: 7px 0 4px;
     font-size: 9px;
     white-space: nowrap;
+  }
+
+  .sync-indicator {
+    min-height: 34px;
+    font-size: 8px;
   }
 
   .tabs {
