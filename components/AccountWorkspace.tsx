@@ -82,7 +82,7 @@ export default function AccountWorkspace({ user, username: savedUsername, cloudR
     <div className="account-overview">
       <span className="next-number">01</span>
       <h2>{user ? "Your progress is saved." : mode === "signup" ? "Create your account." : mode === "reset" ? "Reset your password." : "Keep your course with you."}</h2>
-      <p>{user ? `Signed in as ${displayName}. New reviews, vocabulary, source work, and progress are saved automatically.` : mode === "signup" ? "Choose a unique username, then use your email and password to protect the account." : mode === "reset" ? "Enter the email attached to your account. We will send a secure recovery link." : "Sign in with your email and password to keep one private course history across your computer, phone, and future sessions."}</p>
+      <p>{user ? `Signed in as ${displayName}. New reviews, vocabulary, source work, and progress are saved automatically. This device remembers your session until you choose Sign out.` : mode === "signup" ? "Choose a unique username, then use your email and password to protect the account." : mode === "reset" ? "Enter the email attached to your account. We will send a secure recovery link." : "Sign in with your email and password to merge the progress already on this device and keep one private course history across your computer, phone, and future sessions."}</p>
 
       <div className="guided-capabilities">
         <div><span>Private</span><p>Every account can read and update only its own learning data.</p></div>
