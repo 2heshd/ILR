@@ -503,13 +503,23 @@ export default function Home() {
     return () => window.clearTimeout(timer);
   }, [state, loaded, cloudUser, cloudReady]);
 
+  const successfullyReviewedToday = useMemo(() => {
+    const today = new Date().toDateString();
+    return new Set(state.reviews
+      .filter((review) => review.correct && new Date(review.reviewedAt).toDateString() === today)
+      .map((review) => review.lexicalItemId));
+  }, [state.reviews]);
+
   const due = useMemo(() => {
     const scheduled = state.words
+      // A successful card is complete for the day even if FSRS's initial
+      // learning step becomes due again during a long review session.
+      .filter((word) => !successfullyReviewedToday.has(word.id))
       .filter((word) => new Date(word.modalityCards?.[reviewModality]?.due ?? word.dueAt).getTime() <= Date.now())
       .sort((a, b) => new Date(a.modalityCards?.[reviewModality]?.due ?? a.dueAt).getTime() - new Date(b.modalityCards?.[reviewModality]?.due ?? b.dueAt).getTime());
     if (reviewModality !== "cloze") return scheduled;
     return [...scheduled.filter(isPatternItem), ...scheduled.filter((word) => !isPatternItem(word))];
-  }, [state.words, reviewModality]);
+  }, [state.words, reviewModality, successfullyReviewedToday]);
   const current = due[0];
   const allocation = useMemo(() => adaptiveAllocation(state), [state]);
   const trainingPhase = useMemo(() => currentTrainingPhase(state.weekNumber), [state.weekNumber]);
