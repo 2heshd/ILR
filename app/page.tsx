@@ -1407,13 +1407,21 @@ export default function Home() {
     setStatus(`${TAB_LABELS[skill]} set to ILR ${level}.`);
   }
 
+  function openAccount() {
+    setTab("analytics");
+    setShowProgressDetails(false);
+    window.requestAnimationFrame(() => window.setTimeout(() => {
+      document.querySelector(".account-workspace")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 0));
+  }
+
   if (!loaded) return <div className="onboarding-loading" />;
   if (showOnboarding) return <Onboarding onFinish={finishOnboarding} />;
 
   return <main>
     <header>
       <h1>{TAB_LABELS[tab]}</h1>
-      <div className="row"><HeaderLevelControls levels={state.skillLevels} onChange={setSkillLevel} />{(state.words.length > 0 || tab !== "today") && <button className="primary" onClick={() => { setTab("today"); setShowIntake((value) => !value); }}>Add words</button>}</div>
+      <div className="row"><button className={`sync-indicator ${cloudUser && cloudReady ? "ready" : ""}`} onClick={openAccount} aria-label={cloudUser && cloudReady ? "Cloud sync active. Open account." : cloudUser ? "Cloud sync is connecting. Open account." : "Progress is local only. Open account to sign in."}>{cloudUser ? cloudReady ? "● Synced" : "○ Syncing" : "○ Local"}</button><HeaderLevelControls levels={state.skillLevels} onChange={setSkillLevel} />{(state.words.length > 0 || tab !== "today") && <button className="primary" onClick={() => { setTab("today"); setShowIntake((value) => !value); }}>Add words</button>}</div>
     </header>
 
     <nav className="tabs" aria-label="Cursos navigation">
