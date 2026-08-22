@@ -31,7 +31,7 @@ export default function RapidCaptions({ currentWord, captionListens, playing, on
 
     <div className="rapid-caption-stage" aria-live="assertive" aria-atomic="true">
       <span key={currentWord || (playing ? "playing" : "idle")} className={currentWord ? "rapid-caption-word fa" : "rapid-caption-word idle"} dir="rtl">
-        {currentWord || (playing ? "…" : captionListens ? "تمام" : "آماده")}
+        {currentWord || (playing ? "" : captionListens ? "تمام" : "آماده")}
       </span>
     </div>
 
