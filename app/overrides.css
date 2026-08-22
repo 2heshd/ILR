@@ -1293,6 +1293,87 @@ textarea {
   gap: 14px;
 }
 
+.pattern-recall {
+  display: grid;
+  align-content: center;
+  min-height: 300px;
+  max-width: 680px;
+}
+
+.pattern-flash {
+  display: grid;
+  gap: 16px;
+}
+
+.pattern-flash > span,
+.pattern-answer label,
+.pattern-signal {
+  color: var(--dim);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.pattern-flash .hero-fa {
+  margin: 4px 0;
+  text-align: left;
+}
+
+.pattern-flash-meter {
+  width: min(100%, 420px);
+  height: 1px;
+  overflow: hidden;
+  background: var(--rule);
+}
+
+.pattern-flash-meter i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--accent);
+  transform-origin: left;
+  animation: pattern-flash-countdown 3s linear forwards;
+}
+
+.pattern-answer,
+.pattern-result {
+  display: grid;
+  gap: 24px;
+  width: min(100%, 620px);
+}
+
+.pattern-answer input {
+  width: 100%;
+  padding: 14px 0;
+  color: var(--white);
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--white);
+  border-radius: 0;
+  font-size: clamp(20px, 3vw, 32px);
+}
+
+.pattern-answer .primary {
+  justify-self: start;
+}
+
+.pattern-signal.match {
+  color: var(--accent);
+}
+
+.pattern-result .answer-block {
+  grid-template-columns: 90px 1fr;
+  align-items: baseline;
+  margin: 0;
+}
+
+.pattern-result .answer-block > :last-child {
+  grid-column: 1 / -1;
+}
+
+@keyframes pattern-flash-countdown {
+  to { transform: scaleX(0); }
+}
+
 .progress-snapshot span {
   display: grid;
   gap: 8px;
