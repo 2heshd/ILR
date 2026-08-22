@@ -44,13 +44,24 @@ export async function POST(request: Request) {
       return Response.json({ error: "No word timestamps were detected in the audio." }, { status: 422 });
     }
 
-    return Response.json({
-      audioBase64: audioBuffer.toString("base64"),
+    // Keep the audio binary. Base64 makes an already-large narration roughly 33%
+    // larger and forces the browser to decode one enormous JSON string before it
+    // can play anything. Prefix it with a tiny JSON metadata block instead.
+    const metadata = Buffer.from(JSON.stringify({
       mimeType: "audio/mpeg",
       words,
       duration: transcription.duration,
-    }, {
-      headers: { "Cache-Control": "private, max-age=604800" },
+    }));
+    const metadataLength = Buffer.allocUnsafe(4);
+    metadataLength.writeUInt32BE(metadata.length);
+    const payload = Buffer.concat([metadataLength, metadata, audioBuffer]);
+
+    return new Response(payload, {
+      headers: {
+        "Content-Type": "application/octet-stream",
+        "Content-Length": String(payload.length),
+        "Cache-Control": "private, max-age=604800",
+      },
     });
   } catch (error) {
     console.error(error);

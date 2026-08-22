@@ -385,14 +385,22 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text }),
       });
-      const data = (await response.json()) as { audioBase64?: string; mimeType?: string; words?: TimedCaption[]; error?: string };
-      if (!response.ok || !data.audioBase64 || !data.words?.length) throw new Error(data.error || "Exact word timing is unavailable.");
-      const binary = window.atob(data.audioBase64);
-      const bytes = new Uint8Array(binary.length);
-      for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
-      const audio = new Blob([bytes], { type: data.mimeType || "audio/mpeg" });
+      if (!response.ok) {
+        const data = await response.json().catch(() => null) as { error?: string } | null;
+        throw new Error(data?.error || "Exact word timing is unavailable.");
+      }
+      const payload = await response.arrayBuffer();
+      if (payload.byteLength < 5) throw new Error("The aligned audio response was empty.");
+      const metadataLength = new DataView(payload).getUint32(0);
+      if (!metadataLength || metadataLength + 4 >= payload.byteLength) throw new Error("The aligned audio response was invalid.");
+      const metadata = JSON.parse(new TextDecoder().decode(payload.slice(4, 4 + metadataLength))) as {
+        mimeType?: string;
+        words?: TimedCaption[];
+      };
+      if (!metadata.words?.length) throw new Error("Exact word timing is unavailable.");
+      const audio = new Blob([payload.slice(4 + metadataLength)], { type: metadata.mimeType || "audio/mpeg" });
       speechCacheRef.current.set(cacheKey, audio);
-      speechTimingsRef.current.set(cacheKey, data.words);
+      speechTimingsRef.current.set(cacheKey, metadata.words);
       if ("caches" in window) {
         const [audioCache, timingCache] = await Promise.all([
           caches.open("persian-audio-v2"),
@@ -400,12 +408,12 @@ export default function Home() {
         ]);
         await Promise.all([
           audioCache.put(speechCacheRequest(`v2-${cacheKey}`), new Response(audio, { headers: { "Content-Type": audio.type } })),
-          timingCache.put(speechTimingCacheRequest(cacheKey), new Response(JSON.stringify({ words: data.words }), {
+          timingCache.put(speechTimingCacheRequest(cacheKey), new Response(JSON.stringify({ words: metadata.words }), {
             headers: { "Content-Type": "application/json" },
           })),
         ]);
       }
-      return { audio, timings: data.words };
+      return { audio, timings: metadata.words };
     })().finally(() => speechTimingRequestsRef.current.delete(cacheKey));
 
     speechTimingRequestsRef.current.set(cacheKey, request);
@@ -536,9 +544,25 @@ export default function Home() {
   }, [current?.id, reviewModality]);
 
   useEffect(() => {
-    if (!latestListening || latestListening.mediaUrl || !isMeaningfulPersianText(latestListening.transcriptFa)) return;
-    void prepareSpeech(latestListening.transcriptFa, `listening-${latestListening.id}`).catch(() => {
-      // Device speech remains available when background OpenAI audio cannot be prepared.
+    if (!latestListening || !isMeaningfulPersianText(latestListening.transcriptFa)) return;
+    const speechText = sanitizePersianSpeechText(latestListening.transcriptFa);
+    const alignedKey = `aligned-${latestListening.id}`;
+    const listeningKey = `listening-${latestListening.id}`;
+
+    // Start exact alignment as soon as the lesson exists, not when the learner
+    // presses Start. The same narration can also satisfy normal listening.
+    void prepareAlignedSpeech(speechText, alignedKey).then(async ({ audio }) => {
+      speechCacheRef.current.set(listeningKey, audio);
+      if ("caches" in window) {
+        const cache = await caches.open("persian-audio-v2");
+        await cache.put(speechCacheRequest(`v2-${listeningKey}`), new Response(audio, { headers: { "Content-Type": audio.type } }));
+      }
+    }).catch(() => {
+      if (!latestListening.mediaUrl) {
+        void prepareSpeech(speechText, listeningKey).catch(() => {
+          // Device speech remains available when background audio cannot be prepared.
+        });
+      }
     });
   }, [latestListening?.id]);
 
@@ -1525,7 +1549,7 @@ export default function Home() {
       {latestListening ? <>
         <div className="card span-7">
           <div className="muted">ILR ~{latestListening.ilrEstimate} · {latestListening.topic} · {latestListening.genre} · {latestListening.register}</div><h2>{latestListening.title}</h2><SourceLine item={latestListening} />
-          {listeningMode === "gist" ? <GistListening sentences={gistListeningSentences} words={state.words} gists={listeningGists} listenCounts={gistSentenceListenCounts} hintedSentenceIndexes={gistHintedSentenceIndexes} busy={audioBusy} onPlay={(index) => void playGistSentence(index)} onGistChange={updateListeningGist} onHint={(index) => setGistHintedSentenceIndexes((current) => [...new Set([...current, index])])} /> : listeningMode === "rapid" ? <RapidCaptions currentWord={rapidCaptionWord} captionListens={rapidCaptionListens} playing={rapidPlaying || audioBusy} onPlay={() => void playRapidListening()} onExit={() => { releasePlayback(); setListeningMode("full"); setListensCount(0); setRapidCaptionListens(0); }} /> : <>
+          {listeningMode === "gist" ? <GistListening sentences={gistListeningSentences} words={state.words} gists={listeningGists} listenCounts={gistSentenceListenCounts} hintedSentenceIndexes={gistHintedSentenceIndexes} busy={audioBusy} onPlay={(index) => void playGistSentence(index)} onGistChange={updateListeningGist} onHint={(index) => setGistHintedSentenceIndexes((current) => [...new Set([...current, index])])} /> : listeningMode === "rapid" ? <RapidCaptions currentWord={rapidCaptionWord} captionListens={rapidCaptionListens} playing={rapidPlaying} preparing={audioBusy} onPlay={() => void playRapidListening()} onExit={() => { releasePlayback(); setListeningMode("full"); setListensCount(0); setRapidCaptionListens(0); }} /> : <>
             <div className="audio-stage"><button className="primary big-button" disabled={audioBusy} onClick={playListening}>{audioBusy ? "Starting…" : "▶ Play Persian audio"}</button><span className="muted">listens: {listensCount}</span></div>
             {transcriptVisible && listeningReveal ? <InteractivePersianText text={listeningReveal.text} words={state.words} onStatus={setWordKnowledge} className="fa passage progressive-transcript" /> : <div className="transcript-hidden">Transcript hidden</div>}
             <div className="row">
