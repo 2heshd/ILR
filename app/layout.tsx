@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import "./overrides.css";
@@ -14,6 +14,13 @@ const googleSansCode = localFont({
 export const metadata: Metadata = {
   title: "Cursos",
   description: "Adaptive Persian study system for reading, listening, speaking, and recall",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#151515",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
