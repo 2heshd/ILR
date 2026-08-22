@@ -114,11 +114,13 @@ function hydrateState(raw: Partial<StudyState> | null | undefined): StudyState {
   };
   state.words = state.words.map((word) => {
     const savedCards = [word.fsrsCard, word.modalityCards?.visual, word.modalityCards?.audio].flatMap((card) => card ? [card] : []);
-    const fsrsCard = savedCards.length
+    const savedCard = savedCards.length
       ? savedCards.reduce((latest, card) => (
         new Date(card.due).getTime() > new Date(latest.due).getTime() ? card : latest
       ))
       : createSerializedCard(new Date(word.introducedAt || Date.now()));
+    const removeLegacyDailyCap = word.sourceType === "course" && word.sourceWeek === state.weekNumber && word.reviews === 0;
+    const fsrsCard = removeLegacyDailyCap ? { ...savedCard, due: new Date().toISOString() } : savedCard;
     const knowledgeState = word.knowledgeState ?? (word.sourceWeek < state.weekNumber ? "known" : "learning");
     const tier = word.tier ?? (word.sourceType === "system_advanced" ? "A" : word.sourceType === "course" ? "B" : "C");
     return {
