@@ -9,7 +9,15 @@ export function getSupabaseClient(): SupabaseClient | null {
   if (singleton !== undefined) return singleton;
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  singleton = url && key ? createClient(url, key) : null;
+  singleton = url && key ? createClient(url, key, {
+    auth: {
+      // Make the intended account behavior explicit across desktop browsers,
+      // mobile Safari, and an installed home-screen web app.
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+    },
+  }) : null;
   return singleton;
 }
 
