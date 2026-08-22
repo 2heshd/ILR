@@ -1015,7 +1015,7 @@ export default function Home() {
     setRapidPlaying(true);
     const updateCaption = () => {
       const duration = Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : 1;
-      const word = captionWordAtProgress(words, audio.currentTime / duration);
+      const word = captionWordAtProgress(words, (audio.currentTime + 0.12) / duration);
       if (word && word !== lastWord) {
         lastWord = word;
         setRapidCaptionWord(word);
@@ -1034,7 +1034,7 @@ export default function Home() {
     releasePlayback();
     const words = persianCaptionWords(text);
     const indexedWords = [...text.matchAll(PERSIAN_WORD_PATTERN)].filter((match) => IS_PERSIAN_WORD.test(match[0]));
-    let boundarySeen = false;
+    let lastBoundaryAt = 0;
     let fallbackIndex = 0;
     let finished = false;
     const utterance = new SpeechSynthesisUtterance(text);
@@ -1042,9 +1042,12 @@ export default function Home() {
     utterance.voice = persianVoice;
     utterance.rate = 0.85;
     utterance.onboundary = (event) => {
-      boundarySeen = true;
-      const match = [...indexedWords].reverse().find((part) => (part.index ?? 0) <= event.charIndex);
-      if (match) setRapidCaptionWord(match[0]);
+      lastBoundaryAt = performance.now();
+      const matchIndex = indexedWords.findLastIndex((part) => (part.index ?? 0) <= event.charIndex);
+      if (matchIndex >= 0) {
+        fallbackIndex = matchIndex;
+        setRapidCaptionWord(indexedWords[matchIndex][0]);
+      }
     };
     utterance.onend = () => {
       if (finished) return;
@@ -1061,10 +1064,10 @@ export default function Home() {
     if (words.length) {
       setRapidCaptionWord(words[0]);
       rapidTimerRef.current = window.setInterval(() => {
-        if (boundarySeen) return;
+        if (lastBoundaryAt && performance.now() - lastBoundaryAt < 650) return;
         fallbackIndex = Math.min(words.length - 1, fallbackIndex + 1);
         setRapidCaptionWord(words[fallbackIndex]);
-      }, 430);
+      }, 400);
     }
     speechSynthesis.cancel();
     speechSynthesis.speak(utterance);
