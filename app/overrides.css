@@ -1463,6 +1463,70 @@ textarea {
   border-color: var(--rule);
 }
 
+.rapid-captions {
+  display: grid;
+  gap: 28px;
+  min-height: 460px;
+  padding: 36px 0 24px;
+}
+
+.rapid-caption-stage {
+  display: grid;
+  min-height: 230px;
+  place-items: center;
+  border-block: 1px solid var(--soft-rule);
+}
+
+.rapid-caption-word {
+  color: var(--white);
+  font-size: clamp(44px, 8vw, 88px);
+  font-weight: 300;
+  line-height: 1;
+  text-align: center;
+}
+
+.rapid-caption-word.idle {
+  color: var(--dim);
+  font-size: 16px;
+}
+
+.rapid-caption-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.rapid-caption-controls .muted {
+  margin-left: auto;
+  font-size: 10px;
+}
+
+.rapid-caption-gist {
+  display: grid;
+  gap: 10px;
+  color: var(--dim);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.rapid-caption-gist input {
+  width: 100%;
+  padding: 13px 0;
+  color: var(--white);
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--white);
+  border-radius: 0;
+  font-size: 18px;
+  text-transform: none;
+}
+
+.rapid-caption-gist input:disabled {
+  color: var(--dim);
+  border-color: var(--rule);
+}
+
 .progress-snapshot span {
   display: grid;
   gap: 8px;

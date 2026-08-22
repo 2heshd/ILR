@@ -189,11 +189,13 @@ export type ListeningAttempt = {
   gradingMode?: "ai" | "self";
   firstPass: boolean;
   errorCategories?: ErrorCategory[];
-  listeningMode?: "full" | "gist";
+  listeningMode?: "full" | "gist" | "rapid";
   sentenceGists?: string[];
   sentenceListenCounts?: number[];
   gistAnsweredAfterListens?: number[];
   gistHintedSentenceIndexes?: number[];
+  rapidGist?: string;
+  rapidCaptionListens?: number;
 };
 
 export type SpeakingPrompt = {
