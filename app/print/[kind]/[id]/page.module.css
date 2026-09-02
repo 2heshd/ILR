@@ -1,4 +1,4 @@
-.sheet { max-width: 8.5in; margin: 24px auto; padding: .55in .65in; background: white; color: #111; font-family: var(--font-vazir-code), var(--font-google-sans-code), monospace; font-size: 12pt; line-height: 1.75; }
+.sheet { max-width: 8.5in; margin: 24px auto; padding: .55in .65in; background: white; color: #111; font-family: "Cursos Persian Mono", var(--font-google-sans-code), monospace; font-size: 12pt; line-height: 1.75; }
 .header { margin-bottom: 28px; }
 .title { margin: 4px 0 0; font-size: 20pt; font-weight: 600; }
 .meta { direction: ltr; text-align: left; color: #666; font: 9pt Arial, sans-serif; }

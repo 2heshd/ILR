@@ -1,6 +1,14 @@
 * { box-sizing: border-box; }
+@font-face {
+  font-family: "Cursos Persian Mono";
+  src: url("/fonts/Cursos-Persian-Mono.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+200C-200D, U+FB50-FDFF, U+FE70-FEFF;
+}
 :root { color-scheme: light; }
-html, body { margin: 0; min-height: 100%; background: #f5f3ee; color: #171717; font-family: var(--font-vazir-code), var(--font-google-sans-code), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-weight:300; }
+html, body { margin: 0; min-height: 100%; background: #f5f3ee; color: #171717; font-family: "Cursos Persian Mono", var(--font-google-sans-code), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-weight:300; }
 button, input, textarea, select { font: inherit; }
 .button-link { display:inline-flex; align-items:center; justify-content:center; text-decoration:none; }
 button { cursor: pointer; }
@@ -30,8 +38,8 @@ p { line-height:1.55; }
 textarea { width:100%; min-height:165px; border:1px solid #d5d1c8; border-radius:14px; padding:14px; resize:vertical; background:#fff; margin:12px 0; }
 input,select { border:1px solid #d5d1c8; border-radius:12px; padding:10px 12px; background:#fff; }
 .auth-row input { min-width:270px; }
-.fa { direction:rtl; text-align:right; font-family:var(--font-vazir-code), monospace; line-height:1.9; }
-.fa-inline { direction:rtl; font-family:var(--font-vazir-code), monospace; }
+.fa { direction:rtl; text-align:right; font-family:"Cursos Persian Mono", monospace; line-height:1.9; }
+.fa-inline { direction:rtl; font-family:"Cursos Persian Mono", monospace; }
 .hero-fa { font-size:48px; margin:25px 0 18px; }
 .answer-block { display:grid; gap:5px; margin:16px 0; font-size:16px; }
 .empty { color:#6f6b63; padding:24px 4px; line-height:1.6; }
@@ -41,7 +49,7 @@ input,select { border:1px solid #d5d1c8; border-radius:12px; padding:10px 12px; 
 .word-list { display:grid; grid-template-columns:repeat(2,1fr); gap:8px 18px; margin-top:12px; }
 .word-list.single { grid-template-columns:1fr; }
 .word { padding:10px 0; border-bottom:1px solid #efede8; display:grid; gap:3px; }
-.word strong { font-size:20px; direction:rtl; text-align:right; font-family:var(--font-vazir-code), monospace; }
+.word strong { font-size:20px; direction:rtl; text-align:right; font-family:"Cursos Persian Mono", monospace; }
 .word span { color:#6f6b63; font-size:12px; }
 .queue { display:grid; gap:2px; }
 .queue-item,.queue-button { display:flex; width:100%; align-items:center; justify-content:space-between; gap:12px; padding:13px 0; border:0; border-bottom:1px solid #eeeae2; background:transparent; text-align:left; }
