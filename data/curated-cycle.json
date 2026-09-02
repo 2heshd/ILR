@@ -1,0 +1,5762 @@
+{
+  "meta": {
+    "id": "dli-ch4-ch5l1-news-2026-09-01",
+    "title": "DLI Chapter 4–5.1 + News Cycle",
+    "createdAt": "2026-09-01T12:00:00.000Z",
+    "vocabularyCount": 194,
+    "courseVocabularyCount": 94,
+    "newsVocabularyCount": 100,
+    "articleCount": 30,
+    "sourceFile": "ChiMishe V22.2.xlsm + BBC Persian/Iran International 2,000-token sample"
+  },
+  "vocabulary": [
+    {
+      "id": "vocab-course-559",
+      "displayForm": "اَسب",
+      "normalizedForm": "اَسب",
+      "definition": "horse",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 559,
+      "courseListNumber": 20,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-560",
+      "displayForm": "اِصطَبل",
+      "normalizedForm": "اِصطَبل",
+      "definition": "stable (for horses)",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 560,
+      "courseListNumber": 20,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-561",
+      "displayForm": "با اَدَب",
+      "normalizedForm": "با اَدَب",
+      "definition": "polite",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 561,
+      "courseListNumber": 20,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-562",
+      "displayForm": "بازی کَردَن",
+      "normalizedForm": "بازی کَردَن",
+      "definition": "to play",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 562,
+      "courseListNumber": 20,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-563",
+      "displayForm": "باهوش",
+      "normalizedForm": "باهوش",
+      "definition": "smart",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 563,
+      "courseListNumber": 20,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-564",
+      "displayForm": "بیرون",
+      "normalizedForm": "بیرون",
+      "definition": "outside",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 564,
+      "courseListNumber": 20,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-565",
+      "displayForm": "تار زَدَن (زَن)",
+      "normalizedForm": "تار زَدَن (زَن)",
+      "definition": "to play Taar",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 565,
+      "courseListNumber": 20,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-566",
+      "displayForm": "تَرسیدَن (تَرس)",
+      "normalizedForm": "تَرسیدَن (تَرس)",
+      "definition": "to fear",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 566,
+      "courseListNumber": 20,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-567",
+      "displayForm": "چُرت زَدَن (زَن)",
+      "normalizedForm": "چُرت زَدَن (زَن)",
+      "definition": "to nap, doze off",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 567,
+      "courseListNumber": 20,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-568",
+      "displayForm": "خواستَن (خواه)",
+      "normalizedForm": "خواستَن (خواه)",
+      "definition": "to want",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 568,
+      "courseListNumber": 20,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-569",
+      "displayForm": "خُوش آمَدَن (آی)",
+      "normalizedForm": "خُوش آمَدَن (آی)",
+      "definition": "to like",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 569,
+      "courseListNumber": 20,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-570",
+      "displayForm": "خُوشگِل",
+      "normalizedForm": "خُوشگِل",
+      "definition": "beautiful",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 570,
+      "courseListNumber": 20,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-571",
+      "displayForm": "دَندانپِزِشکی",
+      "normalizedForm": "دَندانپِزِشکی",
+      "definition": "dentistry",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 571,
+      "courseListNumber": 20,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-572",
+      "displayForm": "رایانِه",
+      "normalizedForm": "رایانِه",
+      "definition": "computer",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 572,
+      "courseListNumber": 20,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-573",
+      "displayForm": "زَمین",
+      "normalizedForm": "زَمین",
+      "definition": "field, earth",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 573,
+      "courseListNumber": 20,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-574",
+      "displayForm": "زَمین خوردَن (خور)",
+      "normalizedForm": "زَمین خوردَن (خور)",
+      "definition": "to fall down",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 574,
+      "courseListNumber": 20,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-575",
+      "displayForm": "سَرگَرمی",
+      "normalizedForm": "سَرگَرمی",
+      "definition": "hobby",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 575,
+      "courseListNumber": 20,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-576",
+      "displayForm": "سِفارِش دادَن (دِه)",
+      "normalizedForm": "سِفارِش دادَن (دِه)",
+      "definition": "to order",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 576,
+      "courseListNumber": 20,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-577",
+      "displayForm": "سَوارکاری",
+      "normalizedForm": "سَوارکاری",
+      "definition": "horseback riding",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 577,
+      "courseListNumber": 20,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-578",
+      "displayForm": "سَواری‌ کَردَن (کُن)",
+      "normalizedForm": "سَواری‌ کَردَن (کُن)",
+      "definition": "to ride (animals, vehicles)",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 578,
+      "courseListNumber": 20,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-579",
+      "displayForm": "عاشِق شُدَن (شُو)",
+      "normalizedForm": "عاشِق شُدَن (شُو)",
+      "definition": "to fall in love",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 579,
+      "courseListNumber": 20,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-580",
+      "displayForm": "فَعَّالیَّت",
+      "normalizedForm": "فَعَّالیَّت",
+      "definition": "activity",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 580,
+      "courseListNumber": 20,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-581",
+      "displayForm": "قَشَنگ",
+      "normalizedForm": "قَشَنگ",
+      "definition": "beautiful",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 581,
+      "courseListNumber": 20,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-582",
+      "displayForm": "گُرُسنِه",
+      "normalizedForm": "گُرُسنِه",
+      "definition": "hungry",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 582,
+      "courseListNumber": 20,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-583",
+      "displayForm": "لاغَر",
+      "normalizedForm": "لاغَر",
+      "definition": "thin",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 583,
+      "courseListNumber": 20,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-584",
+      "displayForm": "مُعَرِّفی کَردَن (کُن)",
+      "normalizedForm": "مُعَرِّفی کَردَن (کُن)",
+      "definition": "to introduce",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 584,
+      "courseListNumber": 20,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-585",
+      "displayForm": "مُهَندِسی",
+      "normalizedForm": "مُهَندِسی",
+      "definition": "engineering",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 585,
+      "courseListNumber": 20,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-586",
+      "displayForm": "مُورِدِ عَلاقِه",
+      "normalizedForm": "مُورِدِ عَلاقِه",
+      "definition": "favorite",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 586,
+      "courseListNumber": 20,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-587",
+      "displayForm": "نام‌نِویسی کَردَن (کُن)",
+      "normalizedForm": "نام‌نِویسی کَردَن (کُن)",
+      "definition": "to register, to sign up",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 587,
+      "courseListNumber": 20,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-588",
+      "displayForm": "نِشان دادَن (دِه)",
+      "normalizedForm": "نِشان دادَن (دِه)",
+      "definition": "to show",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 588,
+      "courseListNumber": 20,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-589",
+      "displayForm": "هَیِجان زَدِه",
+      "normalizedForm": "هَیِجان زَدِه",
+      "definition": "excited",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 589,
+      "courseListNumber": 20,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-590",
+      "displayForm": "هیچکَس",
+      "normalizedForm": "هیچکَس",
+      "definition": "no one / nobody",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 590,
+      "courseListNumber": 20,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-591",
+      "displayForm": "اِستِراحَت کَردَن (کُن)",
+      "normalizedForm": "اِستِراحَت کَردَن (کُن)",
+      "definition": "to rest",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 591,
+      "courseListNumber": 21,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 2",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-592",
+      "displayForm": "اِشکال نَدارَد",
+      "normalizedForm": "اِشکال نَدارَد",
+      "definition": "no problem!",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 592,
+      "courseListNumber": 21,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 2",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-593",
+      "displayForm": "اَغلَب",
+      "normalizedForm": "اَغلَب",
+      "definition": "often",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 593,
+      "courseListNumber": 21,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 2",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-594",
+      "displayForm": "با صَفا",
+      "normalizedForm": "با صَفا",
+      "definition": "pleasant",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 594,
+      "courseListNumber": 21,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 2",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-595",
+      "displayForm": "بَرنامِه",
+      "normalizedForm": "بَرنامِه",
+      "definition": "schedule, plan, program",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 595,
+      "courseListNumber": 21,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 2",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-596",
+      "displayForm": "بَعضی",
+      "normalizedForm": "بَعضی",
+      "definition": "some, some people",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 596,
+      "courseListNumber": 21,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 2",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-597",
+      "displayForm": "بِه خاطِرِ",
+      "normalizedForm": "بِه خاطِرِ",
+      "definition": "because of, for",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 597,
+      "courseListNumber": 21,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 2",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-598",
+      "displayForm": "پَرَندِه",
+      "normalizedForm": "پَرَندِه",
+      "definition": "bird, aircraft",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 598,
+      "courseListNumber": 21,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 2",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-599",
+      "displayForm": "تُخمِ مُرغِ نیمرو",
+      "normalizedForm": "تُخمِ مُرغِ نیمرو",
+      "definition": "sunny side up eggs",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 599,
+      "courseListNumber": 21,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 2",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-600",
+      "displayForm": "خواندَن (خوان)",
+      "normalizedForm": "خواندَن (خوان)",
+      "definition": "to sing, to read",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 600,
+      "courseListNumber": 21,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 2",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-601",
+      "displayForm": "دُزدیدَن (دُزد)",
+      "normalizedForm": "دُزدیدَن (دُزد)",
+      "definition": "to steal, to rob",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 601,
+      "courseListNumber": 21,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 2",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-602",
+      "displayForm": "دَست زَدَن (زَن)",
+      "normalizedForm": "دَست زَدَن (زَن)",
+      "definition": "to clap, to touch",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 602,
+      "courseListNumber": 21,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 2",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-603",
+      "displayForm": "دَعوَت کَردَن (کُن)",
+      "normalizedForm": "دَعوَت کَردَن (کُن)",
+      "definition": "to invite",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 603,
+      "courseListNumber": 21,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 2",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-604",
+      "displayForm": "دِل تَنگ شُدَن (شُو)",
+      "normalizedForm": "دِل تَنگ شُدَن (شُو)",
+      "definition": "to miss someone",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 604,
+      "courseListNumber": 21,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 2",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-605",
+      "displayForm": "رَقصیدَن (رَقص)",
+      "normalizedForm": "رَقصیدَن (رَقص)",
+      "definition": "to dance",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 605,
+      "courseListNumber": 21,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 2",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-606",
+      "displayForm": "زَمان",
+      "normalizedForm": "زَمان",
+      "definition": "time",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 606,
+      "courseListNumber": 21,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 2",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-607",
+      "displayForm": "شوخی کَردَن",
+      "normalizedForm": "شوخی کَردَن",
+      "definition": "to kid, to make a joke",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 607,
+      "courseListNumber": 21,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 2",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-608",
+      "displayForm": "صُحبَت کَردَن (کُن)",
+      "normalizedForm": "صُحبَت کَردَن (کُن)",
+      "definition": "to speak, to talk",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 608,
+      "courseListNumber": 21,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 2",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-609",
+      "displayForm": "غَذا دادَن (دِه)",
+      "normalizedForm": "غَذا دادَن (دِه)",
+      "definition": "to feed",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 609,
+      "courseListNumber": 21,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 2",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-610",
+      "displayForm": "غَمگین",
+      "normalizedForm": "غَمگین",
+      "definition": "sad (someone)",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 610,
+      "courseListNumber": 21,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 2",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-611",
+      "displayForm": "قَدَم زَدَن (زَن)",
+      "normalizedForm": "قَدَم زَدَن (زَن)",
+      "definition": "to walk",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 611,
+      "courseListNumber": 21,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 2",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-612",
+      "displayForm": "کوهنَوَردی",
+      "normalizedForm": "کوهنَوَردی",
+      "definition": "mountain climbing, hiking",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 612,
+      "courseListNumber": 21,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 2",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-613",
+      "displayForm": "مَذهَبی",
+      "normalizedForm": "مَذهَبی",
+      "definition": "religious",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 613,
+      "courseListNumber": 21,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 2",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-614",
+      "displayForm": "مُسِن",
+      "normalizedForm": "مُسِن",
+      "definition": "old",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 614,
+      "courseListNumber": 21,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 2",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-615",
+      "displayForm": "مَشروباتِ اَلکُلی",
+      "normalizedForm": "مَشروباتِ اَلکُلی",
+      "definition": "alcoholic beverages",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 615,
+      "courseListNumber": 21,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 2",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-616",
+      "displayForm": "مَمنوع بودَن",
+      "normalizedForm": "مَمنوع بودَن",
+      "definition": "to be forbidden",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 616,
+      "courseListNumber": 21,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 2",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-617",
+      "displayForm": "مَنطَقِه/مَناطِق",
+      "normalizedForm": "مَنطَقِه/مَناطِق",
+      "definition": "area, areas, region, regions",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 617,
+      "courseListNumber": 21,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 2",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-618",
+      "displayForm": "موسیقی",
+      "normalizedForm": "موسیقی",
+      "definition": "music",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 618,
+      "courseListNumber": 21,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 2",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-619",
+      "displayForm": "نِسبَتَاً",
+      "normalizedForm": "نِسبَتَاً",
+      "definition": "relatively",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 619,
+      "courseListNumber": 21,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 2",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-620",
+      "displayForm": "هَمکِلاسی",
+      "normalizedForm": "هَمکِلاسی",
+      "definition": "classmate",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 620,
+      "courseListNumber": 21,
+      "courseLesson": "Unit 1 - Chapter 4 - Lesson 2",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-621",
+      "displayForm": "آزمونِ وُرودی",
+      "normalizedForm": "آزمونِ وُرودی",
+      "definition": "college entrance exam",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 621,
+      "courseListNumber": 22,
+      "courseLesson": "Unit 2 - Chapter 5 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-622",
+      "displayForm": "اِخراج شُدَن (شُو)",
+      "normalizedForm": "اِخراج شُدَن (شُو)",
+      "definition": "to get fired, expelled",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 622,
+      "courseListNumber": 22,
+      "courseLesson": "Unit 2 - Chapter 5 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-623",
+      "displayForm": "اِقتِصاد",
+      "normalizedForm": "اِقتِصاد",
+      "definition": "economy",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 623,
+      "courseListNumber": 22,
+      "courseLesson": "Unit 2 - Chapter 5 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-624",
+      "displayForm": "اِمتِحان دادَن‌ (دِه)",
+      "normalizedForm": "اِمتِحان دادَن‌ (دِه)",
+      "definition": "to take a test",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 624,
+      "courseListNumber": 22,
+      "courseLesson": "Unit 2 - Chapter 5 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-625",
+      "displayForm": "اِنتِخاب کَردَن (کُن)",
+      "normalizedForm": "اِنتِخاب کَردَن (کُن)",
+      "definition": "to choose",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 625,
+      "courseListNumber": 22,
+      "courseLesson": "Unit 2 - Chapter 5 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-626",
+      "displayForm": "با اینکِه",
+      "normalizedForm": "با اینکِه",
+      "definition": "even though",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 626,
+      "courseListNumber": 22,
+      "courseLesson": "Unit 2 - Chapter 5 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-627",
+      "displayForm": "بِه زودی",
+      "normalizedForm": "بِه زودی",
+      "definition": "soon",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 627,
+      "courseListNumber": 22,
+      "courseLesson": "Unit 2 - Chapter 5 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-628",
+      "displayForm": "پِزِشکی",
+      "normalizedForm": "پِزِشکی",
+      "definition": "medical",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 628,
+      "courseListNumber": 22,
+      "courseLesson": "Unit 2 - Chapter 5 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-629",
+      "displayForm": "تَرکِ تَحصیل کَردَن  (کُن)",
+      "normalizedForm": "تَرکِ تَحصیل کَردَن (کُن)",
+      "definition": "to drop out of school",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 629,
+      "courseListNumber": 22,
+      "courseLesson": "Unit 2 - Chapter 5 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-630",
+      "displayForm": "تِست زَدَن",
+      "normalizedForm": "تِست زَدَن",
+      "definition": "to take multiple choice practice test",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 630,
+      "courseListNumber": 22,
+      "courseLesson": "Unit 2 - Chapter 5 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-631",
+      "displayForm": "تَمام کَردَن (کُن)",
+      "normalizedForm": "تَمام کَردَن (کُن)",
+      "definition": "to finish",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 631,
+      "courseListNumber": 22,
+      "courseLesson": "Unit 2 - Chapter 5 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-632",
+      "displayForm": "تَنها",
+      "normalizedForm": "تَنها",
+      "definition": "only, alone, single",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 632,
+      "courseListNumber": 22,
+      "courseLesson": "Unit 2 - Chapter 5 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-633",
+      "displayForm": "دُولَتی",
+      "normalizedForm": "دُولَتی",
+      "definition": "public, governmental",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 633,
+      "courseListNumber": 22,
+      "courseLesson": "Unit 2 - Chapter 5 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-634",
+      "displayForm": "دیپلُم",
+      "normalizedForm": "دیپلُم",
+      "definition": "diploma",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 634,
+      "courseListNumber": 22,
+      "courseLesson": "Unit 2 - Chapter 5 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-635",
+      "displayForm": "دیگَر",
+      "normalizedForm": "دیگَر",
+      "definition": "other, else",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 635,
+      "courseListNumber": 22,
+      "courseLesson": "Unit 2 - Chapter 5 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-636",
+      "displayForm": "رِشتِه",
+      "normalizedForm": "رِشتِه",
+      "definition": "field of education/sports, major",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 636,
+      "courseListNumber": 22,
+      "courseLesson": "Unit 2 - Chapter 5 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-637",
+      "displayForm": "شِرکَت کَردَن (کُن)",
+      "normalizedForm": "شِرکَت کَردَن (کُن)",
+      "definition": "to participate",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 637,
+      "courseListNumber": 22,
+      "courseLesson": "Unit 2 - Chapter 5 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-638",
+      "displayForm": "شَهریِّه",
+      "normalizedForm": "شَهریِّه",
+      "definition": "tuition",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 638,
+      "courseListNumber": 22,
+      "courseLesson": "Unit 2 - Chapter 5 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-639",
+      "displayForm": "عَلاقِه داشتَن (دار)",
+      "normalizedForm": "عَلاقِه داشتَن (دار)",
+      "definition": "to be interested in",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 639,
+      "courseListNumber": 22,
+      "courseLesson": "Unit 2 - Chapter 5 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-640",
+      "displayForm": "فارِغُ التَّحصیل شُدَن (شُو)",
+      "normalizedForm": "فارِغُ التَّحصیل شُدَن (شُو)",
+      "definition": "to graduate",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 640,
+      "courseListNumber": 22,
+      "courseLesson": "Unit 2 - Chapter 5 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-641",
+      "displayForm": "فُوقِ دیپلُم",
+      "normalizedForm": "فُوقِ دیپلُم",
+      "definition": "AA degree/ Associates Degree",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 641,
+      "courseListNumber": 22,
+      "courseLesson": "Unit 2 - Chapter 5 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-642",
+      "displayForm": "فُوقِ لیسانس",
+      "normalizedForm": "فُوقِ لیسانس",
+      "definition": "Master’s degree",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 642,
+      "courseListNumber": 22,
+      "courseLesson": "Unit 2 - Chapter 5 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-643",
+      "displayForm": "قَبول شُدَن (شُو)",
+      "normalizedForm": "قَبول شُدَن (شُو)",
+      "definition": "to pass a test, to be accepted",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 643,
+      "courseListNumber": 22,
+      "courseLesson": "Unit 2 - Chapter 5 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-644",
+      "displayForm": "کُنکور",
+      "normalizedForm": "کُنکور",
+      "definition": "college entrance exam",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 644,
+      "courseListNumber": 22,
+      "courseLesson": "Unit 2 - Chapter 5 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-645",
+      "displayForm": "گِرِفتَن (گیر)",
+      "normalizedForm": "گِرِفتَن (گیر)",
+      "definition": "to get, to catch, to obtain",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 645,
+      "courseListNumber": 22,
+      "courseLesson": "Unit 2 - Chapter 5 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-646",
+      "displayForm": "لیسانس",
+      "normalizedForm": "لیسانس",
+      "definition": "Bachelor’s degree",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 646,
+      "courseListNumber": 22,
+      "courseLesson": "Unit 2 - Chapter 5 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-647",
+      "displayForm": "ماندَن (مان)",
+      "normalizedForm": "ماندَن (مان)",
+      "definition": "to stay, to remain, to linger",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 647,
+      "courseListNumber": 22,
+      "courseLesson": "Unit 2 - Chapter 5 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-648",
+      "displayForm": "مَدرِسِهٔ اِبتِدایی",
+      "normalizedForm": "مَدرِسِهٔ اِبتِدایی",
+      "definition": "elementary school",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 648,
+      "courseListNumber": 22,
+      "courseLesson": "Unit 2 - Chapter 5 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-649",
+      "displayForm": "مَدرِسِهٔ غِیرِ اِنتِفاعی",
+      "normalizedForm": "مَدرِسِهٔ غِیرِ اِنتِفاعی",
+      "definition": "private school",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 649,
+      "courseListNumber": 22,
+      "courseLesson": "Unit 2 - Chapter 5 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-650",
+      "displayForm": "نَظَر",
+      "normalizedForm": "نَظَر",
+      "definition": "opinion, view, aspect",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 650,
+      "courseListNumber": 22,
+      "courseLesson": "Unit 2 - Chapter 5 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-651",
+      "displayForm": "نُمرِه",
+      "normalizedForm": "نُمرِه",
+      "definition": "test score‌‌, number",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 651,
+      "courseListNumber": 22,
+      "courseLesson": "Unit 2 - Chapter 5 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-course-652",
+      "displayForm": "هُنَر",
+      "normalizedForm": "هُنَر",
+      "definition": "art",
+      "sourceType": "course",
+      "sourceWeek": 1,
+      "tier": "B",
+      "courseEntryId": 652,
+      "courseListNumber": 22,
+      "courseLesson": "Unit 2 - Chapter 5 - Lesson 1",
+      "topic": "DLI Chapter 4–Chapter 5 Lesson 1"
+    },
+    {
+      "id": "vocab-news-095",
+      "displayForm": "ایران",
+      "normalizedForm": "ایران",
+      "definition": "Iran",
+      "romanization": "Irân",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-096",
+      "displayForm": "آمریکا",
+      "normalizedForm": "آمریکا",
+      "definition": "United States / America",
+      "romanization": "Âmrikâ",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-097",
+      "displayForm": "حمله / حملات",
+      "normalizedForm": "حمله / حملات",
+      "definition": "attack(s)",
+      "romanization": "hamle / hamalât",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-098",
+      "displayForm": "جنگ",
+      "normalizedForm": "جنگ",
+      "definition": "war",
+      "romanization": "jang",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-099",
+      "displayForm": "کشور / کشورها",
+      "normalizedForm": "کشور / کشورها",
+      "definition": "country / countries",
+      "romanization": "keshvar / keshvarhâ",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-100",
+      "displayForm": "سپاه",
+      "normalizedForm": "سپاه",
+      "definition": "IRGC; corps",
+      "romanization": "sepâh",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-101",
+      "displayForm": "سازمان",
+      "normalizedForm": "سازمان",
+      "definition": "organization",
+      "romanization": "sâzmân",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-102",
+      "displayForm": "شهروند",
+      "normalizedForm": "شهروند",
+      "definition": "citizen",
+      "romanization": "shahrvand",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-103",
+      "displayForm": "ترامپ",
+      "normalizedForm": "ترامپ",
+      "definition": "Trump",
+      "romanization": "Trump",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-104",
+      "displayForm": "گرانی",
+      "normalizedForm": "گرانی",
+      "definition": "high prices; price inflation",
+      "romanization": "gerâni",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-105",
+      "displayForm": "تهدید / تهدیدها",
+      "normalizedForm": "تهدید / تهدیدها",
+      "definition": "threat(s)",
+      "romanization": "tahdid / tahdidhâ",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-106",
+      "displayForm": "نفر",
+      "normalizedForm": "نفر",
+      "definition": "person (counter)",
+      "romanization": "nafar",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-107",
+      "displayForm": "پزشکیان",
+      "normalizedForm": "پزشکیان",
+      "definition": "Pezeshkian",
+      "romanization": "Pezeshkiân",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-108",
+      "displayForm": "تحریم / تحریم‌ها",
+      "normalizedForm": "تحریم / تحریم‌ها",
+      "definition": "sanction(s)",
+      "romanization": "tahrim / tahrimhâ",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-109",
+      "displayForm": "هفته",
+      "normalizedForm": "هفته",
+      "definition": "week",
+      "romanization": "hafte",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-110",
+      "displayForm": "وزیر",
+      "normalizedForm": "وزیر",
+      "definition": "minister",
+      "romanization": "vazir",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-111",
+      "displayForm": "دارو",
+      "normalizedForm": "دارو",
+      "definition": "medicine; medication",
+      "romanization": "dâru",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-112",
+      "displayForm": "ایران‌اینترنشنال",
+      "normalizedForm": "ایران‌اینترنشنال",
+      "definition": "Iran International",
+      "romanization": "Irân International",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-113",
+      "displayForm": "شمار",
+      "normalizedForm": "شمار",
+      "definition": "number; count",
+      "romanization": "shomâr",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-114",
+      "displayForm": "بانک",
+      "normalizedForm": "بانک",
+      "definition": "bank",
+      "romanization": "bânk",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-115",
+      "displayForm": "شانگهای",
+      "normalizedForm": "شانگهای",
+      "definition": "Shanghai",
+      "romanization": "Shânghâi",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-116",
+      "displayForm": "همکاری",
+      "normalizedForm": "همکاری",
+      "definition": "cooperation",
+      "romanization": "hamkâri",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-117",
+      "displayForm": "رقص",
+      "normalizedForm": "رقص",
+      "definition": "dance; dancing",
+      "romanization": "raghs",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-118",
+      "displayForm": "حکومت",
+      "normalizedForm": "حکومت",
+      "definition": "government; regime",
+      "romanization": "hokumat",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-119",
+      "displayForm": "جمهوری اسلامی",
+      "normalizedForm": "جمهوری اسلامی",
+      "definition": "Islamic Republic",
+      "romanization": "jomhuri-ye eslâmi",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-120",
+      "displayForm": "بنزین",
+      "normalizedForm": "بنزین",
+      "definition": "gasoline",
+      "romanization": "benzin",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-121",
+      "displayForm": "ارز",
+      "normalizedForm": "ارز",
+      "definition": "currency; foreign exchange",
+      "romanization": "arz",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-122",
+      "displayForm": "دارایی",
+      "normalizedForm": "دارایی",
+      "definition": "asset; property",
+      "romanization": "dârâyi",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-123",
+      "displayForm": "منطقه",
+      "normalizedForm": "منطقه",
+      "definition": "region",
+      "romanization": "manteqe",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-124",
+      "displayForm": "تورم",
+      "normalizedForm": "تورم",
+      "definition": "inflation",
+      "romanization": "tavarrom",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-125",
+      "displayForm": "مواد",
+      "normalizedForm": "مواد",
+      "definition": "materials; substances",
+      "romanization": "mavâd",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-126",
+      "displayForm": "واکنش",
+      "normalizedForm": "واکنش",
+      "definition": "reaction",
+      "romanization": "vâkonesh",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-127",
+      "displayForm": "اطلاعات",
+      "normalizedForm": "اطلاعات",
+      "definition": "information; intelligence",
+      "romanization": "ettelâ'ât",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-128",
+      "displayForm": "کارزار",
+      "normalizedForm": "کارزار",
+      "definition": "campaign",
+      "romanization": "kârzâr",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-129",
+      "displayForm": "دولت",
+      "normalizedForm": "دولت",
+      "definition": "state; administration",
+      "romanization": "dowlat",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-130",
+      "displayForm": "رنگ",
+      "normalizedForm": "رنگ",
+      "definition": "color; paint",
+      "romanization": "rang",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-131",
+      "displayForm": "هدف",
+      "normalizedForm": "هدف",
+      "definition": "target; goal",
+      "romanization": "hadaf",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-132",
+      "displayForm": "روسیه",
+      "normalizedForm": "روسیه",
+      "definition": "Russia",
+      "romanization": "Rusiye",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-133",
+      "displayForm": "بیشکک",
+      "normalizedForm": "بیشکک",
+      "definition": "Bishkek",
+      "romanization": "Bishkek",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-134",
+      "displayForm": "دیدار",
+      "normalizedForm": "دیدار",
+      "definition": "meeting; visit",
+      "romanization": "didâr",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-135",
+      "displayForm": "ماه",
+      "normalizedForm": "ماه",
+      "definition": "month",
+      "romanization": "mâh",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-136",
+      "displayForm": "عملیات",
+      "normalizedForm": "عملیات",
+      "definition": "operation(s)",
+      "romanization": "amaliyât",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-137",
+      "displayForm": "قربانی",
+      "normalizedForm": "قربانی",
+      "definition": "victim",
+      "romanization": "qorbâni",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-138",
+      "displayForm": "مصر",
+      "normalizedForm": "مصر",
+      "definition": "Egypt",
+      "romanization": "Mesr",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-139",
+      "displayForm": "تصمیم",
+      "normalizedForm": "تصمیم",
+      "definition": "decision",
+      "romanization": "tasmim",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-140",
+      "displayForm": "تزریق",
+      "normalizedForm": "تزریق",
+      "definition": "injection",
+      "romanization": "tazriq",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-141",
+      "displayForm": "هشدار",
+      "normalizedForm": "هشدار",
+      "definition": "warning",
+      "romanization": "هشدار (hoshdâr)",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-142",
+      "displayForm": "تهران",
+      "normalizedForm": "تهران",
+      "definition": "Tehran",
+      "romanization": "Tehrân",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-143",
+      "displayForm": "سبد",
+      "normalizedForm": "سبد",
+      "definition": "basket",
+      "romanization": "sabad",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-144",
+      "displayForm": "نرخ",
+      "normalizedForm": "نرخ",
+      "definition": "rate; price",
+      "romanization": "nerkh",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-145",
+      "displayForm": "پهپاد",
+      "normalizedForm": "پهپاد",
+      "definition": "drone; UAV",
+      "romanization": "pahpâd",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-146",
+      "displayForm": "تنگه",
+      "normalizedForm": "تنگه",
+      "definition": "strait",
+      "romanization": "tange",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-147",
+      "displayForm": "زندان",
+      "normalizedForm": "زندان",
+      "definition": "prison",
+      "romanization": "zendân",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-148",
+      "displayForm": "اعدام",
+      "normalizedForm": "اعدام",
+      "definition": "execution",
+      "romanization": "e'dâm",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-149",
+      "displayForm": "خانه",
+      "normalizedForm": "خانه",
+      "definition": "house; home",
+      "romanization": "khâne",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-150",
+      "displayForm": "مداح",
+      "normalizedForm": "مداح",
+      "definition": "religious eulogist",
+      "romanization": "maddâh",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-151",
+      "displayForm": "سهمیه",
+      "normalizedForm": "سهمیه",
+      "definition": "quota; allowance",
+      "romanization": "sahmiye",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-152",
+      "displayForm": "خودرو",
+      "normalizedForm": "خودرو",
+      "definition": "vehicle; car",
+      "romanization": "khodro",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-153",
+      "displayForm": "بهداشت",
+      "normalizedForm": "بهداشت",
+      "definition": "health; hygiene",
+      "romanization": "behdâsht",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-154",
+      "displayForm": "بیمه",
+      "normalizedForm": "بیمه",
+      "definition": "insurance",
+      "romanization": "bime",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-155",
+      "displayForm": "پوشش",
+      "normalizedForm": "پوشش",
+      "definition": "coverage",
+      "romanization": "pushesh",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-156",
+      "displayForm": "آسیا",
+      "normalizedForm": "آسیا",
+      "definition": "Asia",
+      "romanization": "Âsiyâ",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-157",
+      "displayForm": "حمایت",
+      "normalizedForm": "حمایت",
+      "definition": "support",
+      "romanization": "hemâyat",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-158",
+      "displayForm": "فلسطین",
+      "normalizedForm": "فلسطین",
+      "definition": "Palestine",
+      "romanization": "Felestin",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-159",
+      "displayForm": "نمایش",
+      "normalizedForm": "نمایش",
+      "definition": "show; performance",
+      "romanization": "namâyesh",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-160",
+      "displayForm": "اعتراض / اعتراضات",
+      "normalizedForm": "اعتراض / اعتراضات",
+      "definition": "protest(s)",
+      "romanization": "e'terâz / e'terâzât",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-161",
+      "displayForm": "نظرسنجی",
+      "normalizedForm": "نظرسنجی",
+      "definition": "poll; survey",
+      "romanization": "nazarsanji",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-162",
+      "displayForm": "پایگاه / پایگاه‌ها",
+      "normalizedForm": "پایگاه / پایگاه‌ها",
+      "definition": "base(s)",
+      "romanization": "pâygâh / pâygâhhâ",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-163",
+      "displayForm": "خبر",
+      "normalizedForm": "خبر",
+      "definition": "news; report",
+      "romanization": "khabar",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-164",
+      "displayForm": "صادرات",
+      "normalizedForm": "صادرات",
+      "definition": "exports",
+      "romanization": "sâderât",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-165",
+      "displayForm": "در",
+      "normalizedForm": "در",
+      "definition": "in; at",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-166",
+      "displayForm": "به",
+      "normalizedForm": "به",
+      "definition": "to; toward",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-167",
+      "displayForm": "از",
+      "normalizedForm": "از",
+      "definition": "from; of",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-168",
+      "displayForm": "با",
+      "normalizedForm": "با",
+      "definition": "with",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-169",
+      "displayForm": "برای",
+      "normalizedForm": "برای",
+      "definition": "for",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-170",
+      "displayForm": "پس از",
+      "normalizedForm": "پس از",
+      "definition": "after",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-171",
+      "displayForm": "تا",
+      "normalizedForm": "تا",
+      "definition": "until; up to; to",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-172",
+      "displayForm": "بر",
+      "normalizedForm": "بر",
+      "definition": "on; upon",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-173",
+      "displayForm": "درباره",
+      "normalizedForm": "درباره",
+      "definition": "about; concerning",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-174",
+      "displayForm": "علیه",
+      "normalizedForm": "علیه",
+      "definition": "against",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-175",
+      "displayForm": "بودن",
+      "normalizedForm": "بودن",
+      "definition": "to be",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-176",
+      "displayForm": "کردن",
+      "normalizedForm": "کردن",
+      "definition": "to do; to make",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-177",
+      "displayForm": "دادن",
+      "normalizedForm": "دادن",
+      "definition": "to give",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-178",
+      "displayForm": "شدن",
+      "normalizedForm": "شدن",
+      "definition": "to become; to be done",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-179",
+      "displayForm": "داشتن",
+      "normalizedForm": "داشتن",
+      "definition": "to have",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-180",
+      "displayForm": "گفتن",
+      "normalizedForm": "گفتن",
+      "definition": "to say",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-181",
+      "displayForm": "اعلام کردن",
+      "normalizedForm": "اعلام کردن",
+      "definition": "to announce",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-182",
+      "displayForm": "قرار دادن",
+      "normalizedForm": "قرار دادن",
+      "definition": "to place; to target (in context)",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-183",
+      "displayForm": "توانستن",
+      "normalizedForm": "توانستن",
+      "definition": "to be able to",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-184",
+      "displayForm": "خواستن",
+      "normalizedForm": "خواستن",
+      "definition": "to want; will (future auxiliary)",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-185",
+      "displayForm": "گذاشتن",
+      "normalizedForm": "گذاشتن",
+      "definition": "to put; to leave",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-186",
+      "displayForm": "متوقف کردن / شدن",
+      "normalizedForm": "متوقف کردن / شدن",
+      "definition": "to stop / be stopped",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-187",
+      "displayForm": "رسیدن",
+      "normalizedForm": "رسیدن",
+      "definition": "to arrive; to reach",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-188",
+      "displayForm": "نشان دادن",
+      "normalizedForm": "نشان دادن",
+      "definition": "to show",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-189",
+      "displayForm": "پوشش دادن",
+      "normalizedForm": "پوشش دادن",
+      "definition": "to cover",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-190",
+      "displayForm": "برنامه‌ریزی کردن",
+      "normalizedForm": "برنامه‌ریزی کردن",
+      "definition": "to plan",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-191",
+      "displayForm": "محکوم کردن",
+      "normalizedForm": "محکوم کردن",
+      "definition": "to condemn",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-192",
+      "displayForm": "آغاز کردن",
+      "normalizedForm": "آغاز کردن",
+      "definition": "to begin",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-193",
+      "displayForm": "منتشر کردن",
+      "normalizedForm": "منتشر کردن",
+      "definition": "to publish",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    },
+    {
+      "id": "vocab-news-194",
+      "displayForm": "حذف کردن",
+      "normalizedForm": "حذف کردن",
+      "definition": "to remove; delete",
+      "sourceType": "system_advanced",
+      "sourceWeek": 1,
+      "tier": "A",
+      "topic": "BBC Persian + Iran International frequency sample"
+    }
+  ],
+  "passages": [
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-01",
+      "title": "01. گزارش بازار محلی",
+      "textFa": "شهرداری تهران اعلام کرد بازار میوه در جنوب شهر امروز شلوغ‌تر از هفته گذشته بود. قیمت بعضی مواد غذایی بالا رفت، اما نرخ میوه در چند مغازه تغییر نکرد. چند شهروند گفتند گرانی باعث شده است خرید خانواده‌ها کمتر شود. یک فروشنده توضیح داد که هزینه حمل‌ونقل و بنزین بر قیمت‌ها اثر دارد. شهرداری می‌خواهد هفته آینده یک بازار تازه برای فروش مستقیم محصولات باز کند.",
+      "ilrEstimate": 1.2,
+      "topic": "economy",
+      "register": "standard news Persian",
+      "genre": "خبر کوتاه",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 66,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "گرانی",
+        "نرخ",
+        "شهروند",
+        "بنزین"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "گزارش بازار محلی"
+        },
+        {
+          "question": "بازار میوه در کدام بخش شهر بود؟",
+          "type": "detail",
+          "referenceAnswer": "در جنوب تهران"
+        },
+        {
+          "question": "چرا بعضی خانواده‌ها کمتر خرید می‌کنند؟",
+          "type": "inference",
+          "referenceAnswer": "به دلیل گرانی و افزایش هزینه‌ها"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-02",
+      "title": "02. تغییر ساعت اتوبوس‌ها",
+      "textFa": "سازمان حمل‌ونقل شهر اعلام کرد ساعت حرکت اتوبوس‌های خط مرکز از شنبه تغییر می‌کند. نخستین اتوبوس ساعت شش صبح حرکت خواهد کرد و آخرین اتوبوس ساعت یازده شب به پایگاه برمی‌گردد. این تصمیم پس از یک نظرسنجی از مسافران گرفته شد. بیشتر شهروندان خواسته بودند شب‌ها اتوبوس بیشتری وجود داشته باشد. مسئولان گفتند برنامه جدید برای دو هفته آزمایش می‌شود.",
+      "ilrEstimate": 1.2,
+      "topic": "transportation",
+      "register": "standard news Persian",
+      "genre": "اطلاعیه",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 60,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "سازمان",
+        "شهروند",
+        "نظرسنجی",
+        "تصمیم"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "تغییر ساعت اتوبوس‌ها"
+        },
+        {
+          "question": "برنامه جدید از چه روزی آغاز می‌شود؟",
+          "type": "detail",
+          "referenceAnswer": "از شنبه"
+        },
+        {
+          "question": "چرا ساعت حرکت تغییر کرد؟",
+          "type": "inference",
+          "referenceAnswer": "زیرا مسافران سرویس شبانه بیشتری می‌خواستند"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-03",
+      "title": "03. بازگشایی درمانگاه",
+      "textFa": "درمانگاه مرکزی یک شهر کوچک پس از سه ماه دوباره باز شد. وزارت بهداشت برای خرید دارو و تعمیر ساختمان به این مرکز کمک کرد. درمانگاه اکنون پنج پزشک و ده پرستار دارد و بیمه بیشتر بیماران را پوشش می‌دهد. مسئول مرکز گفت مردم می‌توانند برای تزریق و معاینه از ساعت هشت صبح مراجعه کنند. شهروندان از بازگشایی درمانگاه حمایت کردند.",
+      "ilrEstimate": 1.2,
+      "topic": "health",
+      "register": "standard news Persian",
+      "genre": "گزارش محلی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 61,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "بهداشت",
+        "دارو",
+        "بیمه",
+        "پوشش"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "بازگشایی درمانگاه"
+        },
+        {
+          "question": "درمانگاه چند ماه بسته بود؟",
+          "type": "detail",
+          "referenceAnswer": "سه ماه"
+        },
+        {
+          "question": "بازگشایی درمانگاه چه فایده‌ای برای مردم دارد؟",
+          "type": "inference",
+          "referenceAnswer": "دسترسی محلی به دارو، تزریق و معاینه بهتر می‌شود"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-04",
+      "title": "04. باران و بسته شدن جاده",
+      "textFa": "باران شدید در شمال کشور باعث بسته شدن یک جاده کوهستانی شد. پلیس اعلام کرد هیچ قربانی گزارش نشده است، اما چند خودرو برای دو ساعت متوقف شدند. نیروهای امدادی سنگ و گل را از جاده حذف کردند. سازمان هواشناسی درباره ادامه باران تا فردا هشدار داد. رانندگان باید پیش از سفر اطلاعات تازه را بررسی کنند و از مسیر دیگر بروند.",
+      "ilrEstimate": 1.2,
+      "topic": "weather",
+      "register": "standard news Persian",
+      "genre": "گزارش وضعیت",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 62,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "کشور / کشورها",
+        "خودرو",
+        "سازمان",
+        "هشدار"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "باران و بسته شدن جاده"
+        },
+        {
+          "question": "جاده در کدام منطقه بسته شد؟",
+          "type": "detail",
+          "referenceAnswer": "در شمال کشور"
+        },
+        {
+          "question": "رانندگان چرا باید مسیر دیگری انتخاب کنند؟",
+          "type": "inference",
+          "referenceAnswer": "زیرا باران و خطر بسته شدن دوباره جاده ادامه دارد"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-05",
+      "title": "05. نمایشگاه کتاب مدرسه",
+      "textFa": "یک مدرسه در شیراز این هفته نمایشگاه کتاب برگزار کرد. دانش‌آموزان با کمک معلمان بیش از پانصد کتاب را در سالن مدرسه قرار دادند. خانواده‌ها می‌توانستند کتاب‌های دست دوم را با نرخ پایین بخرند. درآمد نمایشگاه برای خرید کتاب‌های تازه کتابخانه استفاده خواهد شد. مدیر مدرسه گفت هدف برنامه افزایش مطالعه در خانه است.",
+      "ilrEstimate": 1.2,
+      "topic": "education",
+      "register": "standard news Persian",
+      "genre": "گزارش مدرسه",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 54,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "هفته",
+        "خانواده",
+        "نرخ",
+        "هدف"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "نمایشگاه کتاب مدرسه"
+        },
+        {
+          "question": "نمایشگاه در کدام شهر برگزار شد؟",
+          "type": "detail",
+          "referenceAnswer": "در شیراز"
+        },
+        {
+          "question": "درآمد نمایشگاه برای چه کاری است؟",
+          "type": "inference",
+          "referenceAnswer": "برای خرید کتاب‌های تازه کتابخانه"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-06",
+      "title": "06. افزایش صادرات میوه",
+      "textFa": "وزارت بازرگانی اعلام کرد صادرات میوه در ماه گذشته افزایش یافت. بیشتر محصولات به چند کشور همسایه فرستاده شد. وزیر گفت همکاری میان کشاورزان و شرکت‌های حمل‌ونقل علت اصلی این رشد بوده است. با این حال، گرانی بنزین هزینه صادرات را بالا برده است. دولت می‌خواهد برای خودروهای باری سهمیه بیشتری در نظر بگیرد.",
+      "ilrEstimate": 1.2,
+      "topic": "economy",
+      "register": "standard news Persian",
+      "genre": "گزارش اقتصادی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 54,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "صادرات",
+        "کشور / کشورها",
+        "همکاری",
+        "سهمیه"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "افزایش صادرات میوه"
+        },
+        {
+          "question": "صادرات چه محصولی افزایش یافت؟",
+          "type": "detail",
+          "referenceAnswer": "میوه"
+        },
+        {
+          "question": "سهمیه بیشتر چه مشکلی را کاهش می‌دهد؟",
+          "type": "inference",
+          "referenceAnswer": "هزینه بالای سوخت و حمل‌ونقل"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-07",
+      "title": "07. تمرین امداد در فرودگاه",
+      "textFa": "امروز یک عملیات آموزشی در فرودگاه شهر انجام شد. در این تمرین، نیروهای امدادی آتش یک هواپیمای فرضی را متوقف کردند و مسافران را به منطقه امن بردند. مسئولان گفتند هیچ پرواز واقعی لغو نشد. هدف عملیات، آزمایش همکاری پلیس، آتش‌نشانی و بهداشت بود. گزارش کامل تمرین هفته آینده منتشر می‌شود.",
+      "ilrEstimate": 1.2,
+      "topic": "public safety",
+      "register": "standard news Persian",
+      "genre": "گزارش عملیات",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 51,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "عملیات",
+        "منطقه",
+        "همکاری",
+        "منتشر کردن"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "تمرین امداد در فرودگاه"
+        },
+        {
+          "question": "تمرین در کجا انجام شد؟",
+          "type": "detail",
+          "referenceAnswer": "در فرودگاه شهر"
+        },
+        {
+          "question": "چرا این تمرین برگزار شد؟",
+          "type": "inference",
+          "referenceAnswer": "برای آزمایش هماهنگی نیروهای امدادی"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-08",
+      "title": "08. کمبود آب در روستا",
+      "textFa": "چند روستا در جنوب منطقه با کمبود آب روبه‌رو شده‌اند. مردم می‌گویند آب خانه‌ها هر روز برای چند ساعت قطع می‌شود. دولت تانکرهای آب را به روستاها فرستاده و برنامه‌ریزی برای تعمیر شبکه را آغاز کرده است. یک مقام محلی گفت کار تعمیر تا پایان ماه ادامه دارد. شهروندان خواستند اطلاعات دقیق درباره زمان قطع آب اعلام شود.",
+      "ilrEstimate": 1.2,
+      "topic": "environment",
+      "register": "standard news Persian",
+      "genre": "گزارش روستایی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 58,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "منطقه",
+        "خانه",
+        "دولت",
+        "برنامه‌ریزی کردن"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "کمبود آب در روستا"
+        },
+        {
+          "question": "آب خانه‌ها چند وقت قطع می‌شود؟",
+          "type": "detail",
+          "referenceAnswer": "هر روز برای چند ساعت"
+        },
+        {
+          "question": "مردم از مقام‌ها چه می‌خواهند؟",
+          "type": "inference",
+          "referenceAnswer": "اطلاعات دقیق درباره زمان قطع آب"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-09",
+      "title": "09. مسابقه فوتبال جوانان",
+      "textFa": "تیم جوانان تبریز در یک مسابقه دوستانه تیم رشت را شکست داد. بازی با نتیجه دو بر یک پایان یافت. حدود سه هزار نفر در ورزشگاه حضور داشتند و از هر دو تیم حمایت کردند. مربی تبریز گفت هدف اصلی، آماده شدن برای مسابقات آسیا است. تیم هفته آینده برای تمرین بیشتر به تهران خواهد رفت.",
+      "ilrEstimate": 1.2,
+      "topic": "sports",
+      "register": "standard news Persian",
+      "genre": "گزارش ورزشی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 56,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "نفر",
+        "حمایت",
+        "هدف",
+        "آسیا"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "مسابقه فوتبال جوانان"
+        },
+        {
+          "question": "نتیجه مسابقه چه بود؟",
+          "type": "detail",
+          "referenceAnswer": "دو بر یک به سود تبریز"
+        },
+        {
+          "question": "تیم تبریز چرا به تهران می‌رود؟",
+          "type": "inference",
+          "referenceAnswer": "برای تمرین و آماده شدن برای مسابقات آسیا"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-10",
+      "title": "10. افتتاح بانک سیار",
+      "textFa": "یک بانک سیار در سه روستای دورافتاده آغاز به کار کرد. خودرو این بانک دو روز در هفته به هر روستا می‌رود. مردم می‌توانند پول دریافت کنند، حساب باز کنند و درباره وام اطلاعات بگیرند. مدیر بانک گفت هدف، کاهش سفرهای طولانی شهروندان است. اگر برنامه موفق باشد، ماه آینده دو خودرو دیگر اضافه خواهد شد.",
+      "ilrEstimate": 1.2,
+      "topic": "services",
+      "register": "standard news Persian",
+      "genre": "خبر محلی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 56,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "بانک",
+        "خودرو",
+        "اطلاعات",
+        "شهروند"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "افتتاح بانک سیار"
+        },
+        {
+          "question": "بانک سیار به چند روستا می‌رود؟",
+          "type": "detail",
+          "referenceAnswer": "سه روستا"
+        },
+        {
+          "question": "این خدمت چگونه به مردم کمک می‌کند؟",
+          "type": "inference",
+          "referenceAnswer": "نیاز به سفرهای طولانی برای خدمات بانکی را کم می‌کند"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-11",
+      "title": "11. تصمیم درباره قیمت بنزین",
+      "textFa": "دولت اعلام کرد نرخ بنزین در این ماه تغییر نمی‌کند. پیش از این، گزارش‌هایی درباره افزایش قیمت منتشر شده بود. وزیر اقتصاد گفت هر تصمیم تازه پس از بررسی تورم و درآمد خانواده‌ها گرفته می‌شود. او افزود سهمیه فعلی خودروها تا پایان فصل باقی می‌ماند. بازار پس از این خبر واکنش آرامی نشان داد.",
+      "ilrEstimate": 1.2,
+      "topic": "economy",
+      "register": "standard news Persian",
+      "genre": "گزارش سیاست داخلی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 54,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "دولت",
+        "نرخ",
+        "تورم",
+        "واکنش"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "تصمیم درباره قیمت بنزین"
+        },
+        {
+          "question": "نرخ بنزین در این ماه چه می‌شود؟",
+          "type": "detail",
+          "referenceAnswer": "تغییر نمی‌کند"
+        },
+        {
+          "question": "چرا دولت پیش از تصمیم تازه تورم را بررسی می‌کند؟",
+          "type": "inference",
+          "referenceAnswer": "برای سنجیدن اثر قیمت بر خانواده‌ها"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-12",
+      "title": "12. دیدار وزیران منطقه",
+      "textFa": "وزیران سه کشور منطقه در بیشکک دیدار کردند. موضوع اصلی نشست، همکاری اقتصادی و امنیت راه‌های زمینی بود. نمایندگان درباره افزایش صادرات و کاهش هزینه حمل‌ونقل گفت‌وگو کردند. در پایان، یک برنامه مشترک برای شش ماه آینده اعلام شد. دیدار بعدی قرار است در تهران برگزار شود.",
+      "ilrEstimate": 1.2,
+      "topic": "diplomacy",
+      "register": "standard news Persian",
+      "genre": "گزارش سیاسی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 47,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "وزیر",
+        "کشور / کشورها",
+        "دیدار",
+        "همکاری"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "دیدار وزیران منطقه"
+        },
+        {
+          "question": "نشست در کدام شهر برگزار شد؟",
+          "type": "detail",
+          "referenceAnswer": "در بیشکک"
+        },
+        {
+          "question": "برنامه مشترک احتمالاً چه چیزی را بهتر می‌کند؟",
+          "type": "inference",
+          "referenceAnswer": "همکاری اقتصادی و امنیت مسیرهای زمینی"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-13",
+      "title": "13. اعتراض کارکنان کارخانه",
+      "textFa": "گروهی از کارکنان یک کارخانه درباره پرداخت نشدن حقوق خود اعتراض کردند. آنها صبح در برابر ساختمان مدیریت جمع شدند، اما راه ورود را نبستند. نماینده کارگران گفت حقوق دو ماه هنوز پرداخت نشده است. مدیر کارخانه وعده داد بخشی از پول تا پایان هفته داده شود. مقام محلی خواستار گفت‌وگوی آرام میان دو طرف شد.",
+      "ilrEstimate": 1.2,
+      "topic": "labor",
+      "register": "standard news Persian",
+      "genre": "گزارش اجتماعی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 56,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "اعتراض / اعتراضات",
+        "ساختمان",
+        "هفته",
+        "گفتن"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "اعتراض کارکنان کارخانه"
+        },
+        {
+          "question": "کارگران چرا اعتراض کردند؟",
+          "type": "detail",
+          "referenceAnswer": "به دلیل پرداخت نشدن حقوق دو ماه"
+        },
+        {
+          "question": "وعده مدیر چه اثری می‌تواند داشته باشد؟",
+          "type": "inference",
+          "referenceAnswer": "ممکن است تنش را کم و گفت‌وگو را آسان کند"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-14",
+      "title": "14. هشدار درباره داروی تقلبی",
+      "textFa": "وزارت بهداشت درباره فروش یک داروی تقلبی در اینترنت هشدار داد. این دارو پوشش رسمی بیمه ندارد و نام شرکت سازنده روی جعبه اشتباه است. مقام‌ها از مردم خواستند دارو را فقط از داروخانه بخرند. پلیس یک کارزار برای حذف تبلیغات این محصول آغاز کرده است. تاکنون گزارشی درباره قربانی منتشر نشده است.",
+      "ilrEstimate": 1.2,
+      "topic": "health",
+      "register": "standard news Persian",
+      "genre": "هشدار عمومی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 53,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "بهداشت",
+        "دارو",
+        "بیمه",
+        "هشدار"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "هشدار درباره داروی تقلبی"
+        },
+        {
+          "question": "مردم باید دارو را از کجا بخرند؟",
+          "type": "detail",
+          "referenceAnswer": "فقط از داروخانه"
+        },
+        {
+          "question": "نام اشتباه شرکت چه چیزی را نشان می‌دهد؟",
+          "type": "inference",
+          "referenceAnswer": "اینکه محصول احتمالاً تقلبی است"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-15",
+      "title": "15. کاهش آلودگی هوا",
+      "textFa": "سازمان محیط زیست اعلام کرد آلودگی هوای اصفهان در این هفته کمتر شده است. باران و کاهش رفت‌وآمد خودروها دو علت مهم بودند. با وجود این، به کودکان و سالمندان توصیه شد ورزش طولانی در فضای باز نکنند. شهرداری برنامه کاشت هزار درخت را آغاز کرده است. هدف این برنامه بهبود هوا در چند منطقه شلوغ شهر است.",
+      "ilrEstimate": 1.2,
+      "topic": "environment",
+      "register": "standard news Persian",
+      "genre": "گزارش شهری",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 58,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "سازمان",
+        "هفته",
+        "خودرو",
+        "منطقه"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "کاهش آلودگی هوا"
+        },
+        {
+          "question": "آلودگی در کدام شهر کمتر شد؟",
+          "type": "detail",
+          "referenceAnswer": "در اصفهان"
+        },
+        {
+          "question": "چرا هنوز به بعضی مردم احتیاط توصیه شده است؟",
+          "type": "inference",
+          "referenceAnswer": "زیرا کیفیت هوا هنوز ممکن است برای گروه‌های حساس مناسب نباشد"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-16",
+      "title": "16. خانه‌های تازه برای سیل‌زدگان",
+      "textFa": "دولت ساخت پنجاه خانه برای خانواده‌های سیل‌زده را به پایان رساند. این خانه‌ها در منطقه‌ای بلندتر از رودخانه ساخته شده‌اند. هر خانواده همچنین مقداری پول و مواد ساختمانی دریافت کرد. مقام محلی گفت بیمه بخشی از دارایی‌های آسیب‌دیده را پوشش می‌دهد. خانواده‌ها قرار است از هفته آینده به خانه‌های تازه منتقل شوند.",
+      "ilrEstimate": 1.2,
+      "topic": "housing",
+      "register": "standard news Persian",
+      "genre": "گزارش بازسازی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 52,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "خانه",
+        "خانواده",
+        "مواد",
+        "دارایی"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "خانه‌های تازه برای سیل‌زدگان"
+        },
+        {
+          "question": "چند خانه ساخته شد؟",
+          "type": "detail",
+          "referenceAnswer": "پنجاه خانه"
+        },
+        {
+          "question": "چرا خانه‌ها در منطقه بلندتر ساخته شدند؟",
+          "type": "inference",
+          "referenceAnswer": "برای کاهش خطر سیل دوباره"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-17",
+      "title": "17. نظرسنجی درباره پارک",
+      "textFa": "شهرداری یک نظرسنجی درباره ساخت پارک تازه منتشر کرد. بیشتر شرکت‌کنندگان از فضای سبز و زمین بازی حمایت کردند، اما گروهی نگران ترافیک بودند. در طرح تازه، یک پارکینگ کوچک در کنار پارک قرار داده شده است. شهرداری می‌گوید تصمیم نهایی پس از دیدار با شهروندان گرفته می‌شود. این دیدار روز سه‌شنبه در مدرسه محله است.",
+      "ilrEstimate": 1.2,
+      "topic": "community",
+      "register": "standard news Persian",
+      "genre": "گزارش نظرسنجی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 56,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "نظرسنجی",
+        "حمایت",
+        "تصمیم",
+        "دیدار"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "نظرسنجی درباره پارک"
+        },
+        {
+          "question": "دیدار شهروندان چه روزی است؟",
+          "type": "detail",
+          "referenceAnswer": "سه‌شنبه"
+        },
+        {
+          "question": "پارکینگ چرا به طرح اضافه شد؟",
+          "type": "inference",
+          "referenceAnswer": "برای پاسخ به نگرانی درباره ترافیک"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-18",
+      "title": "18. پرواز پهپادهای امدادی",
+      "textFa": "سازمان امداد استفاده آزمایشی از دو پهپاد را آغاز کرد. این پهپادها می‌توانند پس از زلزله از منطقه عکس بگیرند و اطلاعات را به پایگاه امداد بفرستند. نخستین عملیات در یک روستای خالی انجام شد. مسئول پروژه گفت هدف، پیدا کردن سریع راه‌های بسته و خانه‌های آسیب‌دیده است. نتیجه آزمایش تا پایان ماه اعلام خواهد شد.",
+      "ilrEstimate": 1.2,
+      "topic": "technology",
+      "register": "standard news Persian",
+      "genre": "گزارش فناوری",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 56,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "پهپاد",
+        "عملیات",
+        "اطلاعات",
+        "پایگاه / پایگاه‌ها"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "پرواز پهپادهای امدادی"
+        },
+        {
+          "question": "نخستین عملیات کجا انجام شد؟",
+          "type": "detail",
+          "referenceAnswer": "در یک روستای خالی"
+        },
+        {
+          "question": "پهپادها چگونه به امدادگران کمک می‌کنند؟",
+          "type": "inference",
+          "referenceAnswer": "راه‌های بسته و خانه‌های آسیب‌دیده را سریع‌تر پیدا می‌کنند"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-19",
+      "title": "19. بازگشت مسافران از مرز",
+      "textFa": "پس از باز شدن مرز، حدود هشتصد مسافر به کشور بازگشتند. مرز برای یک روز به دلیل طوفان شن بسته بود. نیروهای مرزی آب و مواد غذایی در اختیار مسافران قرار دادند. وزارت راه اعلام کرد حرکت اتوبوس‌ها دوباره آغاز شده است. با این حال، به مردم توصیه شد پیش از سفر وضعیت هوا را بررسی کنند.",
+      "ilrEstimate": 1.2,
+      "topic": "travel",
+      "register": "standard news Persian",
+      "genre": "گزارش مرزی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 57,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "پس از",
+        "کشور / کشورها",
+        "مواد",
+        "اعلام کردن"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "بازگشت مسافران از مرز"
+        },
+        {
+          "question": "مرز چرا بسته بود؟",
+          "type": "detail",
+          "referenceAnswer": "به دلیل طوفان شن"
+        },
+        {
+          "question": "چرا بررسی هوا هنوز مهم است؟",
+          "type": "inference",
+          "referenceAnswer": "زیرا شرایط جوی ممکن است دوباره سفر را مختل کند"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-20",
+      "title": "20. همکاری دانشگاه و بیمارستان",
+      "textFa": "دانشگاه شهر و بیمارستان مرکزی یک برنامه مشترک آموزشی آغاز کردند. در این برنامه، دانشجویان پزشکی سه روز در هفته در درمانگاه کار می‌کنند. بیمارستان برای آنها کلاس‌های بهداشت و تزریق برگزار می‌کند. رئیس دانشگاه گفت همکاری جدید هم به آموزش دانشجویان و هم به خدمات مردم کمک خواهد کرد. نخستین گروه ماه آینده وارد برنامه می‌شود.",
+      "ilrEstimate": 1.2,
+      "topic": "education",
+      "register": "standard news Persian",
+      "genre": "گزارش علمی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 57,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "همکاری",
+        "بهداشت",
+        "تزریق",
+        "ماه"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "همکاری دانشگاه و بیمارستان"
+        },
+        {
+          "question": "دانشجویان چند روز در هفته کار می‌کنند؟",
+          "type": "detail",
+          "referenceAnswer": "سه روز"
+        },
+        {
+          "question": "این برنامه چرا برای بیمارستان مفید است؟",
+          "type": "inference",
+          "referenceAnswer": "نیروی آموزشی بیشتری برای ارائه خدمات دارد"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-21",
+      "title": "21. واکنش بازار ارز",
+      "textFa": "بازار ارز امروز به خبر مذاکرات منطقه‌ای واکنش نشان داد. نرخ چند ارز خارجی در آغاز روز بالا رفت، اما ظهر دوباره کاهش یافت. کارشناسان گفتند هنوز برای پیش‌بینی روند ماه آینده زود است. بانک مرکزی اعلام کرد ارز کافی برای واردات دارو وجود دارد. معامله‌گران اکنون منتظر نتیجه دیدار وزیران هستند.",
+      "ilrEstimate": 1.2,
+      "topic": "economy",
+      "register": "standard news Persian",
+      "genre": "گزارش اقتصادی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 52,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "ارز",
+        "واکنش",
+        "نرخ",
+        "بانک"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "واکنش بازار ارز"
+        },
+        {
+          "question": "نرخ ارز در ظهر چه شد؟",
+          "type": "detail",
+          "referenceAnswer": "کاهش یافت"
+        },
+        {
+          "question": "چرا معامله‌گران منتظر دیدار وزیران هستند؟",
+          "type": "inference",
+          "referenceAnswer": "نتیجه دیدار ممکن است بر بازار ارز اثر بگذارد"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-22",
+      "title": "22. کارزار ایمنی جاده",
+      "textFa": "پلیس راه یک کارزار تازه برای ایمنی جاده‌ها آغاز کرده است. در این برنامه، رانندگان درباره سرعت، کمربند و خستگی اطلاعات می‌گیرند. مأموران همچنین خودروهای باری را در چند پایگاه بررسی می‌کنند. هدف، کاهش شمار قربانیان تصادف در تعطیلات است. نتایج کارزار پس از دو ماه منتشر خواهد شد.",
+      "ilrEstimate": 1.2,
+      "topic": "public safety",
+      "register": "standard news Persian",
+      "genre": "گزارش عمومی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 49,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "کارزار",
+        "اطلاعات",
+        "خودرو",
+        "قربانی"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "کارزار ایمنی جاده"
+        },
+        {
+          "question": "خودروهای باری کجا بررسی می‌شوند؟",
+          "type": "detail",
+          "referenceAnswer": "در چند پایگاه"
+        },
+        {
+          "question": "موفقیت کارزار با چه چیزی سنجیده می‌شود؟",
+          "type": "inference",
+          "referenceAnswer": "با کاهش قربانیان و تصادف‌ها"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-23",
+      "title": "23. جشن رقص محلی",
+      "textFa": "یک جشن رقص محلی در روستایی نزدیک شیراز برگزار شد. گروه‌های هنری از پنج منطقه در این برنامه شرکت کردند. نمایش لباس‌ها و موسیقی سنتی بخش دیگری از جشن بود. برگزارکنندگان گفتند هدف، آشنایی جوانان با فرهنگ محلی است. درآمد فروش غذا برای تعمیر مدرسه روستا کنار گذاشته شد.",
+      "ilrEstimate": 1.2,
+      "topic": "culture",
+      "register": "standard news Persian",
+      "genre": "گزارش فرهنگی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 49,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "رقص",
+        "منطقه",
+        "نمایش",
+        "هدف"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "جشن رقص محلی"
+        },
+        {
+          "question": "گروه‌ها از چند منطقه آمدند؟",
+          "type": "detail",
+          "referenceAnswer": "پنج منطقه"
+        },
+        {
+          "question": "جشن چگونه به مدرسه کمک می‌کند؟",
+          "type": "inference",
+          "referenceAnswer": "درآمد فروش غذا برای تعمیر مدرسه مصرف می‌شود"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-24",
+      "title": "24. افزایش قیمت دارو",
+      "textFa": "انجمن داروسازان اعلام کرد قیمت چند داروی وارداتی افزایش یافته است. علت اصلی، تغییر نرخ ارز و هزینه حمل‌ونقل عنوان شد. بیمه هنوز بخشی از هزینه این داروها را پوشش می‌دهد. وزارت بهداشت گفت برای حمایت از بیماران یک برنامه تازه بررسی می‌شود. تصمیم نهایی قرار است هفته آینده اعلام شود.",
+      "ilrEstimate": 1.2,
+      "topic": "health",
+      "register": "standard news Persian",
+      "genre": "گزارش اقتصادی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 51,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "دارو",
+        "ارز",
+        "بیمه",
+        "حمایت"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "افزایش قیمت دارو"
+        },
+        {
+          "question": "علت افزایش قیمت چیست؟",
+          "type": "detail",
+          "referenceAnswer": "تغییر نرخ ارز و هزینه حمل‌ونقل"
+        },
+        {
+          "question": "برنامه تازه احتمالاً برای چه کسانی است؟",
+          "type": "inference",
+          "referenceAnswer": "برای بیمارانی که هزینه دارو بر آنها فشار می‌آورد"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-25",
+      "title": "25. توقف موقت صادرات",
+      "textFa": "دولت صادرات یک نوع میوه را برای ده روز متوقف کرد. مقام‌ها گفتند این تصمیم برای افزایش محصول در بازار داخلی گرفته شده است. کشاورزان درباره زیان احتمالی هشدار دادند و خواستار حمایت مالی شدند. وزیر وعده داد پس از بررسی قیمت‌ها با نمایندگان آنها دیدار کند. صادرات ممکن است پیش از پایان ده روز دوباره آغاز شود.",
+      "ilrEstimate": 1.2,
+      "topic": "economy",
+      "register": "standard news Persian",
+      "genre": "اطلاعیه تجاری",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 58,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "صادرات",
+        "متوقف کردن / شدن",
+        "تصمیم",
+        "هشدار"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "توقف موقت صادرات"
+        },
+        {
+          "question": "صادرات برای چند روز متوقف شد؟",
+          "type": "detail",
+          "referenceAnswer": "ده روز"
+        },
+        {
+          "question": "دولت چرا صادرات را متوقف کرد؟",
+          "type": "inference",
+          "referenceAnswer": "برای بیشتر شدن محصول در بازار داخلی"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-26",
+      "title": "26. اطلاعیه مدرسه درباره بیماری",
+      "textFa": "مدیر یک مدرسه اعلام کرد کلاس‌های دو پایه فردا به صورت آنلاین برگزار می‌شود. چند دانش‌آموز نشانه‌های یک بیماری فصلی داشته‌اند. ساختمان مدرسه برای یک روز پاک‌سازی خواهد شد. وزارت بهداشت گفته است تعطیلی کامل مدرسه لازم نیست. خانواده‌ها باید وضعیت سلامت کودکان را بررسی کنند و در صورت بیماری آنها را در خانه نگه دارند.",
+      "ilrEstimate": 1.2,
+      "topic": "education",
+      "register": "standard news Persian",
+      "genre": "اطلاعیه مدرسه",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 56,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "اعلام کردن",
+        "ساختمان",
+        "بهداشت",
+        "خانه"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "اطلاعیه مدرسه درباره بیماری"
+        },
+        {
+          "question": "کلاس‌ها چگونه برگزار می‌شوند؟",
+          "type": "detail",
+          "referenceAnswer": "به صورت آنلاین"
+        },
+        {
+          "question": "چرا تعطیلی کامل لازم نیست؟",
+          "type": "inference",
+          "referenceAnswer": "زیرا مشکل محدود است و ساختمان پاک‌سازی می‌شود"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-27",
+      "title": "27. دیدار تیم‌های امدادی",
+      "textFa": "نمایندگان تیم‌های امدادی ایران و دو کشور همسایه در تهران دیدار کردند. آنها درباره کمک پس از زلزله و سیل گفت‌وگو کردند. هر کشور اطلاعات پایگاه‌ها و تجهیزات خود را ارائه داد. در پایان، سه طرف تصمیم گرفتند سال آینده یک عملیات مشترک برگزار کنند. مقام‌ها گفتند این همکاری زمان رسیدن کمک را کاهش می‌دهد.",
+      "ilrEstimate": 1.2,
+      "topic": "regional cooperation",
+      "register": "standard news Persian",
+      "genre": "گزارش همکاری",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 55,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "ایران",
+        "کشور / کشورها",
+        "پایگاه / پایگاه‌ها",
+        "عملیات"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "دیدار تیم‌های امدادی"
+        },
+        {
+          "question": "نمایندگان در کجا دیدار کردند؟",
+          "type": "detail",
+          "referenceAnswer": "در تهران"
+        },
+        {
+          "question": "همکاری چگونه به قربانیان کمک می‌کند؟",
+          "type": "inference",
+          "referenceAnswer": "کمک و امداد سریع‌تر به محل می‌رسد"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-28",
+      "title": "28. گزارش تولید خودرو",
+      "textFa": "وزارت صنعت اعلام کرد تولید خودرو در ماه گذشته کمی افزایش یافت. سه کارخانه در مجموع بیست هزار خودرو ساختند. با این حال، کمبود بعضی مواد هنوز تولید را کند می‌کند. دولت می‌خواهد واردات قطعات را آسان‌تر کند. کارشناسان می‌گویند افزایش تولید می‌تواند قیمت بازار را کاهش دهد، اما نتیجه آن فوری نخواهد بود.",
+      "ilrEstimate": 1.2,
+      "topic": "industry",
+      "register": "standard news Persian",
+      "genre": "گزارش صنعتی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 54,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "خودرو",
+        "ماه",
+        "مواد",
+        "دولت"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "گزارش تولید خودرو"
+        },
+        {
+          "question": "چند خودرو تولید شد؟",
+          "type": "detail",
+          "referenceAnswer": "بیست هزار خودرو"
+        },
+        {
+          "question": "چرا قیمت فوراً پایین نمی‌آید؟",
+          "type": "inference",
+          "referenceAnswer": "زیرا اثر افزایش تولید بر بازار زمان می‌برد"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-29",
+      "title": "29. هشدار امنیتی برای بانک‌ها",
+      "textFa": "مرکز امنیت اینترنت درباره حمله تازه به حساب‌های بانکی هشدار داد. مهاجمان پیام‌هایی با نام بانک برای شهروندان می‌فرستند و اطلاعات شخصی می‌خواهند. پلیس گفت بانک‌ها هرگز رمز کامل مشتری را درخواست نمی‌کنند. یک کارزار آموزشی برای حذف پیام‌های جعلی آغاز شده است. مردم باید هر حمله را به پلیس گزارش دهند.",
+      "ilrEstimate": 1.2,
+      "topic": "cybersecurity",
+      "register": "standard news Persian",
+      "genre": "گزارش امنیتی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 52,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "حمله / حملات",
+        "بانک",
+        "شهروند",
+        "اطلاعات"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "هشدار امنیتی برای بانک‌ها"
+        },
+        {
+          "question": "مهاجمان چه چیزی می‌خواهند؟",
+          "type": "detail",
+          "referenceAnswer": "اطلاعات شخصی و بانکی"
+        },
+        {
+          "question": "مردم چگونه پیام جعلی را تشخیص دهند؟",
+          "type": "inference",
+          "referenceAnswer": "بانک رمز کامل را در پیام درخواست نمی‌کند"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-30",
+      "title": "30. توافق برای حفاظت از تنگه",
+      "textFa": "چند کشور منطقه برای حفاظت از یک تنگه مهم به توافق رسیدند. طبق برنامه، کشتی‌های امدادی اطلاعات هوا و مسیر را با یکدیگر به اشتراک می‌گذارند. وزیران تأکید کردند این همکاری علیه هیچ کشور دیگری نیست. هدف اصلی، کاهش خطر برای کشتی‌های تجاری است. نخستین نشست فنی ماه آینده برگزار می‌شود.",
+      "ilrEstimate": 1.2,
+      "topic": "diplomacy",
+      "register": "standard news Persian",
+      "genre": "گزارش منطقه‌ای",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 51,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "تنگه",
+        "کشور / کشورها",
+        "همکاری",
+        "علیه"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "توافق برای حفاظت از تنگه"
+        },
+        {
+          "question": "نخستین نشست چه زمانی است؟",
+          "type": "detail",
+          "referenceAnswer": "ماه آینده"
+        },
+        {
+          "question": "چرا وزیران گفتند برنامه علیه کشوری نیست؟",
+          "type": "inference",
+          "referenceAnswer": "برای نشان دادن هدف ایمنی و کاهش تنش"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    }
+  ],
+  "listeningItems": [
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-listening-01",
+      "title": "01. گزارش بازار محلی",
+      "ilrEstimate": 1.2,
+      "topic": "economy",
+      "register": "standard news Persian",
+      "genre": "خبر کوتاه",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 66,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "گرانی",
+        "نرخ",
+        "شهروند",
+        "بنزین"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "گزارش بازار محلی"
+        },
+        {
+          "question": "بازار میوه در کدام بخش شهر بود؟",
+          "type": "detail",
+          "referenceAnswer": "در جنوب تهران"
+        },
+        {
+          "question": "چرا بعضی خانواده‌ها کمتر خرید می‌کنند؟",
+          "type": "inference",
+          "referenceAnswer": "به دلیل گرانی و افزایش هزینه‌ها"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z",
+      "transcriptFa": "شهرداری تهران اعلام کرد بازار میوه در جنوب شهر امروز شلوغ‌تر از هفته گذشته بود. قیمت بعضی مواد غذایی بالا رفت، اما نرخ میوه در چند مغازه تغییر نکرد. چند شهروند گفتند گرانی باعث شده است خرید خانواده‌ها کمتر شود. یک فروشنده توضیح داد که هزینه حمل‌ونقل و بنزین بر قیمت‌ها اثر دارد. شهرداری می‌خواهد هفته آینده یک بازار تازه برای فروش مستقیم محصولات باز کند."
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-listening-02",
+      "title": "02. تغییر ساعت اتوبوس‌ها",
+      "ilrEstimate": 1.2,
+      "topic": "transportation",
+      "register": "standard news Persian",
+      "genre": "اطلاعیه",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 60,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "سازمان",
+        "شهروند",
+        "نظرسنجی",
+        "تصمیم"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "تغییر ساعت اتوبوس‌ها"
+        },
+        {
+          "question": "برنامه جدید از چه روزی آغاز می‌شود؟",
+          "type": "detail",
+          "referenceAnswer": "از شنبه"
+        },
+        {
+          "question": "چرا ساعت حرکت تغییر کرد؟",
+          "type": "inference",
+          "referenceAnswer": "زیرا مسافران سرویس شبانه بیشتری می‌خواستند"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z",
+      "transcriptFa": "سازمان حمل‌ونقل شهر اعلام کرد ساعت حرکت اتوبوس‌های خط مرکز از شنبه تغییر می‌کند. نخستین اتوبوس ساعت شش صبح حرکت خواهد کرد و آخرین اتوبوس ساعت یازده شب به پایگاه برمی‌گردد. این تصمیم پس از یک نظرسنجی از مسافران گرفته شد. بیشتر شهروندان خواسته بودند شب‌ها اتوبوس بیشتری وجود داشته باشد. مسئولان گفتند برنامه جدید برای دو هفته آزمایش می‌شود."
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-listening-03",
+      "title": "03. بازگشایی درمانگاه",
+      "ilrEstimate": 1.2,
+      "topic": "health",
+      "register": "standard news Persian",
+      "genre": "گزارش محلی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 61,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "بهداشت",
+        "دارو",
+        "بیمه",
+        "پوشش"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "بازگشایی درمانگاه"
+        },
+        {
+          "question": "درمانگاه چند ماه بسته بود؟",
+          "type": "detail",
+          "referenceAnswer": "سه ماه"
+        },
+        {
+          "question": "بازگشایی درمانگاه چه فایده‌ای برای مردم دارد؟",
+          "type": "inference",
+          "referenceAnswer": "دسترسی محلی به دارو، تزریق و معاینه بهتر می‌شود"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z",
+      "transcriptFa": "درمانگاه مرکزی یک شهر کوچک پس از سه ماه دوباره باز شد. وزارت بهداشت برای خرید دارو و تعمیر ساختمان به این مرکز کمک کرد. درمانگاه اکنون پنج پزشک و ده پرستار دارد و بیمه بیشتر بیماران را پوشش می‌دهد. مسئول مرکز گفت مردم می‌توانند برای تزریق و معاینه از ساعت هشت صبح مراجعه کنند. شهروندان از بازگشایی درمانگاه حمایت کردند."
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-listening-04",
+      "title": "04. باران و بسته شدن جاده",
+      "ilrEstimate": 1.2,
+      "topic": "weather",
+      "register": "standard news Persian",
+      "genre": "گزارش وضعیت",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 62,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "کشور / کشورها",
+        "خودرو",
+        "سازمان",
+        "هشدار"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "باران و بسته شدن جاده"
+        },
+        {
+          "question": "جاده در کدام منطقه بسته شد؟",
+          "type": "detail",
+          "referenceAnswer": "در شمال کشور"
+        },
+        {
+          "question": "رانندگان چرا باید مسیر دیگری انتخاب کنند؟",
+          "type": "inference",
+          "referenceAnswer": "زیرا باران و خطر بسته شدن دوباره جاده ادامه دارد"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z",
+      "transcriptFa": "باران شدید در شمال کشور باعث بسته شدن یک جاده کوهستانی شد. پلیس اعلام کرد هیچ قربانی گزارش نشده است، اما چند خودرو برای دو ساعت متوقف شدند. نیروهای امدادی سنگ و گل را از جاده حذف کردند. سازمان هواشناسی درباره ادامه باران تا فردا هشدار داد. رانندگان باید پیش از سفر اطلاعات تازه را بررسی کنند و از مسیر دیگر بروند."
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-listening-05",
+      "title": "05. نمایشگاه کتاب مدرسه",
+      "ilrEstimate": 1.2,
+      "topic": "education",
+      "register": "standard news Persian",
+      "genre": "گزارش مدرسه",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 54,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "هفته",
+        "خانواده",
+        "نرخ",
+        "هدف"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "نمایشگاه کتاب مدرسه"
+        },
+        {
+          "question": "نمایشگاه در کدام شهر برگزار شد؟",
+          "type": "detail",
+          "referenceAnswer": "در شیراز"
+        },
+        {
+          "question": "درآمد نمایشگاه برای چه کاری است؟",
+          "type": "inference",
+          "referenceAnswer": "برای خرید کتاب‌های تازه کتابخانه"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z",
+      "transcriptFa": "یک مدرسه در شیراز این هفته نمایشگاه کتاب برگزار کرد. دانش‌آموزان با کمک معلمان بیش از پانصد کتاب را در سالن مدرسه قرار دادند. خانواده‌ها می‌توانستند کتاب‌های دست دوم را با نرخ پایین بخرند. درآمد نمایشگاه برای خرید کتاب‌های تازه کتابخانه استفاده خواهد شد. مدیر مدرسه گفت هدف برنامه افزایش مطالعه در خانه است."
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-listening-06",
+      "title": "06. افزایش صادرات میوه",
+      "ilrEstimate": 1.2,
+      "topic": "economy",
+      "register": "standard news Persian",
+      "genre": "گزارش اقتصادی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 54,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "صادرات",
+        "کشور / کشورها",
+        "همکاری",
+        "سهمیه"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "افزایش صادرات میوه"
+        },
+        {
+          "question": "صادرات چه محصولی افزایش یافت؟",
+          "type": "detail",
+          "referenceAnswer": "میوه"
+        },
+        {
+          "question": "سهمیه بیشتر چه مشکلی را کاهش می‌دهد؟",
+          "type": "inference",
+          "referenceAnswer": "هزینه بالای سوخت و حمل‌ونقل"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z",
+      "transcriptFa": "وزارت بازرگانی اعلام کرد صادرات میوه در ماه گذشته افزایش یافت. بیشتر محصولات به چند کشور همسایه فرستاده شد. وزیر گفت همکاری میان کشاورزان و شرکت‌های حمل‌ونقل علت اصلی این رشد بوده است. با این حال، گرانی بنزین هزینه صادرات را بالا برده است. دولت می‌خواهد برای خودروهای باری سهمیه بیشتری در نظر بگیرد."
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-listening-07",
+      "title": "07. تمرین امداد در فرودگاه",
+      "ilrEstimate": 1.2,
+      "topic": "public safety",
+      "register": "standard news Persian",
+      "genre": "گزارش عملیات",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 51,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "عملیات",
+        "منطقه",
+        "همکاری",
+        "منتشر کردن"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "تمرین امداد در فرودگاه"
+        },
+        {
+          "question": "تمرین در کجا انجام شد؟",
+          "type": "detail",
+          "referenceAnswer": "در فرودگاه شهر"
+        },
+        {
+          "question": "چرا این تمرین برگزار شد؟",
+          "type": "inference",
+          "referenceAnswer": "برای آزمایش هماهنگی نیروهای امدادی"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z",
+      "transcriptFa": "امروز یک عملیات آموزشی در فرودگاه شهر انجام شد. در این تمرین، نیروهای امدادی آتش یک هواپیمای فرضی را متوقف کردند و مسافران را به منطقه امن بردند. مسئولان گفتند هیچ پرواز واقعی لغو نشد. هدف عملیات، آزمایش همکاری پلیس، آتش‌نشانی و بهداشت بود. گزارش کامل تمرین هفته آینده منتشر می‌شود."
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-listening-08",
+      "title": "08. کمبود آب در روستا",
+      "ilrEstimate": 1.2,
+      "topic": "environment",
+      "register": "standard news Persian",
+      "genre": "گزارش روستایی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 58,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "منطقه",
+        "خانه",
+        "دولت",
+        "برنامه‌ریزی کردن"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "کمبود آب در روستا"
+        },
+        {
+          "question": "آب خانه‌ها چند وقت قطع می‌شود؟",
+          "type": "detail",
+          "referenceAnswer": "هر روز برای چند ساعت"
+        },
+        {
+          "question": "مردم از مقام‌ها چه می‌خواهند؟",
+          "type": "inference",
+          "referenceAnswer": "اطلاعات دقیق درباره زمان قطع آب"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z",
+      "transcriptFa": "چند روستا در جنوب منطقه با کمبود آب روبه‌رو شده‌اند. مردم می‌گویند آب خانه‌ها هر روز برای چند ساعت قطع می‌شود. دولت تانکرهای آب را به روستاها فرستاده و برنامه‌ریزی برای تعمیر شبکه را آغاز کرده است. یک مقام محلی گفت کار تعمیر تا پایان ماه ادامه دارد. شهروندان خواستند اطلاعات دقیق درباره زمان قطع آب اعلام شود."
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-listening-09",
+      "title": "09. مسابقه فوتبال جوانان",
+      "ilrEstimate": 1.2,
+      "topic": "sports",
+      "register": "standard news Persian",
+      "genre": "گزارش ورزشی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 56,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "نفر",
+        "حمایت",
+        "هدف",
+        "آسیا"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "مسابقه فوتبال جوانان"
+        },
+        {
+          "question": "نتیجه مسابقه چه بود؟",
+          "type": "detail",
+          "referenceAnswer": "دو بر یک به سود تبریز"
+        },
+        {
+          "question": "تیم تبریز چرا به تهران می‌رود؟",
+          "type": "inference",
+          "referenceAnswer": "برای تمرین و آماده شدن برای مسابقات آسیا"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z",
+      "transcriptFa": "تیم جوانان تبریز در یک مسابقه دوستانه تیم رشت را شکست داد. بازی با نتیجه دو بر یک پایان یافت. حدود سه هزار نفر در ورزشگاه حضور داشتند و از هر دو تیم حمایت کردند. مربی تبریز گفت هدف اصلی، آماده شدن برای مسابقات آسیا است. تیم هفته آینده برای تمرین بیشتر به تهران خواهد رفت."
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-listening-10",
+      "title": "10. افتتاح بانک سیار",
+      "ilrEstimate": 1.2,
+      "topic": "services",
+      "register": "standard news Persian",
+      "genre": "خبر محلی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 56,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "بانک",
+        "خودرو",
+        "اطلاعات",
+        "شهروند"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "افتتاح بانک سیار"
+        },
+        {
+          "question": "بانک سیار به چند روستا می‌رود؟",
+          "type": "detail",
+          "referenceAnswer": "سه روستا"
+        },
+        {
+          "question": "این خدمت چگونه به مردم کمک می‌کند؟",
+          "type": "inference",
+          "referenceAnswer": "نیاز به سفرهای طولانی برای خدمات بانکی را کم می‌کند"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z",
+      "transcriptFa": "یک بانک سیار در سه روستای دورافتاده آغاز به کار کرد. خودرو این بانک دو روز در هفته به هر روستا می‌رود. مردم می‌توانند پول دریافت کنند، حساب باز کنند و درباره وام اطلاعات بگیرند. مدیر بانک گفت هدف، کاهش سفرهای طولانی شهروندان است. اگر برنامه موفق باشد، ماه آینده دو خودرو دیگر اضافه خواهد شد."
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-listening-11",
+      "title": "11. تصمیم درباره قیمت بنزین",
+      "ilrEstimate": 1.2,
+      "topic": "economy",
+      "register": "standard news Persian",
+      "genre": "گزارش سیاست داخلی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 54,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "دولت",
+        "نرخ",
+        "تورم",
+        "واکنش"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "تصمیم درباره قیمت بنزین"
+        },
+        {
+          "question": "نرخ بنزین در این ماه چه می‌شود؟",
+          "type": "detail",
+          "referenceAnswer": "تغییر نمی‌کند"
+        },
+        {
+          "question": "چرا دولت پیش از تصمیم تازه تورم را بررسی می‌کند؟",
+          "type": "inference",
+          "referenceAnswer": "برای سنجیدن اثر قیمت بر خانواده‌ها"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z",
+      "transcriptFa": "دولت اعلام کرد نرخ بنزین در این ماه تغییر نمی‌کند. پیش از این، گزارش‌هایی درباره افزایش قیمت منتشر شده بود. وزیر اقتصاد گفت هر تصمیم تازه پس از بررسی تورم و درآمد خانواده‌ها گرفته می‌شود. او افزود سهمیه فعلی خودروها تا پایان فصل باقی می‌ماند. بازار پس از این خبر واکنش آرامی نشان داد."
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-listening-12",
+      "title": "12. دیدار وزیران منطقه",
+      "ilrEstimate": 1.2,
+      "topic": "diplomacy",
+      "register": "standard news Persian",
+      "genre": "گزارش سیاسی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 47,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "وزیر",
+        "کشور / کشورها",
+        "دیدار",
+        "همکاری"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "دیدار وزیران منطقه"
+        },
+        {
+          "question": "نشست در کدام شهر برگزار شد؟",
+          "type": "detail",
+          "referenceAnswer": "در بیشکک"
+        },
+        {
+          "question": "برنامه مشترک احتمالاً چه چیزی را بهتر می‌کند؟",
+          "type": "inference",
+          "referenceAnswer": "همکاری اقتصادی و امنیت مسیرهای زمینی"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z",
+      "transcriptFa": "وزیران سه کشور منطقه در بیشکک دیدار کردند. موضوع اصلی نشست، همکاری اقتصادی و امنیت راه‌های زمینی بود. نمایندگان درباره افزایش صادرات و کاهش هزینه حمل‌ونقل گفت‌وگو کردند. در پایان، یک برنامه مشترک برای شش ماه آینده اعلام شد. دیدار بعدی قرار است در تهران برگزار شود."
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-listening-13",
+      "title": "13. اعتراض کارکنان کارخانه",
+      "ilrEstimate": 1.2,
+      "topic": "labor",
+      "register": "standard news Persian",
+      "genre": "گزارش اجتماعی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 56,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "اعتراض / اعتراضات",
+        "ساختمان",
+        "هفته",
+        "گفتن"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "اعتراض کارکنان کارخانه"
+        },
+        {
+          "question": "کارگران چرا اعتراض کردند؟",
+          "type": "detail",
+          "referenceAnswer": "به دلیل پرداخت نشدن حقوق دو ماه"
+        },
+        {
+          "question": "وعده مدیر چه اثری می‌تواند داشته باشد؟",
+          "type": "inference",
+          "referenceAnswer": "ممکن است تنش را کم و گفت‌وگو را آسان کند"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z",
+      "transcriptFa": "گروهی از کارکنان یک کارخانه درباره پرداخت نشدن حقوق خود اعتراض کردند. آنها صبح در برابر ساختمان مدیریت جمع شدند، اما راه ورود را نبستند. نماینده کارگران گفت حقوق دو ماه هنوز پرداخت نشده است. مدیر کارخانه وعده داد بخشی از پول تا پایان هفته داده شود. مقام محلی خواستار گفت‌وگوی آرام میان دو طرف شد."
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-listening-14",
+      "title": "14. هشدار درباره داروی تقلبی",
+      "ilrEstimate": 1.2,
+      "topic": "health",
+      "register": "standard news Persian",
+      "genre": "هشدار عمومی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 53,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "بهداشت",
+        "دارو",
+        "بیمه",
+        "هشدار"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "هشدار درباره داروی تقلبی"
+        },
+        {
+          "question": "مردم باید دارو را از کجا بخرند؟",
+          "type": "detail",
+          "referenceAnswer": "فقط از داروخانه"
+        },
+        {
+          "question": "نام اشتباه شرکت چه چیزی را نشان می‌دهد؟",
+          "type": "inference",
+          "referenceAnswer": "اینکه محصول احتمالاً تقلبی است"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z",
+      "transcriptFa": "وزارت بهداشت درباره فروش یک داروی تقلبی در اینترنت هشدار داد. این دارو پوشش رسمی بیمه ندارد و نام شرکت سازنده روی جعبه اشتباه است. مقام‌ها از مردم خواستند دارو را فقط از داروخانه بخرند. پلیس یک کارزار برای حذف تبلیغات این محصول آغاز کرده است. تاکنون گزارشی درباره قربانی منتشر نشده است."
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-listening-15",
+      "title": "15. کاهش آلودگی هوا",
+      "ilrEstimate": 1.2,
+      "topic": "environment",
+      "register": "standard news Persian",
+      "genre": "گزارش شهری",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 58,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "سازمان",
+        "هفته",
+        "خودرو",
+        "منطقه"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "کاهش آلودگی هوا"
+        },
+        {
+          "question": "آلودگی در کدام شهر کمتر شد؟",
+          "type": "detail",
+          "referenceAnswer": "در اصفهان"
+        },
+        {
+          "question": "چرا هنوز به بعضی مردم احتیاط توصیه شده است؟",
+          "type": "inference",
+          "referenceAnswer": "زیرا کیفیت هوا هنوز ممکن است برای گروه‌های حساس مناسب نباشد"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z",
+      "transcriptFa": "سازمان محیط زیست اعلام کرد آلودگی هوای اصفهان در این هفته کمتر شده است. باران و کاهش رفت‌وآمد خودروها دو علت مهم بودند. با وجود این، به کودکان و سالمندان توصیه شد ورزش طولانی در فضای باز نکنند. شهرداری برنامه کاشت هزار درخت را آغاز کرده است. هدف این برنامه بهبود هوا در چند منطقه شلوغ شهر است."
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-listening-16",
+      "title": "16. خانه‌های تازه برای سیل‌زدگان",
+      "ilrEstimate": 1.2,
+      "topic": "housing",
+      "register": "standard news Persian",
+      "genre": "گزارش بازسازی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 52,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "خانه",
+        "خانواده",
+        "مواد",
+        "دارایی"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "خانه‌های تازه برای سیل‌زدگان"
+        },
+        {
+          "question": "چند خانه ساخته شد؟",
+          "type": "detail",
+          "referenceAnswer": "پنجاه خانه"
+        },
+        {
+          "question": "چرا خانه‌ها در منطقه بلندتر ساخته شدند؟",
+          "type": "inference",
+          "referenceAnswer": "برای کاهش خطر سیل دوباره"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z",
+      "transcriptFa": "دولت ساخت پنجاه خانه برای خانواده‌های سیل‌زده را به پایان رساند. این خانه‌ها در منطقه‌ای بلندتر از رودخانه ساخته شده‌اند. هر خانواده همچنین مقداری پول و مواد ساختمانی دریافت کرد. مقام محلی گفت بیمه بخشی از دارایی‌های آسیب‌دیده را پوشش می‌دهد. خانواده‌ها قرار است از هفته آینده به خانه‌های تازه منتقل شوند."
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-listening-17",
+      "title": "17. نظرسنجی درباره پارک",
+      "ilrEstimate": 1.2,
+      "topic": "community",
+      "register": "standard news Persian",
+      "genre": "گزارش نظرسنجی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 56,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "نظرسنجی",
+        "حمایت",
+        "تصمیم",
+        "دیدار"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "نظرسنجی درباره پارک"
+        },
+        {
+          "question": "دیدار شهروندان چه روزی است؟",
+          "type": "detail",
+          "referenceAnswer": "سه‌شنبه"
+        },
+        {
+          "question": "پارکینگ چرا به طرح اضافه شد؟",
+          "type": "inference",
+          "referenceAnswer": "برای پاسخ به نگرانی درباره ترافیک"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z",
+      "transcriptFa": "شهرداری یک نظرسنجی درباره ساخت پارک تازه منتشر کرد. بیشتر شرکت‌کنندگان از فضای سبز و زمین بازی حمایت کردند، اما گروهی نگران ترافیک بودند. در طرح تازه، یک پارکینگ کوچک در کنار پارک قرار داده شده است. شهرداری می‌گوید تصمیم نهایی پس از دیدار با شهروندان گرفته می‌شود. این دیدار روز سه‌شنبه در مدرسه محله است."
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-listening-18",
+      "title": "18. پرواز پهپادهای امدادی",
+      "ilrEstimate": 1.2,
+      "topic": "technology",
+      "register": "standard news Persian",
+      "genre": "گزارش فناوری",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 56,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "پهپاد",
+        "عملیات",
+        "اطلاعات",
+        "پایگاه / پایگاه‌ها"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "پرواز پهپادهای امدادی"
+        },
+        {
+          "question": "نخستین عملیات کجا انجام شد؟",
+          "type": "detail",
+          "referenceAnswer": "در یک روستای خالی"
+        },
+        {
+          "question": "پهپادها چگونه به امدادگران کمک می‌کنند؟",
+          "type": "inference",
+          "referenceAnswer": "راه‌های بسته و خانه‌های آسیب‌دیده را سریع‌تر پیدا می‌کنند"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z",
+      "transcriptFa": "سازمان امداد استفاده آزمایشی از دو پهپاد را آغاز کرد. این پهپادها می‌توانند پس از زلزله از منطقه عکس بگیرند و اطلاعات را به پایگاه امداد بفرستند. نخستین عملیات در یک روستای خالی انجام شد. مسئول پروژه گفت هدف، پیدا کردن سریع راه‌های بسته و خانه‌های آسیب‌دیده است. نتیجه آزمایش تا پایان ماه اعلام خواهد شد."
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-listening-19",
+      "title": "19. بازگشت مسافران از مرز",
+      "ilrEstimate": 1.2,
+      "topic": "travel",
+      "register": "standard news Persian",
+      "genre": "گزارش مرزی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 57,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "پس از",
+        "کشور / کشورها",
+        "مواد",
+        "اعلام کردن"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "بازگشت مسافران از مرز"
+        },
+        {
+          "question": "مرز چرا بسته بود؟",
+          "type": "detail",
+          "referenceAnswer": "به دلیل طوفان شن"
+        },
+        {
+          "question": "چرا بررسی هوا هنوز مهم است؟",
+          "type": "inference",
+          "referenceAnswer": "زیرا شرایط جوی ممکن است دوباره سفر را مختل کند"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z",
+      "transcriptFa": "پس از باز شدن مرز، حدود هشتصد مسافر به کشور بازگشتند. مرز برای یک روز به دلیل طوفان شن بسته بود. نیروهای مرزی آب و مواد غذایی در اختیار مسافران قرار دادند. وزارت راه اعلام کرد حرکت اتوبوس‌ها دوباره آغاز شده است. با این حال، به مردم توصیه شد پیش از سفر وضعیت هوا را بررسی کنند."
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-listening-20",
+      "title": "20. همکاری دانشگاه و بیمارستان",
+      "ilrEstimate": 1.2,
+      "topic": "education",
+      "register": "standard news Persian",
+      "genre": "گزارش علمی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 57,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "همکاری",
+        "بهداشت",
+        "تزریق",
+        "ماه"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "همکاری دانشگاه و بیمارستان"
+        },
+        {
+          "question": "دانشجویان چند روز در هفته کار می‌کنند؟",
+          "type": "detail",
+          "referenceAnswer": "سه روز"
+        },
+        {
+          "question": "این برنامه چرا برای بیمارستان مفید است؟",
+          "type": "inference",
+          "referenceAnswer": "نیروی آموزشی بیشتری برای ارائه خدمات دارد"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z",
+      "transcriptFa": "دانشگاه شهر و بیمارستان مرکزی یک برنامه مشترک آموزشی آغاز کردند. در این برنامه، دانشجویان پزشکی سه روز در هفته در درمانگاه کار می‌کنند. بیمارستان برای آنها کلاس‌های بهداشت و تزریق برگزار می‌کند. رئیس دانشگاه گفت همکاری جدید هم به آموزش دانشجویان و هم به خدمات مردم کمک خواهد کرد. نخستین گروه ماه آینده وارد برنامه می‌شود."
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-listening-21",
+      "title": "21. واکنش بازار ارز",
+      "ilrEstimate": 1.2,
+      "topic": "economy",
+      "register": "standard news Persian",
+      "genre": "گزارش اقتصادی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 52,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "ارز",
+        "واکنش",
+        "نرخ",
+        "بانک"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "واکنش بازار ارز"
+        },
+        {
+          "question": "نرخ ارز در ظهر چه شد؟",
+          "type": "detail",
+          "referenceAnswer": "کاهش یافت"
+        },
+        {
+          "question": "چرا معامله‌گران منتظر دیدار وزیران هستند؟",
+          "type": "inference",
+          "referenceAnswer": "نتیجه دیدار ممکن است بر بازار ارز اثر بگذارد"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z",
+      "transcriptFa": "بازار ارز امروز به خبر مذاکرات منطقه‌ای واکنش نشان داد. نرخ چند ارز خارجی در آغاز روز بالا رفت، اما ظهر دوباره کاهش یافت. کارشناسان گفتند هنوز برای پیش‌بینی روند ماه آینده زود است. بانک مرکزی اعلام کرد ارز کافی برای واردات دارو وجود دارد. معامله‌گران اکنون منتظر نتیجه دیدار وزیران هستند."
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-listening-22",
+      "title": "22. کارزار ایمنی جاده",
+      "ilrEstimate": 1.2,
+      "topic": "public safety",
+      "register": "standard news Persian",
+      "genre": "گزارش عمومی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 49,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "کارزار",
+        "اطلاعات",
+        "خودرو",
+        "قربانی"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "کارزار ایمنی جاده"
+        },
+        {
+          "question": "خودروهای باری کجا بررسی می‌شوند؟",
+          "type": "detail",
+          "referenceAnswer": "در چند پایگاه"
+        },
+        {
+          "question": "موفقیت کارزار با چه چیزی سنجیده می‌شود؟",
+          "type": "inference",
+          "referenceAnswer": "با کاهش قربانیان و تصادف‌ها"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z",
+      "transcriptFa": "پلیس راه یک کارزار تازه برای ایمنی جاده‌ها آغاز کرده است. در این برنامه، رانندگان درباره سرعت، کمربند و خستگی اطلاعات می‌گیرند. مأموران همچنین خودروهای باری را در چند پایگاه بررسی می‌کنند. هدف، کاهش شمار قربانیان تصادف در تعطیلات است. نتایج کارزار پس از دو ماه منتشر خواهد شد."
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-listening-23",
+      "title": "23. جشن رقص محلی",
+      "ilrEstimate": 1.2,
+      "topic": "culture",
+      "register": "standard news Persian",
+      "genre": "گزارش فرهنگی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 49,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "رقص",
+        "منطقه",
+        "نمایش",
+        "هدف"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "جشن رقص محلی"
+        },
+        {
+          "question": "گروه‌ها از چند منطقه آمدند؟",
+          "type": "detail",
+          "referenceAnswer": "پنج منطقه"
+        },
+        {
+          "question": "جشن چگونه به مدرسه کمک می‌کند؟",
+          "type": "inference",
+          "referenceAnswer": "درآمد فروش غذا برای تعمیر مدرسه مصرف می‌شود"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z",
+      "transcriptFa": "یک جشن رقص محلی در روستایی نزدیک شیراز برگزار شد. گروه‌های هنری از پنج منطقه در این برنامه شرکت کردند. نمایش لباس‌ها و موسیقی سنتی بخش دیگری از جشن بود. برگزارکنندگان گفتند هدف، آشنایی جوانان با فرهنگ محلی است. درآمد فروش غذا برای تعمیر مدرسه روستا کنار گذاشته شد."
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-listening-24",
+      "title": "24. افزایش قیمت دارو",
+      "ilrEstimate": 1.2,
+      "topic": "health",
+      "register": "standard news Persian",
+      "genre": "گزارش اقتصادی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 51,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "دارو",
+        "ارز",
+        "بیمه",
+        "حمایت"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "افزایش قیمت دارو"
+        },
+        {
+          "question": "علت افزایش قیمت چیست؟",
+          "type": "detail",
+          "referenceAnswer": "تغییر نرخ ارز و هزینه حمل‌ونقل"
+        },
+        {
+          "question": "برنامه تازه احتمالاً برای چه کسانی است؟",
+          "type": "inference",
+          "referenceAnswer": "برای بیمارانی که هزینه دارو بر آنها فشار می‌آورد"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z",
+      "transcriptFa": "انجمن داروسازان اعلام کرد قیمت چند داروی وارداتی افزایش یافته است. علت اصلی، تغییر نرخ ارز و هزینه حمل‌ونقل عنوان شد. بیمه هنوز بخشی از هزینه این داروها را پوشش می‌دهد. وزارت بهداشت گفت برای حمایت از بیماران یک برنامه تازه بررسی می‌شود. تصمیم نهایی قرار است هفته آینده اعلام شود."
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-listening-25",
+      "title": "25. توقف موقت صادرات",
+      "ilrEstimate": 1.2,
+      "topic": "economy",
+      "register": "standard news Persian",
+      "genre": "اطلاعیه تجاری",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 58,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "صادرات",
+        "متوقف کردن / شدن",
+        "تصمیم",
+        "هشدار"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "توقف موقت صادرات"
+        },
+        {
+          "question": "صادرات برای چند روز متوقف شد؟",
+          "type": "detail",
+          "referenceAnswer": "ده روز"
+        },
+        {
+          "question": "دولت چرا صادرات را متوقف کرد؟",
+          "type": "inference",
+          "referenceAnswer": "برای بیشتر شدن محصول در بازار داخلی"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z",
+      "transcriptFa": "دولت صادرات یک نوع میوه را برای ده روز متوقف کرد. مقام‌ها گفتند این تصمیم برای افزایش محصول در بازار داخلی گرفته شده است. کشاورزان درباره زیان احتمالی هشدار دادند و خواستار حمایت مالی شدند. وزیر وعده داد پس از بررسی قیمت‌ها با نمایندگان آنها دیدار کند. صادرات ممکن است پیش از پایان ده روز دوباره آغاز شود."
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-listening-26",
+      "title": "26. اطلاعیه مدرسه درباره بیماری",
+      "ilrEstimate": 1.2,
+      "topic": "education",
+      "register": "standard news Persian",
+      "genre": "اطلاعیه مدرسه",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 56,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "اعلام کردن",
+        "ساختمان",
+        "بهداشت",
+        "خانه"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "اطلاعیه مدرسه درباره بیماری"
+        },
+        {
+          "question": "کلاس‌ها چگونه برگزار می‌شوند؟",
+          "type": "detail",
+          "referenceAnswer": "به صورت آنلاین"
+        },
+        {
+          "question": "چرا تعطیلی کامل لازم نیست؟",
+          "type": "inference",
+          "referenceAnswer": "زیرا مشکل محدود است و ساختمان پاک‌سازی می‌شود"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z",
+      "transcriptFa": "مدیر یک مدرسه اعلام کرد کلاس‌های دو پایه فردا به صورت آنلاین برگزار می‌شود. چند دانش‌آموز نشانه‌های یک بیماری فصلی داشته‌اند. ساختمان مدرسه برای یک روز پاک‌سازی خواهد شد. وزارت بهداشت گفته است تعطیلی کامل مدرسه لازم نیست. خانواده‌ها باید وضعیت سلامت کودکان را بررسی کنند و در صورت بیماری آنها را در خانه نگه دارند."
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-listening-27",
+      "title": "27. دیدار تیم‌های امدادی",
+      "ilrEstimate": 1.2,
+      "topic": "regional cooperation",
+      "register": "standard news Persian",
+      "genre": "گزارش همکاری",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 55,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "ایران",
+        "کشور / کشورها",
+        "پایگاه / پایگاه‌ها",
+        "عملیات"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "دیدار تیم‌های امدادی"
+        },
+        {
+          "question": "نمایندگان در کجا دیدار کردند؟",
+          "type": "detail",
+          "referenceAnswer": "در تهران"
+        },
+        {
+          "question": "همکاری چگونه به قربانیان کمک می‌کند؟",
+          "type": "inference",
+          "referenceAnswer": "کمک و امداد سریع‌تر به محل می‌رسد"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z",
+      "transcriptFa": "نمایندگان تیم‌های امدادی ایران و دو کشور همسایه در تهران دیدار کردند. آنها درباره کمک پس از زلزله و سیل گفت‌وگو کردند. هر کشور اطلاعات پایگاه‌ها و تجهیزات خود را ارائه داد. در پایان، سه طرف تصمیم گرفتند سال آینده یک عملیات مشترک برگزار کنند. مقام‌ها گفتند این همکاری زمان رسیدن کمک را کاهش می‌دهد."
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-listening-28",
+      "title": "28. گزارش تولید خودرو",
+      "ilrEstimate": 1.2,
+      "topic": "industry",
+      "register": "standard news Persian",
+      "genre": "گزارش صنعتی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 54,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "خودرو",
+        "ماه",
+        "مواد",
+        "دولت"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "گزارش تولید خودرو"
+        },
+        {
+          "question": "چند خودرو تولید شد؟",
+          "type": "detail",
+          "referenceAnswer": "بیست هزار خودرو"
+        },
+        {
+          "question": "چرا قیمت فوراً پایین نمی‌آید؟",
+          "type": "inference",
+          "referenceAnswer": "زیرا اثر افزایش تولید بر بازار زمان می‌برد"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z",
+      "transcriptFa": "وزارت صنعت اعلام کرد تولید خودرو در ماه گذشته کمی افزایش یافت. سه کارخانه در مجموع بیست هزار خودرو ساختند. با این حال، کمبود بعضی مواد هنوز تولید را کند می‌کند. دولت می‌خواهد واردات قطعات را آسان‌تر کند. کارشناسان می‌گویند افزایش تولید می‌تواند قیمت بازار را کاهش دهد، اما نتیجه آن فوری نخواهد بود."
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-listening-29",
+      "title": "29. هشدار امنیتی برای بانک‌ها",
+      "ilrEstimate": 1.2,
+      "topic": "cybersecurity",
+      "register": "standard news Persian",
+      "genre": "گزارش امنیتی",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 52,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "حمله / حملات",
+        "بانک",
+        "شهروند",
+        "اطلاعات"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "هشدار امنیتی برای بانک‌ها"
+        },
+        {
+          "question": "مهاجمان چه چیزی می‌خواهند؟",
+          "type": "detail",
+          "referenceAnswer": "اطلاعات شخصی و بانکی"
+        },
+        {
+          "question": "مردم چگونه پیام جعلی را تشخیص دهند؟",
+          "type": "inference",
+          "referenceAnswer": "بانک رمز کامل را در پیام درخواست نمی‌کند"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z",
+      "transcriptFa": "مرکز امنیت اینترنت درباره حمله تازه به حساب‌های بانکی هشدار داد. مهاجمان پیام‌هایی با نام بانک برای شهروندان می‌فرستند و اطلاعات شخصی می‌خواهند. پلیس گفت بانک‌ها هرگز رمز کامل مشتری را درخواست نمی‌کنند. یک کارزار آموزشی برای حذف پیام‌های جعلی آغاز شده است. مردم باید هر حمله را به پلیس گزارش دهند."
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-listening-30",
+      "title": "30. توافق برای حفاظت از تنگه",
+      "ilrEstimate": 1.2,
+      "topic": "diplomacy",
+      "register": "standard news Persian",
+      "genre": "گزارش منطقه‌ای",
+      "sourceType": "generated",
+      "practiceMode": "controlled",
+      "publisher": "GetCursos DLI Lab",
+      "wordCount": 51,
+      "culturalTags": [
+        "Iran",
+        "DLI",
+        "two-week cycle"
+      ],
+      "targetWords": [
+        "تنگه",
+        "کشور / کشورها",
+        "همکاری",
+        "علیه"
+      ],
+      "questions": [
+        {
+          "question": "موضوع اصلی این گزارش چیست؟",
+          "type": "main_idea",
+          "referenceAnswer": "توافق برای حفاظت از تنگه"
+        },
+        {
+          "question": "نخستین نشست چه زمانی است؟",
+          "type": "detail",
+          "referenceAnswer": "ماه آینده"
+        },
+        {
+          "question": "چرا وزیران گفتند برنامه علیه کشوری نیست؟",
+          "type": "inference",
+          "referenceAnswer": "برای نشان دادن هدف ایمنی و کاهش تنش"
+        },
+        {
+          "question": "گزارش چگونه سازمان‌دهی شده است؟",
+          "type": "discourse",
+          "referenceAnswer": "ابتدا رویداد یا تصمیم را معرفی می‌کند، سپس جزئیات، دلیل و نتیجه را توضیح می‌دهد."
+        }
+      ],
+      "createdAt": "2026-09-01T12:00:00.000Z",
+      "transcriptFa": "چند کشور منطقه برای حفاظت از یک تنگه مهم به توافق رسیدند. طبق برنامه، کشتی‌های امدادی اطلاعات هوا و مسیر را با یکدیگر به اشتراک می‌گذارند. وزیران تأکید کردند این همکاری علیه هیچ کشور دیگری نیست. هدف اصلی، کاهش خطر برای کشتی‌های تجاری است. نخستین نشست فنی ماه آینده برگزار می‌شود."
+    }
+  ],
+  "speakingPrompts": [
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-speaking-01",
+      "promptEn": "Give a 45–60 second Persian news brief about “گزارش بازار محلی.” State the main event, give two details, and explain one likely result.",
+      "promptFa": "در ۴۵ تا ۶۰ ثانیه گزارش «گزارش بازار محلی» را خلاصه کنید. رویداد اصلی، دو جزئیات و یک نتیجه احتمالی را بگویید.",
+      "topic": "economy",
+      "ilrTarget": 1,
+      "functions": [
+        "summarize",
+        "report details",
+        "state a simple inference"
+      ],
+      "targetWords": [
+        "گرانی",
+        "نرخ",
+        "شهروند",
+        "بنزین"
+      ],
+      "articleId": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-01",
+      "sequence": 1,
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-speaking-02",
+      "promptEn": "Give a 45–60 second Persian news brief about “تغییر ساعت اتوبوس‌ها.” State the main event, give two details, and explain one likely result.",
+      "promptFa": "در ۴۵ تا ۶۰ ثانیه گزارش «تغییر ساعت اتوبوس‌ها» را خلاصه کنید. رویداد اصلی، دو جزئیات و یک نتیجه احتمالی را بگویید.",
+      "topic": "transportation",
+      "ilrTarget": 1,
+      "functions": [
+        "summarize",
+        "report details",
+        "state a simple inference"
+      ],
+      "targetWords": [
+        "سازمان",
+        "شهروند",
+        "نظرسنجی",
+        "تصمیم"
+      ],
+      "articleId": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-02",
+      "sequence": 2,
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-speaking-03",
+      "promptEn": "Give a 45–60 second Persian news brief about “بازگشایی درمانگاه.” State the main event, give two details, and explain one likely result.",
+      "promptFa": "در ۴۵ تا ۶۰ ثانیه گزارش «بازگشایی درمانگاه» را خلاصه کنید. رویداد اصلی، دو جزئیات و یک نتیجه احتمالی را بگویید.",
+      "topic": "health",
+      "ilrTarget": 1,
+      "functions": [
+        "summarize",
+        "report details",
+        "state a simple inference"
+      ],
+      "targetWords": [
+        "بهداشت",
+        "دارو",
+        "بیمه",
+        "پوشش"
+      ],
+      "articleId": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-03",
+      "sequence": 3,
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-speaking-04",
+      "promptEn": "Give a 45–60 second Persian news brief about “باران و بسته شدن جاده.” State the main event, give two details, and explain one likely result.",
+      "promptFa": "در ۴۵ تا ۶۰ ثانیه گزارش «باران و بسته شدن جاده» را خلاصه کنید. رویداد اصلی، دو جزئیات و یک نتیجه احتمالی را بگویید.",
+      "topic": "weather",
+      "ilrTarget": 1,
+      "functions": [
+        "summarize",
+        "report details",
+        "state a simple inference"
+      ],
+      "targetWords": [
+        "کشور / کشورها",
+        "خودرو",
+        "سازمان",
+        "هشدار"
+      ],
+      "articleId": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-04",
+      "sequence": 4,
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-speaking-05",
+      "promptEn": "Give a 45–60 second Persian news brief about “نمایشگاه کتاب مدرسه.” State the main event, give two details, and explain one likely result.",
+      "promptFa": "در ۴۵ تا ۶۰ ثانیه گزارش «نمایشگاه کتاب مدرسه» را خلاصه کنید. رویداد اصلی، دو جزئیات و یک نتیجه احتمالی را بگویید.",
+      "topic": "education",
+      "ilrTarget": 1,
+      "functions": [
+        "summarize",
+        "report details",
+        "state a simple inference"
+      ],
+      "targetWords": [
+        "هفته",
+        "خانواده",
+        "نرخ",
+        "هدف"
+      ],
+      "articleId": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-05",
+      "sequence": 5,
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-speaking-06",
+      "promptEn": "Give a 45–60 second Persian news brief about “افزایش صادرات میوه.” State the main event, give two details, and explain one likely result.",
+      "promptFa": "در ۴۵ تا ۶۰ ثانیه گزارش «افزایش صادرات میوه» را خلاصه کنید. رویداد اصلی، دو جزئیات و یک نتیجه احتمالی را بگویید.",
+      "topic": "economy",
+      "ilrTarget": 1,
+      "functions": [
+        "summarize",
+        "report details",
+        "state a simple inference"
+      ],
+      "targetWords": [
+        "صادرات",
+        "کشور / کشورها",
+        "همکاری",
+        "سهمیه"
+      ],
+      "articleId": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-06",
+      "sequence": 6,
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-speaking-07",
+      "promptEn": "Give a 45–60 second Persian news brief about “تمرین امداد در فرودگاه.” State the main event, give two details, and explain one likely result.",
+      "promptFa": "در ۴۵ تا ۶۰ ثانیه گزارش «تمرین امداد در فرودگاه» را خلاصه کنید. رویداد اصلی، دو جزئیات و یک نتیجه احتمالی را بگویید.",
+      "topic": "public safety",
+      "ilrTarget": 1,
+      "functions": [
+        "summarize",
+        "report details",
+        "state a simple inference"
+      ],
+      "targetWords": [
+        "عملیات",
+        "منطقه",
+        "همکاری",
+        "منتشر کردن"
+      ],
+      "articleId": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-07",
+      "sequence": 7,
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-speaking-08",
+      "promptEn": "Give a 45–60 second Persian news brief about “کمبود آب در روستا.” State the main event, give two details, and explain one likely result.",
+      "promptFa": "در ۴۵ تا ۶۰ ثانیه گزارش «کمبود آب در روستا» را خلاصه کنید. رویداد اصلی، دو جزئیات و یک نتیجه احتمالی را بگویید.",
+      "topic": "environment",
+      "ilrTarget": 1,
+      "functions": [
+        "summarize",
+        "report details",
+        "state a simple inference"
+      ],
+      "targetWords": [
+        "منطقه",
+        "خانه",
+        "دولت",
+        "برنامه‌ریزی کردن"
+      ],
+      "articleId": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-08",
+      "sequence": 8,
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-speaking-09",
+      "promptEn": "Give a 45–60 second Persian news brief about “مسابقه فوتبال جوانان.” State the main event, give two details, and explain one likely result.",
+      "promptFa": "در ۴۵ تا ۶۰ ثانیه گزارش «مسابقه فوتبال جوانان» را خلاصه کنید. رویداد اصلی، دو جزئیات و یک نتیجه احتمالی را بگویید.",
+      "topic": "sports",
+      "ilrTarget": 1,
+      "functions": [
+        "summarize",
+        "report details",
+        "state a simple inference"
+      ],
+      "targetWords": [
+        "نفر",
+        "حمایت",
+        "هدف",
+        "آسیا"
+      ],
+      "articleId": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-09",
+      "sequence": 9,
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-speaking-10",
+      "promptEn": "Give a 45–60 second Persian news brief about “افتتاح بانک سیار.” State the main event, give two details, and explain one likely result.",
+      "promptFa": "در ۴۵ تا ۶۰ ثانیه گزارش «افتتاح بانک سیار» را خلاصه کنید. رویداد اصلی، دو جزئیات و یک نتیجه احتمالی را بگویید.",
+      "topic": "services",
+      "ilrTarget": 1,
+      "functions": [
+        "summarize",
+        "report details",
+        "state a simple inference"
+      ],
+      "targetWords": [
+        "بانک",
+        "خودرو",
+        "اطلاعات",
+        "شهروند"
+      ],
+      "articleId": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-10",
+      "sequence": 10,
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-speaking-11",
+      "promptEn": "Give a 45–60 second Persian news brief about “تصمیم درباره قیمت بنزین.” State the main event, give two details, and explain one likely result.",
+      "promptFa": "در ۴۵ تا ۶۰ ثانیه گزارش «تصمیم درباره قیمت بنزین» را خلاصه کنید. رویداد اصلی، دو جزئیات و یک نتیجه احتمالی را بگویید.",
+      "topic": "economy",
+      "ilrTarget": 1,
+      "functions": [
+        "summarize",
+        "report details",
+        "state a simple inference"
+      ],
+      "targetWords": [
+        "دولت",
+        "نرخ",
+        "تورم",
+        "واکنش"
+      ],
+      "articleId": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-11",
+      "sequence": 11,
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-speaking-12",
+      "promptEn": "Give a 45–60 second Persian news brief about “دیدار وزیران منطقه.” State the main event, give two details, and explain one likely result.",
+      "promptFa": "در ۴۵ تا ۶۰ ثانیه گزارش «دیدار وزیران منطقه» را خلاصه کنید. رویداد اصلی، دو جزئیات و یک نتیجه احتمالی را بگویید.",
+      "topic": "diplomacy",
+      "ilrTarget": 1,
+      "functions": [
+        "summarize",
+        "report details",
+        "state a simple inference"
+      ],
+      "targetWords": [
+        "وزیر",
+        "کشور / کشورها",
+        "دیدار",
+        "همکاری"
+      ],
+      "articleId": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-12",
+      "sequence": 12,
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-speaking-13",
+      "promptEn": "Give a 45–60 second Persian news brief about “اعتراض کارکنان کارخانه.” State the main event, give two details, and explain one likely result.",
+      "promptFa": "در ۴۵ تا ۶۰ ثانیه گزارش «اعتراض کارکنان کارخانه» را خلاصه کنید. رویداد اصلی، دو جزئیات و یک نتیجه احتمالی را بگویید.",
+      "topic": "labor",
+      "ilrTarget": 1,
+      "functions": [
+        "summarize",
+        "report details",
+        "state a simple inference"
+      ],
+      "targetWords": [
+        "اعتراض / اعتراضات",
+        "ساختمان",
+        "هفته",
+        "گفتن"
+      ],
+      "articleId": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-13",
+      "sequence": 13,
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-speaking-14",
+      "promptEn": "Give a 45–60 second Persian news brief about “هشدار درباره داروی تقلبی.” State the main event, give two details, and explain one likely result.",
+      "promptFa": "در ۴۵ تا ۶۰ ثانیه گزارش «هشدار درباره داروی تقلبی» را خلاصه کنید. رویداد اصلی، دو جزئیات و یک نتیجه احتمالی را بگویید.",
+      "topic": "health",
+      "ilrTarget": 1,
+      "functions": [
+        "summarize",
+        "report details",
+        "state a simple inference"
+      ],
+      "targetWords": [
+        "بهداشت",
+        "دارو",
+        "بیمه",
+        "هشدار"
+      ],
+      "articleId": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-14",
+      "sequence": 14,
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-speaking-15",
+      "promptEn": "Give a 45–60 second Persian news brief about “کاهش آلودگی هوا.” State the main event, give two details, and explain one likely result.",
+      "promptFa": "در ۴۵ تا ۶۰ ثانیه گزارش «کاهش آلودگی هوا» را خلاصه کنید. رویداد اصلی، دو جزئیات و یک نتیجه احتمالی را بگویید.",
+      "topic": "environment",
+      "ilrTarget": 1,
+      "functions": [
+        "summarize",
+        "report details",
+        "state a simple inference"
+      ],
+      "targetWords": [
+        "سازمان",
+        "هفته",
+        "خودرو",
+        "منطقه"
+      ],
+      "articleId": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-15",
+      "sequence": 15,
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-speaking-16",
+      "promptEn": "Give a 45–60 second Persian news brief about “خانه‌های تازه برای سیل‌زدگان.” State the main event, give two details, and explain one likely result.",
+      "promptFa": "در ۴۵ تا ۶۰ ثانیه گزارش «خانه‌های تازه برای سیل‌زدگان» را خلاصه کنید. رویداد اصلی، دو جزئیات و یک نتیجه احتمالی را بگویید.",
+      "topic": "housing",
+      "ilrTarget": 1,
+      "functions": [
+        "summarize",
+        "report details",
+        "state a simple inference"
+      ],
+      "targetWords": [
+        "خانه",
+        "خانواده",
+        "مواد",
+        "دارایی"
+      ],
+      "articleId": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-16",
+      "sequence": 16,
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-speaking-17",
+      "promptEn": "Give a 45–60 second Persian news brief about “نظرسنجی درباره پارک.” State the main event, give two details, and explain one likely result.",
+      "promptFa": "در ۴۵ تا ۶۰ ثانیه گزارش «نظرسنجی درباره پارک» را خلاصه کنید. رویداد اصلی، دو جزئیات و یک نتیجه احتمالی را بگویید.",
+      "topic": "community",
+      "ilrTarget": 1,
+      "functions": [
+        "summarize",
+        "report details",
+        "state a simple inference"
+      ],
+      "targetWords": [
+        "نظرسنجی",
+        "حمایت",
+        "تصمیم",
+        "دیدار"
+      ],
+      "articleId": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-17",
+      "sequence": 17,
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-speaking-18",
+      "promptEn": "Give a 45–60 second Persian news brief about “پرواز پهپادهای امدادی.” State the main event, give two details, and explain one likely result.",
+      "promptFa": "در ۴۵ تا ۶۰ ثانیه گزارش «پرواز پهپادهای امدادی» را خلاصه کنید. رویداد اصلی، دو جزئیات و یک نتیجه احتمالی را بگویید.",
+      "topic": "technology",
+      "ilrTarget": 1,
+      "functions": [
+        "summarize",
+        "report details",
+        "state a simple inference"
+      ],
+      "targetWords": [
+        "پهپاد",
+        "عملیات",
+        "اطلاعات",
+        "پایگاه / پایگاه‌ها"
+      ],
+      "articleId": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-18",
+      "sequence": 18,
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-speaking-19",
+      "promptEn": "Give a 45–60 second Persian news brief about “بازگشت مسافران از مرز.” State the main event, give two details, and explain one likely result.",
+      "promptFa": "در ۴۵ تا ۶۰ ثانیه گزارش «بازگشت مسافران از مرز» را خلاصه کنید. رویداد اصلی، دو جزئیات و یک نتیجه احتمالی را بگویید.",
+      "topic": "travel",
+      "ilrTarget": 1,
+      "functions": [
+        "summarize",
+        "report details",
+        "state a simple inference"
+      ],
+      "targetWords": [
+        "پس از",
+        "کشور / کشورها",
+        "مواد",
+        "اعلام کردن"
+      ],
+      "articleId": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-19",
+      "sequence": 19,
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-speaking-20",
+      "promptEn": "Give a 45–60 second Persian news brief about “همکاری دانشگاه و بیمارستان.” State the main event, give two details, and explain one likely result.",
+      "promptFa": "در ۴۵ تا ۶۰ ثانیه گزارش «همکاری دانشگاه و بیمارستان» را خلاصه کنید. رویداد اصلی، دو جزئیات و یک نتیجه احتمالی را بگویید.",
+      "topic": "education",
+      "ilrTarget": 1,
+      "functions": [
+        "summarize",
+        "report details",
+        "state a simple inference"
+      ],
+      "targetWords": [
+        "همکاری",
+        "بهداشت",
+        "تزریق",
+        "ماه"
+      ],
+      "articleId": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-20",
+      "sequence": 20,
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-speaking-21",
+      "promptEn": "Give a 45–60 second Persian news brief about “واکنش بازار ارز.” State the main event, give two details, and explain one likely result.",
+      "promptFa": "در ۴۵ تا ۶۰ ثانیه گزارش «واکنش بازار ارز» را خلاصه کنید. رویداد اصلی، دو جزئیات و یک نتیجه احتمالی را بگویید.",
+      "topic": "economy",
+      "ilrTarget": 1,
+      "functions": [
+        "summarize",
+        "report details",
+        "state a simple inference"
+      ],
+      "targetWords": [
+        "ارز",
+        "واکنش",
+        "نرخ",
+        "بانک"
+      ],
+      "articleId": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-21",
+      "sequence": 21,
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-speaking-22",
+      "promptEn": "Give a 45–60 second Persian news brief about “کارزار ایمنی جاده.” State the main event, give two details, and explain one likely result.",
+      "promptFa": "در ۴۵ تا ۶۰ ثانیه گزارش «کارزار ایمنی جاده» را خلاصه کنید. رویداد اصلی، دو جزئیات و یک نتیجه احتمالی را بگویید.",
+      "topic": "public safety",
+      "ilrTarget": 1,
+      "functions": [
+        "summarize",
+        "report details",
+        "state a simple inference"
+      ],
+      "targetWords": [
+        "کارزار",
+        "اطلاعات",
+        "خودرو",
+        "قربانی"
+      ],
+      "articleId": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-22",
+      "sequence": 22,
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-speaking-23",
+      "promptEn": "Give a 45–60 second Persian news brief about “جشن رقص محلی.” State the main event, give two details, and explain one likely result.",
+      "promptFa": "در ۴۵ تا ۶۰ ثانیه گزارش «جشن رقص محلی» را خلاصه کنید. رویداد اصلی، دو جزئیات و یک نتیجه احتمالی را بگویید.",
+      "topic": "culture",
+      "ilrTarget": 1,
+      "functions": [
+        "summarize",
+        "report details",
+        "state a simple inference"
+      ],
+      "targetWords": [
+        "رقص",
+        "منطقه",
+        "نمایش",
+        "هدف"
+      ],
+      "articleId": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-23",
+      "sequence": 23,
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-speaking-24",
+      "promptEn": "Give a 45–60 second Persian news brief about “افزایش قیمت دارو.” State the main event, give two details, and explain one likely result.",
+      "promptFa": "در ۴۵ تا ۶۰ ثانیه گزارش «افزایش قیمت دارو» را خلاصه کنید. رویداد اصلی، دو جزئیات و یک نتیجه احتمالی را بگویید.",
+      "topic": "health",
+      "ilrTarget": 1,
+      "functions": [
+        "summarize",
+        "report details",
+        "state a simple inference"
+      ],
+      "targetWords": [
+        "دارو",
+        "ارز",
+        "بیمه",
+        "حمایت"
+      ],
+      "articleId": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-24",
+      "sequence": 24,
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-speaking-25",
+      "promptEn": "Give a 45–60 second Persian news brief about “توقف موقت صادرات.” State the main event, give two details, and explain one likely result.",
+      "promptFa": "در ۴۵ تا ۶۰ ثانیه گزارش «توقف موقت صادرات» را خلاصه کنید. رویداد اصلی، دو جزئیات و یک نتیجه احتمالی را بگویید.",
+      "topic": "economy",
+      "ilrTarget": 1,
+      "functions": [
+        "summarize",
+        "report details",
+        "state a simple inference"
+      ],
+      "targetWords": [
+        "صادرات",
+        "متوقف کردن / شدن",
+        "تصمیم",
+        "هشدار"
+      ],
+      "articleId": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-25",
+      "sequence": 25,
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-speaking-26",
+      "promptEn": "Give a 45–60 second Persian news brief about “اطلاعیه مدرسه درباره بیماری.” State the main event, give two details, and explain one likely result.",
+      "promptFa": "در ۴۵ تا ۶۰ ثانیه گزارش «اطلاعیه مدرسه درباره بیماری» را خلاصه کنید. رویداد اصلی، دو جزئیات و یک نتیجه احتمالی را بگویید.",
+      "topic": "education",
+      "ilrTarget": 1,
+      "functions": [
+        "summarize",
+        "report details",
+        "state a simple inference"
+      ],
+      "targetWords": [
+        "اعلام کردن",
+        "ساختمان",
+        "بهداشت",
+        "خانه"
+      ],
+      "articleId": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-26",
+      "sequence": 26,
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-speaking-27",
+      "promptEn": "Give a 45–60 second Persian news brief about “دیدار تیم‌های امدادی.” State the main event, give two details, and explain one likely result.",
+      "promptFa": "در ۴۵ تا ۶۰ ثانیه گزارش «دیدار تیم‌های امدادی» را خلاصه کنید. رویداد اصلی، دو جزئیات و یک نتیجه احتمالی را بگویید.",
+      "topic": "regional cooperation",
+      "ilrTarget": 1,
+      "functions": [
+        "summarize",
+        "report details",
+        "state a simple inference"
+      ],
+      "targetWords": [
+        "ایران",
+        "کشور / کشورها",
+        "پایگاه / پایگاه‌ها",
+        "عملیات"
+      ],
+      "articleId": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-27",
+      "sequence": 27,
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-speaking-28",
+      "promptEn": "Give a 45–60 second Persian news brief about “گزارش تولید خودرو.” State the main event, give two details, and explain one likely result.",
+      "promptFa": "در ۴۵ تا ۶۰ ثانیه گزارش «گزارش تولید خودرو» را خلاصه کنید. رویداد اصلی، دو جزئیات و یک نتیجه احتمالی را بگویید.",
+      "topic": "industry",
+      "ilrTarget": 1,
+      "functions": [
+        "summarize",
+        "report details",
+        "state a simple inference"
+      ],
+      "targetWords": [
+        "خودرو",
+        "ماه",
+        "مواد",
+        "دولت"
+      ],
+      "articleId": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-28",
+      "sequence": 28,
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-speaking-29",
+      "promptEn": "Give a 45–60 second Persian news brief about “هشدار امنیتی برای بانک‌ها.” State the main event, give two details, and explain one likely result.",
+      "promptFa": "در ۴۵ تا ۶۰ ثانیه گزارش «هشدار امنیتی برای بانک‌ها» را خلاصه کنید. رویداد اصلی، دو جزئیات و یک نتیجه احتمالی را بگویید.",
+      "topic": "cybersecurity",
+      "ilrTarget": 1,
+      "functions": [
+        "summarize",
+        "report details",
+        "state a simple inference"
+      ],
+      "targetWords": [
+        "حمله / حملات",
+        "بانک",
+        "شهروند",
+        "اطلاعات"
+      ],
+      "articleId": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-29",
+      "sequence": 29,
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    },
+    {
+      "id": "cycle-dli-ch4-ch5l1-news-2026-09-01-speaking-30",
+      "promptEn": "Give a 45–60 second Persian news brief about “توافق برای حفاظت از تنگه.” State the main event, give two details, and explain one likely result.",
+      "promptFa": "در ۴۵ تا ۶۰ ثانیه گزارش «توافق برای حفاظت از تنگه» را خلاصه کنید. رویداد اصلی، دو جزئیات و یک نتیجه احتمالی را بگویید.",
+      "topic": "diplomacy",
+      "ilrTarget": 1,
+      "functions": [
+        "summarize",
+        "report details",
+        "state a simple inference"
+      ],
+      "targetWords": [
+        "تنگه",
+        "کشور / کشورها",
+        "همکاری",
+        "علیه"
+      ],
+      "articleId": "cycle-dli-ch4-ch5l1-news-2026-09-01-article-30",
+      "sequence": 30,
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    }
+  ]
+}

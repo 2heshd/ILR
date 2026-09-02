@@ -1,33 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { SPEAKING_PROMPTS } from "@/lib/speaking-prompts";
 import type { IlrLevel, SpeakingAttempt, SpeakingGrade, SpeakingPrompt } from "@/lib/types";
 
 type Props = {
-  weekNumber: number;
   level: IlrLevel;
-  targetWords: string[];
-  latestPrompt?: SpeakingPrompt;
-  onPrompt: (prompt: SpeakingPrompt) => void;
+  prompts: SpeakingPrompt[];
   onAttempt: (attempt: SpeakingAttempt) => void;
   makeId: () => string;
 };
 
 const TARGET_SECONDS: Record<IlrLevel, number> = { 1: 45, 2: 90, 3: 150, 4: 240 };
-
-function makePrompt(level: IlrLevel, index: number, weekNumber: number, targetWords: string[], makeId: () => string): SpeakingPrompt {
-  const item = SPEAKING_PROMPTS[level][(index + weekNumber - 1) % SPEAKING_PROMPTS[level].length];
-  return {
-    id: makeId(),
-    promptEn: item.prompt,
-    topic: item.topic,
-    ilrTarget: level,
-    functions: item.functions,
-    targetWords: targetWords.slice(0, level <= 1 ? 3 : 5),
-    createdAt: new Date().toISOString(),
-  };
-}
 
 function writeString(view: DataView, offset: number, value: string) {
   for (let i = 0; i < value.length; i += 1) view.setUint8(offset + i, value.charCodeAt(i));
@@ -71,8 +54,9 @@ async function convertToWav(blob: Blob) {
   }
 }
 
-export default function SpeakingLab({ weekNumber, level, targetWords, latestPrompt, onPrompt, onAttempt, makeId }: Props) {
+export default function SpeakingLab({ level, prompts, onAttempt, makeId }: Props) {
   const [promptIndex, setPromptIndex] = useState(0);
+  const latestPrompt = prompts[promptIndex] ?? prompts[0];
   const [recording, setRecording] = useState(false);
   const [busy, setBusy] = useState(false);
   const [elapsed, setElapsed] = useState(0);
@@ -84,16 +68,6 @@ export default function SpeakingLab({ weekNumber, level, targetWords, latestProm
   const streamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const startedAtRef = useRef(0);
-
-  useEffect(() => {
-    if (!latestPrompt || latestPrompt.ilrTarget !== level) {
-      onPrompt(makePrompt(level, 0, weekNumber, targetWords, makeId));
-      setPromptIndex(0);
-      setAudioBlob(null);
-      setGrade(null);
-      setElapsed(0);
-    }
-  }, [level, latestPrompt, makeId, onPrompt, targetWords, weekNumber]);
 
   useEffect(() => {
     if (!recording) return;
@@ -108,9 +82,8 @@ export default function SpeakingLab({ weekNumber, level, targetWords, latestProm
   }, [audioUrl]);
 
   function nextPrompt() {
-    const next = (promptIndex + 1) % SPEAKING_PROMPTS[level].length;
+    const next = (promptIndex + 1) % prompts.length;
     setPromptIndex(next);
-    onPrompt(makePrompt(level, next, weekNumber, targetWords, makeId));
     setAudioBlob(null);
     setGrade(null);
     setElapsed(0);
@@ -204,8 +177,9 @@ export default function SpeakingLab({ weekNumber, level, targetWords, latestProm
   return <section className="speaking-workspace">
     {latestPrompt && <>
       <div className="speaking-prompt">
-        <div className="row spread"><span className="muted">Level {level} · {latestPrompt.topic}</span><button className="text-button" onClick={nextPrompt}>Different prompt</button></div>
+        <div className="row spread"><span className="muted">Report {promptIndex + 1} of {prompts.length} · ILR 1+ · {latestPrompt.topic}</span><div className="row"><select aria-label="Choose speaking report" value={promptIndex} onChange={(event) => { setPromptIndex(Number(event.target.value)); setAudioBlob(null); setGrade(null); setElapsed(0); setStatus(""); }}>{prompts.map((prompt, index) => <option key={prompt.id} value={index}>{String(index + 1).padStart(2, "0")} · {prompt.topic}</option>)}</select><button className="text-button" onClick={nextPrompt}>Next report</button></div></div>
         <h1>{latestPrompt.promptEn}</h1>
+        {latestPrompt.promptFa && <p className="fa" dir="rtl">{latestPrompt.promptFa}</p>}
         <p>{latestPrompt.functions.join(" · ")}</p>
       </div>
 

@@ -3,19 +3,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import AccountWorkspace from "@/components/AccountWorkspace";
-import AnkiWorkspace from "@/components/AnkiWorkspace";
 import ComprehensionGrader from "@/components/ComprehensionGrader";
 import GistListening from "@/components/GistListening";
 import InferenceReadingText, { persianSentences } from "@/components/InferenceReadingText";
 import InteractivePersianText from "@/components/InteractivePersianText";
 import Onboarding from "@/components/Onboarding";
 import RapidCaptions from "@/components/RapidCaptions";
-import SourceIngestion from "@/components/SourceIngestion";
 import SpeakingLab from "@/components/SpeakingLab";
 import { adaptiveAllocation, currentTrainingPhase, dominantBottleneck, selectContextWords } from "@/lib/adaptive";
 import { fallbackAdvanced, type AdvancedWord } from "@/lib/advanced";
 import type { AnkiReviewRow, AnkiVocabularyRow } from "@/lib/anki";
 import { COURSE_META, loadCourseWeek } from "@/lib/course";
+import { curatedListeningItems, curatedPassages, curatedSpeakingPrompts, curatedVocabulary } from "@/lib/curated-cycle";
 import { createSerializedCard, reviewFsrs } from "@/lib/fsrs";
 import { normalizePersian, parseWeeklyInput } from "@/lib/persian";
 import { isMeaningfulPersianText, sanitizePersianSpeechText } from "@/lib/persian-speech";
@@ -45,15 +44,14 @@ const LEGACY_KEYS = ["ilr-persian-v2", "ilr-persian-v1"];
 const PERSIAN_WORD_PATTERN = /([\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06FA-\u06FC\u200C]+)/g;
 const IS_PERSIAN_WORD = /^[\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06FA-\u06FC\u200C]+$/;
 
-type Tab = "today" | "sources" | "reading" | "listening" | "speaking" | "anki" | "analytics";
+type Tab = "today" | "reading" | "listening" | "speaking" | "vocabulary" | "analytics";
 
 const TAB_LABELS: Record<Tab, string> = {
   today: "Today",
-  sources: "Sources",
   reading: "Reading",
   listening: "Listening",
   speaking: "Speaking",
-  anki: "Anki",
+  vocabulary: "Vocabulary",
   analytics: "Progress",
 };
 
@@ -67,15 +65,15 @@ const emptyState: StudyState = {
   weekNumber: 1,
   currentIlr: 1,
   skillLevels: { reading: 1, listening: 1, speaking: 1 },
-  course: { catalogId: COURSE_META.id, sourceFile: COURSE_META.sourceFile, importedWeeks: [] },
+  course: { catalogId: COURSE_META.id, sourceFile: COURSE_META.sourceFile, importedWeeks: [1] },
   anki: { endpoint: "http://127.0.0.1:8765", deckName: "" },
-  words: [],
+  words: curatedVocabulary(),
   reviews: [],
-  passages: [],
+  passages: curatedPassages(),
   passageAttempts: [],
-  listeningItems: [],
+  listeningItems: curatedListeningItems(),
   listeningAttempts: [],
-  speakingPrompts: [],
+  speakingPrompts: curatedSpeakingPrompts(),
   speakingAttempts: [],
 };
 
@@ -86,10 +84,15 @@ function id() {
 type TimedCaption = { word: string; start: number; end: number };
 
 function hydrateState(raw: Partial<StudyState> | null | undefined): StudyState {
-  const catalogChanged = Boolean(raw?.course?.catalogId && raw.course.catalogId !== COURSE_META.id);
-  const importedWeeks = catalogChanged
-    ? (raw?.course?.importedWeeks ?? []).filter((week) => week > 1).map((week) => week - 1)
-    : (raw?.course?.importedWeeks ?? []);
+  const seededWords = curatedVocabulary();
+  const seededPassages = curatedPassages();
+  const seededListening = curatedListeningItems();
+  const seededSpeaking = curatedSpeakingPrompts();
+  const savedWords = new Map((raw?.words ?? []).map((word) => [word.id, word]));
+  const wordIds = new Set(seededWords.map((word) => word.id));
+  const passageIds = new Set(seededPassages.map((item) => item.id));
+  const listeningIds = new Set(seededListening.map((item) => item.id));
+  const speakingIds = new Set(seededSpeaking.map((item) => item.id));
   const state: StudyState = {
     ...emptyState,
     ...raw,
@@ -101,21 +104,19 @@ function hydrateState(raw: Partial<StudyState> | null | undefined): StudyState {
     },
     course: {
       ...emptyState.course,
-      ...(raw?.course ?? {}),
       catalogId: COURSE_META.id,
-      importedWeeks,
+      sourceFile: COURSE_META.sourceFile,
+      importedWeeks: [1],
     },
     anki: { ...emptyState.anki, ...(raw?.anki ?? {}) },
-    words: (raw?.words ?? [])
-      .filter((word) => !word.courseLesson?.startsWith("Introductory Unit"))
-      .map((word) => catalogChanged && word.courseLesson && word.sourceWeek > 1 ? { ...word, sourceWeek: word.sourceWeek - 1 } : word),
-    reviews: raw?.reviews ?? [],
-    passages: (raw?.passages ?? []).map((item) => ({ ...item, genre: item.genre ?? "generated practice", sourceType: item.sourceType ?? "generated" })),
-    passageAttempts: (raw?.passageAttempts ?? []).map((attempt) => ({ ...attempt, firstPass: attempt.firstPass ?? true })),
-    listeningItems: (raw?.listeningItems ?? []).map((item) => ({ ...item, genre: item.genre ?? "generated practice", sourceType: item.sourceType ?? "generated" })),
-    listeningAttempts: (raw?.listeningAttempts ?? []).map((attempt) => ({ ...attempt, firstPass: attempt.firstPass ?? !attempt.transcriptRevealed })),
-    speakingPrompts: raw?.speakingPrompts ?? [],
-    speakingAttempts: raw?.speakingAttempts ?? [],
+    words: seededWords.map((word) => ({ ...word, ...(savedWords.get(word.id) ?? {}), displayForm: word.displayForm, normalizedForm: word.normalizedForm, definition: word.definition, romanization: word.romanization, sourceType: word.sourceType, courseLesson: word.courseLesson, topic: word.topic })),
+    reviews: (raw?.reviews ?? []).filter((review) => wordIds.has(review.lexicalItemId)),
+    passages: seededPassages,
+    passageAttempts: (raw?.passageAttempts ?? []).filter((attempt) => passageIds.has(attempt.passageId)).map((attempt) => ({ ...attempt, firstPass: attempt.firstPass ?? true })),
+    listeningItems: seededListening,
+    listeningAttempts: (raw?.listeningAttempts ?? []).filter((attempt) => listeningIds.has(attempt.listeningItemId)).map((attempt) => ({ ...attempt, firstPass: attempt.firstPass ?? !attempt.transcriptRevealed })),
+    speakingPrompts: seededSpeaking,
+    speakingAttempts: (raw?.speakingAttempts ?? []).filter((attempt) => speakingIds.has(attempt.speakingPromptId)),
   };
   state.words = state.words.map((word) => {
     const savedCards = [word.fsrsCard, word.modalityCards?.visual, word.modalityCards?.audio, word.modalityCards?.cloze].flatMap((card) => card ? [card] : []);
@@ -241,7 +242,6 @@ export default function Home() {
   const [tab, setTab] = useState<Tab>("today");
   const [showIntake, setShowIntake] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [sourceView, setSourceView] = useState<"reading" | "listening" | "library" | null>(null);
   const [showProgressDetails, setShowProgressDetails] = useState(false);
   const [courseBusy, setCourseBusy] = useState(false);
   const [generationBusy, setGenerationBusy] = useState<"reading" | "listening" | null>(null);
@@ -456,7 +456,7 @@ export default function Home() {
         const cloud = await loadCloudState(supabase!, user);
         if (!active) return;
         if (cloud) {
-          const merged = hydrateState(mergeStudyStates(cloud, local));
+          const merged = hydrateState(mergeStudyStates(hydrateState(cloud), local));
           setState(merged);
           await saveCloudState(supabase!, user, merged);
         } else await saveCloudState(supabase!, user, local);
@@ -527,15 +527,14 @@ export default function Home() {
   const mature = state.words.filter((word) => word.reviews >= 4 && word.correct / Math.max(1, word.reviews) >= 0.8).length;
   const retention = state.reviews.length ? Math.round(100 * state.reviews.filter((review) => review.correct).length / state.reviews.length) : 0;
   const medianRecall = median(state.reviews.slice(-250).map((review) => review.responseMs));
-  const latestPassage = state.passages.find((item) => item.id === activePassageId) ?? state.passages.at(-1);
-  const latestListening = state.listeningItems.find((item) => item.id === activeListeningId) ?? state.listeningItems.at(-1);
+  const latestPassage = state.passages.find((item) => item.id === activePassageId) ?? state.passages[0];
+  const latestListening = state.listeningItems.find((item) => item.id === activeListeningId) ?? state.listeningItems[0];
   const transcriptRevealPercent = Math.min(100, transcriptRevealStep * 30);
   const transcriptVisible = transcriptRevealStep > 0;
   const listeningReveal = useMemo(
     () => latestListening ? progressiveListeningText(latestListening.transcriptFa, state.words, transcriptRevealPercent) : null,
     [latestListening, state.words, transcriptRevealPercent],
   );
-  const latestSpeakingPrompt = state.speakingPrompts.at(-1);
 
   useEffect(() => {
     setRevealed(false);
@@ -1421,7 +1420,7 @@ export default function Home() {
   return <main>
     <header>
       <h1>{TAB_LABELS[tab]}</h1>
-      <div className="row"><button className={`sync-indicator ${cloudUser && cloudReady ? "ready" : ""}`} onClick={openAccount} aria-label={cloudUser && cloudReady ? "Cloud sync active. Open account." : cloudUser ? "Cloud sync is connecting. Open account." : "Progress is local only. Open account to sign in."}>{cloudUser ? cloudReady ? "● Synced" : "○ Syncing" : "○ Local"}</button><HeaderLevelControls levels={state.skillLevels} onChange={setSkillLevel} />{(state.words.length > 0 || tab !== "today") && <button className="primary" onClick={() => { setTab("today"); setShowIntake((value) => !value); }}>Add words</button>}</div>
+      <div className="row"><button className={`sync-indicator ${cloudUser && cloudReady ? "ready" : ""}`} onClick={openAccount} aria-label={cloudUser && cloudReady ? "Cloud sync active. Open account." : cloudUser ? "Cloud sync is connecting. Open account." : "Progress is local only. Open account to sign in."}>{cloudUser ? cloudReady ? "● Synced" : "○ Syncing" : "○ Local"}</button><HeaderLevelControls levels={state.skillLevels} onChange={setSkillLevel} /></div>
     </header>
 
     <nav className="tabs" aria-label="Cursos navigation">
@@ -1430,7 +1429,7 @@ export default function Home() {
       <div className="nav-section-heading"><span><i>▲</i> Study</span><span>−</span></div>
       <div className="nav-dash" />
       <div className="nav-items">
-        {(["today", "sources", "reading", "listening", "speaking", "anki", "analytics"] as Tab[]).map((name) => <button key={name} className={tab === name ? "tab active" : "tab"} onClick={() => setTab(name)}><span className="nav-bullet">{tab === name ? "●" : "·"}</span>{TAB_LABELS[name]}</button>)}
+        {(["today", "reading", "listening", "speaking", "vocabulary", "analytics"] as Tab[]).map((name) => <button key={name} className={tab === name ? "tab active" : "tab"} onClick={() => setTab(name)}><span className="nav-bullet">{tab === name ? "●" : "·"}</span>{TAB_LABELS[name]}</button>)}
       </div>
       <div className="nav-course">
         <span>Week {state.weekNumber}/{COURSE_META.weeks}</span>
@@ -1511,36 +1510,14 @@ export default function Home() {
           <button className="queue-button" onClick={() => setTab("listening")}><span>Listening lab</span><strong>{listeningAverage || "start"}</strong></button>
           <button className="queue-button" onClick={() => setTab("speaking")}><span>Speaking</span><strong>{speakingAverage || `S${state.skillLevels.speaking}`}</strong></button>
           <button className="queue-button" onClick={() => setTab("analytics")}><span>Difficult items</span><strong>{weakWords.length}</strong></button>
-          <button className="queue-button" onClick={advanceWeek} disabled={state.weekNumber >= COURSE_META.weeks}><span>Advance course week</span><strong>W{Math.min(COURSE_META.weeks, state.weekNumber + 1)}</strong></button>
+          <div className="queue-button"><span>Current cycle</span><strong>30 reports · 194 words</strong></div>
         </div>
       </div>}
 
     </section>}
 
-    {tab === "sources" && <section className="guided-workspace">
-      {!sourceView && <div className="guided-overview">
-        <span className="next-number">01</span><h2>Train with real Persian.</h2>
-        <p>Add a short excerpt or transcript from a real source. The app turns it into level-appropriate practice while keeping its origin attached.</p>
-        <div className="guided-capabilities"><div><span>Preserve</span><p>Keep title, publisher, date, link, and authentic or adapted status.</p></div><div><span>Analyze</span><p>Identify topic, genre, register, level, questions, and useful vocabulary.</p></div><div><span>Practice</span><p>Send the material directly into Reading or Listening.</p></div><div><span>Compare</span><p>See which sources, genres, and registers are improving or causing difficulty.</p></div></div>
-        <div className="row guided-paths"><button className="primary" onClick={() => setSourceView("reading")}>Add reading source</button><button className="primary" onClick={() => setSourceView("listening")}>Add listening source</button><button className="secondary" onClick={() => setSourceView("library")}>View library</button></div>
-      </div>}
-      {(sourceView === "reading" || sourceView === "listening") && <><button className="back-link" onClick={() => setSourceView(null)}>← Back</button><SourceIngestion
-        key={sourceView}
-        initialModality={sourceView}
-        knownWords={state.words.map((word) => word.displayForm)}
-        makeId={id}
-        onStatus={setStatus}
-        onReading={(passage) => { setState((currentState) => ({ ...currentState, passages: [...currentState.passages, passage] })); resetReadingLab(passage.id); }}
-        onListening={(item) => { setState((currentState) => ({ ...currentState, listeningItems: [...currentState.listeningItems, item] })); resetListeningLab(item.id); }}
-      /></>}
-      {sourceView === "library" && <><button className="back-link" onClick={() => setSourceView(null)}>← Back</button><section className="grid source-library">
-        <div className="card span-6"><h2>Reading source library</h2><div className="queue">{state.passages.slice().reverse().map((item) => <button className="queue-button source-row" key={item.id} onClick={() => resetReadingLab(item.id)}><span><strong>{item.title}</strong><small>{item.publisher || "AI-generated"} · {item.genre} · {item.register} · ILR {item.ilrEstimate}</small></span><span className={`pill origin-${item.sourceType}`}>{item.sourceType}</span></button>)}</div>{!state.passages.length && <div className="empty">No reading sources yet.</div>}</div>
-        <div className="card span-6"><h2>Listening source library</h2><div className="queue">{state.listeningItems.slice().reverse().map((item) => <button className="queue-button source-row" key={item.id} onClick={() => resetListeningLab(item.id)}><span><strong>{item.title}</strong><small>{item.publisher || "AI-generated"} · {item.genre} · {item.register} · ILR {item.ilrEstimate}</small></span><span className={`pill origin-${item.sourceType}`}>{item.sourceType}</span></button>)}</div>{!state.listeningItems.length && <div className="empty">No listening sources yet.</div>}</div>
-      </section></>}
-    </section>}
-
     {tab === "reading" && <section className="grid">
-      <div className="card span-12 lab-header"><div><h2>Reading</h2><span className="muted">Controlled reinforces your words. Inference trains fast gist reading.</span></div><div className="row"><button className={readingMode === "full" ? "mode-button active" : "mode-button"} disabled={Boolean(readingStartedAt || readingQuestionsOpen)} onClick={() => { setReadingMode("full"); setSentenceGists([]); }}>Full text</button><button className={readingMode === "inference" ? "mode-button active" : "mode-button"} disabled={Boolean(readingStartedAt || readingQuestionsOpen)} onClick={() => { setReadingMode("inference"); setSentenceGists([]); }}>Inference</button><button className="secondary" disabled={generationBusy !== null} onClick={() => generatePractice("reading", "controlled")}>{generationBusy === "reading" ? "Generating…" : "Controlled"}</button><button className="primary" disabled={generationBusy !== null} onClick={() => generatePractice("reading", "transfer")}>{generationBusy === "reading" ? "Generating…" : "Fresh transfer"}</button></div></div>
+      <div className="card span-12 lab-header"><div><h2>Reading · 30-report cycle</h2><span className="muted">Use the same report for reading, listening, and speaking transfer.</span></div><div className="row"><select aria-label="Choose reading report" value={latestPassage?.id ?? ""} disabled={Boolean(readingStartedAt || readingQuestionsOpen)} onChange={(event) => resetReadingLab(event.target.value)}>{state.passages.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select><button className={readingMode === "full" ? "mode-button active" : "mode-button"} disabled={Boolean(readingStartedAt || readingQuestionsOpen)} onClick={() => { setReadingMode("full"); setSentenceGists([]); }}>Full text</button><button className={readingMode === "inference" ? "mode-button active" : "mode-button"} disabled={Boolean(readingStartedAt || readingQuestionsOpen)} onClick={() => { setReadingMode("inference"); setSentenceGists([]); }}>Inference</button></div></div>
       {latestPassage ? <>
         <div className="card span-7">
           <div className="row spread"><div><div className="muted">ILR ~{latestPassage.ilrEstimate} · {latestPassage.topic} · {latestPassage.genre} · {latestPassage.register}</div><h2>{latestPassage.title}</h2><SourceLine item={latestPassage} /></div>{!readingStartedAt && !readingQuestionsOpen && <button className="primary" onClick={() => { setReadingStartedAt(Date.now()); setReadingDurationMs(0); }}>Start timer</button>}</div>
@@ -1563,7 +1540,7 @@ export default function Home() {
     </section>}
 
     {tab === "listening" && <section className="grid">
-      <div className="card span-12 lab-header"><div><h2>Listening</h2><span className="muted">Full tests the passage. Gist isolates meaning. Rapid Captions connects sound to Persian words.</span></div><div className="row"><button className={listeningMode === "full" ? "mode-button active" : "mode-button"} onClick={() => { releasePlayback(); setListeningMode("full"); setListensCount(0); setListeningGists([]); setGistSentenceListenCounts([]); setGistAnsweredAfterListens([]); setGistHintedSentenceIndexes([]); setRapidCaptionListens(0); }}>Full audio</button><button className={listeningMode === "gist" ? "mode-button active" : "mode-button"} onClick={() => { releasePlayback(); setListeningMode("gist"); setListensCount(0); setTranscriptRevealStep(0); setListeningGists([]); setGistSentenceListenCounts([]); setGistAnsweredAfterListens([]); setGistHintedSentenceIndexes([]); setRapidCaptionListens(0); }}>Gist</button><button className={listeningMode === "rapid" ? "mode-button active" : "mode-button"} onClick={() => { releasePlayback(); setListeningMode("rapid"); setListensCount(0); setTranscriptRevealStep(0); setRapidCaptionListens(0); }}>Rapid captions</button><button className="secondary" disabled={generationBusy !== null} onClick={() => generatePractice("listening", "controlled")}>{generationBusy === "listening" ? "Generating…" : "Controlled"}</button><button className="primary" disabled={generationBusy !== null} onClick={() => generatePractice("listening", "transfer")}>{generationBusy === "listening" ? "Generating…" : "Fresh transfer"}</button></div></div>
+      <div className="card span-12 lab-header"><div><h2>Listening · 30-report cycle</h2><span className="muted">Full tests the report. Gist isolates meaning. Rapid Captions connects sound to Persian words.</span></div><div className="row"><select aria-label="Choose listening report" value={latestListening?.id ?? ""} onChange={(event) => resetListeningLab(event.target.value)}>{state.listeningItems.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select><button className={listeningMode === "full" ? "mode-button active" : "mode-button"} onClick={() => { releasePlayback(); setListeningMode("full"); setListensCount(0); setListeningGists([]); setGistSentenceListenCounts([]); setGistAnsweredAfterListens([]); setGistHintedSentenceIndexes([]); setRapidCaptionListens(0); }}>Full audio</button><button className={listeningMode === "gist" ? "mode-button active" : "mode-button"} onClick={() => { releasePlayback(); setListeningMode("gist"); setListensCount(0); setTranscriptRevealStep(0); setListeningGists([]); setGistSentenceListenCounts([]); setGistAnsweredAfterListens([]); setGistHintedSentenceIndexes([]); setRapidCaptionListens(0); }}>Gist</button><button className={listeningMode === "rapid" ? "mode-button active" : "mode-button"} onClick={() => { releasePlayback(); setListeningMode("rapid"); setListensCount(0); setTranscriptRevealStep(0); setRapidCaptionListens(0); }}>Rapid captions</button></div></div>
       {latestListening ? <>
         <div className="card span-7">
           <div className="muted">ILR ~{latestListening.ilrEstimate} · {latestListening.topic} · {latestListening.genre} · {latestListening.register}</div><h2>{latestListening.title}</h2><SourceLine item={latestListening} />
@@ -1592,22 +1569,17 @@ export default function Home() {
     </section>}
 
     {tab === "speaking" && <SpeakingLab
-      weekNumber={state.weekNumber}
       level={state.skillLevels.speaking}
-      targetWords={speakingWords}
-      latestPrompt={latestSpeakingPrompt}
-      onPrompt={addSpeakingPrompt}
+      prompts={state.speakingPrompts}
       onAttempt={addSpeakingAttempt}
       makeId={id}
     />}
 
-    {tab === "anki" && <AnkiWorkspace
-      settings={state.anki ?? emptyState.anki}
-      words={state.words}
-      onSettings={(anki) => setState((currentState) => ({ ...currentState, anki }))}
-      onWords={addAnkiWords}
-      onReviews={addAnkiReviews}
-    />}
+    {tab === "vocabulary" && <section className="grid">
+      <div className="card span-12"><div className="row spread"><div><h2>Fixed vocabulary bank</h2><p className="muted">94 DLI items from Chapter 4 through Chapter 5 Lesson 1, plus all 100 words from the current news-frequency sample.</p></div><span className="pill">194 total</span></div></div>
+      <div className="card span-6"><h2>DLI Chapter 4–5.1 · 94</h2><div className="word-list">{state.words.filter((word) => word.sourceType === "course").map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><span>{word.definition}</span><span>{word.courseLesson}</span></div>)}</div></div>
+      <div className="card span-6"><h2>News-frequency words · 100</h2><div className="word-list">{state.words.filter((word) => word.sourceType === "system_advanced").map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><span>{word.romanization ? `${word.romanization} · ` : ""}{word.definition}</span><span>BBC Persian + Iran International · 2,000-word sample</span></div>)}</div></div>
+    </section>}
 
     {tab === "analytics" && !showProgressDetails && <section className="guided-workspace"><div className="guided-overview">
       <span className="next-number">01</span><h2>Know why you&apos;re improving.</h2>
