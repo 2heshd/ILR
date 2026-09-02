@@ -1,0 +1,24 @@
+.sheet { max-width: 8.5in; margin: 24px auto; padding: .45in .55in; background: white; color: #111; font-family: Tahoma, Arial, sans-serif; font-size: 13pt; line-height: 1.9; }
+.header { border-bottom: 2px solid #111; padding-bottom: 12px; margin-bottom: 22px; }
+.title { margin: 0 0 8px; font-size: 22pt; }
+.meta { direction: ltr; text-align: left; color: #444; font: 10pt Arial, sans-serif; }
+.student { direction: ltr; display: flex; gap: 28px; margin-top: 14px; font: 11pt Arial, sans-serif; }
+.student span { flex: 1; border-bottom: 1px solid #555; padding-bottom: 2px; }
+.persianText { text-align: justify; font-size: 15pt; line-height: 2.15; }
+.heading { font-size: 15pt; margin: 24px 0 8px; }
+.targets { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 20px; }
+.targets span { border: 1px solid #777; border-radius: 12px; padding: 1px 9px; font-size: 11pt; }
+.question { break-inside: avoid; margin: 12px 0; }
+.question p { margin: 0; }
+.line { height: 26px; border-bottom: 1px solid #aaa; }
+.notes { break-before: page; }
+.footer { direction: ltr; text-align: left; color: #666; font: 9pt Arial, sans-serif; margin-top: 18px; }
+
+:global(.print-actions) { position: sticky; top: 0; z-index: 2; direction: ltr; display: flex; justify-content: center; gap: 10px; padding: 10px; background: #111; }
+:global(.print-actions button) { border: 1px solid #fff; border-radius: 7px; padding: 8px 14px; background: white; color: #111; font-weight: 700; cursor: pointer; }
+
+@page { size: letter; margin: .55in; }
+@media print {
+  .sheet { max-width: none; margin: 0; padding: 0; }
+  :global(.print-actions) { display: none; }
+}
