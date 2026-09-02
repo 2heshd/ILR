@@ -21,6 +21,13 @@ export default async function PrintableWorksheet({ params }: { params: Promise<{
 
   const text = "textFa" in item ? item.textFa : item.transcriptFa;
   const label = kind === "reading" ? "Reading report" : "Listening transcript";
+  const sentences = text.split(/(?<=[.!؟!])\s+/).filter(Boolean);
+  const englishQuestions: Record<string, string> = {
+    main_idea: "What is the main idea of this report?",
+    detail: "What important detail does the report give about the event?",
+    inference: "What can you reasonably infer from the information in the report?",
+    discourse: "How is the report organized?",
+  };
 
   return <>
     <PrintActions />
@@ -28,22 +35,19 @@ export default async function PrintableWorksheet({ params }: { params: Promise<{
       <header className={styles.header}>
         <div className={styles.meta}>GetCursos · {label} · ILR 1+ · {item.topic} · {item.genre}</div>
         <h1 className={styles.title}>{item.title}</h1>
-        <div className={styles.student}><span>Name</span><span>Date</span></div>
       </header>
       <main>
-        <section className={styles.persianText}>{text}</section>
-        <h2 className={styles.heading}>واژه‌های هدف</h2>
-        <div className={styles.targets}>{item.targetWords.map((word) => <span key={word}>{word}</span>)}</div>
-        <h2 className={styles.heading}>پرسش‌های درک مطلب</h2>
-        {item.questions.map((question, index) => <section className={styles.question} key={question.question}>
-          <p><strong>{index + 1}.</strong> {question.question}</p>
-          <div className={styles.line} /><div className={styles.line} />
-        </section>)}
-        <section className={styles.notes}>
-          <h2 className={styles.heading}>یادداشت‌ها</h2>
-          {Array.from({ length: 10 }, (_, index) => <div className={styles.line} key={index} />)}
+        <section className={styles.persianText}>{sentences.map((sentence, index) => <p className={styles.sentence} key={index}>{sentence}</p>)}</section>
+        <section className={styles.questions}>
+          <h2 className={styles.heading}>Questions</h2>
+          {item.questions.map((question, index) => <section className={styles.question} key={question.question}>
+            <p><strong>{index + 1}.</strong> {englishQuestions[question.type]}</p>
+          </section>)}
         </section>
-        <p className={styles.footer}>Generated practice material · GetCursos two-week DLI/news cycle</p>
+        <section className={styles.notes}>
+          <h2 className={styles.heading}>Notes</h2>
+          <div className={styles.notesSpace} />
+        </section>
       </main>
     </article>
   </>;
