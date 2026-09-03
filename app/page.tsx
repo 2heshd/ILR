@@ -1608,9 +1608,10 @@ export default function Home() {
     />}
 
     {tab === "vocabulary" && <section className="grid">
-      <div className="card span-12"><div className="row spread"><div><h2>Fixed vocabulary bank</h2><p className="muted">94 DLI items from Chapter 4 through Chapter 5 Lesson 1, plus all 100 words from the current news-frequency sample.</p></div><span className="pill">194 total</span></div></div>
+      <div className="card span-12"><div className="row spread"><div><h2>Vocabulary bank</h2><p className="muted">Course, news-frequency, and personally researched words share one bank and feed reviews, readings, and listenings.</p></div><span className="pill">{state.words.length} total</span></div></div>
       <div className="card span-6"><h2>DLI Chapter 4–5.1 · 94</h2><div className="word-list">{state.words.filter((word) => word.sourceType === "course").map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><span>{word.definition}</span><span>{word.courseLesson}</span></div>)}</div></div>
       <div className="card span-6"><h2>News-frequency words · 100</h2><div className="word-list">{state.words.filter((word) => word.sourceType === "system_advanced").map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><span>{word.romanization ? `${word.romanization} · ` : ""}{word.definition}</span><span>BBC Persian + Iran International · 2,000-word sample</span></div>)}</div></div>
+      <div className="card span-12"><h2>My words · {state.words.filter((word) => word.sourceType === "user").length}</h2><div className="word-list single">{state.words.filter((word) => word.sourceType === "user").map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><span>{word.romanization ? `${word.romanization} · ` : ""}{word.definition}</span><span>{word.topic || "Personal vocabulary"}</span></div>)}</div>{!state.words.some((word) => word.sourceType === "user") && <div className="empty">Words researched in Asl will appear here.</div>}</div>
     </section>}
 
     {tab === "analytics" && !showProgressDetails && <section className="guided-workspace"><div className="guided-overview">
