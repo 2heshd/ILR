@@ -45,6 +45,7 @@ const PERSIAN_WORD_PATTERN = /([\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06FA-\u
 const IS_PERSIAN_WORD = /^[\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06FA-\u06FC\u200C]+$/;
 const SYNAPTX_URL = process.env.NEXT_PUBLIC_SYNAPTX_URL ?? "http://localhost:3002";
 const ASL_URL = process.env.NEXT_PUBLIC_ASL_URL ?? "http://localhost:3000";
+const NEWS_CATALOG = curatedVocabulary().filter((word) => word.sourceType === "system_advanced");
 
 function syntaxUrl(sentence: string) {
   const params = new URLSearchParams({ sentence, language: "fa" });
@@ -79,7 +80,7 @@ const emptyState: StudyState = {
   skillLevels: { reading: 1, listening: 1, speaking: 1 },
   course: { catalogId: COURSE_META.id, sourceFile: COURSE_META.sourceFile, importedWeeks: [] },
   anki: { endpoint: "http://127.0.0.1:8765", deckName: "" },
-  words: curatedVocabulary(),
+  words: [],
   reviews: [],
   passages: curatedPassages(),
   passageAttempts: [],
@@ -96,16 +97,10 @@ function id() {
 type TimedCaption = { word: string; start: number; end: number };
 
 function hydrateState(raw: Partial<StudyState> | null | undefined): StudyState {
-  const seededWords = curatedVocabulary();
   const seededPassages = curatedPassages();
   const seededListening = curatedListeningItems();
   const seededSpeaking = curatedSpeakingPrompts();
-  const savedWords = new Map((raw?.words ?? []).map((word) => [word.id, word]));
-  const seededIds = new Set(seededWords.map((word) => word.id));
-  const mergedWords = [
-    ...seededWords.map((word) => ({ ...word, ...(savedWords.get(word.id) ?? {}), displayForm: word.displayForm, normalizedForm: word.normalizedForm, definition: word.definition, romanization: word.romanization, sourceType: word.sourceType, courseLesson: word.courseLesson, topic: word.topic })),
-    ...(raw?.words ?? []).filter((word) => !seededIds.has(word.id)),
-  ];
+  const mergedWords = raw?.words ?? [];
   const wordIds = new Set(mergedWords.map((word) => word.id));
   const passageIds = new Set(seededPassages.map((item) => item.id));
   const listeningIds = new Set(seededListening.map((item) => item.id));
@@ -266,6 +261,8 @@ export default function Home() {
   const [catalogLesson, setCatalogLesson] = useState("");
   const [catalogQuery, setCatalogQuery] = useState("");
   const [selectedCourseEntries, setSelectedCourseEntries] = useState<Set<number>>(new Set());
+  const [newsQuery, setNewsQuery] = useState("");
+  const [selectedNewsEntries, setSelectedNewsEntries] = useState<Set<string>>(new Set());
   const [generationBusy, setGenerationBusy] = useState<"reading" | "listening" | null>(null);
   const [audioBusy, setAudioBusy] = useState(false);
   const [input, setInput] = useState("");
@@ -895,6 +892,35 @@ export default function Home() {
     setStatus(`${addable.length} course ${addable.length === 1 ? "word" : "words"} added${addable.length < chosen.length ? ` · ${chosen.length - addable.length} already in your bank` : ""}.`);
   }
 
+  function addSelectedNewsWords() {
+    const chosen = NEWS_CATALOG.filter((word) => selectedNewsEntries.has(word.id));
+    const existing = new Set(state.words.map((word) => courseWordKey(word.displayForm)));
+    const addable = chosen.filter((word) => {
+      const key = courseWordKey(word.displayForm);
+      if (!key || existing.has(key)) return false;
+      existing.add(key);
+      return true;
+    });
+    setState((currentState) => {
+      const currentKeys = new Set(currentState.words.map((word) => courseWordKey(word.displayForm)));
+      const now = new Date();
+      const incoming = addable.filter((word) => !currentKeys.has(courseWordKey(word.displayForm))).map((word): LexicalItem => {
+        const fsrsCard = createSerializedCard(now);
+        return {
+          ...word,
+          id: id(),
+          introducedAt: now.toISOString(),
+          dueAt: fsrsCard.due,
+          fsrsCard,
+          modalityCards: { visual: fsrsCard, audio: fsrsCard, cloze: fsrsCard },
+        };
+      });
+      return { ...currentState, words: [...currentState.words, ...incoming] };
+    });
+    setSelectedNewsEntries(new Set());
+    setStatus(`${addable.length} news ${addable.length === 1 ? "word" : "words"} added${addable.length < chosen.length ? ` · ${chosen.length - addable.length} already in your bank` : ""}.`);
+  }
+
   function reveal() {
     setResponseMs(Date.now() - startRef.current);
     setRevealed(true);
@@ -1486,6 +1512,9 @@ export default function Home() {
     && (!normalizedCatalogQuery || `${entry.fa} ${entry.en}`.toLocaleLowerCase().includes(normalizedCatalogQuery))
   ));
   const bankCourseKeys = new Set(state.words.filter((word) => word.sourceType === "course").map((word) => courseWordKey(word.displayForm)));
+  const allBankKeys = new Set(state.words.map((word) => courseWordKey(word.displayForm)));
+  const normalizedNewsQuery = newsQuery.trim().toLocaleLowerCase();
+  const visibleNewsEntries = NEWS_CATALOG.filter((word) => !normalizedNewsQuery || `${word.displayForm} ${word.definition ?? ""} ${word.romanization ?? ""}`.toLocaleLowerCase().includes(normalizedNewsQuery));
   const inferenceSentenceCount = latestPassage ? persianSentences(latestPassage.textFa).length : 0;
   const inferenceReady = readingMode !== "inference"
     || (sentenceGists.length === inferenceSentenceCount && sentenceGists.every((gist) => gist.trim()));
@@ -1626,7 +1655,7 @@ export default function Home() {
               <div className="row"><button className="danger" onClick={() => rateKnown(false)}>I was wrong</button><button className="primary" onClick={() => rateKnown(true)}>I was right</button></div>
             </>}
           </>}
-        </> : !currentCourseWeekImported ? <div className="next-action course-ready"><span className="next-number">01</span><h3>Start Unit 1.</h3><p>Week {state.weekNumber} contains {currentCourseWordCount} entries from {currentCourseLessonCount} lesson lists. Introductory-unit vocabulary has been removed. Every word becomes available immediately, with no daily cap.</p><div className="course-ready-meta"><span>{COURSE_META.entries.toLocaleString()} course entries</span><span>{COURSE_META.lessonLists} lesson lists</span><span>{COURSE_META.weeks} weeks</span></div><button className="primary" onClick={() => void importCourseWeek()} disabled={courseBusy}>{courseBusy ? "Preparing…" : state.weekNumber === 1 ? "Start Unit 1" : `Start Week ${state.weekNumber}`}</button></div> : state.words.length ? <div className="next-action"><h3>You&apos;re caught up.</h3><p>Choose Reading or Listening from the menu for your next session.</p></div> : <div className="next-action"><span className="next-number">01</span><h3>Add your first words.</h3><p>Add vocabulary manually to create your review schedule.</p><button className="primary" onClick={() => setShowIntake(true)}>Add words</button></div>}
+        </> : !currentCourseWeekImported ? <div className="next-action course-ready"><span className="next-number">01</span><h3>Start Week {state.weekNumber}.</h3><p>This week contains {currentCourseWordCount} entries from {currentCourseLessonCount} original ChiMishe lesson lists. Every word becomes available immediately, with no daily cap.</p><div className="course-ready-meta"><span>{COURSE_META.entries.toLocaleString()} course entries</span><span>{COURSE_META.lessonLists} lesson lists</span><span>{COURSE_META.weeks} weeks</span></div><button className="primary" onClick={() => void importCourseWeek()} disabled={courseBusy}>{courseBusy ? "Preparing…" : `Start Week ${state.weekNumber}`}</button></div> : state.words.length ? <div className="next-action"><h3>You&apos;re caught up.</h3><p>Choose Reading or Listening from the menu for your next session.</p></div> : <div className="next-action"><span className="next-number">01</span><h3>Add your first words.</h3><p>Add vocabulary manually to create your review schedule.</p><button className="primary" onClick={() => setShowIntake(true)}>Add words</button></div>}
       </div>
 
       <div className="card span-5 dashboard-secondary">
@@ -1730,7 +1759,7 @@ export default function Home() {
         {courseCatalog.length > 0 && !visibleCatalogEntries.length && <div className="empty">No words match this search.</div>}
       </div>
       <div className="card span-6"><h2>Course words · {state.words.filter((word) => word.sourceType === "course").length}</h2><div className="word-list single bank-list">{state.words.filter((word) => word.sourceType === "course").map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><span>{word.definition}</span><span>{word.courseLesson}</span></div>)}</div></div>
-      <div className="card span-6"><h2>News-frequency words · {state.words.filter((word) => word.sourceType === "system_advanced").length}</h2><p className="muted">100 frequent terms drawn from a 2,000-token BBC Persian and Iran International sample.</p><div className="word-list single bank-list">{state.words.filter((word) => word.sourceType === "system_advanced").map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><span>{word.romanization ? `${word.romanization} · ` : ""}{word.definition}</span></div>)}</div></div>
+      <div className="card span-6 news-catalog"><h2>News-frequency catalog · {NEWS_CATALOG.length}</h2><p className="muted">Frequent terms drawn from a 2,000-token BBC Persian and Iran International sample. Choose only the words you want active.</p><label className="catalog-search"><span>Find a news word</span><input value={newsQuery} onChange={(event) => setNewsQuery(event.target.value)} placeholder="Persian, English, or transliteration" /></label><div className="catalog-selection row spread"><span>{visibleNewsEntries.length} shown · {selectedNewsEntries.size} selected</span><div className="row"><button className="text-button" onClick={() => setSelectedNewsEntries(new Set(visibleNewsEntries.filter((word) => !allBankKeys.has(courseWordKey(word.displayForm))).map((word) => word.id)))}>Select shown</button><button className="primary" disabled={!selectedNewsEntries.size} onClick={addSelectedNewsWords}>Add selected</button></div></div><div className="catalog-list news-list">{visibleNewsEntries.map((word) => { const alreadyAdded = allBankKeys.has(courseWordKey(word.displayForm)); return <label className={`catalog-word${alreadyAdded ? " added" : ""}`} key={word.id}><input type="checkbox" checked={alreadyAdded || selectedNewsEntries.has(word.id)} disabled={alreadyAdded} onChange={() => setSelectedNewsEntries((current) => { const next = new Set(current); if (next.has(word.id)) next.delete(word.id); else next.add(word.id); return next; })} /><strong>{word.displayForm}</strong><span>{word.romanization ? `${word.romanization} · ` : ""}{word.definition}</span><small>{alreadyAdded ? "In your bank" : "News"}</small></label>; })}</div></div>
       <div className="card span-12"><h2>My words · {state.words.filter((word) => word.sourceType === "user").length}</h2><div className="word-list single">{state.words.filter((word) => word.sourceType === "user").map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><span>{word.romanization ? `${word.romanization} · ` : ""}{word.definition}</span><span>{word.topic || "Personal vocabulary"}</span><a className="inspect-word" href={morphologyUrl(word.displayForm)} target="_blank" rel="noreferrer">Inspect morphology in Synaptx ↗</a></div>)}</div>{!state.words.some((word) => word.sourceType === "user") && <div className="empty">Words researched in Asl will appear here.</div>}</div>
     </section>}
 

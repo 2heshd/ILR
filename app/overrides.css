@@ -42,6 +42,22 @@
   text-transform: none;
 }
 
+.catalog-search {
+  display: grid;
+  gap: 7px;
+  margin-top: 22px;
+  color: var(--dim);
+  font-size: 10px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.catalog-search input {
+  width: 100%;
+  padding: 9px 0;
+  text-transform: none;
+}
+
 .catalog-selection {
   padding-block: 10px;
   color: var(--dim);
@@ -95,6 +111,10 @@
 .bank-list {
   max-height: 520px;
   overflow: auto;
+}
+
+.news-list {
+  grid-template-columns: 1fr;
 }
 
 @media (max-width: 820px) {
