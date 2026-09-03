@@ -67,6 +67,7 @@ test("reading and listening generation are constrained to learner-selected vocab
   assert.match(route, /reasoning: \{ effort: isPractice \? "low" : "none" \}/u);
   assert.match(route, /REPAIR THE PREVIOUS DRAFT/u);
   assert.match(route, /status: 422/u);
+  assert.match(route, /suggestedWords: violations\.slice\(0, 8\)/u);
   assert.match(pageSource, /if \(!state\.words\.length\)/u);
   assert.match(pageSource, /selectedContextKeys/u);
 });

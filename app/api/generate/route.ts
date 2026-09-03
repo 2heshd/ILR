@@ -132,7 +132,11 @@ Return this exact shape:
         violations = unselectedContentWords(String(data.textFa ?? ""), selectedVocabulary);
       }
       if (violations.length) {
-        return NextResponse.json({ error: "The selected words could not form a natural closed-vocabulary passage. Add a few more useful verbs or nouns and try again." }, { status: 422 });
+        const suggestions = violations.slice(0, 8).join("، ");
+        return NextResponse.json({
+          error: `The selected words could not form a natural closed-vocabulary passage. Add these words to your bank or choose more vocabulary: ${suggestions}.`,
+          suggestedWords: violations.slice(0, 8),
+        }, { status: 422 });
       }
     }
 
