@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { dedupeLexicalWords } from "../lib/word-merge.js";
 
 const course = JSON.parse(await readFile(new URL("../data/course-vocabulary.json", import.meta.url), "utf8"));
 const cycle = JSON.parse(await readFile(new URL("../data/curated-cycle.json", import.meta.url), "utf8"));
@@ -36,4 +37,19 @@ test("new learners choose vocabulary instead of receiving the pilot bank", () =>
   assert.doesNotMatch(pageSource, /words:\s*curatedVocabulary\(\)/u);
   assert.match(pageSource, /NEWS_CATALOG/u);
   assert.match(pageSource, /Add selected/u);
+});
+
+test("shared vocabulary merges by normalized Persian form without losing review references", () => {
+  const result = dedupeLexicalWords([
+    { id: "cloud", displayForm: "تعليم", normalizedForm: "تعليم", definition: "education", reviews: 4, correct: 3, lapses: 1 },
+    { id: "asl", displayForm: "تعلیم", normalizedForm: "تعلیم", romanization: "taʿlīm", topic: "Asl derivation", reviews: 0, correct: 0, lapses: 0 },
+  ]);
+
+  assert.equal(result.words.length, 1);
+  assert.equal(result.words[0].id, "cloud");
+  assert.equal(result.words[0].normalizedForm, "تعلیم");
+  assert.equal(result.words[0].definition, "education");
+  assert.equal(result.words[0].romanization, "taʿlīm");
+  assert.equal(result.words[0].reviews, 4);
+  assert.equal(result.aliases.get("asl"), "cloud");
 });

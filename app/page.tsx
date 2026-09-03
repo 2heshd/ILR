@@ -20,6 +20,7 @@ import { normalizePersian, parseWeeklyInput } from "@/lib/persian";
 import { isMeaningfulPersianText, sanitizePersianSpeechText } from "@/lib/persian-speech";
 import { sourceMetrics } from "@/lib/source-analytics";
 import { appendCloudReview, getSupabaseClient, loadCloudState, loadPlatformVocabulary, loadUsername, mergePlatformVocabulary, mergeStudyStates, saveCloudState, syncPlatformVocabulary, updateUsername } from "@/lib/supabase";
+import { dedupeLexicalWords } from "@/lib/word-merge";
 import type {
   ComprehensionGrade,
   LexicalItem,
@@ -100,7 +101,7 @@ function hydrateState(raw: Partial<StudyState> | null | undefined): StudyState {
   const seededPassages = curatedPassages();
   const seededListening = curatedListeningItems();
   const seededSpeaking = curatedSpeakingPrompts();
-  const mergedWords = raw?.words ?? [];
+  const { words: mergedWords, aliases: wordAliases } = dedupeLexicalWords(raw?.words ?? []);
   const wordIds = new Set(mergedWords.map((word) => word.id));
   const passageIds = new Set(seededPassages.map((item) => item.id));
   const listeningIds = new Set(seededListening.map((item) => item.id));
@@ -122,7 +123,10 @@ function hydrateState(raw: Partial<StudyState> | null | undefined): StudyState {
     },
     anki: { ...emptyState.anki, ...(raw?.anki ?? {}) },
     words: mergedWords,
-    reviews: (raw?.reviews ?? []).filter((review) => wordIds.has(review.lexicalItemId)),
+    reviews: [...new Map((raw?.reviews ?? [])
+      .map((review) => ({ ...review, lexicalItemId: wordAliases.get(review.lexicalItemId) ?? review.lexicalItemId }))
+      .filter((review) => wordIds.has(review.lexicalItemId))
+      .map((review) => [review.id, review] as const)).values()],
     passages: seededPassages,
     passageAttempts: (raw?.passageAttempts ?? []).filter((attempt) => passageIds.has(attempt.passageId)).map((attempt) => ({ ...attempt, firstPass: attempt.firstPass ?? true })),
     listeningItems: seededListening,
