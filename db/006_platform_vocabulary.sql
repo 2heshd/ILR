@@ -21,6 +21,7 @@ create index if not exists platform_vocabulary_user_time_idx
   on public.platform_vocabulary(user_id, created_at desc);
 
 alter table public.platform_vocabulary enable row level security;
+alter table public.platform_vocabulary replica identity full;
 
 drop policy if exists "own vocabulary select" on public.platform_vocabulary;
 drop policy if exists "own vocabulary insert" on public.platform_vocabulary;

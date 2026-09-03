@@ -17,6 +17,7 @@ import { COURSE_META, loadCourseCatalog, loadCourseWeek, type CourseVocabularyEn
 import { curatedListeningItems, curatedPassages, curatedSpeakingPrompts } from "@/lib/curated-cycle";
 import { createSerializedCard, reviewFsrs } from "@/lib/fsrs";
 import { NEWS_META, newsVocabulary } from "@/lib/news";
+import { removeDeletedSharedWord } from "@/lib/word-merge.js";
 import { normalizePersian, parseWeeklyInput } from "@/lib/persian";
 import { isMeaningfulPersianText, sanitizePersianSpeechText } from "@/lib/persian-speech";
 import { sourceMetrics } from "@/lib/source-analytics";
@@ -533,7 +534,14 @@ export default function Home() {
         schema: "public",
         table: "platform_vocabulary",
         filter: `user_id=eq.${cloudUser.id}`,
-      }, () => {
+      }, (payload) => {
+        if (payload.eventType === "DELETE") {
+          setState((current) => ({
+            ...current,
+            words: removeDeletedSharedWord(current.words, payload.old),
+          }));
+          return;
+        }
         void loadPlatformVocabulary(client, cloudUser)
           .then((sharedWords) => setState((current) => hydrateState(mergePlatformVocabulary(current, sharedWords))))
           .catch((error) => console.error("Shared vocabulary refresh failed", error));

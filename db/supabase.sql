@@ -80,6 +80,7 @@ alter table public.study_snapshots enable row level security;
 alter table public.review_events enable row level security;
 alter table public.profiles enable row level security;
 alter table public.platform_vocabulary enable row level security;
+alter table public.platform_vocabulary replica identity full;
 
 drop policy if exists "own snapshot select" on public.study_snapshots;
 drop policy if exists "own snapshot insert" on public.study_snapshots;

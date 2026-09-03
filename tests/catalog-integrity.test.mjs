@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { selectContextWords } from "../lib/adaptive.ts";
-import { dedupeLexicalWords } from "../lib/word-merge.js";
+import { dedupeLexicalWords, removeDeletedSharedWord } from "../lib/word-merge.js";
 
 const course = JSON.parse(await readFile(new URL("../data/course-vocabulary.json", import.meta.url), "utf8"));
 const cycle = JSON.parse(await readFile(new URL("../data/curated-cycle.json", import.meta.url), "utf8"));
@@ -72,6 +72,18 @@ test("shared vocabulary merges by normalized Persian form without losing review 
   assert.equal(result.words[0].romanization, "taʿlīm");
   assert.equal(result.words[0].reviews, 4);
   assert.equal(result.aliases.get("asl"), "cloud");
+});
+
+test("a shared-bank deletion removes only the matching personal word", () => {
+  const words = [
+    { id: "personal", displayForm: "تعلیم", normalizedForm: "تعلیم", sourceType: "user" },
+    { id: "course-copy", displayForm: "تعليم", normalizedForm: "تعليم", sourceType: "course" },
+    { id: "other", displayForm: "تدریس", normalizedForm: "تدریس", sourceType: "user" },
+  ];
+
+  const result = removeDeletedSharedWord(words, { normalized_form: "تَعْلِيم" });
+
+  assert.deepEqual(result.map((word) => word.id), ["course-copy", "other"]);
 });
 
 test("a newly added Asl word enters the context pool used by readings and listenings", () => {
