@@ -72,12 +72,16 @@ export async function POST(request: Request) {
   } else {
     const mode = body.kind === "reading" ? "reading" : "listening";
     const level = Math.max(1, Math.min(4, body.targetIlr ?? 1));
-    const sentenceCount = level === 1 ? "5-6" : level === 2 ? "6-8" : level === 3 ? "8-10" : "9-11";
     const transfer = body.practiceMode === "transfer";
     const selectedVocabulary = [...new Set((body.targetWords ?? []).map((word) => word.trim()).filter(Boolean))];
     if (!selectedVocabulary.length) {
       return NextResponse.json({ error: "Choose vocabulary before generating practice." }, { status: 400 });
     }
+    const sentenceCount = selectedVocabulary.length < 8
+      ? "2-3"
+      : selectedVocabulary.length < 20
+        ? "3-4"
+        : level === 1 ? "5-6" : level === 2 ? "6-8" : level === 3 ? "8-10" : "9-11";
     prompt = `Create one Persian ${mode} practice item at the learner's selected proficiency level. Return JSON only.
 
 Target ILR difficulty: ${body.targetIlr ?? 1}
@@ -92,7 +96,8 @@ Requirements:
 - never use an infinitive ending in کردن, شدن, دادن, گرفتن, داشتن, or بودن as a finite sentence predicate; use the appropriate Persian finite form instead
 - silently revise the Persian before returning it so every sentence is idiomatic and grammatically complete; selected-only vocabulary must never produce broken Persian
 - do not introduce, target, or list any unselected vocabulary; newWordsIntroduced must be []
-- ${transfer ? "do not repeat a memorized or previously supplied passage; freshness must come from the situation and syntax, not new vocabulary" : "use selected words naturally and repeatedly"}
+- ${transfer ? "do not repeat a memorized or previously supplied passage; freshness must come from the situation and syntax, not new vocabulary" : "use as many selected words as fit naturally, but never force awkward repetition merely to increase coverage"}
+- prefer a shorter, clear, idiomatic passage over a longer passage with unnatural combinations of the selected words
 - use familiar daily-life situations at Level 1 and progressively use formal news, government, economics, policy, diplomacy, security, or social situations at higher levels, but never add vocabulary outside the selected bank
 - include discourse relations and inference opportunities appropriate to the selected level
 - avoid English inside the Persian passage
