@@ -1,15 +1,17 @@
 # Cursos
 
-Adaptive Persian/Farsi learning system for a 35-week intensive course beginning at Unit 1, with independently selectable levels 1–4 for reading, listening, and speaking.
+Adaptive Persian/Farsi learning system for the 36-week ChiMishe course catalog, with independently selectable levels 1–4 for reading, listening, and speaking.
 
 The distilled Deep Research requirements live in [`docs/MASTER_SPEC.md`](docs/MASTER_SPEC.md) and are the implementation source of truth.
 
 ## What the app does now
 
-- imports required weekly course vocabulary in one paste
+- includes all 6,060 ChiMishe entries across 154 lesson lists and 36 weeks
+- lets learners browse by week and unit/chapter lesson, search, select individual words, or add a complete week
 - normalizes Persian spelling variants and blocks duplicates
 - fills missing English definitions + romanization when AI is configured
 - adds exactly **5 advanced government/politics/economics/security/diplomacy terms** per week without repeating learned items
+- includes a starter news-frequency bank of 100 unique terms derived from a 2,000-token BBC Persian and Iran International sample
 - schedules vocabulary with **FSRS** rather than fixed intervals
 - measures retrieval latency and turns a correct response into an automatic Easy/Good/Hard grade based on speed
 - keeps vocabulary recall to two decisions: **Reveal → I was right / I was wrong**
