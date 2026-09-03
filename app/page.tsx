@@ -19,7 +19,7 @@ import { createSerializedCard, reviewFsrs } from "@/lib/fsrs";
 import { normalizePersian, parseWeeklyInput } from "@/lib/persian";
 import { isMeaningfulPersianText, sanitizePersianSpeechText } from "@/lib/persian-speech";
 import { sourceMetrics } from "@/lib/source-analytics";
-import { appendCloudReview, getSupabaseClient, loadCloudState, loadUsername, mergeStudyStates, saveCloudState, updateUsername } from "@/lib/supabase";
+import { appendCloudReview, getSupabaseClient, loadCloudState, loadPlatformVocabulary, loadUsername, mergePlatformVocabulary, mergeStudyStates, saveCloudState, syncPlatformVocabulary, updateUsername } from "@/lib/supabase";
 import type {
   ComprehensionGrade,
   LexicalItem,
@@ -471,11 +471,16 @@ export default function Home() {
       try {
         const cloud = await loadCloudState(supabase!, user);
         if (!active) return;
+        const sharedWords = await loadPlatformVocabulary(supabase!, user);
         if (cloud) {
-          const merged = hydrateState(mergeStudyStates(hydrateState(cloud), local));
+          const merged = hydrateState(mergePlatformVocabulary(mergeStudyStates(hydrateState(cloud), local), sharedWords));
           setState(merged);
           await saveCloudState(supabase!, user, merged);
-        } else await saveCloudState(supabase!, user, local);
+        } else {
+          const merged = hydrateState(mergePlatformVocabulary(local, sharedWords));
+          setState(merged);
+          await saveCloudState(supabase!, user, merged);
+        }
         setCloudUsername(await loadUsername(supabase!, user));
         setCloudReady(true);
       } catch (error) {
@@ -505,13 +510,33 @@ export default function Home() {
   useEffect(() => () => releasePlayback(), []);
 
   useEffect(() => {
+    if (!cloudUser) return;
+    const client = getSupabaseClient();
+    if (!client) return;
+    const channel = client
+      .channel(`platform-vocabulary-${cloudUser.id}`)
+      .on("postgres_changes", {
+        event: "*",
+        schema: "public",
+        table: "platform_vocabulary",
+        filter: `user_id=eq.${cloudUser.id}`,
+      }, () => {
+        void loadPlatformVocabulary(client, cloudUser)
+          .then((sharedWords) => setState((current) => hydrateState(mergePlatformVocabulary(current, sharedWords))))
+          .catch((error) => console.error("Shared vocabulary refresh failed", error));
+      })
+      .subscribe();
+    return () => { void client.removeChannel(channel); };
+  }, [cloudUser]);
+
+  useEffect(() => {
     if (!loaded) return;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     if (!cloudUser || !cloudReady) return;
     const client = getSupabaseClient();
     if (!client) return;
     const timer = window.setTimeout(() => {
-      saveCloudState(client, cloudUser, state).catch((error) => {
+      Promise.all([saveCloudState(client, cloudUser, state), syncPlatformVocabulary(client, cloudUser, state.words)]).catch((error) => {
         console.error(error);
         setStatus("Cloud save failed; local history remains available.");
       });

@@ -1,7 +1,7 @@
 "use client";
 
 import { createClient, type SupabaseClient, type User } from "@supabase/supabase-js";
-import type { StudyState } from "./types";
+import type { LexicalItem, StudyState } from "./types";
 
 let singleton: SupabaseClient | null | undefined;
 
@@ -29,6 +29,102 @@ export async function loadCloudState(client: SupabaseClient, user: User): Promis
     .maybeSingle();
   if (error) throw error;
   return (data?.state as StudyState | undefined) ?? null;
+}
+
+type PlatformVocabularyRow = {
+  id: string;
+  display_form: string;
+  normalized_form: string;
+  definition: string | null;
+  romanization: string | null;
+  source_platform: string;
+  source_context: string | null;
+  source_week: number;
+  created_at: string;
+};
+
+function missingPlatformTable(error: { code?: string } | null) {
+  return error?.code === "42P01" || error?.code === "PGRST205";
+}
+
+function rowToLexicalItem(row: PlatformVocabularyRow): LexicalItem {
+  return {
+    id: row.id,
+    displayForm: row.display_form,
+    normalizedForm: row.normalized_form,
+    definition: row.definition ?? undefined,
+    romanization: row.romanization ?? undefined,
+    sourceType: "user",
+    sourceWeek: Math.max(1, Number(row.source_week) || 1),
+    tier: "B",
+    knowledgeState: "learning",
+    topic: row.source_context || `${row.source_platform || "shared"} vocabulary`,
+    introducedAt: row.created_at,
+    reviews: 0,
+    correct: 0,
+    lapses: 0,
+    dueAt: row.created_at,
+  };
+}
+
+export async function loadPlatformVocabulary(client: SupabaseClient, user: User): Promise<LexicalItem[]> {
+  const { data, error } = await client
+    .from("platform_vocabulary")
+    .select("id,display_form,normalized_form,definition,romanization,source_platform,source_context,source_week,created_at")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: true });
+  if (missingPlatformTable(error)) return [];
+  if (error) throw error;
+  return ((data ?? []) as PlatformVocabularyRow[]).map(rowToLexicalItem);
+}
+
+export function mergePlatformVocabulary(state: StudyState, sharedWords: LexicalItem[]): StudyState {
+  if (!sharedWords.length) return state;
+  const words = [...state.words];
+  const indexes = new Map(words.map((word, index) => [word.normalizedForm, index]));
+  let changed = false;
+  for (const shared of sharedWords) {
+    const index = indexes.get(shared.normalizedForm);
+    if (index === undefined) {
+      indexes.set(shared.normalizedForm, words.length);
+      words.push(shared);
+      changed = true;
+    } else if (words[index].sourceType === "user") {
+      const current = words[index];
+      const merged = {
+        ...shared,
+        ...current,
+        displayForm: shared.displayForm,
+        normalizedForm: shared.normalizedForm,
+        definition: shared.definition || current.definition,
+        romanization: shared.romanization || current.romanization,
+        topic: shared.topic || current.topic,
+      };
+      if (merged.displayForm !== current.displayForm || merged.definition !== current.definition || merged.romanization !== current.romanization || merged.topic !== current.topic) {
+        words[index] = merged;
+        changed = true;
+      }
+    }
+  }
+  return changed ? { ...state, words } : state;
+}
+
+export async function syncPlatformVocabulary(client: SupabaseClient, user: User, words: LexicalItem[]) {
+  const rows = words.filter((word) => word.sourceType === "user").map((word) => ({
+    user_id: user.id,
+    display_form: word.displayForm,
+    normalized_form: word.normalizedForm,
+    definition: word.definition ?? null,
+    romanization: word.romanization ?? null,
+    source_platform: word.topic === "Asl derivation" ? "asl" : "cursos",
+    source_context: word.topic ?? "Personal vocabulary",
+    source_week: Math.max(1, Number(word.sourceWeek) || 1),
+    updated_at: new Date().toISOString(),
+  }));
+  if (!rows.length) return;
+  const { error } = await client.from("platform_vocabulary").upsert(rows, { onConflict: "user_id,normalized_form" });
+  if (missingPlatformTable(error)) return;
+  if (error) throw error;
 }
 
 export async function loadUsername(client: SupabaseClient, user: User): Promise<string | null> {
