@@ -89,7 +89,12 @@ function hydrateState(raw: Partial<StudyState> | null | undefined): StudyState {
   const seededListening = curatedListeningItems();
   const seededSpeaking = curatedSpeakingPrompts();
   const savedWords = new Map((raw?.words ?? []).map((word) => [word.id, word]));
-  const wordIds = new Set(seededWords.map((word) => word.id));
+  const seededIds = new Set(seededWords.map((word) => word.id));
+  const mergedWords = [
+    ...seededWords.map((word) => ({ ...word, ...(savedWords.get(word.id) ?? {}), displayForm: word.displayForm, normalizedForm: word.normalizedForm, definition: word.definition, romanization: word.romanization, sourceType: word.sourceType, courseLesson: word.courseLesson, topic: word.topic })),
+    ...(raw?.words ?? []).filter((word) => !seededIds.has(word.id)),
+  ];
+  const wordIds = new Set(mergedWords.map((word) => word.id));
   const passageIds = new Set(seededPassages.map((item) => item.id));
   const listeningIds = new Set(seededListening.map((item) => item.id));
   const speakingIds = new Set(seededSpeaking.map((item) => item.id));
@@ -109,7 +114,7 @@ function hydrateState(raw: Partial<StudyState> | null | undefined): StudyState {
       importedWeeks: [1],
     },
     anki: { ...emptyState.anki, ...(raw?.anki ?? {}) },
-    words: seededWords.map((word) => ({ ...word, ...(savedWords.get(word.id) ?? {}), displayForm: word.displayForm, normalizedForm: word.normalizedForm, definition: word.definition, romanization: word.romanization, sourceType: word.sourceType, courseLesson: word.courseLesson, topic: word.topic })),
+    words: mergedWords,
     reviews: (raw?.reviews ?? []).filter((review) => wordIds.has(review.lexicalItemId)),
     passages: seededPassages,
     passageAttempts: (raw?.passageAttempts ?? []).filter((attempt) => passageIds.has(attempt.passageId)).map((attempt) => ({ ...attempt, firstPass: attempt.firstPass ?? true })),
@@ -502,6 +507,33 @@ export default function Home() {
     }, 700);
     return () => window.clearTimeout(timer);
   }, [state, loaded, cloudUser, cloudReady]);
+
+  useEffect(() => {
+    if (!loaded) return;
+    const params = new URLSearchParams(window.location.search);
+    const displayForm = params.get("add_word")?.trim();
+    if (!displayForm) return;
+    const normalizedForm = normalizePersian(displayForm);
+    const definition = params.get("definition")?.trim() || undefined;
+    const romanization = params.get("romanization")?.trim() || undefined;
+    setState((currentState) => {
+      if (currentState.words.some((word) => word.normalizedForm === normalizedForm)) return currentState;
+      const now = new Date();
+      const fsrsCard = createSerializedCard(now);
+      const word: LexicalItem = {
+        id: id(), displayForm, normalizedForm, definition, romanization,
+        sourceType: "user", sourceWeek: currentState.weekNumber, tier: "B",
+        knowledgeState: "learning", topic: "Asl derivation",
+        introducedAt: now.toISOString(), reviews: 0, correct: 0, lapses: 0,
+        dueAt: fsrsCard.due, fsrsCard,
+        modalityCards: { visual: fsrsCard, audio: fsrsCard, cloze: fsrsCard },
+      };
+      return { ...currentState, words: [...currentState.words, word] };
+    });
+    setTab("vocabulary");
+    setStatus(`${displayForm} is in your Cursos vocabulary bank and can now appear in reviews, readings, and listenings.`);
+    window.history.replaceState({}, "", window.location.pathname);
+  }, [loaded]);
 
   const successfullyReviewedToday = useMemo(() => {
     const today = new Date().toDateString();
@@ -1424,7 +1456,7 @@ export default function Home() {
     </header>
 
     <nav className="tabs" aria-label="Cursos navigation">
-      <div className="nav-section-heading"><span><i className="nav-flower">✺</i> Cursos</span><span>+</span></div>
+      <div className="nav-section-heading"><span><i className="nav-flower">✺</i> Cursos <small>by Synapt’x</small></span><span>+</span></div>
       <div className="nav-dash" />
       <div className="nav-section-heading"><span><i>▲</i> Study</span><span>−</span></div>
       <div className="nav-dash" />
