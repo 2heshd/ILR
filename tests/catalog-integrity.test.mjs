@@ -59,6 +59,8 @@ test("reading and listening generation are constrained to learner-selected vocab
   assert.match(route, /treat bank entries as dictionary forms/u);
   assert.match(route, /never use an infinitive ending in کردن, شدن, دادن, گرفتن, داشتن, or بودن as a finite sentence predicate/u);
   assert.match(route, /selected-only vocabulary must never produce broken Persian/u);
+  assert.match(route, /never omit the copula from a nominal sentence/u);
+  assert.match(route, /check semantic roles and Persian collocations/u);
   assert.match(route, /selectedVocabulary\.length < 8/u);
   assert.match(route, /never force awkward repetition/u);
   assert.match(route, /prefer a shorter, clear, idiomatic passage/u);

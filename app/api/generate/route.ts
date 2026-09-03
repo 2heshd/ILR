@@ -97,6 +97,9 @@ Requirements:
 - treat bank entries as dictionary forms, not text that must be copied literally: conjugate simple and compound verbs naturally for their subject, tense, and aspect
 - never use an infinitive ending in کردن, شدن, دادن, گرفتن, داشتن, or بودن as a finite sentence predicate; use the appropriate Persian finite form instead
 - silently revise the Persian before returning it so every sentence is idiomatic and grammatically complete; selected-only vocabulary must never produce broken Persian
+- in formal prose, never omit the copula from a nominal sentence: write forms such as مهم است or مهم بود, not a fragment such as مهم
+- check semantic roles and Persian collocations: use every selected verb with a plausible subject and object; a report may show an increase, while exports increase or have an increase rather than "show" one
+- do not end a sentence with an isolated adjective, noun, or prepositional phrase unless it has the required Persian verb or copula
 - do not introduce, target, or list any unselected vocabulary; newWordsIntroduced must be []
 - ${transfer ? "do not repeat a memorized or previously supplied passage; freshness must come from the situation and syntax, not new vocabulary" : "use as many selected words as fit naturally, but never force awkward repetition merely to increase coverage"}
 - prefer a shorter, clear, idiomatic passage over a longer passage with unnatural combinations of the selected words
