@@ -72,6 +72,13 @@ test("shared vocabulary merges by normalized Persian form without losing review 
   assert.equal(result.words[0].romanization, "taʿlīm");
   assert.equal(result.words[0].reviews, 4);
   assert.equal(result.aliases.get("asl"), "cloud");
+
+  const compound = dedupeLexicalWords([
+    { id: "saved", displayForm: "استخراج کردن", normalizedForm: "استخراجکردن" },
+    { id: "repeat", displayForm: "استخراج کردن", normalizedForm: "استخراج کردن", definition: "to extract" },
+  ]);
+  assert.equal(compound.words.length, 1);
+  assert.equal(compound.words[0].definition, "to extract");
 });
 
 test("a shared-bank deletion removes only the matching personal word", () => {
@@ -115,4 +122,5 @@ test("personal vocabulary carries its saved meaning and pronunciation into Synap
   assert.match(pageSource, /params\.set\("definition", definition\.trim\(\)\)/u);
   assert.match(pageSource, /params\.set\("romanization", romanization\.trim\(\)\)/u);
   assert.match(pageSource, /morphologyUrl\(word\.displayForm, word\.definition, word\.romanization\)/u);
+  assert.match(pageSource, /courseWordKey\(word\.displayForm\) === incomingKey/u);
 });

@@ -573,10 +573,22 @@ export default function Home() {
     const displayForm = params.get("add_word")?.trim();
     if (!displayForm) return;
     const normalizedForm = normalizePersian(displayForm);
+    const incomingKey = courseWordKey(displayForm);
     const definition = params.get("definition")?.trim() || undefined;
     const romanization = params.get("romanization")?.trim() || undefined;
     setState((currentState) => {
-      if (currentState.words.some((word) => word.normalizedForm === normalizedForm)) return currentState;
+      const existingIndex = currentState.words.findIndex((word) => courseWordKey(word.displayForm) === incomingKey);
+      if (existingIndex >= 0) {
+        const existing = currentState.words[existingIndex];
+        if ((!definition || existing.definition === definition) && (!romanization || existing.romanization === romanization)) return currentState;
+        const words = [...currentState.words];
+        words[existingIndex] = {
+          ...existing,
+          definition: definition || existing.definition,
+          romanization: romanization || existing.romanization,
+        };
+        return { ...currentState, words };
+      }
       const now = new Date();
       const fsrsCard = createSerializedCard(now);
       const word: LexicalItem = {
