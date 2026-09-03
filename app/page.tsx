@@ -19,7 +19,7 @@ import { createSerializedCard, reviewFsrs } from "@/lib/fsrs";
 import { normalizePersian, parseWeeklyInput } from "@/lib/persian";
 import { isMeaningfulPersianText, sanitizePersianSpeechText } from "@/lib/persian-speech";
 import { sourceMetrics } from "@/lib/source-analytics";
-import { appendCloudReview, getSupabaseClient, loadCloudState, loadPlatformVocabulary, loadUsername, mergePlatformVocabulary, mergeStudyStates, saveCloudState, syncPlatformVocabulary, updateUsername } from "@/lib/supabase";
+import { appendCloudReview, deletePlatformVocabulary, getSupabaseClient, loadCloudState, loadPlatformVocabulary, loadUsername, mergePlatformVocabulary, mergeStudyStates, saveCloudState, syncPlatformVocabulary, updateUsername } from "@/lib/supabase";
 import { dedupeLexicalWords } from "@/lib/word-merge";
 import type {
   ComprehensionGrade,
@@ -925,6 +925,23 @@ export default function Home() {
     setStatus(`${addable.length} news ${addable.length === 1 ? "word" : "words"} added${addable.length < chosen.length ? ` · ${chosen.length - addable.length} already in your bank` : ""}.`);
   }
 
+  function removeWord(normalizedForm: string) {
+    const removed = state.words.find((word) => word.normalizedForm === normalizedForm);
+    if (!removed) return;
+    setState((currentState) => ({
+      ...currentState,
+      words: currentState.words.filter((word) => word.normalizedForm !== normalizedForm),
+    }));
+    const client = getSupabaseClient();
+    if (removed.sourceType === "user" && client && cloudUser) {
+      void deletePlatformVocabulary(client, cloudUser, normalizedForm).catch((error) => {
+        console.error(error);
+        setStatus("The word was removed here, but cloud removal needs another try.");
+      });
+    }
+    setStatus(`${removed.displayForm} removed from your vocabulary bank.`);
+  }
+
   function reveal() {
     setResponseMs(Date.now() - startRef.current);
     setRevealed(true);
@@ -1020,6 +1037,11 @@ export default function Home() {
 
   async function generatePractice(kind: "reading" | "listening", practiceMode: PracticeMode = "controlled") {
     if (generationBusy) return;
+    if (!state.words.length) {
+      setTab("vocabulary");
+      setStatus("Choose some vocabulary first. Reading and Listening only use words in your bank.");
+      return;
+    }
     setGenerationBusy(kind);
     setStatus(`Generating ${practiceMode === "transfer" ? "fresh transfer" : "controlled"} ${kind}…`);
     try {
@@ -1027,12 +1049,14 @@ export default function Home() {
       const targetIlr = state.skillLevels[kind];
       const data = await generateJson({ kind, weekNumber: state.weekNumber, targetWords: words, targetIlr, practiceMode });
       if (!isMeaningfulPersianText(data.textFa)) throw new Error(`The generated ${kind} item had no valid Persian text. Please try again.`);
-      const generatedTargets = [
-        ...(Array.isArray(data.knownWordsUsed) ? data.knownWordsUsed : words.slice(0, 12)),
-        ...(Array.isArray(data.newWordsIntroduced) ? data.newWordsIntroduced : []),
-      ].filter((word): word is string => typeof word === "string").slice(0, 16);
+      const selectedContextKeys = new Set(words.map((word) => normalizePersian(word)));
+      const reportedWords: unknown[] = Array.isArray(data.knownWordsUsed) ? data.knownWordsUsed : words.slice(0, 12);
+      const reportedSelectedWords = reportedWords
+        .filter((word): word is string => typeof word === "string")
+        .filter((word) => selectedContextKeys.has(normalizePersian(word)));
+      const generatedTargets = (reportedSelectedWords.length ? reportedSelectedWords : words.slice(0, 12)).slice(0, 16);
       const generatedWordCount = data.textFa.trim().split(/\s+/).filter(Boolean).length;
-      const unknownCount = Array.isArray(data.newWordsIntroduced) ? data.newWordsIntroduced.length : 0;
+      const unknownCount = 0;
       if (kind === "reading") {
         const passage: Passage = {
           id: id(),
@@ -1757,14 +1781,13 @@ export default function Home() {
         <div className="catalog-selection row spread"><span>{visibleCatalogEntries.length} shown · {selectedCourseEntries.size} selected</span><div className="row"><button className="text-button" onClick={() => setSelectedCourseEntries(new Set(visibleCatalogEntries.filter((entry) => !bankCourseKeys.has(courseWordKey(entry.fa))).map((entry) => entry.id)))}>Select shown</button><button className="primary" disabled={!selectedCourseEntries.size} onClick={addSelectedCourseWords}>Add selected</button></div></div>
         <div className="catalog-list">{visibleCatalogEntries.map((entry) => {
           const alreadyAdded = bankCourseKeys.has(courseWordKey(entry.fa));
-          return <label className={`catalog-word${alreadyAdded ? " added" : ""}`} key={entry.id}><input type="checkbox" checked={alreadyAdded || selectedCourseEntries.has(entry.id)} disabled={alreadyAdded} onChange={() => setSelectedCourseEntries((current) => { const next = new Set(current); if (next.has(entry.id)) next.delete(entry.id); else next.add(entry.id); return next; })} /><strong>{entry.fa}</strong><span>{entry.en}</span><small>{alreadyAdded ? "In your bank" : `List ${entry.list}`}</small></label>;
+          return <label className={`catalog-word${alreadyAdded ? " added" : ""}`} key={entry.id}><input type="checkbox" checked={alreadyAdded || selectedCourseEntries.has(entry.id)} onChange={() => { const bankWord = state.words.find((word) => courseWordKey(word.displayForm) === courseWordKey(entry.fa)); if (bankWord) removeWord(bankWord.normalizedForm); else setSelectedCourseEntries((current) => { const next = new Set(current); if (next.has(entry.id)) next.delete(entry.id); else next.add(entry.id); return next; }); }} /><strong>{entry.fa}</strong><span>{entry.en}</span><small>{alreadyAdded ? "Selected · uncheck to remove" : `List ${entry.list}`}</small></label>;
         })}</div>
         {!courseCatalog.length && <div className="empty">Loading the course catalog…</div>}
         {courseCatalog.length > 0 && !visibleCatalogEntries.length && <div className="empty">No words match this search.</div>}
       </div>
-      <div className="card span-6"><h2>Course words · {state.words.filter((word) => word.sourceType === "course").length}</h2><div className="word-list single bank-list">{state.words.filter((word) => word.sourceType === "course").map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><span>{word.definition}</span><span>{word.courseLesson}</span></div>)}</div></div>
-      <div className="card span-6 news-catalog"><h2>News-frequency catalog · {NEWS_CATALOG.length}</h2><p className="muted">Frequent terms drawn from a 2,000-token BBC Persian and Iran International sample. Choose only the words you want active.</p><label className="catalog-search"><span>Find a news word</span><input value={newsQuery} onChange={(event) => setNewsQuery(event.target.value)} placeholder="Persian, English, or transliteration" /></label><div className="catalog-selection row spread"><span>{visibleNewsEntries.length} shown · {selectedNewsEntries.size} selected</span><div className="row"><button className="text-button" onClick={() => setSelectedNewsEntries(new Set(visibleNewsEntries.filter((word) => !allBankKeys.has(courseWordKey(word.displayForm))).map((word) => word.id)))}>Select shown</button><button className="primary" disabled={!selectedNewsEntries.size} onClick={addSelectedNewsWords}>Add selected</button></div></div><div className="catalog-list news-list">{visibleNewsEntries.map((word) => { const alreadyAdded = allBankKeys.has(courseWordKey(word.displayForm)); return <label className={`catalog-word${alreadyAdded ? " added" : ""}`} key={word.id}><input type="checkbox" checked={alreadyAdded || selectedNewsEntries.has(word.id)} disabled={alreadyAdded} onChange={() => setSelectedNewsEntries((current) => { const next = new Set(current); if (next.has(word.id)) next.delete(word.id); else next.add(word.id); return next; })} /><strong>{word.displayForm}</strong><span>{word.romanization ? `${word.romanization} · ` : ""}{word.definition}</span><small>{alreadyAdded ? "In your bank" : "News"}</small></label>; })}</div></div>
-      <div className="card span-12"><h2>My words · {state.words.filter((word) => word.sourceType === "user").length}</h2><div className="word-list single">{state.words.filter((word) => word.sourceType === "user").map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><span>{word.romanization ? `${word.romanization} · ` : ""}{word.definition}</span><span>{word.topic || "Personal vocabulary"}</span><a className="inspect-word" href={morphologyUrl(word.displayForm)} target="_blank" rel="noreferrer">Inspect morphology in Synaptx ↗</a></div>)}</div>{!state.words.some((word) => word.sourceType === "user") && <div className="empty">Words researched in Asl will appear here.</div>}</div>
+      <div className="card span-12 news-catalog"><h2>News-frequency catalog · {NEWS_CATALOG.length}</h2><p className="muted">Frequent terms drawn from a 2,000-token BBC Persian and Iran International sample. Choose only the words you want active.</p><label className="catalog-search"><span>Find a news word</span><input value={newsQuery} onChange={(event) => setNewsQuery(event.target.value)} placeholder="Persian, English, or transliteration" /></label><div className="catalog-selection row spread"><span>{visibleNewsEntries.length} shown · {selectedNewsEntries.size} selected</span><div className="row"><button className="text-button" onClick={() => setSelectedNewsEntries(new Set(visibleNewsEntries.filter((word) => !allBankKeys.has(courseWordKey(word.displayForm))).map((word) => word.id)))}>Select shown</button><button className="primary" disabled={!selectedNewsEntries.size} onClick={addSelectedNewsWords}>Add selected</button></div></div><div className="catalog-list news-list">{visibleNewsEntries.map((word) => { const alreadyAdded = allBankKeys.has(courseWordKey(word.displayForm)); return <label className={`catalog-word${alreadyAdded ? " added" : ""}`} key={word.id}><input type="checkbox" checked={alreadyAdded || selectedNewsEntries.has(word.id)} onChange={() => { const bankWord = state.words.find((item) => courseWordKey(item.displayForm) === courseWordKey(word.displayForm)); if (bankWord) removeWord(bankWord.normalizedForm); else setSelectedNewsEntries((current) => { const next = new Set(current); if (next.has(word.id)) next.delete(word.id); else next.add(word.id); return next; }); }} /><strong>{word.displayForm}</strong><span>{word.romanization ? `${word.romanization} · ` : ""}{word.definition}</span><small>{alreadyAdded ? "Selected · uncheck to remove" : "News"}</small></label>; })}</div></div>
+      <div className="card span-12"><h2>My words · {state.words.filter((word) => word.sourceType === "user").length}</h2><div className="word-list single">{state.words.filter((word) => word.sourceType === "user").map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><span>{word.romanization ? `${word.romanization} · ` : ""}{word.definition}</span><span>{word.topic || "Personal vocabulary"}</span><div className="word-actions"><a className="inspect-word" href={morphologyUrl(word.displayForm)} target="_blank" rel="noreferrer">Inspect morphology in Synaptx ↗</a><button className="text-button remove-word" onClick={() => removeWord(word.normalizedForm)}>Remove</button></div></div>)}</div>{!state.words.some((word) => word.sourceType === "user") && <div className="empty">Words researched in Asl will appear here after you choose them.</div>}</div>
     </section>}
 
     {tab === "analytics" && !showProgressDetails && <section className="guided-workspace"><div className="guided-overview">

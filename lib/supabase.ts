@@ -127,6 +127,16 @@ export async function syncPlatformVocabulary(client: SupabaseClient, user: User,
   if (error) throw error;
 }
 
+export async function deletePlatformVocabulary(client: SupabaseClient, user: User, normalizedForm: string) {
+  const { error } = await client
+    .from("platform_vocabulary")
+    .delete()
+    .eq("user_id", user.id)
+    .eq("normalized_form", normalizedForm);
+  if (missingPlatformTable(error)) return;
+  if (error) throw error;
+}
+
 export async function loadUsername(client: SupabaseClient, user: User): Promise<string | null> {
   const { data, error } = await client
     .from("profiles")

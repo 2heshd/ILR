@@ -38,6 +38,19 @@ test("new learners choose vocabulary instead of receiving the pilot bank", () =>
   assert.doesNotMatch(pageSource, /words:\s*curatedVocabulary\(\)/u);
   assert.match(pageSource, /NEWS_CATALOG/u);
   assert.match(pageSource, /Add selected/u);
+  assert.doesNotMatch(pageSource, /Course words ·/u);
+  assert.match(pageSource, /span-12 news-catalog/u);
+  assert.match(pageSource, /Selected · uncheck to remove/u);
+  assert.match(pageSource, /removeWord\(word\.normalizedForm\)/u);
+});
+
+test("reading and listening generation are constrained to learner-selected vocabulary", async () => {
+  const route = await readFile(new URL("../app/api/generate/route.ts", import.meta.url), "utf8");
+  assert.match(route, /Learner-selected vocabulary bank/u);
+  assert.match(route, /use ONLY vocabulary selected in the learner bank/u);
+  assert.match(route, /newWordsIntroduced must be \[\]/u);
+  assert.match(pageSource, /if \(!state\.words\.length\)/u);
+  assert.match(pageSource, /selectedContextKeys/u);
 });
 
 test("shared vocabulary merges by normalized Persian form without losing review references", () => {

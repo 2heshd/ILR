@@ -53,6 +53,8 @@ input,select { border:1px solid #d5d1c8; border-radius:12px; padding:10px 12px; 
 .word span { color:#6f6b63; font-size:12px; }
 .inspect-word,.inspect-link { width:max-content; color:#171717; font-size:11px; font-weight:650; text-decoration:none; }
 .inspect-word { margin-top:4px; }
+.word-actions { display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+.remove-word { color:#a43e2e; }
 .inspect-link { margin-top:12px; }
 .queue { display:grid; gap:2px; }
 .queue-item,.queue-button { display:flex; width:100%; align-items:center; justify-content:space-between; gap:12px; padding:13px 0; border:0; border-bottom:1px solid #eeeae2; background:transparent; text-align:left; }
