@@ -12,7 +12,7 @@ const googleSansCode = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Cursos by Synapt’x",
+  title: "Cursos by Synaptx",
   description: "Adaptive Persian study system for reading, listening, speaking, and recall",
 };
 

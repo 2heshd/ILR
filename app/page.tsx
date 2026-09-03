@@ -1593,7 +1593,7 @@ export default function Home() {
     </header>
 
     <nav className="tabs" aria-label="Cursos navigation">
-      <div className="nav-section-heading"><span><i className="nav-flower">✺</i> Cursos <small>by Synapt’x</small></span><span>+</span></div>
+      <div className="nav-section-heading"><span><i className="nav-flower">✺</i> Cursos <small>by Synaptx</small></span><span>+</span></div>
       <div className="nav-dash" />
       <div className="nav-section-heading"><span><i>▲</i> Study</span><span>−</span></div>
       <div className="nav-dash" />
