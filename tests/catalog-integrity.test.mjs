@@ -5,6 +5,7 @@ import { selectContextWords } from "../lib/adaptive.ts";
 import { courseSectionLabel } from "../lib/course.ts";
 import { unselectedContentWords } from "../lib/practice-vocabulary.ts";
 import { dedupeLexicalWords, removeDeletedSharedWord } from "../lib/word-merge.js";
+import { compactStudyState, readStudyState, writeStudyState } from "../lib/storage.ts";
 
 const course = JSON.parse(await readFile(new URL("../data/course-vocabulary.json", import.meta.url), "utf8"));
 const cycle = JSON.parse(await readFile(new URL("../data/curated-cycle.json", import.meta.url), "utf8"));
@@ -43,6 +44,25 @@ test("ChiMishe vocabulary can be selected in complete chapters and modules", () 
   assert.match(pageSource, /Choose whole chapters or modules/u);
   assert.match(pageSource, /addSelectedCourseSections/u);
   assert.match(pageSource, /selectedCourseSectionEntryCount/u);
+});
+
+test("large chapter selections use compact, recoverable browser storage", () => {
+  const card = { due: "2026-09-03T00:00:00.000Z", stability: 0, difficulty: 0, elapsedDays: 0, scheduledDays: 0, reps: 0, lapses: 0, learningSteps: 0, state: 0 };
+  const state = {
+    words: [{ id: "course-1", displayForm: "تعلیم", normalizedForm: "تعلیم", definition: "education", sourceType: "course", sourceWeek: 1, introducedAt: card.due, reviews: 0, correct: 0, lapses: 0, dueAt: card.due, fsrsCard: card, modalityCards: { visual: card, audio: card, cloze: card } }],
+    passages: [{ id: "bundled-reading" }], listeningItems: [{ id: "bundled-listening" }], speakingPrompts: [{ id: "bundled-speaking" }],
+  };
+  const compact = compactStudyState(state);
+  assert.equal(compact.words[0].modalityCards, undefined);
+  assert.equal(compact.words[0].fsrsCard, undefined);
+  assert.deepEqual(compact.passages, []);
+
+  const saved = new Map();
+  const storage = { getItem: (key) => saved.get(key) ?? null, setItem: (key, value) => saved.set(key, value), removeItem: (key) => saved.delete(key) };
+  assert.equal(writeStudyState(storage, "state", state), true);
+  assert.equal(readStudyState(storage, "state", []).state.words[0].displayForm, "تعلیم");
+  saved.set("state", "{broken");
+  assert.deepEqual(readStudyState(storage, "state", []), { state: null, recovered: true });
 });
 
 test("news catalog contains 2,000 unique sourced usable terms", () => {

@@ -21,6 +21,7 @@ import { removeDeletedSharedWord } from "@/lib/word-merge.js";
 import { normalizePersian, parseWeeklyInput } from "@/lib/persian";
 import { isMeaningfulPersianText, sanitizePersianSpeechText } from "@/lib/persian-speech";
 import { sourceMetrics } from "@/lib/source-analytics";
+import { compactStudyState, readStudyState, writeStudyState } from "@/lib/storage";
 import { appendCloudReview, deletePlatformVocabulary, getSupabaseClient, loadCloudState, loadPlatformVocabulary, loadUsername, mergePlatformVocabulary, mergeStudyStates, saveCloudState, syncPlatformVocabulary, updateUsername } from "@/lib/supabase";
 import { dedupeLexicalWords } from "@/lib/word-merge";
 import type {
@@ -467,15 +468,10 @@ export default function Home() {
   }
 
   useEffect(() => {
-    let raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      for (const key of LEGACY_KEYS) {
-        raw = localStorage.getItem(key);
-        if (raw) break;
-      }
-    }
-    const local = hydrateState(raw ? JSON.parse(raw) : emptyState);
+    const saved = readStudyState(localStorage, STORAGE_KEY, LEGACY_KEYS);
+    const local = hydrateState(saved.state ?? emptyState);
     setState(local);
+    if (saved.recovered) setStatus("Cursos repaired damaged browser storage and reopened with a clean local copy.");
     setShowOnboarding(localStorage.getItem(ONBOARDING_KEY) !== "complete");
     setLoaded(true);
 
@@ -555,12 +551,14 @@ export default function Home() {
 
   useEffect(() => {
     if (!loaded) return;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    if (!writeStudyState(localStorage, STORAGE_KEY, state)) {
+      setStatus("This vocabulary bank is too large for browser storage. Your open session is safe; sign in to keep the complete bank in cloud storage.");
+    }
     if (!cloudUser || !cloudReady) return;
     const client = getSupabaseClient();
     if (!client) return;
     const timer = window.setTimeout(() => {
-      Promise.all([saveCloudState(client, cloudUser, state), syncPlatformVocabulary(client, cloudUser, state.words)]).catch((error) => {
+      Promise.all([saveCloudState(client, cloudUser, compactStudyState(state)), syncPlatformVocabulary(client, cloudUser, state.words)]).catch((error) => {
         console.error(error);
         setStatus("Cloud save failed; local history remains available.");
       });
