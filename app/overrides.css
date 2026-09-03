@@ -712,6 +712,21 @@ a {
   text-transform: uppercase;
 }
 
+.platform-switcher {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.platform-switcher a {
+  color: var(--white);
+  text-decoration: none;
+}
+
+.platform-switcher a:hover {
+  color: var(--accent);
+}
+
 button,
 input,
 select,

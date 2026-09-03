@@ -44,6 +44,7 @@ const LEGACY_KEYS = ["ilr-persian-v2", "ilr-persian-v1"];
 const PERSIAN_WORD_PATTERN = /([\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06FA-\u06FC\u200C]+)/g;
 const IS_PERSIAN_WORD = /^[\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06FA-\u06FC\u200C]+$/;
 const SYNAPTX_URL = process.env.NEXT_PUBLIC_SYNAPTX_URL ?? "http://localhost:3002";
+const ASL_URL = process.env.NEXT_PUBLIC_ASL_URL ?? "http://localhost:3000";
 
 function syntaxUrl(sentence: string) {
   const params = new URLSearchParams({ sentence, language: "fa" });
@@ -1567,6 +1568,7 @@ export default function Home() {
         {(["today", "reading", "listening", "speaking", "vocabulary", "analytics"] as Tab[]).map((name) => <button key={name} className={tab === name ? "tab active" : "tab"} onClick={() => setTab(name)}><span className="nav-bullet">{tab === name ? "●" : "·"}</span>{TAB_LABELS[name]}</button>)}
       </div>
       <div className="nav-course">
+        <div className="platform-switcher"><a href={ASL_URL}>Asl</a><a href={SYNAPTX_URL}>Synaptx</a></div>
         <span>Week {state.weekNumber}/{COURSE_META.weeks}</span>
         <span>Reading {state.skillLevels.reading} · Listening {state.skillLevels.listening}</span>
         <span>Speaking {state.skillLevels.speaking}</span>
