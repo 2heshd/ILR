@@ -44,7 +44,30 @@ export async function POST(request: Request) {
     if (!selectedVocabulary.length) {
       return NextResponse.json({ error: "Choose vocabulary before generating practice." }, { status: 400 });
     }
-    prompt = `Create one Persian ${mode} practice item at the learner's selected proficiency level. Return JSON only.\n\nTarget ILR difficulty: ${body.targetIlr ?? 1}\nLearner-selected vocabulary bank: ${selectedVocabulary.join(", ")}\n\nRequirements:\n- natural educated Iranian Persian suitable for the selected ILR level\n- ${sentenceCount} natural connected sentences forming ONE coherent passage, not standalone example sentences\n- practice mode: ${transfer ? "FRESH TRANSFER — create a new situation and new sentence structure without introducing unselected vocabulary" : "CONTROLLED COVERAGE — reinforce the selected bank in coherent context"}\n- use ONLY vocabulary selected in the learner bank for lexical/content words; ordinary Persian grammar words, pronouns, prepositions, conjunctions, and inflected forms of selected words are allowed\n- do not introduce, target, or list any unselected vocabulary; newWordsIntroduced must be []\n- ${transfer ? "do not repeat a memorized or previously supplied passage; freshness must come from the situation and syntax, not new vocabulary" : "use selected words naturally and repeatedly"}\n- use familiar daily-life situations at Level 1 and progressively use formal news, government, economics, policy, diplomacy, security, or social situations at higher levels, but never add vocabulary outside the selected bank\n- include discourse relations and inference opportunities appropriate to the selected level\n- avoid English inside the Persian passage\n- list only selected bank words actually used\n- produce 5 comprehension questions in ENGLISH: one main idea, two detail, one inference, one discourse/author-intent\n- for each question include a concise hidden reference answer used only for grading\n\nReturn this exact shape:\n{"title":"English title","textFa":"Persian paragraph","topic":"...","register":"...","knownWordsUsed":["..."],"newWordsIntroduced":[],"questions":[{"question":"...","type":"main_idea|detail|inference|discourse","referenceAnswer":"..."}]}`;
+    prompt = `Create one Persian ${mode} practice item at the learner's selected proficiency level. Return JSON only.
+
+Target ILR difficulty: ${body.targetIlr ?? 1}
+Learner-selected vocabulary bank: ${selectedVocabulary.join(", ")}
+
+Requirements:
+- natural educated Iranian Persian suitable for the selected ILR level
+- ${sentenceCount} natural connected sentences forming ONE coherent passage, not standalone example sentences
+- practice mode: ${transfer ? "FRESH TRANSFER — create a new situation and new sentence structure without introducing unselected vocabulary" : "CONTROLLED COVERAGE — reinforce the selected bank in coherent context"}
+- use ONLY vocabulary selected in the learner bank for lexical/content words; ordinary Persian grammar words, pronouns, prepositions, conjunctions, and inflected forms of selected words are allowed
+- treat bank entries as dictionary forms, not text that must be copied literally: conjugate simple and compound verbs naturally for their subject, tense, and aspect
+- never use an infinitive ending in کردن, شدن, دادن, گرفتن, داشتن, or بودن as a finite sentence predicate; use the appropriate Persian finite form instead
+- silently revise the Persian before returning it so every sentence is idiomatic and grammatically complete; selected-only vocabulary must never produce broken Persian
+- do not introduce, target, or list any unselected vocabulary; newWordsIntroduced must be []
+- ${transfer ? "do not repeat a memorized or previously supplied passage; freshness must come from the situation and syntax, not new vocabulary" : "use selected words naturally and repeatedly"}
+- use familiar daily-life situations at Level 1 and progressively use formal news, government, economics, policy, diplomacy, security, or social situations at higher levels, but never add vocabulary outside the selected bank
+- include discourse relations and inference opportunities appropriate to the selected level
+- avoid English inside the Persian passage
+- list only selected bank words actually used, using their original dictionary forms from the bank
+- produce 5 comprehension questions in ENGLISH: one main idea, two detail, one inference, one discourse/author-intent
+- for each question include a concise hidden reference answer used only for grading
+
+Return this exact shape:
+{"title":"English title","textFa":"Persian paragraph","topic":"...","register":"...","knownWordsUsed":["..."],"newWordsIntroduced":[],"questions":[{"question":"...","type":"main_idea|detail|inference|discourse","referenceAnswer":"..."}]}`;
   }
 
   try {
@@ -53,7 +76,7 @@ export async function POST(request: Request) {
       store: false,
       input: prompt,
       max_output_tokens: 2200,
-      reasoning: { effort: "none" },
+      reasoning: { effort: body.kind === "reading" || body.kind === "listening" ? "low" : "none" },
       text: { verbosity: "low" },
     });
     return NextResponse.json(parseJson(response.output_text));
