@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { selectContextWords } from "../lib/adaptive.ts";
 import { dedupeLexicalWords } from "../lib/word-merge.js";
 
 const course = JSON.parse(await readFile(new URL("../data/course-vocabulary.json", import.meta.url), "utf8"));
@@ -52,4 +53,28 @@ test("shared vocabulary merges by normalized Persian form without losing review 
   assert.equal(result.words[0].romanization, "taʿlīm");
   assert.equal(result.words[0].reviews, 4);
   assert.equal(result.aliases.get("asl"), "cloud");
+});
+
+test("a newly added Asl word enters the context pool used by readings and listenings", () => {
+  const olderWords = Array.from({ length: 100 }, (_, index) => ({
+    id: `older-${index}`,
+    displayForm: `واژه${index}`,
+    sourceWeek: 1,
+    knowledgeState: "known",
+    reviews: 4,
+    correct: 4,
+  }));
+  const aslWord = {
+    id: "asl-current",
+    displayForm: "استخراج کردن",
+    sourceWeek: 12,
+    knowledgeState: "learning",
+    reviews: 0,
+    correct: 0,
+  };
+
+  const selected = selectContextWords({ words: [...olderWords, aslWord], weekNumber: 12 }, 80);
+
+  assert.equal(selected.length, 80);
+  assert.ok(selected.includes("استخراج کردن"));
 });
