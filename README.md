@@ -130,6 +130,8 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 
 The combined Progress and Account page supports unique usernames plus email/password authentication. After sign-in, the complete learning state saves automatically to the user's private `study_snapshots` row while local storage remains available as an offline fallback.
 
+The same setup creates `platform_vocabulary`, the small canonical bank shared by Cursos, Asl, and Synaptx. Applying [`db/006_platform_vocabulary.sql`](db/006_platform_vocabulary.sql) upgrades an older Supabase project without rerunning the full schema. Words added in Asl or Synaptx merge into Cursos by normalized Persian spelling and become eligible for vocabulary review, reading, and listening; Cursos also mirrors personal words back to the shared bank. Row-level security keeps every learner's vocabulary private.
+
 Restart the development server. Create an account or sign in from the Progress page. Local persistence remains active as an offline/recovery layer.
 
 ## Adaptive logic
