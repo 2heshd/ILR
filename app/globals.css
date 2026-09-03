@@ -51,6 +51,9 @@ input,select { border:1px solid #d5d1c8; border-radius:12px; padding:10px 12px; 
 .word { padding:10px 0; border-bottom:1px solid #efede8; display:grid; gap:3px; }
 .word strong { font-size:20px; direction:rtl; text-align:right; font-family:"Cursos Persian Mono", monospace; }
 .word span { color:#6f6b63; font-size:12px; }
+.inspect-word,.inspect-link { width:max-content; color:#171717; font-size:11px; font-weight:650; text-decoration:none; }
+.inspect-word { margin-top:4px; }
+.inspect-link { margin-top:12px; }
 .queue { display:grid; gap:2px; }
 .queue-item,.queue-button { display:flex; width:100%; align-items:center; justify-content:space-between; gap:12px; padding:13px 0; border:0; border-bottom:1px solid #eeeae2; background:transparent; text-align:left; }
 .queue-item:last-child,.queue-button:last-child { border-bottom:0; }

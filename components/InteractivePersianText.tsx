@@ -14,6 +14,11 @@ type Props = {
 
 const WORD_PATTERN = /([\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06FA-\u06FC\u200C]+)/g;
 const IS_WORD = /^[\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06FA-\u06FC\u200C]+$/;
+const SYNAPTX_URL = process.env.NEXT_PUBLIC_SYNAPTX_URL ?? "http://localhost:3002";
+function morphologyUrl(word: string) {
+  const params = new URLSearchParams({ word, language: "fa", focus: "etymology" });
+  return `${SYNAPTX_URL}/morphology.html?${params}`;
+}
 const STATES: Array<{ value: WordKnowledgeState; label: string; detail: string }> = [
   { value: "new", label: "New", detail: "Unfamiliar · review now" },
   { value: "learning", label: "Learning", detail: "Still building recall" },
@@ -54,6 +59,7 @@ export default function InteractivePersianText({ text, words, className = "", di
           onClick={() => { onStatus(selected, state.value); setSelected(""); }}
         ><strong>{state.label}</strong><small>{state.detail}</small></button>)}
       </div>
+      <a className="secondary button-link inspect-link" href={morphologyUrl(selected)} target="_blank" rel="noreferrer">Inspect morphology in Synaptx ↗</a>
     </div>}
   </div>;
 }
