@@ -2,9 +2,9 @@ const ARABIC_TO_PERSIAN: Record<string, string> = { ي: "ی", ى: "ی", ك: "ک"
 const PERSIAN_TOKEN = /[\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06FA-\u06FC\u200C]+/gu;
 
 const GRAMMAR_WORDS = new Set([
-  "از", "اگر", "اما", "او", "این", "آن", "آنها", "ای", "با", "برای", "بر", "به", "بود", "بودم", "بودی", "بودند", "بودیم", "بودید",
+  "از", "اگر", "اما", "او", "این", "آن", "آنها", "ای", "است", "با", "برای", "بر", "به", "بود", "بودم", "بودی", "بودند", "بودیم", "بودید",
   "باشد", "باشند", "باشیم", "باید", "پس", "تا", "تو", "چرا", "چون", "چه", "خود", "در", "درباره", "را", "روی", "زیر", "سپس", "شما",
-  "که", "کی", "ما", "من", "میان", "نه", "نیز", "نیست", "نیستم", "نیستند", "هست", "هستم", "هستند", "هم", "همه", "هر", "هیچ", "و", "ولی", "یا", "یک",
+  "که", "کی", "ما", "من", "میان", "نه", "نیز", "نیست", "نیستم", "نیستند", "هست", "هستم", "هستی", "هستند", "هستیم", "هستید", "هم", "همه", "هر", "هیچ", "و", "ولی", "یا", "یک",
 ]);
 
 const PRESENT_STEMS: Record<string, string[]> = {
@@ -15,7 +15,7 @@ const PRESENT_STEMS: Record<string, string[]> = {
 };
 
 const VERB_ENDINGS = ["", "م", "ی", "د", "یم", "ید", "ند", "ه", "هام", "های", "هایم", "هاید", "هاند"];
-const NOMINAL_SUFFIXES = ["هایمان", "هایتان", "هایشان", "هایم", "هایت", "هایش", "هایی", "های", "ها", "مان", "تان", "شان", "ام", "ات", "اش", "ان", "ی"];
+const NOMINAL_SUFFIXES = ["هایمان", "هایتان", "هایشان", "هایم", "هایت", "هایش", "هایی", "های", "ها", "مان", "تان", "شان", "اند", "ام", "ات", "اش", "ان", "ی"];
 
 function normalize(value: string) {
   return value
@@ -50,20 +50,33 @@ function nominalBases(token: string) {
 }
 
 export function unselectedContentWords(text: string, selectedVocabulary: string[]) {
-  const selectedTokens = new Set(selectedVocabulary.flatMap(tokens));
-  const verbStems = new Set<string>();
+  const selectedItems = selectedVocabulary.map(tokens).filter((item) => item.length);
+  const selectedTokens = new Set(selectedItems.flat());
+  const standaloneVerbs = new Set(selectedItems.filter((item) => item.length === 1 && item[0].endsWith("ن")).map((item) => item[0]));
+  const licensedCompounds = new Set(selectedItems
+    .filter((item) => item.length > 1 && item.at(-1)?.endsWith("ن"))
+    .map((item) => `${item.at(-2)}|${item.at(-1)}`));
+  const verbStems = new Map<string, Set<string>>();
 
   for (const token of selectedTokens) {
     if (!token.endsWith("ن") || token.length < 3) continue;
-    verbStems.add(token.slice(0, -1));
-    for (const stem of PRESENT_STEMS[token] ?? []) verbStems.add(stem);
+    verbStems.set(token, new Set([token.slice(0, -1), ...(PRESENT_STEMS[token] ?? [])]));
   }
 
   const unknown = new Set<string>();
-  for (const token of tokens(text)) {
+  const passageTokens = tokens(text);
+  for (const [index, token] of passageTokens.entries()) {
     if (GRAMMAR_WORDS.has(token) || selectedTokens.has(token)) continue;
     if ([...nominalBases(token)].some((base) => selectedTokens.has(base))) continue;
-    if ([...verbStems].some((stem) => matchesStem(token, stem))) continue;
+    const verbLemma = [...verbStems].find(([, stems]) => [...stems].some((stem) => matchesStem(token, stem)))?.[0];
+    if (verbLemma) {
+      if (standaloneVerbs.has(verbLemma)) continue;
+      const previous = passageTokens[index - 1] ?? "";
+      const licensed = [...nominalBases(previous)].some((base) => licensedCompounds.has(`${base}|${verbLemma}`));
+      if (licensed) continue;
+      unknown.add(previous ? `${previous} ${verbLemma}` : verbLemma);
+      continue;
+    }
     unknown.add(token);
   }
   return [...unknown];

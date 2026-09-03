@@ -76,9 +76,11 @@ test("reading and listening generation are constrained to learner-selected vocab
 
 test("closed-vocabulary validation accepts inflections and rejects unselected content", () => {
   const selected = ["دولت", "گزارش", "اعلام کردن", "اقتصاد", "کشور", "کاهش"];
-  assert.deepEqual(unselectedContentWords("دولت گزارش را اعلام کرد و اقتصاد کشور کاهش یافت.", [...selected, "یافتن"]), []);
+  assert.deepEqual(unselectedContentWords("دولت گزارش را اعلام کرد و اقتصاد کشور کاهش یافت. این گزارش مهم است.", [...selected, "یافتن", "مهم"]), []);
   assert.deepEqual(unselectedContentWords("دولت‌ها گزارش را اعلام کردند.", selected), []);
   assert.deepEqual(unselectedContentWords("اقتصاد کشور کاهش داشت.", selected), ["داشت"]);
+  assert.deepEqual(unselectedContentWords("گزارش افزایش را نشان داد.", [...selected, "افزایش", "نشان دادن"]), []);
+  assert.deepEqual(unselectedContentWords("شرکت تولید را افزایش داد.", [...selected, "شرکت", "تولید", "افزایش", "نشان دادن"]), ["افزایش دادن"]);
 });
 
 test("shared vocabulary merges by normalized Persian form without losing review references", () => {
