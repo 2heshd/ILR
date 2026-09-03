@@ -35,6 +35,16 @@ export const COURSE_META = {
   weekLessonCounts: [5, 6, 5, 6, 4, 6, 6, 5, 4, 4, 5, 4, 5, 5, 6, 6, 6, 5, 4, 5, 4, 4, 4, 4, 3, 4, 3, 3, 3, 4, 3, 3, 3, 2, 3, 2],
 } as const;
 
+export function courseSectionLabel(lesson: string) {
+  const chapter = lesson.match(/^(Unit \d+) - (Chapter \d+)/u);
+  if (chapter) return `${chapter[1]} · ${chapter[2]}`;
+  const module = lesson.match(/^(Semester \d+) - (Module \d+)/u);
+  if (module) return `${module[1]} · ${module[2]}`;
+  if (lesson.startsWith("Introductory Unit")) return "Introductory Unit";
+  if (lesson.startsWith("Newspaper Book")) return "Newspaper Book";
+  return lesson.replace(/ - Lesson \d+$/u, "");
+}
+
 export async function loadCourseCatalog() {
   const module = await import("@/data/course-vocabulary.json");
   return module.default as CourseCatalog;

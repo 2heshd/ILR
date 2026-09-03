@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { selectContextWords } from "../lib/adaptive.ts";
+import { courseSectionLabel } from "../lib/course.ts";
 import { unselectedContentWords } from "../lib/practice-vocabulary.ts";
 import { dedupeLexicalWords, removeDeletedSharedWord } from "../lib/word-merge.js";
 
@@ -26,6 +27,22 @@ test("ChiMishe catalog is complete and internally consistent", () => {
 
   const weekCounts = Array.from({ length: 36 }, (_, index) => course.entries.filter((entry) => entry.week === index + 1).length);
   assert.deepEqual(weekCounts, course.meta.weekCounts);
+});
+
+test("ChiMishe vocabulary can be selected in complete chapters and modules", () => {
+  const sections = new Map();
+  for (const entry of course.entries) {
+    const section = courseSectionLabel(entry.lesson);
+    sections.set(section, (sections.get(section) ?? 0) + 1);
+  }
+  assert.equal(sections.size, 52);
+  assert.equal([...sections.values()].reduce((total, count) => total + count, 0), 6060);
+  assert.equal(courseSectionLabel("Unit 3 - Chapter 9 - Lesson 2"), "Unit 3 · Chapter 9");
+  assert.equal(courseSectionLabel("Semester 3 - Module 7 - Lesson 4"), "Semester 3 · Module 7");
+  assert.equal(courseSectionLabel("Introductory Unit - Lesson 8"), "Introductory Unit");
+  assert.match(pageSource, /Choose whole chapters or modules/u);
+  assert.match(pageSource, /addSelectedCourseSections/u);
+  assert.match(pageSource, /selectedCourseSectionEntryCount/u);
 });
 
 test("news catalog contains 2,000 unique sourced usable terms", () => {

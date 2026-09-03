@@ -13,7 +13,7 @@ import SpeakingLab from "@/components/SpeakingLab";
 import { adaptiveAllocation, currentTrainingPhase, dominantBottleneck, selectContextWords } from "@/lib/adaptive";
 import { fallbackAdvanced, type AdvancedWord } from "@/lib/advanced";
 import type { AnkiReviewRow, AnkiVocabularyRow } from "@/lib/anki";
-import { COURSE_META, loadCourseCatalog, loadCourseWeek, type CourseVocabularyEntry } from "@/lib/course";
+import { COURSE_META, courseSectionLabel, loadCourseCatalog, loadCourseWeek, type CourseVocabularyEntry } from "@/lib/course";
 import { curatedListeningItems, curatedPassages, curatedSpeakingPrompts } from "@/lib/curated-cycle";
 import { createSerializedCard, reviewFsrs } from "@/lib/fsrs";
 import { NEWS_META, newsVocabulary } from "@/lib/news";
@@ -269,6 +269,7 @@ export default function Home() {
   const [catalogLesson, setCatalogLesson] = useState("");
   const [catalogQuery, setCatalogQuery] = useState("");
   const [selectedCourseEntries, setSelectedCourseEntries] = useState<Set<number>>(new Set());
+  const [selectedCourseSections, setSelectedCourseSections] = useState<Set<string>>(new Set());
   const [newsQuery, setNewsQuery] = useState("");
   const [selectedNewsEntries, setSelectedNewsEntries] = useState<Set<string>>(new Set());
   const [generationBusy, setGenerationBusy] = useState<"reading" | "listening" | null>(null);
@@ -871,8 +872,7 @@ export default function Home() {
     }
   }
 
-  function addSelectedCourseWords() {
-    const chosen = courseCatalog.filter((entry) => selectedCourseEntries.has(entry.id));
+  function addCourseEntries(chosen: CourseVocabularyEntry[], sourceLabel: string) {
     if (!chosen.length) return;
     const existingKeys = new Set(state.words.map((word) => courseWordKey(word.displayForm)));
     const addable = chosen.filter((entry) => {
@@ -915,8 +915,19 @@ export default function Home() {
       });
       return { ...currentState, words: [...currentState.words, ...incoming] };
     });
+    setStatus(`${addable.length} ${sourceLabel} ${addable.length === 1 ? "word" : "words"} added${addable.length < chosen.length ? ` · ${chosen.length - addable.length} already in your bank` : ""}.`);
+  }
+
+  function addSelectedCourseWords() {
+    const chosen = courseCatalog.filter((entry) => selectedCourseEntries.has(entry.id));
+    addCourseEntries(chosen, "course");
     setSelectedCourseEntries(new Set());
-    setStatus(`${addable.length} course ${addable.length === 1 ? "word" : "words"} added${addable.length < chosen.length ? ` · ${chosen.length - addable.length} already in your bank` : ""}.`);
+  }
+
+  function addSelectedCourseSections() {
+    const chosen = courseCatalog.filter((entry) => selectedCourseSections.has(courseSectionLabel(entry.lesson)));
+    addCourseEntries(chosen, "chapter");
+    setSelectedCourseSections(new Set());
   }
 
   function addSelectedNewsWords() {
@@ -1554,6 +1565,15 @@ export default function Home() {
   const currentCourseWeekImported = state.course.importedWeeks.includes(state.weekNumber);
   const currentCourseWordCount = COURSE_META.weekCounts[state.weekNumber - 1];
   const currentCourseLessonCount = COURSE_META.weekLessonCounts[state.weekNumber - 1];
+  const courseSectionCounts = new Map<string, number>();
+  for (const entry of courseCatalog) {
+    const section = courseSectionLabel(entry.lesson);
+    courseSectionCounts.set(section, (courseSectionCounts.get(section) ?? 0) + 1);
+  }
+  const courseSections = [...courseSectionCounts].map(([label, count]) => ({ label, count }));
+  const selectedCourseSectionEntryCount = courseSections
+    .filter((section) => selectedCourseSections.has(section.label))
+    .reduce((total, section) => total + section.count, 0);
   const catalogWeekEntries = courseCatalog.filter((entry) => entry.week === catalogWeek);
   const catalogLessons = [...new Set(catalogWeekEntries.map((entry) => entry.lesson))];
   const activeCatalogLesson = catalogLessons.includes(catalogLesson) ? catalogLesson : (catalogLessons[0] ?? "");
@@ -1796,6 +1816,12 @@ export default function Home() {
       <div className="card span-12"><div className="row spread"><div><h2>Vocabulary bank</h2><p className="muted">Choose words from ChiMishe by week and lesson. Anything you add can appear in reviews, readings, and listenings.</p></div><span className="pill">{state.words.length} in your bank</span></div></div>
       <div className="card span-12 course-catalog">
         <div className="row spread catalog-heading"><div><h2>{COURSE_META.title}</h2><p className="muted">{COURSE_META.entries.toLocaleString()} entries · {COURSE_META.lessonLists} lesson lists · {COURSE_META.weeks} weeks</p></div><button className="secondary" onClick={() => void importCourseWeek(catalogWeek)} disabled={courseBusy || state.course.importedWeeks.includes(catalogWeek)}>{state.course.importedWeeks.includes(catalogWeek) ? `Week ${catalogWeek} added` : courseBusy ? "Adding…" : `Add all of Week ${catalogWeek}`}</button></div>
+        <details className="chapter-picker">
+          <summary>Choose whole chapters or modules</summary>
+          <p>Select several sections, then add their vocabulary in one step.</p>
+          <div className="chapter-options">{courseSections.map((section) => <label key={section.label}><input type="checkbox" checked={selectedCourseSections.has(section.label)} onChange={() => setSelectedCourseSections((current) => { const next = new Set(current); if (next.has(section.label)) next.delete(section.label); else next.add(section.label); return next; })} /><span>{section.label}</span><small>{section.count} words</small></label>)}</div>
+          <div className="chapter-actions"><button className="text-button" disabled={!selectedCourseSections.size} onClick={() => setSelectedCourseSections(new Set())}>Clear</button><button className="primary" disabled={!selectedCourseSections.size} onClick={addSelectedCourseSections}>Add {selectedCourseSections.size || "selected"} {selectedCourseSections.size === 1 ? "chapter" : "chapters"} · {selectedCourseSectionEntryCount.toLocaleString()} words</button></div>
+        </details>
         <div className="catalog-controls">
           <label><span>Week</span><select value={catalogWeek} onChange={(event) => { setCatalogWeek(Number(event.target.value)); setCatalogLesson(""); setSelectedCourseEntries(new Set()); }}>{Array.from({ length: COURSE_META.weeks }, (_, index) => index + 1).map((week) => <option key={week} value={week}>Week {week} · {COURSE_META.weekCounts[week - 1]} words</option>)}</select></label>
           <label><span>Lesson</span><select value={activeCatalogLesson} onChange={(event) => { setCatalogLesson(event.target.value); setSelectedCourseEntries(new Set()); }}>{catalogLessons.map((lesson) => <option key={lesson} value={lesson}>{lesson}</option>)}</select></label>
