@@ -46,8 +46,8 @@ const ONBOARDING_KEY = "ilr-persian-onboarding-v1";
 const LEGACY_KEYS = ["ilr-persian-v2", "ilr-persian-v1"];
 const PERSIAN_WORD_PATTERN = /([\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06FA-\u06FC\u200C]+)/g;
 const IS_PERSIAN_WORD = /^[\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06FA-\u06FC\u200C]+$/;
-const SYNAPTX_URL = process.env.NEXT_PUBLIC_SYNAPTX_URL ?? (process.env.NODE_ENV === "production" ? "https://synapt-x.app" : "http://localhost:3002");
-const ASL_URL = process.env.NEXT_PUBLIC_ASL_URL ?? (process.env.NODE_ENV === "production" ? "https://persian-root-guide.clean-toad-6000.chatgpt.site" : "http://localhost:3000");
+const SYNAPTX_URL = process.env.NEXT_PUBLIC_SYNAPTX_URL ?? (process.env.NODE_ENV === "production" ? "https://synapt-x.vercel.app" : "http://localhost:3002");
+const ASL_URL = process.env.NEXT_PUBLIC_ASL_URL ?? (process.env.NODE_ENV === "production" ? "https://get-asl.vercel.app" : "http://localhost:3000");
 const NEWS_CATALOG = newsVocabulary();
 
 function syntaxUrl(sentence: string) {
