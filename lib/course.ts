@@ -25,24 +25,22 @@ type CourseCatalog = {
 };
 
 export const COURSE_META = {
-  id: "dli-ch4-ch5l1-news-2026-09-01",
-  title: "DLI Chapter 4–5.1 + News Cycle",
+  id: "chimishe-v22-2",
+  title: "ChiMishe course vocabulary",
   sourceFile: "ChiMishe V22.2.xlsm",
-  entries: 194,
-  lessonLists: 3,
-  weeks: 1,
-  weekCounts: [194],
-  weekLessonCounts: [3],
+  entries: 6060,
+  lessonLists: 154,
+  weeks: 36,
+  weekCounts: [178, 170, 144, 200, 137, 185, 177, 159, 146, 169, 179, 158, 202, 153, 170, 164, 184, 147, 177, 174, 181, 136, 163, 171, 172, 205, 162, 151, 146, 204, 154, 158, 217, 121, 187, 159],
+  weekLessonCounts: [5, 6, 5, 6, 4, 6, 6, 5, 4, 4, 5, 4, 5, 5, 6, 6, 6, 5, 4, 5, 4, 4, 4, 4, 3, 4, 3, 3, 3, 4, 3, 3, 3, 2, 3, 2],
 } as const;
 
-export async function loadCourseWeek(week: number) {
+export async function loadCourseCatalog() {
   const module = await import("@/data/course-vocabulary.json");
-  const catalog = module.default as CourseCatalog;
-  return catalog.entries
-    .filter((entry) => [
-      "Unit 1 - Chapter 4 - Lesson 1",
-      "Unit 1 - Chapter 4 - Lesson 2",
-      "Unit 2 - Chapter 5 - Lesson 1",
-    ].includes(entry.lesson))
-    .map((entry) => ({ ...entry, week }));
+  return module.default as CourseCatalog;
+}
+
+export async function loadCourseWeek(week: number) {
+  const catalog = await loadCourseCatalog();
+  return catalog.entries.filter((entry) => entry.week === week);
 }
