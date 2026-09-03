@@ -14,7 +14,7 @@ type Props = {
 
 const WORD_PATTERN = /([\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06FA-\u06FC\u200C]+)/g;
 const IS_WORD = /^[\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06FA-\u06FC\u200C]+$/;
-const SYNAPTX_URL = process.env.NEXT_PUBLIC_SYNAPTX_URL ?? "http://localhost:3002";
+const SYNAPTX_URL = process.env.NEXT_PUBLIC_SYNAPTX_URL ?? (process.env.NODE_ENV === "production" ? "https://synapt-x.app" : "http://localhost:3002");
 function morphologyUrl(word: string) {
   const params = new URLSearchParams({ word, language: "fa", focus: "etymology" });
   return `${SYNAPTX_URL}/morphology.html?${params}`;
