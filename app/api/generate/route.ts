@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
 import { openAiErrorResponse } from "@/lib/openai-error";
+import { unselectedContentWords } from "@/lib/practice-vocabulary";
 
 export const runtime = "nodejs";
 
@@ -65,6 +66,7 @@ export async function POST(request: Request) {
   const model = process.env.OPENAI_MODEL || "gpt-5.4-mini";
 
   let prompt = "";
+  let selectedVocabulary: string[] = [];
   if (body.kind === "define_words") {
     prompt = `Return JSON only. Define and romanize these Persian vocabulary items for a serious learner: ${(body.words ?? []).join(", ")}. Preserve the exact Persian display form. Give the most useful concise English meaning in context; for verbs use an infinitive beginning with "to". Romanization should be readable and consistent.\n\nReturn this exact shape:\n{"words":[{"displayForm":"...","definition":"...","romanization":"..."}]}`;
   } else if (body.kind === "advanced_words") {
@@ -73,7 +75,7 @@ export async function POST(request: Request) {
     const mode = body.kind === "reading" ? "reading" : "listening";
     const level = Math.max(1, Math.min(4, body.targetIlr ?? 1));
     const transfer = body.practiceMode === "transfer";
-    const selectedVocabulary = [...new Set((body.targetWords ?? []).map((word) => word.trim()).filter(Boolean))];
+    selectedVocabulary = [...new Set((body.targetWords ?? []).map((word) => word.trim()).filter(Boolean))];
     if (!selectedVocabulary.length) {
       return NextResponse.json({ error: "Choose vocabulary before generating practice." }, { status: 400 });
     }
@@ -111,15 +113,30 @@ Return this exact shape:
 
   try {
     const isPractice = body.kind === "reading" || body.kind === "listening";
-    const response = await client.responses.create({
-      model,
-      store: false,
-      input: prompt,
-      max_output_tokens: isPractice ? 3200 : 2200,
-      reasoning: { effort: isPractice ? "low" : "none" },
-      text: { format: isPractice ? practiceResponseFormat : { type: "json_object" }, verbosity: "low" },
-    });
-    return NextResponse.json(parseJson(response.output_text));
+    const generate = (input: string) => client.responses.create({
+        model,
+        store: false,
+        input,
+        max_output_tokens: isPractice ? 3200 : 2200,
+        reasoning: { effort: isPractice ? "low" : "none" },
+        text: { format: isPractice ? practiceResponseFormat : { type: "json_object" }, verbosity: "low" },
+      });
+    let response = await generate(prompt);
+    let data = parseJson(response.output_text);
+
+    if (isPractice) {
+      let violations = unselectedContentWords(String(data.textFa ?? ""), selectedVocabulary);
+      if (violations.length) {
+        response = await generate(`${prompt}\n\nREPAIR THE PREVIOUS DRAFT. It used these unselected Persian content words or verb forms: ${violations.join(", ")}. Rewrite the passage and questions without them. Use only the selected dictionary forms and their natural inflections. Previous draft:\n${JSON.stringify(data)}`);
+        data = parseJson(response.output_text);
+        violations = unselectedContentWords(String(data.textFa ?? ""), selectedVocabulary);
+      }
+      if (violations.length) {
+        return NextResponse.json({ error: "The selected words could not form a natural closed-vocabulary passage. Add a few more useful verbs or nouns and try again." }, { status: 422 });
+      }
+    }
+
+    return NextResponse.json(data);
   } catch (error) {
     console.error(error);
     return openAiErrorResponse(error, "Generation failed.");

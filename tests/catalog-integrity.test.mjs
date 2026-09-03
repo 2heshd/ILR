@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { selectContextWords } from "../lib/adaptive.ts";
+import { unselectedContentWords } from "../lib/practice-vocabulary.ts";
 import { dedupeLexicalWords, removeDeletedSharedWord } from "../lib/word-merge.js";
 
 const course = JSON.parse(await readFile(new URL("../data/course-vocabulary.json", import.meta.url), "utf8"));
@@ -64,8 +65,17 @@ test("reading and listening generation are constrained to learner-selected vocab
   assert.match(route, /name: "persian_practice_item"/u);
   assert.match(route, /newWordsIntroduced: \{ type: "array", maxItems: 0/u);
   assert.match(route, /reasoning: \{ effort: isPractice \? "low" : "none" \}/u);
+  assert.match(route, /REPAIR THE PREVIOUS DRAFT/u);
+  assert.match(route, /status: 422/u);
   assert.match(pageSource, /if \(!state\.words\.length\)/u);
   assert.match(pageSource, /selectedContextKeys/u);
+});
+
+test("closed-vocabulary validation accepts inflections and rejects unselected content", () => {
+  const selected = ["دولت", "گزارش", "اعلام کردن", "اقتصاد", "کشور", "کاهش"];
+  assert.deepEqual(unselectedContentWords("دولت گزارش را اعلام کرد و اقتصاد کشور کاهش یافت.", [...selected, "یافتن"]), []);
+  assert.deepEqual(unselectedContentWords("دولت‌ها گزارش را اعلام کردند.", selected), []);
+  assert.deepEqual(unselectedContentWords("اقتصاد کشور کاهش داشت.", selected), ["داشت"]);
 });
 
 test("shared vocabulary merges by normalized Persian form without losing review references", () => {
