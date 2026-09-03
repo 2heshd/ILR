@@ -11,7 +11,7 @@ The distilled Deep Research requirements live in [`docs/MASTER_SPEC.md`](docs/MA
 - normalizes Persian spelling variants and blocks duplicates
 - fills missing English definitions + romanization when AI is configured
 - adds exactly **5 advanced government/politics/economics/security/diplomacy terms** per week without repeating learned items
-- includes a starter news-frequency bank of 100 unique terms derived from a 2,000-token BBC Persian and Iran International sample
+- includes an opt-in news-frequency catalog of 100 unique terms derived from a 2,000-token BBC Persian and Iran International sample
 - schedules vocabulary with **FSRS** rather than fixed intervals
 - measures retrieval latency and turns a correct response into an automatic Easy/Good/Hard grade based on speed
 - keeps vocabulary recall to two decisions: **Reveal → I was right / I was wrong**

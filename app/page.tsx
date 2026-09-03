@@ -1676,7 +1676,7 @@ export default function Home() {
           <button className="queue-button" onClick={() => setTab("listening")}><span>Listening lab</span><strong>{listeningAverage || "start"}</strong></button>
           <button className="queue-button" onClick={() => setTab("speaking")}><span>Speaking</span><strong>{speakingAverage || `S${state.skillLevels.speaking}`}</strong></button>
           <button className="queue-button" onClick={() => setTab("analytics")}><span>Difficult items</span><strong>{weakWords.length}</strong></button>
-          <div className="queue-button"><span>Current cycle</span><strong>30 reports · 194 words</strong></div>
+          <div className="queue-button"><span>Practice library</span><strong>30 readings · 30 listenings</strong></div>
         </div>
       </div>}
 
