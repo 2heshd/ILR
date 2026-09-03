@@ -6,6 +6,7 @@ import { dedupeLexicalWords } from "../lib/word-merge.js";
 
 const course = JSON.parse(await readFile(new URL("../data/course-vocabulary.json", import.meta.url), "utf8"));
 const cycle = JSON.parse(await readFile(new URL("../data/curated-cycle.json", import.meta.url), "utf8"));
+const newsCatalog = JSON.parse(await readFile(new URL("../data/news-vocabulary.json", import.meta.url), "utf8"));
 const pageSource = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
 
 const normalize = (value) => String(value)
@@ -26,11 +27,16 @@ test("ChiMishe catalog is complete and internally consistent", () => {
   assert.deepEqual(weekCounts, course.meta.weekCounts);
 });
 
-test("news catalog contains 100 unique usable terms", () => {
-  const news = cycle.vocabulary.filter((word) => word.sourceType === "system_advanced");
-  assert.equal(news.length, 100);
-  assert.equal(new Set(news.map((word) => normalize(word.displayForm))).size, 100);
+test("news catalog contains 2,000 unique sourced usable terms", () => {
+  const news = newsCatalog.entries;
+  assert.equal(news.length, 2000);
+  assert.equal(newsCatalog.meta.entries, 2000);
+  assert.equal(newsCatalog.meta.frequencySampleEntries, 100);
+  assert.equal(newsCatalog.meta.newspaperBookEntries, 654);
+  assert.equal(newsCatalog.meta.advancedCourseEntries, 1246);
+  assert.equal(new Set(news.map((word) => normalize(word.displayForm))).size, 2000);
   assert.equal(news.filter((word) => !word.displayForm.trim() || !word.definition?.trim()).length, 0);
+  assert.equal(news.filter((word) => !["frequency_sample", "newspaper_book", "advanced_course"].includes(word.provenance)).length, 0);
 });
 
 test("new learners choose vocabulary instead of receiving the pilot bank", () => {
