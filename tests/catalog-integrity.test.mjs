@@ -109,3 +109,10 @@ test("a newly added Asl word enters the context pool used by readings and listen
   assert.equal(selected.length, 80);
   assert.ok(selected.includes("استخراج کردن"));
 });
+
+test("personal vocabulary carries its saved meaning and pronunciation into Synaptx", () => {
+  assert.match(pageSource, /function morphologyUrl\(word: string, definition\?: string, romanization\?: string\)/u);
+  assert.match(pageSource, /params\.set\("definition", definition\.trim\(\)\)/u);
+  assert.match(pageSource, /params\.set\("romanization", romanization\.trim\(\)\)/u);
+  assert.match(pageSource, /morphologyUrl\(word\.displayForm, word\.definition, word\.romanization\)/u);
+});
