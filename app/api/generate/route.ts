@@ -14,6 +14,40 @@ type GenerateBody = {
   practiceMode?: "controlled" | "transfer";
 };
 
+const practiceResponseFormat = {
+  type: "json_schema" as const,
+  name: "persian_practice_item",
+  strict: true,
+  schema: {
+    type: "object",
+    additionalProperties: false,
+    required: ["title", "textFa", "topic", "register", "knownWordsUsed", "newWordsIntroduced", "questions"],
+    properties: {
+      title: { type: "string" },
+      textFa: { type: "string" },
+      topic: { type: "string" },
+      register: { type: "string" },
+      knownWordsUsed: { type: "array", items: { type: "string" } },
+      newWordsIntroduced: { type: "array", maxItems: 0, items: { type: "string" } },
+      questions: {
+        type: "array",
+        minItems: 5,
+        maxItems: 5,
+        items: {
+          type: "object",
+          additionalProperties: false,
+          required: ["question", "type", "referenceAnswer"],
+          properties: {
+            question: { type: "string" },
+            type: { type: "string", enum: ["main_idea", "detail", "inference", "discourse"] },
+            referenceAnswer: { type: "string" },
+          },
+        },
+      },
+    },
+  },
+};
+
 function parseJson(text: string) {
   const cleaned = text.trim().replace(/^```json\s*/i, "").replace(/```$/i, "").trim();
   return JSON.parse(cleaned);
@@ -71,13 +105,14 @@ Return this exact shape:
   }
 
   try {
+    const isPractice = body.kind === "reading" || body.kind === "listening";
     const response = await client.responses.create({
       model,
       store: false,
       input: prompt,
-      max_output_tokens: 2200,
-      reasoning: { effort: body.kind === "reading" || body.kind === "listening" ? "low" : "none" },
-      text: { verbosity: "low" },
+      max_output_tokens: isPractice ? 3200 : 2200,
+      reasoning: { effort: isPractice ? "low" : "none" },
+      text: { format: isPractice ? practiceResponseFormat : { type: "json_object" }, verbosity: "low" },
     });
     return NextResponse.json(parseJson(response.output_text));
   } catch (error) {

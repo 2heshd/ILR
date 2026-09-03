@@ -58,7 +58,9 @@ test("reading and listening generation are constrained to learner-selected vocab
   assert.match(route, /treat bank entries as dictionary forms/u);
   assert.match(route, /never use an infinitive ending in کردن, شدن, دادن, گرفتن, داشتن, or بودن as a finite sentence predicate/u);
   assert.match(route, /selected-only vocabulary must never produce broken Persian/u);
-  assert.match(route, /body\.kind === "reading" \|\| body\.kind === "listening" \? "low" : "none"/u);
+  assert.match(route, /name: "persian_practice_item"/u);
+  assert.match(route, /newWordsIntroduced: \{ type: "array", maxItems: 0/u);
+  assert.match(route, /reasoning: \{ effort: isPractice \? "low" : "none" \}/u);
   assert.match(pageSource, /if \(!state\.words\.length\)/u);
   assert.match(pageSource, /selectedContextKeys/u);
 });
