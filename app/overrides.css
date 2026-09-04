@@ -2898,3 +2898,14 @@ input[type="range"] {
 .student-demo-picker{display:flex;gap:.5rem;flex-wrap:wrap}.student-demo-picker button[aria-pressed=true]{outline:2px solid #f47a62;outline-offset:2px}
 .classroom-workspace header h1{white-space:normal;line-height:1.15;overflow:visible}.classroom-workspace p,.student-breakdown dl{font-size:1rem;line-height:1.6}.classroom-workspace h2{font-size:1.6rem}.classroom-workspace h3{font-size:1.2rem}
 @media(max-width:820px){.tabs{height:calc(112px + env(safe-area-inset-bottom));padding-inline:0}.tabs .suite-navigation{height:36px;padding:4px 12px;align-items:center;justify-content:center;gap:20px;flex-wrap:nowrap;font-size:12px}.tabs .nav-items{grid-template-columns:repeat(6,minmax(0,1fr));height:72px}.tabs .tab{font-size:12px;line-height:1.15;white-space:normal;overflow-wrap:anywhere;min-height:64px}.tabs .nav-bullet{font-size:12px}.tabs .suite-navigation a{display:flex;align-items:center;min-height:32px}main{padding-bottom:calc(136px + env(safe-area-inset-bottom))}.header-level-controls label{font-size:12px}.header-level-controls select{width:30px}.notice{font-size:14px}.sync-indicator{font-size:12px}}
+.plan-shortcut{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:14px;border-bottom:1px solid #7774;padding:12px 0}
+.plan-mode-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
+.study-plan button[aria-pressed=true]{border-color:currentColor;background:#7772}
+.study-plan .plan-course-tree details{border-top:1px solid #7774;padding:12px 0}
+.study-plan .plan-course-tree summary{font-size:16px;font-weight:600;min-height:44px;overflow-wrap:anywhere}
+.plan-chapter{margin:12px 0 0 24px}
+.plan-group-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.plan-group-actions small{font-size:14px;margin-right:auto}
+.plan-lesson{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0;border-top:1px solid #7773;margin-left:24px;font-size:14px}
+.study-plan .plan-word-list{max-height:none}
+@media(max-width:700px){.plan-chapter,.plan-lesson{margin-left:12px}.plan-lesson{align-items:flex-start;flex-direction:column}.plan-group-actions{width:100%;gap:8px}.plan-group-actions button{flex:1}.plan-group-actions small{width:100%}.plan-mode-tabs button{flex:1 1 40%}.study-plan .row input{min-width:0}}

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
-import StudyPlanPicker from "@/components/StudyPlanPicker";
+import StudyPlanPicker, {planLabels} from "@/components/StudyPlanPicker";
 import { dueWords, plannedWords, type PlanMode, type StudyPlan } from "@/lib/study-plans";
 import { independentSchedules } from "@/lib/independent-schedules";
 import { patternHints } from "@/lib/persian-patterns";
@@ -273,6 +273,7 @@ export default function Home() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showProgressDetails, setShowProgressDetails] = useState(false);
   const [courseBusy, setCourseBusy] = useState(false);
+  const [planMode, setPlanMode] = useState<PlanMode>('visual');
   const [courseCatalog, setCourseCatalog] = useState<CourseVocabularyEntry[]>([]);
   const [catalogWeek, setCatalogWeek] = useState(1);
   const [catalogLesson, setCatalogLesson] = useState("");
@@ -655,7 +656,7 @@ export default function Home() {
   useEffect(()=>{const timer=setInterval(()=>setClockNow(Date.now()),15000);return()=>clearInterval(timer);},[]);
   const due=useMemo(()=>dueWords(state,reviewModality,new Date(clockNow)),[state,reviewModality,clockNow]);
   function updatePlan(mode:PlanMode,plan:StudyPlan){setState(current=>({...current,studyPlans:{...current.studyPlans,[mode]:plan}}));}
-  function planPicker(mode:PlanMode){return <StudyPlanPicker key={mode} state={state} mode={mode} onChange={plan=>updatePlan(mode,plan)}/>;}
+  function planPicker(mode:PlanMode){const plan=state.studyPlans?.[mode];return <div className="plan-shortcut span-12"><span>{planLabels[mode]} · {plan?.enabled?`${plannedWords(state,mode).length} active words`:(mode==='reading'||mode==='listening'?'Choose vocabulary':'All due words')}</span><button onClick={()=>{setPlanMode(mode);setTab('vocabulary');window.scrollTo({top:0,behavior:'smooth'});}}>Edit plan in Vocabulary →</button></div>;}
   const current = due[0];
   const allocation = useMemo(() => adaptiveAllocation(state), [state]);
   const trainingPhase = useMemo(() => currentTrainingPhase(state.weekNumber), [state.weekNumber]);
@@ -895,7 +896,7 @@ export default function Home() {
     }
   }
 
-  function addCourseEntries(chosen: CourseVocabularyEntry[], sourceLabel: string) {
+  function addCourseEntries(chosen: CourseVocabularyEntry[], sourceLabel: string, targetPlan?:{mode:PlanMode;plan:StudyPlan;add:boolean}) {
     if (!chosen.length) return;
     const existingKeys = new Set(state.words.map((word) => courseWordKey(word.displayForm)));
     const addable = chosen.filter((entry) => {
@@ -906,7 +907,7 @@ export default function Home() {
     });
     setState((currentState) => {
       const existing = new Set(currentState.words.map((word) => courseWordKey(word.displayForm)));
-      const incoming = addable.filter((entry) => {
+      const incoming = (targetPlan&&!targetPlan.add?[]:chosen).filter((entry) => {
         const key = courseWordKey(entry.fa);
         if (!key || existing.has(key)) return false;
         existing.add(key);
@@ -936,9 +937,17 @@ export default function Home() {
           modalityCards: { visual: fsrsCard, audio: fsrsCard, cloze: fsrsCard },
         };
       });
-      return { ...currentState, words: [...currentState.words, ...incoming] };
+      const words=[...currentState.words,...incoming];
+      if(targetPlan){
+        const keys=new Set(chosen.map(entry=>courseWordKey(entry.fa)));
+        const currentPlan=currentState.studyPlans?.[targetPlan.mode]??targetPlan.plan;
+        const ids=new Set(currentPlan.wordIds);
+        for(const word of words)if(keys.has(courseWordKey(word.displayForm))){if(targetPlan.add)ids.add(word.id);else ids.delete(word.id);}
+        return {...currentState,words,studyPlans:{...currentState.studyPlans,[targetPlan.mode]:{...currentPlan,enabled:true,wordIds:[...ids]}}};
+      }
+      return { ...currentState, words };
     });
-    setStatus(`${addable.length} ${sourceLabel} ${addable.length === 1 ? "word" : "words"} added${addable.length < chosen.length ? ` · ${chosen.length - addable.length} already in your bank` : ""}.`);
+    setStatus(targetPlan?`${planLabels[targetPlan.mode]} plan updated. ${targetPlan.add?'Missing words were added to your bank.':'Your saved vocabulary and other plans are unchanged.'}`:`${addable.length} ${sourceLabel} ${addable.length === 1 ? "word" : "words"} added${addable.length < chosen.length ? ` · ${chosen.length - addable.length} already in your bank` : ""}.`);
   }
 
   function addSelectedCourseWords() {
@@ -1852,6 +1861,7 @@ export default function Home() {
     />}
 
     {tab === "vocabulary" && <section className="grid">
+      <StudyPlanPicker state={state} mode={planMode} catalog={courseCatalog} onModeChange={setPlanMode} onChange={plan=>updatePlan(planMode,plan)} onCourseChange={(entries,add,plan)=>addCourseEntries(entries,'course',{mode:planMode,plan,add})}/>
       <div className="card span-12"><div className="row spread"><div><h2>Vocabulary bank</h2><p className="muted">Choose words from ChiMishe by week and lesson. Anything you add can appear in reviews, readings, and listenings.</p></div><span className="pill">{state.words.length} in your bank</span></div></div>
       <div className="card span-12 course-catalog">
         <div className="row spread catalog-heading"><div><h2>{COURSE_META.title}</h2><p className="muted">{COURSE_META.entries.toLocaleString()} entries · {COURSE_META.lessonLists} lesson lists · {COURSE_META.weeks} weeks</p></div><button className="secondary" onClick={() => void importCourseWeek(catalogWeek)} disabled={courseBusy || state.course.importedWeeks.includes(catalogWeek)}>{state.course.importedWeeks.includes(catalogWeek) ? `Week ${catalogWeek} added` : courseBusy ? "Adding…" : `Add all of Week ${catalogWeek}`}</button></div>
