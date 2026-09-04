@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ComprehensionGrade, PassageQuestion } from "@/lib/types";
 
 type Completion = {
@@ -48,15 +48,18 @@ export default function ComprehensionGrader({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [selfScore, setSelfScore] = useState(70);
+  const submitted = useRef(false);
 
   useEffect(() => {
     setAnswers(questions.map(() => ""));
     setGrade(null);
     setError("");
+    submitted.current = false;
   }, [questions]);
 
   async function submit() {
-    if (disabled || busy || !questions.length) return;
+    if (disabled || busy || submitted.current || !questions.length) return;
+    submitted.current = true;
     setBusy(true);
     setError("");
     try {
@@ -79,6 +82,7 @@ export default function ComprehensionGrader({
       setGrade(result);
       onComplete({ answers, grade: result, gradingMode: "ai" });
     } catch (cause) {
+      submitted.current = false;
       setError(cause instanceof Error ? cause.message : "Automatic grading failed.");
     } finally {
       setBusy(false);
@@ -86,6 +90,8 @@ export default function ComprehensionGrader({
   }
 
   function saveSelfScore() {
+    if (disabled || busy || submitted.current) return;
+    submitted.current = true;
     const result = emptyGrade(selfScore);
     setGrade(result);
     onComplete({ answers, grade: result, gradingMode: "self" });

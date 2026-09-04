@@ -1188,6 +1188,7 @@ export default function Home() {
     const attempt: PassageAttempt = {
       id: id(),
       passageId: latestPassage.id,
+      questionTypes: activeReadingQuestions.map(question => question.type),
       attemptedAt: new Date().toISOString(),
       durationMs: readingDurationMs,
       comprehensionScore: result.grade.overallScore,
@@ -1376,6 +1377,7 @@ export default function Home() {
     const attempt: ListeningAttempt = {
       id: id(),
       listeningItemId: latestListening.id,
+      questionTypes: activeListeningQuestions.map(question => question.type),
       attemptedAt: new Date().toISOString(),
       listensCount,
       comprehensionScore: result.grade.overallScore,
@@ -1611,7 +1613,7 @@ export default function Home() {
   const inferenceSentenceCount = latestPassage ? persianSentences(latestPassage.textFa).length : 0;
   const inferenceReady = readingMode !== "inference"
     || (sentenceGists.length === inferenceSentenceCount && sentenceGists.every((gist) => gist.trim()));
-  const focusedReadingQuestions = latestPassage?.questions.filter((question) => question.type !== "detail") ?? [];
+  const focusedReadingQuestions = useMemo(() => latestPassage?.questions.filter((question) => question.type !== "detail") ?? [], [latestPassage?.questions]);
   const activeReadingQuestions = readingMode === "inference" && focusedReadingQuestions.length
     ? focusedReadingQuestions
     : (latestPassage?.questions ?? []);
@@ -1622,7 +1624,7 @@ export default function Home() {
     && listeningGists.every((gist) => gist.trim())
     && gistSentenceListenCounts.length === gistListeningSentences.length
     && gistSentenceListenCounts.every((count) => count >= 1);
-  const focusedListeningQuestions = latestListening?.questions.filter((question) => question.type !== "detail") ?? [];
+  const focusedListeningQuestions = useMemo(() => latestListening?.questions.filter((question) => question.type !== "detail") ?? [], [latestListening?.questions]);
   const activeListeningQuestions = listeningMode === "gist" && focusedListeningQuestions.length
     ? focusedListeningQuestions
     : (latestListening?.questions ?? []);

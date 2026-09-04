@@ -131,6 +131,7 @@ export type Passage = {
 };
 
 export type PassageAttempt = {
+  questionTypes?: PassageQuestion['type'][];
   id: string;
   passageId: string;
   attemptedAt: string;
@@ -176,6 +177,7 @@ export type ListeningItem = {
 };
 
 export type ListeningAttempt = {
+  questionTypes?: PassageQuestion['type'][];
   id: string;
   listeningItemId: string;
   attemptedAt: string;
