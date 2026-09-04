@@ -665,6 +665,8 @@ export default function Home() {
   const medianRecall = median(state.reviews.slice(-250).map((review) => review.responseMs));
   const latestPassage = state.passages.find((item) => item.id === activePassageId) ?? state.passages[0];
   const latestListening = state.listeningItems.find((item) => item.id === activeListeningId) ?? state.listeningItems[0];
+  const focusedReadingQuestions = useMemo(() => latestPassage?.questions.filter((question) => question.type !== "detail") ?? [], [latestPassage?.questions]);
+  const focusedListeningQuestions = useMemo(() => latestListening?.questions.filter((question) => question.type !== "detail") ?? [], [latestListening?.questions]);
   const transcriptRevealPercent = Math.min(100, transcriptRevealStep * 30);
   const transcriptVisible = transcriptRevealStep > 0;
   const listeningReveal = useMemo(
@@ -1622,7 +1624,6 @@ export default function Home() {
   const inferenceSentenceCount = latestPassage ? persianSentences(latestPassage.textFa).length : 0;
   const inferenceReady = readingMode !== "inference"
     || (sentenceGists.length === inferenceSentenceCount && sentenceGists.every((gist) => gist.trim()));
-  const focusedReadingQuestions = useMemo(() => latestPassage?.questions.filter((question) => question.type !== "detail") ?? [], [latestPassage?.questions]);
   const activeReadingQuestions = readingMode === "inference" && focusedReadingQuestions.length
     ? focusedReadingQuestions
     : (latestPassage?.questions ?? []);
@@ -1633,7 +1634,6 @@ export default function Home() {
     && listeningGists.every((gist) => gist.trim())
     && gistSentenceListenCounts.length === gistListeningSentences.length
     && gistSentenceListenCounts.every((count) => count >= 1);
-  const focusedListeningQuestions = useMemo(() => latestListening?.questions.filter((question) => question.type !== "detail") ?? [], [latestListening?.questions]);
   const activeListeningQuestions = listeningMode === "gist" && focusedListeningQuestions.length
     ? focusedListeningQuestions
     : (latestListening?.questions ?? []);

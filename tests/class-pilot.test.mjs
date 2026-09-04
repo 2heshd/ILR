@@ -3,6 +3,15 @@ import assert from 'node:assert/strict';
 import {normalizeClassCode,validClassCode,classInviteLink,inviteCodeFromHash} from '../lib/class-invites.ts';
 import {csvCell,classroomCsv} from '../lib/classroom-export.ts';
 import {compactStudyState} from '../lib/storage.ts';
+import {readFileSync} from 'node:fs';
+test('focused comprehension hooks run before the loading return',()=>{
+ const source=readFileSync(new URL('../app/page.tsx',import.meta.url),'utf8');
+ const loadingReturn=source.indexOf('\n  if (!loaded) return');assert.ok(loadingReturn>=0);
+ for(const name of ['focusedReadingQuestions','focusedListeningQuestions']){
+  const hook=source.indexOf(`  const ${name} = useMemo`);
+  assert.ok(hook>=0&&hook<loadingReturn,`${name} must run before the loading return`);
+ }
+});
 test('invite links normalize codes and keep them out of the query string',()=>{
  const code='abcdef123456abcdef123456';
  assert.equal(normalizeClassCode(' ABCDEF 123456ABCDEF123456 '),code);
