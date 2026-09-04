@@ -31,7 +31,7 @@ begin
     on conflict(class_id,user_id) do update set display_name=excluded.display_name;
   return target;
 end $$;
-revoke all on function public.join_learning_class(text,text) from public;
+revoke all on function public.join_learning_class(text,text) from public, anon;
 grant execute on function public.join_learning_class(text,text) to authenticated;
 
 -- Return aggregate practice evidence only, never private notes or raw answers.
@@ -52,5 +52,5 @@ begin
   ) rows;
   return report;
 end $$;
-revoke all on function public.learning_class_report(uuid) from public;
+revoke all on function public.learning_class_report(uuid) from public, anon;
 grant execute on function public.learning_class_report(uuid) to authenticated;
