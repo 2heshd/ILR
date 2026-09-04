@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import StudyPlanPicker, {planLabels} from "@/components/StudyPlanPicker";
+import {canManageClasses} from "@/lib/classroom-access";
 import { dueWords, plannedWords, type PlanMode, type StudyPlan } from "@/lib/study-plans";
 import { independentSchedules } from "@/lib/independent-schedules";
 import { patternHints } from "@/lib/persian-patterns";
@@ -1702,7 +1703,7 @@ export default function Home() {
     </header>
 
     <nav className="tabs" aria-label="Cursos navigation">
-      <div className="suite-navigation"><a href="https://synapt-x.vercel.app">Synaptx ↗</a><a href="https://get-asl.vercel.app">Asl ↗</a><a href="/classroom">Classroom ↗</a></div>
+      <div className="suite-navigation"><a href="https://synapt-x.vercel.app">Synaptx ↗</a><a href="https://get-asl.vercel.app">Asl ↗</a>{canManageClasses(cloudUser)&&<a href="/classroom">Classroom ↗</a>}</div>
       <div className="nav-section-heading"><span><i className="nav-flower">✺</i> Cursos <small>by Synaptx</small></span><span>+</span></div>
       <div className="nav-dash" />
       <div className="nav-section-heading"><span><i>▲</i> Study</span><span>−</span></div>
