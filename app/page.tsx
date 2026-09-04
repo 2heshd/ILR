@@ -51,7 +51,7 @@ const ONBOARDING_KEY = "ilr-persian-onboarding-v1";
 const LEGACY_KEYS = ["ilr-persian-v2", "ilr-persian-v1"];
 const PERSIAN_WORD_PATTERN = /([\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06FA-\u06FC\u200C]+)/g;
 const IS_PERSIAN_WORD = /^[\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06FA-\u06FC\u200C]+$/;
-const SYNAPTX_URL = process.env.NEXT_PUBLIC_SYNAPTX_URL ?? (process.env.NODE_ENV === "production" ? "https://synapt-x.app" : "http://localhost:3002");
+const SYNAPTX_URL = process.env.NEXT_PUBLIC_SYNAPTX_URL ?? (process.env.NODE_ENV === "production" ? "https://synapt-x.vercel.app" : "http://localhost:3002");
 const ASL_URL = process.env.NEXT_PUBLIC_ASL_URL ?? (process.env.NODE_ENV === "production" ? "https://get-asl.vercel.app" : "http://localhost:3000");
 const NEWS_CATALOG = newsVocabulary();
 
@@ -1651,7 +1651,7 @@ export default function Home() {
     </header>
 
     <nav className="tabs" aria-label="Cursos navigation">
-      <div className="suite-navigation"><a href="https://synapt-x.app">Synaptx ↗</a><a href="https://get-asl.vercel.app">Asl ↗</a><a href="/classroom">Classroom ↗</a></div>
+      <div className="suite-navigation"><a href="https://synapt-x.vercel.app">Synaptx ↗</a><a href="https://get-asl.vercel.app">Asl ↗</a><a href="/classroom">Classroom ↗</a></div>
       <div className="nav-section-heading"><span><i className="nav-flower">✺</i> Cursos <small>by Synaptx</small></span><span>+</span></div>
       <div className="nav-dash" />
       <div className="nav-section-heading"><span><i>▲</i> Study</span><span>−</span></div>
