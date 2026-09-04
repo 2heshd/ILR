@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
+import AccountClasses from './AccountClasses';
+import {inviteCodeFromHash,normalizeClassCode,validClassCode} from '@/lib/class-invites';
 
 type SetupStatus = {
   accounts: { configured: boolean };
@@ -13,7 +15,7 @@ type Props = {
   cloudReady: boolean;
   status: string;
   onSignIn: (email: string, password: string) => Promise<void>;
-  onSignUp: (username: string, email: string, password: string) => Promise<void>;
+  onSignUp: (username: string, email: string, password: string, classCode?:string) => Promise<void>;
   onSignOut: () => Promise<void>;
   onResetPassword: (email: string) => Promise<void>;
   onChangePassword: (password: string) => Promise<void>;
@@ -32,8 +34,12 @@ export default function AccountWorkspace({ user, username: savedUsername, cloudR
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  const [classCode,setClassCode]=useState('');
+  const [classConsent,setClassConsent]=useState(false);
 
   useEffect(() => {
+    const invited=inviteCodeFromHash(window.location.hash);
+    if(invited){setClassCode(invited);if(!user)setMode('signup');}
     fetch("/api/setup", { cache: "no-store" })
       .then((response) => response.json())
       .then((value: SetupStatus) => setSetup(value))
@@ -43,7 +49,7 @@ export default function AccountWorkspace({ user, username: savedUsername, cloudR
   const usernameValid = /^[A-Za-z0-9_]{3,24}$/.test(signupUsername);
   const formValid = mode === "reset"
     ? Boolean(email.trim())
-    : Boolean(email.trim() && password.length >= 8 && (mode === "signin" || (usernameValid && password === confirmPassword)));
+    : Boolean(email.trim() && password.length >= 8 && (mode === "signin" || (usernameValid && password === confirmPassword && (!classCode.trim() || (validClassCode(classCode)&&classConsent)))));
   const usernameValue = savedUsername || (user?.user_metadata?.username ? String(user.user_metadata.username) : "");
   const displayName = usernameValue || user?.email || "your account";
   const accountLabel = usernameValue ? `@${usernameValue}` : displayName;
@@ -53,7 +59,7 @@ export default function AccountWorkspace({ user, username: savedUsername, cloudR
     setBusy(true);
     try {
       if (mode === "reset") await onResetPassword(email.trim());
-      else if (mode === "signup") await onSignUp(signupUsername.trim(), email.trim(), password);
+      else if (mode === "signup") await onSignUp(signupUsername.trim(), email.trim(), password, normalizeClassCode(classCode)||undefined);
       else await onSignIn(email.trim(), password);
       setPassword("");
       setConfirmPassword("");
@@ -78,7 +84,7 @@ export default function AccountWorkspace({ user, username: savedUsername, cloudR
     }
   }
 
-  return <section className="account-workspace">
+  return <section className="account-workspace" id="account">
     <div className="account-overview">
       <span className="next-number">01</span>
       <h2>{user ? "Your progress is saved." : mode === "signup" ? "Create your account." : mode === "reset" ? "Reset your password." : "Keep your course with you."}</h2>
@@ -98,11 +104,13 @@ export default function AccountWorkspace({ user, username: savedUsername, cloudR
           {newPassword && <label>Confirm new password<input type="password" value={confirmNewPassword} onChange={(event) => setConfirmNewPassword(event.target.value)} minLength={8} autoComplete="new-password"/><small>{newPassword === confirmNewPassword ? "Passwords match." : "Passwords must match."}</small></label>}
           <button className="primary" type="submit" disabled={busy || !(/^[A-Za-z0-9_]{3,24}$/.test(newUsername)) || Boolean(newPassword && (newPassword.length < 8 || newPassword !== confirmNewPassword))}>{busy ? "Saving…" : "Save account"}</button>
         </form>}
+        <AccountClasses key={user.id} user={user} username={usernameValue}/>
       </> : setup?.accounts.configured ? <form className="account-form" onSubmit={(event) => { event.preventDefault(); void submit(); }}>
         {mode === "signup" && <label>Username<input value={signupUsername} onChange={(event) => setSignupUsername(event.target.value.replace(/[^A-Za-z0-9_]/g, ""))} placeholder="your_name" autoComplete="username" minLength={3} maxLength={24} required/><small>3–24 letters, numbers, or underscores.</small></label>}
         <label>Email<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" autoComplete="email" required/></label>
         {mode !== "reset" && <label>Password<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="8 characters minimum" autoComplete={mode === "signup" ? "new-password" : "current-password"} minLength={8} required/></label>}
         {mode === "signup" && <label>Confirm password<input type="password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} placeholder="Type it again" autoComplete="new-password" minLength={8} required/><small>{confirmPassword && password !== confirmPassword ? "Passwords must match." : ""}</small></label>}
+        {mode==='signup'&&<><label>Class code · optional<input value={classCode} onChange={e=>{setClassCode(e.target.value);setClassConsent(false);}} maxLength={48} autoCapitalize="none" autoCorrect="off" placeholder="Invite code from your teacher"/><small>You can also join later from My classes. If email confirmation is required, your code is kept for your first sign-in.</small></label>{classCode.trim()&&<label className="class-consent"><input type="checkbox" checked={classConsent} onChange={e=>setClassConsent(e.target.checked)} required/>Join this class using my username and share my vocabulary practice counts and text, audio, and pattern recall results with its owner. Reading/listening comprehension requires a separate opt-in; answers and notes stay private.</label>}</>}
         <div className="account-form-actions"><button className="primary" type="submit" disabled={!formValid || busy}>{busy ? "Working…" : mode === "signup" ? "Create account" : mode === "reset" ? "Send reset link" : "Sign in"}</button><button className="secondary" type="button" onClick={() => { setMode(mode === "signup" ? "signin" : "signup"); setPassword(""); setConfirmPassword(""); }}>{mode === "signup" ? "I already have an account" : "Create an account"}</button>{mode === "signin" && <button className="text-button" type="button" onClick={() => setMode("reset")}>Forgot password?</button>}{mode === "reset" && <button className="text-button" type="button" onClick={() => setMode("signin")}>Back to sign in</button>}</div>
       </form> : <div className="account-action setup-needed"><span>Account storage is not connected yet.</span><small>Add the Supabase project URL and public anon key to <code>.env.local</code>, then restart the app.</small></div>}
       {status && <p className="account-status">{status}</p>}

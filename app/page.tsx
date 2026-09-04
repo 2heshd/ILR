@@ -7,6 +7,7 @@ import { dueWords, plannedWords, type PlanMode, type StudyPlan } from "@/lib/stu
 import { independentSchedules } from "@/lib/independent-schedules";
 import { patternHints } from "@/lib/persian-patterns";
 import AccountWorkspace from "@/components/AccountWorkspace";
+import {inviteCodeFromHash,normalizeClassCode,validClassCode} from '@/lib/class-invites';
 import ComprehensionGrader from "@/components/ComprehensionGrader";
 import GistListening from "@/components/GistListening";
 import InferenceReadingText, { persianSentences } from "@/components/InferenceReadingText";
@@ -607,6 +608,12 @@ export default function Home() {
 
   useEffect(() => {
     if (!loaded) return;
+    const openAccount=()=>{if(inviteCodeFromHash(window.location.hash)||window.location.hash==='#account'){setTab('analytics');setShowOnboarding(false);setTimeout(()=>document.getElementById('account')?.scrollIntoView({block:'start'}),100);}};
+    openAccount();window.addEventListener('hashchange',openAccount);return()=>window.removeEventListener('hashchange',openAccount);
+  },[loaded]);
+
+  useEffect(() => {
+    if (!loaded) return;
     const params = new URLSearchParams(window.location.search);
     const displayForm = params.get("add_word")?.trim();
     if (!displayForm) return;
@@ -712,13 +719,14 @@ export default function Home() {
     setStatus(error ? friendlyAccountError(error) : "Signed in. Your course is syncing now.");
   }
 
-  async function signUp(username: string, email: string, password: string) {
+  async function signUp(username: string, email: string, password: string, classCode?:string) {
     const supabase = getSupabaseClient();
     if (!supabase) return;
+    if(classCode&&!validClassCode(classCode)){setStatus('Check the class invite code before creating your account.');return;}
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { username } },
+      options: { data: { username, ...(classCode?{pending_class_code:normalizeClassCode(classCode)}:{}) } },
     });
     if (error) {
       setStatus(friendlyAccountError(error));
@@ -732,7 +740,8 @@ export default function Home() {
         return;
       }
     }
-    setStatus(data.session ? "Account created. Your course is syncing now." : "Account created. Check your email once to confirm it, then sign in.");
+    if(data.session&&classCode){const {error:joinError}=await supabase.rpc('join_learning_class',{code:normalizeClassCode(classCode),learner_name:username});if(joinError){setStatus('Account created, but the class code could not be used. Check it with your teacher and retry in My classes.');return;}await supabase.auth.updateUser({data:{pending_class_code:null}});window.dispatchEvent(new Event('cursos-class-membership-change'));setStatus('Account created and class joined. Enable reading/listening sharing in classroom settings if you want those results included.');return;}
+    setStatus(data.session ? "Account created. Your course is syncing now." : classCode?"Account created. Confirm your email, sign in, then complete Join class under My classes; your code will be filled in.":"Account created. Check your email once to confirm it, then sign in.");
   }
 
   async function signOut() {

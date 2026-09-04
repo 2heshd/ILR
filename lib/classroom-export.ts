@@ -1,0 +1,8 @@
+import {comprehensionSummary,type StudentReport} from './student-report.ts';
+export function csvCell(value:unknown){let text=value===null||value===undefined?'':String(value);if(/^[\s]*[=+@-]/.test(text))text="'"+text;return '"'+text.replaceAll('"','""')+'"';}
+export function classroomCsv(className:string,students:StudentReport[]){
+ const headers=['period_start_utc','period_end_utc','class','learner_reference','display_name','vocabulary_reviews','text_recall_percent','audio_recall_percent','pattern_recall_percent','comprehension_shared'];
+ for(const mode of ['reading','listening']){headers.push(mode+'_ai_attempts',mode+'_ai_score',mode+'_self_attempts',mode+'_self_score');for(const category of ['main_idea','detail','inference','discourse'])headers.push(mode+'_'+category+'_questions',mode+'_'+category+'_score');}
+ const rows=students.map(student=>{const days=(student.daily??[]).map(d=>d.day).sort();const row:unknown[]=[days[0]??'',days.at(-1)??'',className,student.user_id,student.display_name,student.reviews,student.text_retention,student.audio_retention,student.pattern_retention,student.comprehension_shared===true];for(const mode of ['reading','listening'] as const){const summary=comprehensionSummary(student.comprehension_shared?student.comprehension??[]:[],mode);row.push(...(student.comprehension_shared?[summary.ai.length,summary.score,summary.self.length,summary.selfScore]:[null,null,null,null]));for(const category of ['main_idea','detail','inference','discourse']){const d=summary.dimensions.find(d=>d.type===category)!;row.push(student.comprehension_shared?d.count:null,student.comprehension_shared?d.score:null);}}return row;});
+ return '\uFEFF'+[headers,...rows].map(row=>row.map(csvCell).join(',')).join('\r\n');
+}

@@ -11,9 +11,14 @@ function compactWord(word: LexicalItem): LexicalItem {
 
 /** Keep large course selections within normal browser-storage limits. */
 export function compactStudyState(state: StudyState): StudyState {
+  const questionTypes=(questions:{type:'detail'|'inference'|'discourse'|'main_idea'}[]|undefined,focused:boolean)=>{if(!questions)return undefined;const filtered=focused?questions.filter(q=>q.type!=='detail'):questions;return (filtered.length?filtered:questions).map(q=>q.type);};
   return {
     ...state,
     words: state.words.map(compactWord),
+    // Keep exact assessment categories even when bundled source text is omitted.
+    // Do not age out attempt/review history during a multi-week pilot.
+    passageAttempts:(state.passageAttempts??[]).map(a=>({...a,questionTypes:a.questionTypes??questionTypes(state.passages.find(p=>p.id===a.passageId)?.questions,a.readingMode==='inference')})),
+    listeningAttempts:(state.listeningAttempts??[]).map(a=>({...a,questionTypes:a.questionTypes??questionTypes(state.listeningItems.find(p=>p.id===a.listeningItemId)?.questions,a.listeningMode==='gist')})),
     // These three libraries are bundled with the app and restored by hydrateState.
     passages: state.passages.filter(item=>!item.id.startsWith('cycle-')),
     listeningItems: state.listeningItems.filter(item=>!item.id.startsWith('cycle-')),
