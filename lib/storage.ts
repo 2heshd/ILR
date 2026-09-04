@@ -2,7 +2,7 @@ import type { LexicalItem, StudyState } from "./types";
 
 function compactWord(word: LexicalItem): LexicalItem {
   const compact = { ...word };
-  if (compact.sourceType === "course" && compact.reviews === 0) {
+  if (compact.sourceType === "course" && compact.reviews === 0 && !Object.values(compact.modalityCards ?? {}).some(card => card && (card.reps > 0 || card.state !== 0))) {
     const { fsrsCard: _unusedSchedule, modalityCards: _unusedChannels, ...unreviewed } = compact;
     return unreviewed as LexicalItem;
   }

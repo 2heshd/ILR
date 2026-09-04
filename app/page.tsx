@@ -15,7 +15,6 @@ import Onboarding from "@/components/Onboarding";
 import RapidCaptions from "@/components/RapidCaptions";
 import SpeakingLab from "@/components/SpeakingLab";
 import { adaptiveAllocation, currentTrainingPhase, dominantBottleneck, selectContextWords } from "@/lib/adaptive";
-import { fallbackAdvanced, type AdvancedWord } from "@/lib/advanced";
 import type { AnkiReviewRow, AnkiVocabularyRow } from "@/lib/anki";
 import { COURSE_META, courseSectionLabel, loadCourseCatalog, loadCourseWeek, type CourseVocabularyEntry } from "@/lib/course";
 import { curatedListeningItems, curatedPassages, curatedSpeakingPrompts } from "@/lib/curated-cycle";
@@ -132,6 +131,7 @@ function hydrateState(raw: Partial<StudyState> | null | undefined): StudyState {
     },
     anki: { ...emptyState.anki, ...(raw?.anki ?? {}) },
     words: mergedWords,
+    studyPlans: Object.fromEntries(Object.entries(raw?.studyPlans ?? {}).map(([mode, plan]) => [mode, plan ? {...plan, wordIds: [...new Set(plan.wordIds.map(wordId => wordAliases.get(wordId) ?? wordId))].filter(wordId => wordIds.has(wordId))} : plan])),
     reviews: [...new Map((raw?.reviews ?? [])
       .map((review) => ({ ...review, lexicalItemId: wordAliases.get(review.lexicalItemId) ?? review.lexicalItemId }))
       .filter((review) => wordIds.has(review.lexicalItemId))
@@ -262,6 +262,10 @@ async function generateJson(body: Record<string, unknown>) {
 
 export default function Home() {
   const [state, setState] = useState<StudyState>(emptyState);
+  const latestState = useRef(state);
+  latestState.current = state;
+  const submittedReview = useRef('');
+  const localStateKey = useRef(STORAGE_KEY);
   const [loaded, setLoaded] = useState(false);
   const [tab, setTab] = useState<Tab>("today");
   const [showIntake, setShowIntake] = useState(false);
@@ -285,6 +289,7 @@ export default function Home() {
   const [cloudReady, setCloudReady] = useState(false);
   const [reviewModality, setReviewModality] = useState<Extract<ReviewModality, "visual" | "audio" | "cloze">>("visual");
   const [revealed, setRevealed] = useState(false);
+  const [playedReviewWord,setPlayedReviewWord]=useState('');
   const [responseMs, setResponseMs] = useState(0);
   const [patternPhase, setPatternPhase] = useState<"flash" | "answer" | "result">("flash");
   const [patternInput, setPatternInput] = useState("");
@@ -471,9 +476,12 @@ export default function Home() {
   }
 
   useEffect(() => {
-    const saved = readStudyState(localStorage, STORAGE_KEY, LEGACY_KEYS);
+    const previousOwner=localStorage.getItem(`${STORAGE_KEY}:owner`);
+    localStateKey.current=previousOwner?`${STORAGE_KEY}:guest`:STORAGE_KEY;
+    const saved = readStudyState(localStorage, localStateKey.current, previousOwner?[]:LEGACY_KEYS);
     const local = hydrateState(saved.state ?? emptyState);
     setState(local);
+    latestState.current = local;
     if (saved.recovered) setStatus("Cursos repaired damaged browser storage and reopened with a clean local copy.");
     setShowOnboarding(localStorage.getItem(ONBOARDING_KEY) !== "complete");
     setLoaded(true);
@@ -482,26 +490,45 @@ export default function Home() {
     if (!supabase) return;
 
     let active = true;
+    let connectionVersion = 0;
+    let connectingUser = '';
     async function connect(user: User) {
+      if (connectingUser === user.id) return;
+      connectingUser = user.id;
+      const version = ++connectionVersion;
+      setCloudReady(false);
       setCloudUser(user);
       try {
         const cloud = await loadCloudState(supabase!, user);
-        if (!active) return;
+        if (!active || version !== connectionVersion) return;
         const sharedWords = await loadPlatformVocabulary(supabase!, user);
+        if (!active || version !== connectionVersion) return;
+        const userKey = `${STORAGE_KEY}:user:${user.id}`;
+        const previousOwner=localStorage.getItem(`${STORAGE_KEY}:owner`);
+        const cachedUser=hydrateState(readStudyState(localStorage,userKey,previousOwner===user.id?[STORAGE_KEY]:[]).state);
+        const isGuest=localStateKey.current===STORAGE_KEY||localStateKey.current===`${STORAGE_KEY}:guest`;
+        const currentLocal = localStateKey.current===userKey?latestState.current:isGuest?mergeStudyStates(cachedUser,latestState.current):cachedUser;
+        if(isGuest)writeStudyState(localStorage,`${STORAGE_KEY}:guest`,latestState.current);
+        localStateKey.current=userKey;
+        localStorage.setItem(`${STORAGE_KEY}:owner`,user.id);
         if (cloud) {
-          const merged = hydrateState(mergePlatformVocabulary(mergeStudyStates(hydrateState(cloud), local), sharedWords));
+          const merged = hydrateState(mergePlatformVocabulary(mergeStudyStates(hydrateState(cloud), currentLocal), sharedWords));
           setState(merged);
           await saveCloudState(supabase!, user, merged);
         } else {
-          const merged = hydrateState(mergePlatformVocabulary(local, sharedWords));
+          const merged = hydrateState(mergePlatformVocabulary(currentLocal, sharedWords));
           setState(merged);
           await saveCloudState(supabase!, user, merged);
         }
-        setCloudUsername(await loadUsername(supabase!, user));
+        const username=await loadUsername(supabase!, user);
+        if(!active||version!==connectionVersion)return;
+        setCloudUsername(username);
         setCloudReady(true);
       } catch (error) {
         console.error(error);
         setStatus("Cloud sync setup needs attention; local history is still safe on this device.");
+      } finally {
+        if (version === connectionVersion) connectingUser = '';
       }
     }
 
@@ -509,9 +536,18 @@ export default function Home() {
       if (data.session?.user) void connect(data.session.user);
       else setCloudReady(false);
     });
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) void connect(session.user);
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user && event !== 'TOKEN_REFRESHED') setTimeout(() => { if(active) void connect(session.user); },0);
       else {
+        if (session?.user) return;
+        connectionVersion++;
+        connectingUser = '';
+        if(localStateKey.current.includes(':user:')){
+          localStateKey.current=`${STORAGE_KEY}:guest`;
+          const guest=hydrateState(readStudyState(localStorage,localStateKey.current,[]).state);
+          latestState.current=guest;
+          setState(guest);
+        }
         setCloudUser(null);
         setCloudUsername(null);
         setCloudReady(false);
@@ -554,7 +590,7 @@ export default function Home() {
 
   useEffect(() => {
     if (!loaded) return;
-    if (!writeStudyState(localStorage, STORAGE_KEY, state)) {
+    if (!writeStudyState(localStorage, localStateKey.current, state)) {
       setStatus("This vocabulary bank is too large for browser storage. Your open session is safe; sign in to keep the complete bank in cloud storage.");
     }
     if (!cloudUser || !cloudReady) return;
@@ -631,6 +667,7 @@ export default function Home() {
 
   useEffect(() => {
     setRevealed(false);
+    setPlayedReviewWord('');
     setResponseMs(0);
     setPatternInput("");
     setPatternMatched(false);
@@ -754,19 +791,6 @@ export default function Home() {
       }
     }
 
-    enriched.forEach((word) => existing.add(normalizePersian(word.displayForm)));
-    let advanced: AdvancedWord[] = [];
-    try {
-      const data = await generateJson({ kind: "advanced_words", weekNumber: state.weekNumber, existing: [...existing] });
-      advanced = (data.words ?? []).filter((word: AdvancedWord) => !existing.has(normalizePersian(word.displayForm))).slice(0, 5);
-    } catch {
-      advanced = fallbackAdvanced(existing, 5);
-    }
-    if (advanced.length < 5) {
-      const blocked = new Set([...existing, ...advanced.map((word) => normalizePersian(word.displayForm))]);
-      advanced = [...advanced, ...fallbackAdvanced(blocked, 5 - advanced.length)];
-    }
-
     const makeWord = (
       displayForm: string,
       definition: string | undefined,
@@ -798,12 +822,11 @@ export default function Home() {
 
     const newWords = [
       ...enriched.map((word) => makeWord(word.displayForm, word.definition, word.romanization, "course")),
-      ...advanced.map((word) => makeWord(word.displayForm, word.definition, word.romanization, "system_advanced", word.topic)),
     ];
     setState((currentState) => ({ ...currentState, words: [...currentState.words, ...newWords] }));
     setInput("");
     setShowIntake(false);
-    setStatus(`Added ${enriched.length} required words + ${advanced.length} advanced words for Week ${state.weekNumber}.`);
+    setStatus(`Added ${enriched.length} words you supplied for Week ${state.weekNumber}.`);
   }
 
   async function importCourseWeek(targetWeek = state.weekNumber) {
@@ -966,6 +989,7 @@ export default function Home() {
   }
 
   function reveal() {
+    if(reviewModality==='audio'&&playedReviewWord!==current?.id)return;
     setResponseMs(Date.now() - startRef.current);
     setRevealed(true);
   }
@@ -983,11 +1007,13 @@ export default function Home() {
       const cacheKey = `word-${current.id}`;
       const cached = await readCachedSpeech(cacheKey);
       if (!cached && playWithDeviceVoice(current.displayForm)) {
+        setPlayedReviewWord(current.id);
         setStatus("Playing with the device’s Persian voice.");
         return;
       }
       const blob = cached ?? await prepareSpeech(current.displayForm, cacheKey);
       await playAudioBlob(blob);
+      setPlayedReviewWord(current.id);
       setStatus("Playing word audio.");
     } catch (error) {
       if (!playWithDeviceVoice(current.displayForm)) {
@@ -995,11 +1021,16 @@ export default function Home() {
         return;
       }
       setStatus("Playing with the device’s Persian voice.");
+      setPlayedReviewWord(current.id);
     }
   }
 
   async function rateKnown(correct: boolean) {
     if (!current) return;
+    if(reviewModality==='audio'&&playedReviewWord!==current.id)return;
+    const submissionKey = [current.id, reviewModality, current.modalityCards?.[reviewModality]?.reps ?? 0, current.modalityCards?.[reviewModality]?.due ?? 'new'].join(':');
+    if (submittedReview.current === submissionKey) return;
+    submittedReview.current = submissionKey;
     const measured = responseMs || Date.now() - startRef.current;
     // A learner's explicit correctness judgment should determine the schedule.
     // Response time remains useful analytics, but must not turn a correct answer
@@ -1526,7 +1557,7 @@ export default function Home() {
   if (!loaded) return <main>Loading…</main>;
 
   const weakWords = [...state.words]
-    .filter((word) => word.reviews >= 1)
+    .filter((word) => word.reviews >= 1 && weakestAccuracy(word) < 0.9)
     .sort((a, b) => weakestAccuracy(a) - weakestAccuracy(b) || (b.medianResponseMs ?? 0) - (a.medianResponseMs ?? 0))
     .slice(0, 50);
   const readingAverage = Math.round(average(state.passageAttempts.slice(-5).map((attempt) => attempt.comprehensionScore)));
@@ -1672,9 +1703,9 @@ export default function Home() {
 
     {showIntake && <section className="card intake">
       <h2>Week {state.weekNumber} intake</h2>
-      <div className="muted">Paste your weekly course words. Missing definitions and romanization can be filled automatically. Five advanced terms are added.</div>
+      <div className="muted">Paste your weekly course words. Missing definitions and romanization can be filled automatically. Only the words you supply are added.</div>
       <textarea value={input} onChange={(event) => setInput(event.target.value)} placeholder={"کارمند — employee — kārmand\nبازداشت کردن — to arrest — bāzdāsht kardan\nآینده — future — āyande"} />
-      <div className="row"><button className="primary" onClick={importWeek}>Import week + 5 advanced</button><button className="secondary" onClick={() => setShowIntake(false)}>Cancel</button></div>
+      <div className="row"><button className="primary" onClick={importWeek}>Import selected words</button><button className="secondary" onClick={() => setShowIntake(false)}>Cancel</button></div>
     </section>}
 
     {tab === "today" && !showIntake && <section className="grid today-grid">
@@ -1682,7 +1713,7 @@ export default function Home() {
       <div className="card span-12"><label>New words per day, per skill <select value={state.dailyNewLimit??40} onChange={e=>setState(current=>({...current,dailyNewLimit:Number(e.target.value)}))}>{[30,40,50].map(count=><option key={count}>{count}</option>)}</select></label><p className="muted">90% scheduling target · Due reviews come first. Text, audio, and patterns advance independently. Short learning steps may return today.</p></div>
       <Metric label="Due now" value={String(due.length)} />
       <Metric label="Total words" value={String(state.words.length)} />
-      <Metric label="Retention" value={`${retention}%`} />
+      <Metric label="Review accuracy" value={`${retention}%`} />
       <Metric label="Median recall" value={medianRecall ? `${(medianRecall / 1000).toFixed(1)}s` : "—"} />
 
       <div className="card span-7 dashboard-primary">
@@ -1712,7 +1743,7 @@ export default function Home() {
             </div>}
           </div> : <>
             {reviewModality === "visual" ? <div className="fa hero-fa">{current.displayForm}</div> : <div className="audio-recall"><button className="primary" onClick={() => void playCurrentWord()}>Play word</button><span className="muted">Identify it by sound before revealing.</span></div>}
-            {!revealed ? <button className="primary" onClick={reveal}>Reveal meaning</button> : <>
+            {!revealed ? <button className="primary" onClick={reveal} disabled={reviewModality==="audio"&&playedReviewWord!==current.id}>{reviewModality==="audio"&&playedReviewWord!==current.id?"Play audio first":"Reveal meaning"}</button> : <>
               <div className="answer-block">
                 <strong>{current.definition || "Definition missing — add it during intake or enable AI enrichment."}</strong>
                 {current.romanization && <span className="muted">{current.romanization}</span>}
@@ -1721,7 +1752,7 @@ export default function Home() {
               <div className="row"><button className="danger" onClick={() => rateKnown(false)}>I was wrong</button><button className="primary" onClick={() => rateKnown(true)}>I was right</button></div>
             </>}
           </>}
-        </> : !currentCourseWeekImported ? <div className="next-action course-ready"><span className="next-number">01</span><h3>Start Week {state.weekNumber}.</h3><p>This week contains {currentCourseWordCount} entries from {currentCourseLessonCount} original ChiMishe lesson lists. Choose the words you want; new reviews follow your daily limit.</p><div className="course-ready-meta"><span>{COURSE_META.entries.toLocaleString()} course entries</span><span>{COURSE_META.lessonLists} lesson lists</span><span>{COURSE_META.weeks} weeks</span></div><button className="primary" onClick={() => void importCourseWeek()} disabled={courseBusy}>{courseBusy ? "Preparing…" : `Start Week ${state.weekNumber}`}</button></div> : state.words.length ? <div className="next-action"><h3>You&apos;re caught up.</h3><p>Choose Reading or Listening from the menu for your next session.</p></div> : <div className="next-action"><span className="next-number">01</span><h3>Add your first words.</h3><p>Add vocabulary manually to create your review schedule.</p><button className="primary" onClick={() => setShowIntake(true)}>Add words</button></div>}
+        </> : state.words.length ? <div className="next-action"><h3>No reviews due in this selection.</h3><p>Your word bank is still saved. If you expected words here, check the plan dates, selection, and daily new-word limit above. Short learning steps will return when due.</p><button onClick={()=>setTab("reading")}>Open reading</button></div> : !currentCourseWeekImported ? <div className="next-action course-ready"><span className="next-number">01</span><h3>Start Week {state.weekNumber}.</h3><p>This week contains {currentCourseWordCount} entries from {currentCourseLessonCount} original ChiMishe lesson lists. Choose the words you want; new reviews follow your daily limit.</p><div className="course-ready-meta"><span>{COURSE_META.entries.toLocaleString()} course entries</span><span>{COURSE_META.lessonLists} lesson lists</span><span>{COURSE_META.weeks} weeks</span></div><button className="primary" onClick={() => void importCourseWeek()} disabled={courseBusy}>{courseBusy ? "Preparing…" : `Start Week ${state.weekNumber}`}</button></div> : state.words.length ? <div className="next-action"><h3>You&apos;re caught up.</h3><p>Choose Reading or Listening from the menu for your next session.</p></div> : <div className="next-action"><span className="next-number">01</span><h3>Add your first words.</h3><p>Add vocabulary manually to create your review schedule.</p><button className="primary" onClick={() => setShowIntake(true)}>Add words</button></div>}
       </div>
 
       <div className="card span-5 dashboard-secondary">
