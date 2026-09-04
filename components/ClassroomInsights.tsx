@@ -1,0 +1,9 @@
+'use client';
+import {useState} from 'react';
+import StudentBreakdown from './StudentBreakdown';
+import {accuracy,skillNames,type StudentReport} from '@/lib/student-report';
+export default function ClassroomInsights({students}:{students:StudentReport[]}){
+ const [selectedId,setSelectedId]=useState(students[0]?.user_id??'');
+ const selected=students.find(s=>s.user_id===selectedId)??students[0];
+ return <div className="insights"><div className="insight-summary"><div><span>CLASS SNAPSHOT</span><strong>{students.length}<small> learners</small></strong><p>{students.filter(s=>s.reviews>0).length} practiced this week</p></div>{['visual','audio','cloze'].map(modality=>{const skills=students.flatMap(s=>s.skills??[]).filter(s=>s.modality===modality),attempts=skills.reduce((n,s)=>n+s.attempts,0),score=accuracy(skills.reduce((n,s)=>n+s.correct,0),attempts);return <div key={modality} data-skill={modality}><span>{skillNames[modality]}</span><strong>{score??'—'}{score!==null&&<small>%</small>}</strong><p>{attempts.toLocaleString('en-US')} attempts · class accuracy</p><div className="insight-meter"><i style={{width:`${score??0}%`}}/></div></div>;})}</div><div className="insight-workbench"><aside className="insight-roster"><h2>Learners <small>{students.length}</small></h2><p>Text · Audio · Patterns</p><div className="roster-list">{students.map((s,i)=><button key={s.user_id} aria-pressed={selected?.user_id===s.user_id} onClick={()=>setSelectedId(s.user_id)}><span className="learner-number">{String(i+1).padStart(2,'0')}</span><span><strong>{s.display_name}</strong><small>{[s.text_retention,s.audio_retention,s.pattern_retention].map(v=>v===null?'—':`${v}%`).join(' · ')}</small></span><span className="roster-arrow">↗</span></button>)}</div></aside>{selected?<StudentBreakdown student={selected}/>:<p>No students have joined yet. Share your class code to invite them.</p>}</div></div>;
+}
