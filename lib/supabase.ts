@@ -156,6 +156,9 @@ function mergeById<T extends { id: string }>(cloud: T[], local: T[]) {
 export function mergeStudyStates(cloud: StudyState, local: StudyState): StudyState {
   return {
     ...cloud,
+    schedulingVersion: 1,
+    studyPlans: { ...cloud.studyPlans, ...local.studyPlans },
+    dailyNewLimit: local.dailyNewLimit ?? cloud.dailyNewLimit ?? 40,
     weekNumber: Math.max(cloud.weekNumber, local.weekNumber),
     currentIlr: local.currentIlr ?? cloud.currentIlr,
     skillLevels: { ...cloud.skillLevels, ...local.skillLevels },

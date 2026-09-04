@@ -1,9 +1,9 @@
 import type { LexicalItem, StudyState } from "./types";
 
 function compactWord(word: LexicalItem): LexicalItem {
-  const { modalityCards: _duplicateSchedules, ...compact } = word;
+  const compact = { ...word };
   if (compact.sourceType === "course" && compact.reviews === 0) {
-    const { fsrsCard: _unusedSchedule, ...unreviewed } = compact;
+    const { fsrsCard: _unusedSchedule, modalityCards: _unusedChannels, ...unreviewed } = compact;
     return unreviewed as LexicalItem;
   }
   return compact;
@@ -15,9 +15,9 @@ export function compactStudyState(state: StudyState): StudyState {
     ...state,
     words: state.words.map(compactWord),
     // These three libraries are bundled with the app and restored by hydrateState.
-    passages: [],
-    listeningItems: [],
-    speakingPrompts: [],
+    passages: state.passages.filter(item=>!item.id.startsWith('cycle-')),
+    listeningItems: state.listeningItems.filter(item=>!item.id.startsWith('cycle-')),
+    speakingPrompts: state.speakingPrompts.filter(item=>!item.id.startsWith('cycle-')),
   };
 }
 

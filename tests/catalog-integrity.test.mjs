@@ -50,7 +50,7 @@ test("large chapter selections use compact, recoverable browser storage", () => 
   const card = { due: "2026-09-03T00:00:00.000Z", stability: 0, difficulty: 0, elapsedDays: 0, scheduledDays: 0, reps: 0, lapses: 0, learningSteps: 0, state: 0 };
   const state = {
     words: [{ id: "course-1", displayForm: "تعلیم", normalizedForm: "تعلیم", definition: "education", sourceType: "course", sourceWeek: 1, introducedAt: card.due, reviews: 0, correct: 0, lapses: 0, dueAt: card.due, fsrsCard: card, modalityCards: { visual: card, audio: card, cloze: card } }],
-    passages: [{ id: "bundled-reading" }], listeningItems: [{ id: "bundled-listening" }], speakingPrompts: [{ id: "bundled-speaking" }],
+    passages: [{ id: "cycle-reading" }], listeningItems: [{ id: "cycle-listening" }], speakingPrompts: [{ id: "cycle-speaking" }],
   };
   const compact = compactStudyState(state);
   assert.equal(compact.words[0].modalityCards, undefined);

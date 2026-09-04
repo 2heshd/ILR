@@ -7,7 +7,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "node --test tests/catalog-integrity.test.mjs"
+    "test": "node --test tests/*.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "latest",

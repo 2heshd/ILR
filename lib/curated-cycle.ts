@@ -1,4 +1,5 @@
 import cycle from "@/data/curated-cycle.json";
+import questionBank from "@/data/curated-questions.json";
 import type { LexicalItem, ListeningItem, Passage, SpeakingPrompt } from "@/lib/types";
 
 export const CURRICULUM_META = cycle.meta;
@@ -22,7 +23,7 @@ export function curatedPassages(): Passage[] {
     ...item,
     sourceType: item.sourceType as Passage["sourceType"],
     practiceMode: item.practiceMode as Passage["practiceMode"],
-    questions: item.questions.map((question) => ({ ...question, type: question.type as Passage["questions"][number]["type"] })),
+    questions: (questionBank[item.id as keyof typeof questionBank]??item.questions).map((question) => ({ ...question, type: question.type as Passage["questions"][number]["type"] })),
   }));
 }
 
@@ -31,7 +32,7 @@ export function curatedListeningItems(): ListeningItem[] {
     ...item,
     sourceType: item.sourceType as ListeningItem["sourceType"],
     practiceMode: item.practiceMode as ListeningItem["practiceMode"],
-    questions: item.questions.map((question) => ({ ...question, type: question.type as ListeningItem["questions"][number]["type"] })),
+    questions: (questionBank[item.id.replace('-listening-','-article-') as keyof typeof questionBank]??item.questions).map((question) => ({ ...question, type: question.type as ListeningItem["questions"][number]["type"] })),
   }));
 }
 

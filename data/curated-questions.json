@@ -1,0 +1,1498 @@
+{
+  "cycle-dli-ch4-ch5l1-news-2026-09-01-article-01": [
+    {
+      "question": "According to the Tehran municipality, what was happening in the fruit market in the south of Tehran today, and what did it plan to do next week?",
+      "type": "main_idea",
+      "referenceAnswer": "The south Tehran fruit market was busier than last week, and the municipality planned to open a new direct-sales market next week.",
+      "evidenceSentenceIndexes": [
+        0,
+        4
+      ],
+      "evidenceFa": "شهرداری تهران اعلام کرد بازار میوه در جنوب شهر امروز شلوغ‌تر از هفته گذشته بود. … شهرداری می‌خواهد هفته آینده یک بازار تازه برای فروش مستقیم محصولات باز کند."
+    },
+    {
+      "question": "What did some citizens say had caused families to buy less?",
+      "type": "detail",
+      "referenceAnswer": "They said rising prices had caused families to buy less.",
+      "evidenceSentenceIndexes": [
+        2
+      ],
+      "evidenceFa": "چند شهروند گفتند گرانی باعث شده است خرید خانواده‌ها کمتر شود."
+    },
+    {
+      "question": "Which costs did the seller say affect prices?",
+      "type": "detail",
+      "referenceAnswer": "Transportation and gasoline costs affect prices.",
+      "evidenceSentenceIndexes": [
+        3
+      ],
+      "evidenceFa": "یک فروشنده توضیح داد که هزینه حمل‌ونقل و بنزین بر قیمت‌ها اثر دارد."
+    },
+    {
+      "question": "What can be inferred about why the municipality wants to open a new market next week?",
+      "type": "inference",
+      "referenceAnswer": "It likely wants to respond to the busy market conditions and make direct sales easier for shoppers.",
+      "evidenceSentenceIndexes": [
+        0,
+        4
+      ],
+      "evidenceFa": "شهرداری تهران اعلام کرد بازار میوه در جنوب شهر امروز شلوغ‌تر از هفته گذشته بود. … شهرداری می‌خواهد هفته آینده یک بازار تازه برای فروش مستقیم محصولات باز کند."
+    },
+    {
+      "question": "How does the sentence about food prices contrast with the sentence about fruit prices?",
+      "type": "discourse",
+      "referenceAnswer": "It contrasts a rise in some food prices with no change in fruit prices in several shops.",
+      "evidenceSentenceIndexes": [
+        1
+      ],
+      "evidenceFa": "قیمت بعضی مواد غذایی بالا رفت، اما نرخ میوه در چند مغازه تغییر نکرد."
+    }
+  ],
+  "cycle-dli-ch4-ch5l1-news-2026-09-01-article-02": [
+    {
+      "question": "What is the main change the city transportation organization announced for the center-line buses starting on Saturday?",
+      "type": "main_idea",
+      "referenceAnswer": "The bus schedule for the center line will change starting Saturday.",
+      "evidenceSentenceIndexes": [
+        0
+      ],
+      "evidenceFa": "سازمان حمل‌ونقل شهر اعلام کرد ساعت حرکت اتوبوس‌های خط مرکز از شنبه تغییر می‌کند."
+    },
+    {
+      "question": "At what time will the first center-line bus leave, according to the new schedule?",
+      "type": "detail",
+      "referenceAnswer": "At six in the morning.",
+      "evidenceSentenceIndexes": [
+        1
+      ],
+      "evidenceFa": "نخستین اتوبوس ساعت شش صبح حرکت خواهد کرد و آخرین اتوبوس ساعت یازده شب به پایگاه برمی‌گردد."
+    },
+    {
+      "question": "What did most citizens want regarding buses at night?",
+      "type": "detail",
+      "referenceAnswer": "They wanted more buses at night.",
+      "evidenceSentenceIndexes": [
+        3
+      ],
+      "evidenceFa": "بیشتر شهروندان خواسته بودند شب‌ها اتوبوس بیشتری وجود داشته باشد."
+    },
+    {
+      "question": "Why will the new bus schedule be tested for two weeks?",
+      "type": "inference",
+      "referenceAnswer": "Because officials changed the schedule after surveying passengers, and the two-week test lets them evaluate that survey-based change.",
+      "evidenceSentenceIndexes": [
+        2,
+        4
+      ],
+      "evidenceFa": "این تصمیم پس از یک نظرسنجی از مسافران گرفته شد. … مسئولان گفتند برنامه جدید برای دو هفته آزمایش می‌شود."
+    },
+    {
+      "question": "How does the passengers’ request for more night buses help explain the new schedule?",
+      "type": "discourse",
+      "referenceAnswer": "The survey identified demand for more night service, motivating the schedule change.",
+      "evidenceSentenceIndexes": [
+        2,
+        3
+      ],
+      "evidenceFa": "این تصمیم پس از یک نظرسنجی از مسافران گرفته شد. … بیشتر شهروندان خواسته بودند شب‌ها اتوبوس بیشتری وجود داشته باشد."
+    }
+  ],
+  "cycle-dli-ch4-ch5l1-news-2026-09-01-article-03": [
+    {
+      "question": "What happened to the central clinic of the small city after three months, according to the passage?",
+      "type": "main_idea",
+      "referenceAnswer": "It reopened after being closed for three months.",
+      "evidenceSentenceIndexes": [
+        0
+      ],
+      "evidenceFa": "درمانگاه مرکزی یک شهر کوچک پس از سه ماه دوباره باز شد."
+    },
+    {
+      "question": "How did the Ministry of Health help the central clinic in the small city?",
+      "type": "detail",
+      "referenceAnswer": "It helped buy medicine and repair the building.",
+      "evidenceSentenceIndexes": [
+        1
+      ],
+      "evidenceFa": "وزارت بهداشت برای خرید دارو و تعمیر ساختمان به این مرکز کمک کرد."
+    },
+    {
+      "question": "When can people visit the clinic's center for injections and examinations, according to the center's manager?",
+      "type": "detail",
+      "referenceAnswer": "They can come from 8 a.m. onward.",
+      "evidenceSentenceIndexes": [
+        3
+      ],
+      "evidenceFa": "مسئول مرکز گفت مردم می‌توانند برای تزریق و معاینه از ساعت هشت صبح مراجعه کنند."
+    },
+    {
+      "question": "What suggests that the reopened clinic offers both treatment and some financial protection?",
+      "type": "inference",
+      "referenceAnswer": "Doctors and nurses provide care, and insurance covers most patients. There is no comparison with previous staffing.",
+      "evidenceSentenceIndexes": [
+        2
+      ],
+      "evidenceFa": "درمانگاه اکنون پنج پزشک و ده پرستار دارد و بیمه بیشتر بیماران را پوشش می‌دهد."
+    },
+    {
+      "question": "How does the sentence about citizens supporting the clinic's reopening relate to the earlier sentences about the ministry's help and the clinic's new services?",
+      "type": "discourse",
+      "referenceAnswer": "It adds a positive reaction from the community to the practical support and reopening described earlier.",
+      "evidenceSentenceIndexes": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "evidenceFa": "وزارت بهداشت برای خرید دارو و تعمیر ساختمان به این مرکز کمک کرد. … درمانگاه اکنون پنج پزشک و ده پرستار دارد و بیمه بیشتر بیماران را پوشش می‌دهد. … مسئول مرکز گفت مردم می‌توانند برای تزریق و معاینه از ساعت هشت صبح مراجعه کنند. … شهروندان از بازگشایی درمانگاه حمایت کردند."
+    }
+  ],
+  "cycle-dli-ch4-ch5l1-news-2026-09-01-article-04": [
+    {
+      "question": "What happened in northern Iran because of the heavy rain mentioned in the passage?",
+      "type": "main_idea",
+      "referenceAnswer": "A mountain road was closed.",
+      "evidenceSentenceIndexes": [
+        0
+      ],
+      "evidenceFa": "باران شدید در شمال کشور باعث بسته شدن یک جاده کوهستانی شد."
+    },
+    {
+      "question": "According to the police, what happened to the vehicles after the road was blocked?",
+      "type": "detail",
+      "referenceAnswer": "Several cars were stopped for two hours.",
+      "evidenceSentenceIndexes": [
+        1
+      ],
+      "evidenceFa": "پلیس اعلام کرد هیچ قربانی گزارش نشده است، اما چند خودرو برای دو ساعت متوقف شدند."
+    },
+    {
+      "question": "What did the rescue teams remove from the road?",
+      "type": "detail",
+      "referenceAnswer": "They removed rocks and mud from the road.",
+      "evidenceSentenceIndexes": [
+        2
+      ],
+      "evidenceFa": "نیروهای امدادی سنگ و گل را از جاده حذف کردند."
+    },
+    {
+      "question": "Why should drivers check the latest information before traveling and take another route?",
+      "type": "inference",
+      "referenceAnswer": "Because the road was already closed by heavy rain and the weather office warned that the rain could continue until tomorrow.",
+      "evidenceSentenceIndexes": [
+        0,
+        3,
+        4
+      ],
+      "evidenceFa": "باران شدید در شمال کشور باعث بسته شدن یک جاده کوهستانی شد. … سازمان هواشناسی درباره ادامه باران تا فردا هشدار داد. … رانندگان باید پیش از سفر اطلاعات تازه را بررسی کنند و از مسیر دیگر بروند."
+    },
+    {
+      "question": "How does the passage contrast the police report with the weather warning?",
+      "type": "discourse",
+      "referenceAnswer": "The police report says no victims were reported, while the weather office warns that the rain may continue until tomorrow.",
+      "evidenceSentenceIndexes": [
+        1,
+        3
+      ],
+      "evidenceFa": "پلیس اعلام کرد هیچ قربانی گزارش نشده است، اما چند خودرو برای دو ساعت متوقف شدند. … سازمان هواشناسی درباره ادامه باران تا فردا هشدار داد."
+    }
+  ],
+  "cycle-dli-ch4-ch5l1-news-2026-09-01-article-05": [
+    {
+      "question": "What event did the school in Shiraz hold this week?",
+      "type": "main_idea",
+      "referenceAnswer": "It held a book exhibition.",
+      "evidenceSentenceIndexes": [
+        0
+      ],
+      "evidenceFa": "یک مدرسه در شیراز این هفته نمایشگاه کتاب برگزار کرد."
+    },
+    {
+      "question": "Who helped the students place more than five hundred books in the school hall?",
+      "type": "detail",
+      "referenceAnswer": "Their teachers helped them.",
+      "evidenceSentenceIndexes": [
+        1
+      ],
+      "evidenceFa": "دانش‌آموزان با کمک معلمان بیش از پانصد کتاب را در سالن مدرسه قرار دادند."
+    },
+    {
+      "question": "What could families buy at the exhibition?",
+      "type": "detail",
+      "referenceAnswer": "They could buy second-hand books at a low price.",
+      "evidenceSentenceIndexes": [
+        2
+      ],
+      "evidenceFa": "خانواده‌ها می‌توانستند کتاب‌های دست دوم را با نرخ پایین بخرند."
+    },
+    {
+      "question": "How could the exhibition encourage reading in two different ways?",
+      "type": "inference",
+      "referenceAnswer": "Families could buy inexpensive books, while proceeds fund new library books.",
+      "evidenceSentenceIndexes": [
+        2,
+        3,
+        4
+      ],
+      "evidenceFa": "خانواده‌ها می‌توانستند کتاب‌های دست دوم را با نرخ پایین بخرند. … درآمد نمایشگاه برای خرید کتاب‌های تازه کتابخانه استفاده خواهد شد. … مدیر مدرسه گفت هدف برنامه افزایش مطالعه در خانه است."
+    },
+    {
+      "question": "How does the principal’s stated goal relate to the exhibition income being used for new library books?",
+      "type": "discourse",
+      "referenceAnswer": "The goal focuses on increasing reading at home, while the income is directed to buying new library books.",
+      "evidenceSentenceIndexes": [
+        3,
+        4
+      ],
+      "evidenceFa": "درآمد نمایشگاه برای خرید کتاب‌های تازه کتابخانه استفاده خواهد شد. … مدیر مدرسه گفت هدف برنامه افزایش مطالعه در خانه است."
+    }
+  ],
+  "cycle-dli-ch4-ch5l1-news-2026-09-01-article-06": [
+    {
+      "question": "According to the Ministry of Commerce, what happened to fruit exports last month?",
+      "type": "main_idea",
+      "referenceAnswer": "Fruit exports increased last month.",
+      "evidenceSentenceIndexes": [
+        0
+      ],
+      "evidenceFa": "وزارت بازرگانی اعلام کرد صادرات میوه در ماه گذشته افزایش یافت."
+    },
+    {
+      "question": "To where were most of the products sent?",
+      "type": "detail",
+      "referenceAnswer": "They were sent to several neighboring countries.",
+      "evidenceSentenceIndexes": [
+        1
+      ],
+      "evidenceFa": "بیشتر محصولات به چند کشور همسایه فرستاده شد."
+    },
+    {
+      "question": "What did the minister say was the main reason for this growth in exports?",
+      "type": "detail",
+      "referenceAnswer": "Cooperation between farmers and transport companies was the main reason.",
+      "evidenceSentenceIndexes": [
+        2
+      ],
+      "evidenceFa": "وزیر گفت همکاری میان کشاورزان و شرکت‌های حمل‌ونقل علت اصلی این رشد بوده است."
+    },
+    {
+      "question": "What does the passage suggest about the government's plan for cargo vehicles, given that export costs have risen because of higher gasoline prices and that the government wants to give cargo vehicles more quota?",
+      "type": "inference",
+      "referenceAnswer": "The government likely wants to help reduce the pressure of higher export costs and support exports by giving cargo vehicles more quota.",
+      "evidenceSentenceIndexes": [
+        3,
+        4
+      ],
+      "evidenceFa": "با این حال، گرانی بنزین هزینه صادرات را بالا برده است. … دولت می‌خواهد برای خودروهای باری سهمیه بیشتری در نظر بگیرد."
+    },
+    {
+      "question": "What contrast does the phrase \"با این حال\" introduce between the export situation and the cost situation?",
+      "type": "discourse",
+      "referenceAnswer": "It contrasts the increase in exports with the fact that export costs have also gone up.",
+      "evidenceSentenceIndexes": [
+        0,
+        3
+      ],
+      "evidenceFa": "وزارت بازرگانی اعلام کرد صادرات میوه در ماه گذشته افزایش یافت. … با این حال، گرانی بنزین هزینه صادرات را بالا برده است."
+    }
+  ],
+  "cycle-dli-ch4-ch5l1-news-2026-09-01-article-07": [
+    {
+      "question": "What was the purpose of the airport training operation described in the passage, especially regarding the police, fire department, and health services?",
+      "type": "main_idea",
+      "referenceAnswer": "It was an exercise to test cooperation among the police, fire department, and health services.",
+      "evidenceSentenceIndexes": [
+        3
+      ],
+      "evidenceFa": "هدف عملیات، آزمایش همکاری پلیس، آتش‌نشانی و بهداشت بود."
+    },
+    {
+      "question": "In the training exercise at the city airport, what did the emergency fire crews do with the simulated airplane?",
+      "type": "detail",
+      "referenceAnswer": "They stopped the simulated airplane.",
+      "evidenceSentenceIndexes": [
+        1
+      ],
+      "evidenceFa": "در این تمرین، نیروهای امدادی آتش یک هواپیمای فرضی را متوقف کردند و مسافران را به منطقه امن بردند."
+    },
+    {
+      "question": "According to the report, what happened to real flights during the airport operation?",
+      "type": "detail",
+      "referenceAnswer": "No real flights were canceled.",
+      "evidenceSentenceIndexes": [
+        2
+      ],
+      "evidenceFa": "مسئولان گفتند هیچ پرواز واقعی لغو نشد."
+    },
+    {
+      "question": "What can be inferred about the airport operation from the fact that it involved a simulated airplane and that no real flights were canceled?",
+      "type": "inference",
+      "referenceAnswer": "It was a practice drill, not a real emergency, because the airplane was fictional and normal flights continued.",
+      "evidenceSentenceIndexes": [
+        1,
+        2
+      ],
+      "evidenceFa": "در این تمرین، نیروهای امدادی آتش یک هواپیمای فرضی را متوقف کردند و مسافران را به منطقه امن بردند. … مسئولان گفتند هیچ پرواز واقعی لغو نشد."
+    },
+    {
+      "question": "What contrast does the passage make between the airplane in the exercise and the flights mentioned by the officials?",
+      "type": "discourse",
+      "referenceAnswer": "It contrasts a simulated airplane in the drill with real flights that were not canceled.",
+      "evidenceSentenceIndexes": [
+        1,
+        2
+      ],
+      "evidenceFa": "در این تمرین، نیروهای امدادی آتش یک هواپیمای فرضی را متوقف کردند و مسافران را به منطقه امن بردند. … مسئولان گفتند هیچ پرواز واقعی لغو نشد."
+    }
+  ],
+  "cycle-dli-ch4-ch5l1-news-2026-09-01-article-08": [
+    {
+      "question": "What problem are the villages in the south of the region facing in this passage?",
+      "type": "main_idea",
+      "referenceAnswer": "They are facing a water shortage.",
+      "evidenceSentenceIndexes": [
+        0
+      ],
+      "evidenceFa": "چند روستا در جنوب منطقه با کمبود آب روبه‌رو شده‌اند."
+    },
+    {
+      "question": "According to the residents, what happens to the water in their homes every day?",
+      "type": "detail",
+      "referenceAnswer": "The water is cut off for a few hours each day.",
+      "evidenceSentenceIndexes": [
+        1
+      ],
+      "evidenceFa": "مردم می‌گویند آب خانه‌ها هر روز برای چند ساعت قطع می‌شود."
+    },
+    {
+      "question": "What two actions has the government taken in response to the water shortage in the villages?",
+      "type": "detail",
+      "referenceAnswer": "It has sent water tankers to the villages and started planning repairs to the network.",
+      "evidenceSentenceIndexes": [
+        2
+      ],
+      "evidenceFa": "دولت تانکرهای آب را به روستاها فرستاده و برنامه‌ریزی برای تعمیر شبکه را آغاز کرده است."
+    },
+    {
+      "question": "Based on the local official’s statement and the residents’ complaint, why are people likely asking for exact information about the water-cut times?",
+      "type": "inference",
+      "referenceAnswer": "Because repairs are expected to continue until the end of the month, but residents still need exact timing for the daily shutoffs.",
+      "evidenceSentenceIndexes": [
+        3,
+        4
+      ],
+      "evidenceFa": "یک مقام محلی گفت کار تعمیر تا پایان ماه ادامه دارد. … شهروندان خواستند اطلاعات دقیق درباره زمان قطع آب اعلام شود."
+    },
+    {
+      "question": "How does the local official’s statement about repair work relate to the government’s earlier response in the passage?",
+      "type": "discourse",
+      "referenceAnswer": "It adds a time frame to the government’s repair effort by saying the work will continue until the end of the month.",
+      "evidenceSentenceIndexes": [
+        2,
+        3
+      ],
+      "evidenceFa": "دولت تانکرهای آب را به روستاها فرستاده و برنامه‌ریزی برای تعمیر شبکه را آغاز کرده است. … یک مقام محلی گفت کار تعمیر تا پایان ماه ادامه دارد."
+    }
+  ],
+  "cycle-dli-ch4-ch5l1-news-2026-09-01-article-09": [
+    {
+      "question": "In the friendly match, what did the Tabriz youth team do to the Rasht team, and what does that show about the result of the game?",
+      "type": "main_idea",
+      "referenceAnswer": "The Tabriz youth team defeated the Rasht team in a friendly match.",
+      "evidenceSentenceIndexes": [
+        0,
+        1
+      ],
+      "evidenceFa": "تیم جوانان تبریز در یک مسابقه دوستانه تیم رشت را شکست داد. … بازی با نتیجه دو بر یک پایان یافت."
+    },
+    {
+      "question": "What was the final score when the Tabriz youth team played Rasht?",
+      "type": "detail",
+      "referenceAnswer": "Tabriz won 2–1.",
+      "evidenceSentenceIndexes": [
+        1
+      ],
+      "evidenceFa": "بازی با نتیجه دو بر یک پایان یافت."
+    },
+    {
+      "question": "According to the passage, who came to the stadium and how did they support the match?",
+      "type": "detail",
+      "referenceAnswer": "About 3,000 people attended the stadium and supported both teams.",
+      "evidenceSentenceIndexes": [
+        2
+      ],
+      "evidenceFa": "حدود سه هزار نفر در ورزشگاه حضور داشتند و از هر دو تیم حمایت کردند."
+    },
+    {
+      "question": "Why will the Tabriz team go to Tehran next week, and how does that connect to the coach’s stated goal?",
+      "type": "inference",
+      "referenceAnswer": "They will go to Tehran for more training, which fits the coach’s goal of preparing for the Asian competitions.",
+      "evidenceSentenceIndexes": [
+        3,
+        4
+      ],
+      "evidenceFa": "مربی تبریز گفت هدف اصلی، آماده شدن برای مسابقات آسیا است. … تیم هفته آینده برای تمرین بیشتر به تهران خواهد رفت."
+    },
+    {
+      "question": "How are the coach’s statement and the team’s trip to Tehran related in the passage?",
+      "type": "discourse",
+      "referenceAnswer": "The trip to Tehran is presented as a step that supports the coach’s preparation goal.",
+      "evidenceSentenceIndexes": [
+        3,
+        4
+      ],
+      "evidenceFa": "مربی تبریز گفت هدف اصلی، آماده شدن برای مسابقات آسیا است. … تیم هفته آینده برای تمرین بیشتر به تهران خواهد رفت."
+    }
+  ],
+  "cycle-dli-ch4-ch5l1-news-2026-09-01-article-10": [
+    {
+      "question": "What service did the mobile bank begin providing in the three remote villages?",
+      "type": "main_idea",
+      "referenceAnswer": "A mobile bank started operating in three remote villages.",
+      "evidenceSentenceIndexes": [
+        0
+      ],
+      "evidenceFa": "یک بانک سیار در سه روستای دورافتاده آغاز به کار کرد."
+    },
+    {
+      "question": "How often does the mobile bank's vehicle go to each village?",
+      "type": "detail",
+      "referenceAnswer": "It goes to each village two days a week.",
+      "evidenceSentenceIndexes": [
+        1
+      ],
+      "evidenceFa": "خودرو این بانک دو روز در هفته به هر روستا می‌رود."
+    },
+    {
+      "question": "What kinds of services can people get from the mobile bank?",
+      "type": "detail",
+      "referenceAnswer": "They can withdraw money, open accounts, and get information about loans.",
+      "evidenceSentenceIndexes": [
+        2
+      ],
+      "evidenceFa": "مردم می‌توانند پول دریافت کنند، حساب باز کنند و درباره وام اطلاعات بگیرند."
+    },
+    {
+      "question": "What does the conditional plan to add vehicles suggest about the current service?",
+      "type": "inference",
+      "referenceAnswer": "The current service is being assessed before expansion; more vehicles depend on success.",
+      "evidenceSentenceIndexes": [
+        0,
+        4
+      ],
+      "evidenceFa": "یک بانک سیار در سه روستای دورافتاده آغاز به کار کرد. … اگر برنامه موفق باشد، ماه آینده دو خودرو دیگر اضافه خواهد شد."
+    },
+    {
+      "question": "How does the sentence about adding two more vehicles next month relate to the current mobile bank service?",
+      "type": "discourse",
+      "referenceAnswer": "It gives a future expansion that depends on the current program being successful, contrasting the present single vehicle with possible additional vehicles later.",
+      "evidenceSentenceIndexes": [
+        1,
+        4
+      ],
+      "evidenceFa": "خودرو این بانک دو روز در هفته به هر روستا می‌رود. … اگر برنامه موفق باشد، ماه آینده دو خودرو دیگر اضافه خواهد شد."
+    }
+  ],
+  "cycle-dli-ch4-ch5l1-news-2026-09-01-article-11": [
+    {
+      "question": "According to the government announcement, what will happen to gasoline prices in this month, despite earlier reports of a possible increase?",
+      "type": "main_idea",
+      "referenceAnswer": "Gasoline prices will not change this month.",
+      "evidenceSentenceIndexes": [
+        0,
+        1
+      ],
+      "evidenceFa": "دولت اعلام کرد نرخ بنزین در این ماه تغییر نمی‌کند. … پیش از این، گزارش‌هایی درباره افزایش قیمت منتشر شده بود."
+    },
+    {
+      "question": "What did the Minister of Economy say must be examined before any new decision is made?",
+      "type": "detail",
+      "referenceAnswer": "Inflation and family income.",
+      "evidenceSentenceIndexes": [
+        2
+      ],
+      "evidenceFa": "وزیر اقتصاد گفت هر تصمیم تازه پس از بررسی تورم و درآمد خانواده‌ها گرفته می‌شود."
+    },
+    {
+      "question": "How long did the minister say the current vehicle fuel quotas would remain in place?",
+      "type": "detail",
+      "referenceAnswer": "Until the end of the season.",
+      "evidenceSentenceIndexes": [
+        3
+      ],
+      "evidenceFa": "او افزود سهمیه فعلی خودروها تا پایان فصل باقی می‌ماند."
+    },
+    {
+      "question": "What can be inferred about why the market reacted calmly after the announcement about gasoline prices and quotas?",
+      "type": "inference",
+      "referenceAnswer": "The announcement reduced uncertainty because it said prices would not change this month and the current quotas would remain until the end of the season.",
+      "evidenceSentenceIndexes": [
+        0,
+        3,
+        4
+      ],
+      "evidenceFa": "دولت اعلام کرد نرخ بنزین در این ماه تغییر نمی‌کند. … او افزود سهمیه فعلی خودروها تا پایان فصل باقی می‌ماند. … بازار پس از این خبر واکنش آرامی نشان داد."
+    },
+    {
+      "question": "How does the gasoline-price announcement relate to earlier reports of an increase?",
+      "type": "discourse",
+      "referenceAnswer": "It counters those reports by saying prices will not change this month.",
+      "evidenceSentenceIndexes": [
+        0,
+        1
+      ],
+      "evidenceFa": "دولت اعلام کرد نرخ بنزین در این ماه تغییر نمی‌کند. … پیش از این، گزارش‌هایی درباره افزایش قیمت منتشر شده بود."
+    }
+  ],
+  "cycle-dli-ch4-ch5l1-news-2026-09-01-article-12": [
+    {
+      "question": "What was the main focus of the meeting held by the ministers of three regional countries in Bishkek?",
+      "type": "main_idea",
+      "referenceAnswer": "Economic cooperation and the security of land routes.",
+      "evidenceSentenceIndexes": [
+        0,
+        1
+      ],
+      "evidenceFa": "وزیران سه کشور منطقه در بیشکک دیدار کردند. … موضوع اصلی نشست، همکاری اقتصادی و امنیت راه‌های زمینی بود."
+    },
+    {
+      "question": "In the Bishkek meeting, what did the representatives discuss in order to improve trade and transport?",
+      "type": "detail",
+      "referenceAnswer": "They discussed increasing exports and reducing transportation costs.",
+      "evidenceSentenceIndexes": [
+        2
+      ],
+      "evidenceFa": "نمایندگان درباره افزایش صادرات و کاهش هزینه حمل‌ونقل گفت‌وگو کردند."
+    },
+    {
+      "question": "According to the passage, where is the next meeting scheduled to take place?",
+      "type": "detail",
+      "referenceAnswer": "In Tehran.",
+      "evidenceSentenceIndexes": [
+        4
+      ],
+      "evidenceFa": "دیدار بعدی قرار است در تهران برگزار شود."
+    },
+    {
+      "question": "Why does the passage suggest that the Bishkek meeting was not only about discussion but also about planning for the near future?",
+      "type": "inference",
+      "referenceAnswer": "Because they announced a joint plan for the next six months after the talks, showing the meeting led to concrete short-term action.",
+      "evidenceSentenceIndexes": [
+        3
+      ],
+      "evidenceFa": "در پایان، یک برنامه مشترک برای شش ماه آینده اعلام شد."
+    },
+    {
+      "question": "What does the next meeting in Tehran add to the joint six-month program?",
+      "type": "discourse",
+      "referenceAnswer": "It establishes a planned follow-up rather than ending contact after one meeting.",
+      "evidenceSentenceIndexes": [
+        3,
+        4
+      ],
+      "evidenceFa": "در پایان، یک برنامه مشترک برای شش ماه آینده اعلام شد. … دیدار بعدی قرار است در تهران برگزار شود."
+    }
+  ],
+  "cycle-dli-ch4-ch5l1-news-2026-09-01-article-13": [
+    {
+      "question": "What happened when a group of factory workers protested about not being paid their wages?",
+      "type": "main_idea",
+      "referenceAnswer": "A group of factory workers protested because their wages had not been paid.",
+      "evidenceSentenceIndexes": [
+        0,
+        1
+      ],
+      "evidenceFa": "گروهی از کارکنان یک کارخانه درباره پرداخت نشدن حقوق خود اعتراض کردند. … آنها صبح در برابر ساختمان مدیریت جمع شدند، اما راه ورود را نبستند."
+    },
+    {
+      "question": "Where did the workers gather in the morning during their protest?",
+      "type": "detail",
+      "referenceAnswer": "They gathered in front of the management building.",
+      "evidenceSentenceIndexes": [
+        1
+      ],
+      "evidenceFa": "آنها صبح در برابر ساختمان مدیریت جمع شدند، اما راه ورود را نبستند."
+    },
+    {
+      "question": "According to the workers’ representative, how long had the wages gone unpaid?",
+      "type": "detail",
+      "referenceAnswer": "The wages for two months had still not been paid.",
+      "evidenceSentenceIndexes": [
+        2
+      ],
+      "evidenceFa": "نماینده کارگران گفت حقوق دو ماه هنوز پرداخت نشده است."
+    },
+    {
+      "question": "Why does the passage suggest the workers' protest was serious but still controlled?",
+      "type": "inference",
+      "referenceAnswer": "They were protesting over two months of unpaid wages, but they did not block the entrance, showing both strong dissatisfaction and a controlled protest.",
+      "evidenceSentenceIndexes": [
+        1,
+        2
+      ],
+      "evidenceFa": "آنها صبح در برابر ساختمان مدیریت جمع شدند، اما راه ورود را نبستند. … نماینده کارگران گفت حقوق دو ماه هنوز پرداخت نشده است."
+    },
+    {
+      "question": "What contrast does the passage show between the workers and the local official after the protest began?",
+      "type": "discourse",
+      "referenceAnswer": "The workers protested and demanded payment, while the local official asked both sides to speak calmly.",
+      "evidenceSentenceIndexes": [
+        0,
+        4
+      ],
+      "evidenceFa": "گروهی از کارکنان یک کارخانه درباره پرداخت نشدن حقوق خود اعتراض کردند. … مقام محلی خواستار گفت‌وگوی آرام میان دو طرف شد."
+    }
+  ],
+  "cycle-dli-ch4-ch5l1-news-2026-09-01-article-14": [
+    {
+      "question": "What is the Health Ministry warning people about in this report, and what is the overall concern mentioned about it?",
+      "type": "main_idea",
+      "referenceAnswer": "The Health Ministry is warning about a fake medicine being sold online.",
+      "evidenceSentenceIndexes": [
+        0
+      ],
+      "evidenceFa": "وزارت بهداشت درباره فروش یک داروی تقلبی در اینترنت هشدار داد."
+    },
+    {
+      "question": "According to the report, what is wrong with the fake medicine's manufacturer name on the box?",
+      "type": "detail",
+      "referenceAnswer": "The company name printed on the box is incorrect.",
+      "evidenceSentenceIndexes": [
+        1
+      ],
+      "evidenceFa": "این دارو پوشش رسمی بیمه ندارد و نام شرکت سازنده روی جعبه اشتباه است."
+    },
+    {
+      "question": "Where did officials tell people to buy this medicine instead of buying it online?",
+      "type": "detail",
+      "referenceAnswer": "They told people to buy it only from a pharmacy.",
+      "evidenceSentenceIndexes": [
+        2
+      ],
+      "evidenceFa": "مقام‌ها از مردم خواستند دارو را فقط از داروخانه بخرند."
+    },
+    {
+      "question": "Why does the report suggest that the product should not be trusted, based on the insurance and box-label clues?",
+      "type": "inference",
+      "referenceAnswer": "Because it has no official insurance coverage and the manufacturer name on the box is wrong, the product appears suspicious and unreliable.",
+      "evidenceSentenceIndexes": [
+        1,
+        2
+      ],
+      "evidenceFa": "این دارو پوشش رسمی بیمه ندارد و نام شرکت سازنده روی جعبه اشتباه است. … مقام‌ها از مردم خواستند دارو را فقط از داروخانه بخرند."
+    },
+    {
+      "question": "How does removing online advertisements follow up on the counterfeit-medicine warning?",
+      "type": "discourse",
+      "referenceAnswer": "The warning alerts the public while police act against the product’s promotion.",
+      "evidenceSentenceIndexes": [
+        0,
+        3
+      ],
+      "evidenceFa": "وزارت بهداشت درباره فروش یک داروی تقلبی در اینترنت هشدار داد. … پلیس یک کارزار برای حذف تبلیغات این محصول آغاز کرده است."
+    }
+  ],
+  "cycle-dli-ch4-ch5l1-news-2026-09-01-article-15": [
+    {
+      "question": "According to the report from the Environmental Organization, what happened to the air pollution in Isfahan this week?",
+      "type": "main_idea",
+      "referenceAnswer": "It decreased this week.",
+      "evidenceSentenceIndexes": [
+        0
+      ],
+      "evidenceFa": "سازمان محیط زیست اعلام کرد آلودگی هوای اصفهان در این هفته کمتر شده است."
+    },
+    {
+      "question": "What two causes were named for the lower air pollution in Isfahan this week?",
+      "type": "detail",
+      "referenceAnswer": "Rain and fewer car trips.",
+      "evidenceSentenceIndexes": [
+        1
+      ],
+      "evidenceFa": "باران و کاهش رفت‌وآمد خودروها دو علت مهم بودند."
+    },
+    {
+      "question": "Who was advised not to do long outdoor exercise, despite the improvement in air pollution?",
+      "type": "detail",
+      "referenceAnswer": "Children and older people.",
+      "evidenceSentenceIndexes": [
+        2
+      ],
+      "evidenceFa": "با وجود این، به کودکان و سالمندان توصیه شد ورزش طولانی در فضای باز نکنند."
+    },
+    {
+      "question": "What can be inferred about why children and older people were still told to avoid long outdoor exercise, even though the air pollution had decreased?",
+      "type": "inference",
+      "referenceAnswer": "Because the air had improved but was not yet safe enough for long outdoor exercise for those groups.",
+      "evidenceSentenceIndexes": [
+        0,
+        2
+      ],
+      "evidenceFa": "سازمان محیط زیست اعلام کرد آلودگی هوای اصفهان در این هفته کمتر شده است. … با وجود این، به کودکان و سالمندان توصیه شد ورزش طولانی در فضای باز نکنند."
+    },
+    {
+      "question": "In the passage, how does the sentence about the city hall’s tree-planting plan relate to the earlier sentences about rain, reduced car traffic, and the air-pollution drop?",
+      "type": "discourse",
+      "referenceAnswer": "It adds another effort to improve air quality, moving from the causes of the recent improvement to a planned future measure.",
+      "evidenceSentenceIndexes": [
+        1,
+        3,
+        4
+      ],
+      "evidenceFa": "باران و کاهش رفت‌وآمد خودروها دو علت مهم بودند. … شهرداری برنامه کاشت هزار درخت را آغاز کرده است. … هدف این برنامه بهبود هوا در چند منطقه شلوغ شهر است."
+    }
+  ],
+  "cycle-dli-ch4-ch5l1-news-2026-09-01-article-16": [
+    {
+      "question": "What did the government complete for the flood-affected families in the passage?",
+      "type": "main_idea",
+      "referenceAnswer": "It completed the construction of fifty houses for flood-affected families.",
+      "evidenceSentenceIndexes": [
+        0
+      ],
+      "evidenceFa": "دولت ساخت پنجاه خانه برای خانواده‌های سیل‌زده را به پایان رساند."
+    },
+    {
+      "question": "Where were the new houses for the flood-affected families built?",
+      "type": "detail",
+      "referenceAnswer": "They were built in an area higher than the river.",
+      "evidenceSentenceIndexes": [
+        1
+      ],
+      "evidenceFa": "این خانه‌ها در منطقه‌ای بلندتر از رودخانه ساخته شده‌اند."
+    },
+    {
+      "question": "What else did each family receive besides the new houses?",
+      "type": "detail",
+      "referenceAnswer": "Each family also received some money and building materials.",
+      "evidenceSentenceIndexes": [
+        2
+      ],
+      "evidenceFa": "هر خانواده همچنین مقداری پول و مواد ساختمانی دریافت کرد."
+    },
+    {
+      "question": "Why is building above the river relevant to the families’ situation?",
+      "type": "inference",
+      "referenceAnswer": "The families experienced flooding; the higher location suggests an effort to reduce future flood exposure, not guaranteed safety.",
+      "evidenceSentenceIndexes": [
+        0,
+        1
+      ],
+      "evidenceFa": "دولت ساخت پنجاه خانه برای خانواده‌های سیل‌زده را به پایان رساند. … این خانه‌ها در منطقه‌ای بلندتر از رودخانه ساخته شده‌اند."
+    },
+    {
+      "question": "How does insurance supplement the new homes and direct aid?",
+      "type": "discourse",
+      "referenceAnswer": "It covers part of the damaged property in addition to housing, money, and materials.",
+      "evidenceSentenceIndexes": [
+        0,
+        2,
+        3
+      ],
+      "evidenceFa": "دولت ساخت پنجاه خانه برای خانواده‌های سیل‌زده را به پایان رساند. … هر خانواده همچنین مقداری پول و مواد ساختمانی دریافت کرد. … مقام محلی گفت بیمه بخشی از دارایی‌های آسیب‌دیده را پوشش می‌دهد."
+    }
+  ],
+  "cycle-dli-ch4-ch5l1-news-2026-09-01-article-17": [
+    {
+      "question": "According to the municipal survey about the new park, what was the overall public response to the park plan discussed by the city government?",
+      "type": "main_idea",
+      "referenceAnswer": "Most participants supported the green space and playground, though some were worried about traffic.",
+      "evidenceSentenceIndexes": [
+        0,
+        1
+      ],
+      "evidenceFa": "شهرداری یک نظرسنجی درباره ساخت پارک تازه منتشر کرد. … بیشتر شرکت‌کنندگان از فضای سبز و زمین بازی حمایت کردند، اما گروهی نگران ترافیک بودند."
+    },
+    {
+      "question": "What two features of the new park plan did most participants support in the survey?",
+      "type": "detail",
+      "referenceAnswer": "They supported the green space and the playground.",
+      "evidenceSentenceIndexes": [
+        1
+      ],
+      "evidenceFa": "بیشتر شرکت‌کنندگان از فضای سبز و زمین بازی حمایت کردند، اما گروهی نگران ترافیک بودند."
+    },
+    {
+      "question": "What small addition is included next to the park in the new plan?",
+      "type": "detail",
+      "referenceAnswer": "A small parking lot is placed next to the park.",
+      "evidenceSentenceIndexes": [
+        2
+      ],
+      "evidenceFa": "در طرح تازه، یک پارکینگ کوچک در کنار پارک قرار داده شده است."
+    },
+    {
+      "question": "Why does the municipality say the final decision about the park will be made after meeting with citizens, and what does that suggest about the survey results?",
+      "type": "inference",
+      "referenceAnswer": "Because the city still wants to hear from residents directly; this suggests the survey did not settle the issue completely, since there were both supporters and traffic concerns.",
+      "evidenceSentenceIndexes": [
+        1,
+        3
+      ],
+      "evidenceFa": "بیشتر شرکت‌کنندگان از فضای سبز و زمین بازی حمایت کردند، اما گروهی نگران ترافیک بودند. … شهرداری می‌گوید تصمیم نهایی پس از دیدار با شهروندان گرفته می‌شود."
+    },
+    {
+      "question": "How does the municipality's decision-making process contrast the survey with the citizen meeting about the new park?",
+      "type": "discourse",
+      "referenceAnswer": "The survey gathers opinions first, but the final decision is postponed until after the citizen meeting.",
+      "evidenceSentenceIndexes": [
+        0,
+        3,
+        4
+      ],
+      "evidenceFa": "شهرداری یک نظرسنجی درباره ساخت پارک تازه منتشر کرد. … شهرداری می‌گوید تصمیم نهایی پس از دیدار با شهروندان گرفته می‌شود. … این دیدار روز سه‌شنبه در مدرسه محله است."
+    }
+  ],
+  "cycle-dli-ch4-ch5l1-news-2026-09-01-article-18": [
+    {
+      "question": "What experiment did the relief organization begin with the two drones mentioned in the passage?",
+      "type": "main_idea",
+      "referenceAnswer": "It began an experimental use of two drones for relief work.",
+      "evidenceSentenceIndexes": [
+        0,
+        1
+      ],
+      "evidenceFa": "سازمان امداد استفاده آزمایشی از دو پهپاد را آغاز کرد. … این پهپادها می‌توانند پس از زلزله از منطقه عکس بگیرند و اطلاعات را به پایگاه امداد بفرستند."
+    },
+    {
+      "question": "According to the passage, what can the two drones do after an earthquake?",
+      "type": "detail",
+      "referenceAnswer": "They can take photos of the area and send information to the relief base.",
+      "evidenceSentenceIndexes": [
+        1
+      ],
+      "evidenceFa": "این پهپادها می‌توانند پس از زلزله از منطقه عکس بگیرند و اطلاعات را به پایگاه امداد بفرستند."
+    },
+    {
+      "question": "Where was the first operation with the two drones carried out?",
+      "type": "detail",
+      "referenceAnswer": "It was carried out in an empty village.",
+      "evidenceSentenceIndexes": [
+        2
+      ],
+      "evidenceFa": "نخستین عملیات در یک روستای خالی انجام شد."
+    },
+    {
+      "question": "How could the drones help rescuers plan their routes after an earthquake?",
+      "type": "inference",
+      "referenceAnswer": "Photographs sent to the rescue base can help identify blocked roads and damaged houses before choosing routes.",
+      "evidenceSentenceIndexes": [
+        1,
+        3
+      ],
+      "evidenceFa": "این پهپادها می‌توانند پس از زلزله از منطقه عکس بگیرند و اطلاعات را به پایگاه امداد بفرستند. … مسئول پروژه گفت هدف، پیدا کردن سریع راه‌های بسته و خانه‌های آسیب‌دیده است."
+    },
+    {
+      "question": "How does the sentence about what the drones can do relate to the project goal given by the project manager?",
+      "type": "discourse",
+      "referenceAnswer": "Sentence 1 explains how the drones help achieve the goal described in sentence 3.",
+      "evidenceSentenceIndexes": [
+        1,
+        3
+      ],
+      "evidenceFa": "این پهپادها می‌توانند پس از زلزله از منطقه عکس بگیرند و اطلاعات را به پایگاه امداد بفرستند. … مسئول پروژه گفت هدف، پیدا کردن سریع راه‌های بسته و خانه‌های آسیب‌دیده است."
+    }
+  ],
+  "cycle-dli-ch4-ch5l1-news-2026-09-01-article-19": [
+    {
+      "question": "What happened after the border reopened in this passage, involving the return of about eight hundred travelers and the response of the border forces?",
+      "type": "main_idea",
+      "referenceAnswer": "After the border reopened, about 800 travelers returned to the country and border forces helped them.",
+      "evidenceSentenceIndexes": [
+        0,
+        2
+      ],
+      "evidenceFa": "پس از باز شدن مرز، حدود هشتصد مسافر به کشور بازگشتند. … نیروهای مرزی آب و مواد غذایی در اختیار مسافران قرار دادند."
+    },
+    {
+      "question": "Why was the border closed for one day?",
+      "type": "detail",
+      "referenceAnswer": "It was closed for one day because of a sandstorm.",
+      "evidenceSentenceIndexes": [
+        1
+      ],
+      "evidenceFa": "مرز برای یک روز به دلیل طوفان شن بسته بود."
+    },
+    {
+      "question": "What did the border forces give the travelers?",
+      "type": "detail",
+      "referenceAnswer": "They provided water and food.",
+      "evidenceSentenceIndexes": [
+        2
+      ],
+      "evidenceFa": "نیروهای مرزی آب و مواد غذایی در اختیار مسافران قرار دادند."
+    },
+    {
+      "question": "What can be inferred from the one-day sandstorm closure and the advice to check the weather before traveling?",
+      "type": "inference",
+      "referenceAnswer": "The storm had disrupted travel, so people were warned to check the weather before making a trip.",
+      "evidenceSentenceIndexes": [
+        1,
+        4
+      ],
+      "evidenceFa": "مرز برای یک روز به دلیل طوفان شن بسته بود. … با این حال، به مردم توصیه شد پیش از سفر وضعیت هوا را بررسی کنند."
+    },
+    {
+      "question": "Why does the report still recommend checking the weather after the border and buses reopen?",
+      "type": "discourse",
+      "referenceAnswer": "The reopening is positive news, but caution remains relevant after a sandstorm disrupted travel.",
+      "evidenceSentenceIndexes": [
+        1,
+        3,
+        4
+      ],
+      "evidenceFa": "مرز برای یک روز به دلیل طوفان شن بسته بود. … وزارت راه اعلام کرد حرکت اتوبوس‌ها دوباره آغاز شده است. … با این حال، به مردم توصیه شد پیش از سفر وضعیت هوا را بررسی کنند."
+    }
+  ],
+  "cycle-dli-ch4-ch5l1-news-2026-09-01-article-20": [
+    {
+      "question": "What joint educational program did the University of the City and the Central Hospital start together?",
+      "type": "main_idea",
+      "referenceAnswer": "They started a joint educational program.",
+      "evidenceSentenceIndexes": [
+        0
+      ],
+      "evidenceFa": "دانشگاه شهر و بیمارستان مرکزی یک برنامه مشترک آموزشی آغاز کردند."
+    },
+    {
+      "question": "How many days a week do the medical students work in the clinic in this program?",
+      "type": "detail",
+      "referenceAnswer": "Three days a week.",
+      "evidenceSentenceIndexes": [
+        1
+      ],
+      "evidenceFa": "در این برنامه، دانشجویان پزشکی سه روز در هفته در درمانگاه کار می‌کنند."
+    },
+    {
+      "question": "What kinds of classes does the hospital hold for the students in this program?",
+      "type": "detail",
+      "referenceAnswer": "Health and injection classes.",
+      "evidenceSentenceIndexes": [
+        2
+      ],
+      "evidenceFa": "بیمارستان برای آنها کلاس‌های بهداشت و تزریق برگزار می‌کند."
+    },
+    {
+      "question": "How could the clinic program benefit people beyond the students?",
+      "type": "inference",
+      "referenceAnswer": "Students gain practical training while contributing to clinic work and public services.",
+      "evidenceSentenceIndexes": [
+        1,
+        2,
+        3
+      ],
+      "evidenceFa": "در این برنامه، دانشجویان پزشکی سه روز در هفته در درمانگاه کار می‌کنند. … بیمارستان برای آنها کلاس‌های بهداشت و تزریق برگزار می‌کند. … رئیس دانشگاه گفت همکاری جدید هم به آموزش دانشجویان و هم به خدمات مردم کمک خواهد کرد."
+    },
+    {
+      "question": "How does the last sentence relate to the earlier description of the program?",
+      "type": "discourse",
+      "referenceAnswer": "It gives the schedule for the program's first group by saying they will enter next month.",
+      "evidenceSentenceIndexes": [
+        4
+      ],
+      "evidenceFa": "نخستین گروه ماه آینده وارد برنامه می‌شود."
+    }
+  ],
+  "cycle-dli-ch4-ch5l1-news-2026-09-01-article-21": [
+    {
+      "question": "How did the foreign-exchange market react to the news about the regional negotiations today?",
+      "type": "main_idea",
+      "referenceAnswer": "It reacted by moving in response to the news, with rates rising early and then falling again later.",
+      "evidenceSentenceIndexes": [
+        0,
+        1
+      ],
+      "evidenceFa": "بازار ارز امروز به خبر مذاکرات منطقه‌ای واکنش نشان داد. … نرخ چند ارز خارجی در آغاز روز بالا رفت، اما ظهر دوباره کاهش یافت."
+    },
+    {
+      "question": "What happened to the rates of several foreign currencies at the beginning of the day and at noon?",
+      "type": "detail",
+      "referenceAnswer": "They rose at the beginning of the day, then fell again at noon.",
+      "evidenceSentenceIndexes": [
+        1
+      ],
+      "evidenceFa": "نرخ چند ارز خارجی در آغاز روز بالا رفت، اما ظهر دوباره کاهش یافت."
+    },
+    {
+      "question": "What did the Central Bank say about foreign currency for medicine imports?",
+      "type": "detail",
+      "referenceAnswer": "It said there was enough foreign currency for medicine imports.",
+      "evidenceSentenceIndexes": [
+        3
+      ],
+      "evidenceFa": "بانک مرکزی اعلام کرد ارز کافی برای واردات دارو وجود دارد."
+    },
+    {
+      "question": "Why are traders now waiting for the result of the ministers' meeting?",
+      "type": "inference",
+      "referenceAnswer": "Because the market is reacting to the regional talks and traders want the meeting's outcome to guide what may happen next.",
+      "evidenceSentenceIndexes": [
+        0,
+        4
+      ],
+      "evidenceFa": "بازار ارز امروز به خبر مذاکرات منطقه‌ای واکنش نشان داد. … معامله‌گران اکنون منتظر نتیجه دیدار وزیران هستند."
+    },
+    {
+      "question": "What contrast appears between currency rates early in the day and at noon?",
+      "type": "discourse",
+      "referenceAnswer": "Rates rose first, then fell again at noon.",
+      "evidenceSentenceIndexes": [
+        1
+      ],
+      "evidenceFa": "نرخ چند ارز خارجی در آغاز روز بالا رفت، اما ظهر دوباره کاهش یافت."
+    }
+  ],
+  "cycle-dli-ch4-ch5l1-news-2026-09-01-article-22": [
+    {
+      "question": "What is the main goal of the police road campaign described in the passage?",
+      "type": "main_idea",
+      "referenceAnswer": "To reduce the number of road accident victims during the holidays.",
+      "evidenceSentenceIndexes": [
+        0,
+        3
+      ],
+      "evidenceFa": "پلیس راه یک کارزار تازه برای ایمنی جاده‌ها آغاز کرده است. … هدف، کاهش شمار قربانیان تصادف در تعطیلات است."
+    },
+    {
+      "question": "What three safety topics do drivers receive information about in this program?",
+      "type": "detail",
+      "referenceAnswer": "Speed, seat belts, and fatigue.",
+      "evidenceSentenceIndexes": [
+        1
+      ],
+      "evidenceFa": "در این برنامه، رانندگان درباره سرعت، کمربند و خستگی اطلاعات می‌گیرند."
+    },
+    {
+      "question": "What else do the officers check in several bases besides giving drivers information?",
+      "type": "detail",
+      "referenceAnswer": "They inspect cargo trucks.",
+      "evidenceSentenceIndexes": [
+        2
+      ],
+      "evidenceFa": "مأموران همچنین خودروهای باری را در چند پایگاه بررسی می‌کنند."
+    },
+    {
+      "question": "Why combine driver education with cargo-vehicle checks in the safety campaign?",
+      "type": "inference",
+      "referenceAnswer": "The campaign addresses driver behavior and vehicle-related risks to reduce holiday accident casualties.",
+      "evidenceSentenceIndexes": [
+        1,
+        2,
+        3
+      ],
+      "evidenceFa": "در این برنامه، رانندگان درباره سرعت، کمربند و خستگی اطلاعات می‌گیرند. … مأموران همچنین خودروهای باری را در چند پایگاه بررسی می‌کنند. … هدف، کاهش شمار قربانیان تصادف در تعطیلات است."
+    },
+    {
+      "question": "How does the passage contrast the officers’ two actions in the campaign: informing drivers and checking cargo trucks?",
+      "type": "discourse",
+      "referenceAnswer": "It presents them as two different parts of the same campaign: one focuses on educating drivers, while the other focuses on inspecting cargo trucks.",
+      "evidenceSentenceIndexes": [
+        1,
+        2
+      ],
+      "evidenceFa": "در این برنامه، رانندگان درباره سرعت، کمربند و خستگی اطلاعات می‌گیرند. … مأموران همچنین خودروهای باری را در چند پایگاه بررسی می‌کنند."
+    }
+  ],
+  "cycle-dli-ch4-ch5l1-news-2026-09-01-article-23": [
+    {
+      "question": "What was the event held in a village near Shiraz mainly about, based on the local dance festival and its activities?",
+      "type": "main_idea",
+      "referenceAnswer": "It was a local dance festival with cultural performances in a village near Shiraz.",
+      "evidenceSentenceIndexes": [
+        0,
+        2
+      ],
+      "evidenceFa": "یک جشن رقص محلی در روستایی نزدیک شیراز برگزار شد. … نمایش لباس‌ها و موسیقی سنتی بخش دیگری از جشن بود."
+    },
+    {
+      "question": "Which kinds of groups took part in the program held at the local dance festival?",
+      "type": "detail",
+      "referenceAnswer": "Art groups from five regions participated.",
+      "evidenceSentenceIndexes": [
+        1
+      ],
+      "evidenceFa": "گروه‌های هنری از پنج منطقه در این برنامه شرکت کردند."
+    },
+    {
+      "question": "Besides the dance performance, what other traditional cultural elements were part of the festival?",
+      "type": "detail",
+      "referenceAnswer": "Traditional costumes and traditional music were also featured.",
+      "evidenceSentenceIndexes": [
+        2
+      ],
+      "evidenceFa": "نمایش لباس‌ها و موسیقی سنتی بخش دیگری از جشن بود."
+    },
+    {
+      "question": "Why did the organizers say they held the festival, and what part of the event makes that goal especially likely?",
+      "type": "inference",
+      "referenceAnswer": "They wanted young people to become familiar with local culture, and the festival included cultural performances that could introduce that culture to them.",
+      "evidenceSentenceIndexes": [
+        2,
+        3
+      ],
+      "evidenceFa": "نمایش لباس‌ها و موسیقی سنتی بخش دیگری از جشن بود. … برگزارکنندگان گفتند هدف، آشنایی جوانان با فرهنگ محلی است."
+    },
+    {
+      "question": "What is the relation between the dance performances and the food-sale income at the festival?",
+      "type": "discourse",
+      "referenceAnswer": "The dance performances were part of the cultural program, while the food-sale income was set aside for repairing the village school.",
+      "evidenceSentenceIndexes": [
+        0,
+        4
+      ],
+      "evidenceFa": "یک جشن رقص محلی در روستایی نزدیک شیراز برگزار شد. … درآمد فروش غذا برای تعمیر مدرسه روستا کنار گذاشته شد."
+    }
+  ],
+  "cycle-dli-ch4-ch5l1-news-2026-09-01-article-24": [
+    {
+      "question": "According to the Iranian Pharmacists Association, what happened to the prices of several imported medicines?",
+      "type": "main_idea",
+      "referenceAnswer": "The prices of several imported medicines increased.",
+      "evidenceSentenceIndexes": [
+        0
+      ],
+      "evidenceFa": "انجمن داروسازان اعلام کرد قیمت چند داروی وارداتی افزایش یافته است."
+    },
+    {
+      "question": "What two factors were given as the main reason for the price increase in these imported medicines?",
+      "type": "detail",
+      "referenceAnswer": "A change in the exchange rate and transportation costs.",
+      "evidenceSentenceIndexes": [
+        1
+      ],
+      "evidenceFa": "علت اصلی، تغییر نرخ ارز و هزینه حمل‌ونقل عنوان شد."
+    },
+    {
+      "question": "According to the passage, what still covers part of the cost of these medicines?",
+      "type": "detail",
+      "referenceAnswer": "Insurance still covers part of the cost.",
+      "evidenceSentenceIndexes": [
+        2
+      ],
+      "evidenceFa": "بیمه هنوز بخشی از هزینه این داروها را پوشش می‌دهد."
+    },
+    {
+      "question": "Why might patients not pay the entire increase in medicine costs themselves?",
+      "type": "inference",
+      "referenceAnswer": "Insurance still covers part of the cost despite higher prices; this does not mean patients pay nothing.",
+      "evidenceSentenceIndexes": [
+        0,
+        2
+      ],
+      "evidenceFa": "انجمن داروسازان اعلام کرد قیمت چند داروی وارداتی افزایش یافته است. … بیمه هنوز بخشی از هزینه این داروها را پوشش می‌دهد."
+    },
+    {
+      "question": "How does the ministry’s proposed support respond to the report of higher medicine prices?",
+      "type": "discourse",
+      "referenceAnswer": "The price report identifies the problem; the ministry is considering assistance but has not made a final decision.",
+      "evidenceSentenceIndexes": [
+        0,
+        3,
+        4
+      ],
+      "evidenceFa": "انجمن داروسازان اعلام کرد قیمت چند داروی وارداتی افزایش یافته است. … وزارت بهداشت گفت برای حمایت از بیماران یک برنامه تازه بررسی می‌شود. … تصمیم نهایی قرار است هفته آینده اعلام شود."
+    }
+  ],
+  "cycle-dli-ch4-ch5l1-news-2026-09-01-article-25": [
+    {
+      "question": "What did the government do to the export of one type of fruit for ten days?",
+      "type": "main_idea",
+      "referenceAnswer": "It suspended the export of one type of fruit for ten days.",
+      "evidenceSentenceIndexes": [
+        0
+      ],
+      "evidenceFa": "دولت صادرات یک نوع میوه را برای ده روز متوقف کرد."
+    },
+    {
+      "question": "According to the officials, why was this export decision made?",
+      "type": "detail",
+      "referenceAnswer": "It was made to increase supply in the domestic market.",
+      "evidenceSentenceIndexes": [
+        1
+      ],
+      "evidenceFa": "مقام‌ها گفتند این تصمیم برای افزایش محصول در بازار داخلی گرفته شده است."
+    },
+    {
+      "question": "What did the farmers warn about and request after the export was stopped?",
+      "type": "detail",
+      "referenceAnswer": "They warned about possible losses and asked for financial support.",
+      "evidenceSentenceIndexes": [
+        2
+      ],
+      "evidenceFa": "کشاورزان درباره زیان احتمالی هشدار دادند و خواستار حمایت مالی شدند."
+    },
+    {
+      "question": "What competing interests must the minister balance over the export restriction?",
+      "type": "inference",
+      "referenceAnswer": "More domestic fruit supply is the government’s aim, while farmers fear losses and want financial support.",
+      "evidenceSentenceIndexes": [
+        1,
+        2,
+        3
+      ],
+      "evidenceFa": "مقام‌ها گفتند این تصمیم برای افزایش محصول در بازار داخلی گرفته شده است. … کشاورزان درباره زیان احتمالی هشدار دادند و خواستار حمایت مالی شدند. … وزیر وعده داد پس از بررسی قیمت‌ها با نمایندگان آنها دیدار کند."
+    },
+    {
+      "question": "How does a possible early restart qualify the ten-day export suspension?",
+      "type": "discourse",
+      "referenceAnswer": "Ten days is the announced period, but the suspension may end sooner.",
+      "evidenceSentenceIndexes": [
+        0,
+        4
+      ],
+      "evidenceFa": "دولت صادرات یک نوع میوه را برای ده روز متوقف کرد. … صادرات ممکن است پیش از پایان ده روز دوباره آغاز شود."
+    }
+  ],
+  "cycle-dli-ch4-ch5l1-news-2026-09-01-article-26": [
+    {
+      "question": "What overall response did the school and health authorities take after some students showed signs of a seasonal illness at the school?",
+      "type": "main_idea",
+      "referenceAnswer": "They shifted two grades online, planned a one-day cleaning of the building, and said the school did not need to be fully closed.",
+      "evidenceSentenceIndexes": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "evidenceFa": "مدیر یک مدرسه اعلام کرد کلاس‌های دو پایه فردا به صورت آنلاین برگزار می‌شود. … چند دانش‌آموز نشانه‌های یک بیماری فصلی داشته‌اند. … ساختمان مدرسه برای یک روز پاک‌سازی خواهد شد. … وزارت بهداشت گفته است تعطیلی کامل مدرسه لازم نیست."
+    },
+    {
+      "question": "Which two grades will be held online tomorrow, according to the school principal?",
+      "type": "detail",
+      "referenceAnswer": "The classes of two grades will be held online tomorrow.",
+      "evidenceSentenceIndexes": [
+        0
+      ],
+      "evidenceFa": "مدیر یک مدرسه اعلام کرد کلاس‌های دو پایه فردا به صورت آنلاین برگزار می‌شود."
+    },
+    {
+      "question": "What will happen to the school building for one day?",
+      "type": "detail",
+      "referenceAnswer": "The school building will be cleaned for one day.",
+      "evidenceSentenceIndexes": [
+        2
+      ],
+      "evidenceFa": "ساختمان مدرسه برای یک روز پاک‌سازی خواهد شد."
+    },
+    {
+      "question": "Why should families check their children's health and keep them at home if they are sick?",
+      "type": "inference",
+      "referenceAnswer": "Because some students have shown seasonal illness symptoms, so sick children should stay home to avoid spreading the illness.",
+      "evidenceSentenceIndexes": [
+        1,
+        4
+      ],
+      "evidenceFa": "چند دانش‌آموز نشانه‌های یک بیماری فصلی داشته‌اند. … خانواده‌ها باید وضعیت سلامت کودکان را بررسی کنند و در صورت بیماری آنها را در خانه نگه دارند."
+    },
+    {
+      "question": "How does advice against full closure fit the move online for only two grades?",
+      "type": "discourse",
+      "referenceAnswer": "Both favor a limited response rather than closing the whole school.",
+      "evidenceSentenceIndexes": [
+        0,
+        3
+      ],
+      "evidenceFa": "مدیر یک مدرسه اعلام کرد کلاس‌های دو پایه فردا به صورت آنلاین برگزار می‌شود. … وزارت بهداشت گفته است تعطیلی کامل مدرسه لازم نیست."
+    }
+  ],
+  "cycle-dli-ch4-ch5l1-news-2026-09-01-article-27": [
+    {
+      "question": "What was the main event involving Iranian relief-team representatives and delegates from two neighboring countries in Tehran?",
+      "type": "main_idea",
+      "referenceAnswer": "They met in Tehran to discuss humanitarian cooperation.",
+      "evidenceSentenceIndexes": [
+        0,
+        1
+      ],
+      "evidenceFa": "نمایندگان تیم‌های امدادی ایران و دو کشور همسایه در تهران دیدار کردند. … آنها درباره کمک پس از زلزله و سیل گفت‌وگو کردند."
+    },
+    {
+      "question": "According to the passage, what did the three sides talk about after meeting in Tehran?",
+      "type": "detail",
+      "referenceAnswer": "They discussed aid after earthquakes and floods.",
+      "evidenceSentenceIndexes": [
+        1
+      ],
+      "evidenceFa": "آنها درباره کمک پس از زلزله و سیل گفت‌وگو کردند."
+    },
+    {
+      "question": "What information did each country present during the meeting?",
+      "type": "detail",
+      "referenceAnswer": "Each country presented information about its bases and equipment.",
+      "evidenceSentenceIndexes": [
+        2
+      ],
+      "evidenceFa": "هر کشور اطلاعات پایگاه‌ها و تجهیزات خود را ارائه داد."
+    },
+    {
+      "question": "How could sharing base and equipment information speed up rescue assistance?",
+      "type": "inference",
+      "referenceAnswer": "Knowing partners’ resources can improve coordination and deployment after earthquakes or floods.",
+      "evidenceSentenceIndexes": [
+        1,
+        2,
+        4
+      ],
+      "evidenceFa": "آنها درباره کمک پس از زلزله و سیل گفت‌وگو کردند. … هر کشور اطلاعات پایگاه‌ها و تجهیزات خود را ارائه داد. … مقام‌ها گفتند این همکاری زمان رسیدن کمک را کاهش می‌دهد."
+    },
+    {
+      "question": "How does faster aid explain the joint operation planned for next year?",
+      "type": "discourse",
+      "referenceAnswer": "Reduced response time is the stated benefit motivating joint work.",
+      "evidenceSentenceIndexes": [
+        3,
+        4
+      ],
+      "evidenceFa": "در پایان، سه طرف تصمیم گرفتند سال آینده یک عملیات مشترک برگزار کنند. … مقام‌ها گفتند این همکاری زمان رسیدن کمک را کاهش می‌دهد."
+    }
+  ],
+  "cycle-dli-ch4-ch5l1-news-2026-09-01-article-28": [
+    {
+      "question": "According to the report, what happened to car production last month, and what did the Ministry of Industry announce about it?",
+      "type": "main_idea",
+      "referenceAnswer": "Car production increased slightly last month, and the Ministry of Industry announced it.",
+      "evidenceSentenceIndexes": [
+        0
+      ],
+      "evidenceFa": "وزارت صنعت اعلام کرد تولید خودرو در ماه گذشته کمی افزایش یافت."
+    },
+    {
+      "question": "How many cars did the three factories produce in total?",
+      "type": "detail",
+      "referenceAnswer": "They produced 20,000 cars in total.",
+      "evidenceSentenceIndexes": [
+        1
+      ],
+      "evidenceFa": "سه کارخانه در مجموع بیست هزار خودرو ساختند."
+    },
+    {
+      "question": "What is still slowing production, according to the passage?",
+      "type": "detail",
+      "referenceAnswer": "A shortage of some materials is still slowing production.",
+      "evidenceSentenceIndexes": [
+        2
+      ],
+      "evidenceFa": "با این حال، کمبود بعضی مواد هنوز تولید را کند می‌کند."
+    },
+    {
+      "question": "What can be inferred about the effect of easier import of parts and the experts' view of higher production on car prices?",
+      "type": "inference",
+      "referenceAnswer": "Easier imports of parts could support higher production, and experts say that higher production can reduce market prices, but not right away.",
+      "evidenceSentenceIndexes": [
+        3,
+        4
+      ],
+      "evidenceFa": "دولت می‌خواهد واردات قطعات را آسان‌تر کند. … کارشناسان می‌گویند افزایش تولید می‌تواند قیمت بازار را کاهش دهد، اما نتیجه آن فوری نخواهد بود."
+    },
+    {
+      "question": "What limitation accompanies the reported increase in car production?",
+      "type": "discourse",
+      "referenceAnswer": "Despite the increase, material shortages still slow production.",
+      "evidenceSentenceIndexes": [
+        0,
+        2
+      ],
+      "evidenceFa": "وزارت صنعت اعلام کرد تولید خودرو در ماه گذشته کمی افزایش یافت. … با این حال، کمبود بعضی مواد هنوز تولید را کند می‌کند."
+    }
+  ],
+  "cycle-dli-ch4-ch5l1-news-2026-09-01-article-29": [
+    {
+      "question": "What is the main point of the Internet Security Center's warning about bank accounts in this passage?",
+      "type": "main_idea",
+      "referenceAnswer": "It warns about a new attack on bank accounts using fake bank messages.",
+      "evidenceSentenceIndexes": [
+        0,
+        1
+      ],
+      "evidenceFa": "مرکز امنیت اینترنت درباره حمله تازه به حساب‌های بانکی هشدار داد. … مهاجمان پیام‌هایی با نام بانک برای شهروندان می‌فرستند و اطلاعات شخصی می‌خواهند."
+    },
+    {
+      "question": "According to the passage, what do the attackers ask citizens for in the messages sent under a bank's name?",
+      "type": "detail",
+      "referenceAnswer": "They ask for personal information.",
+      "evidenceSentenceIndexes": [
+        1
+      ],
+      "evidenceFa": "مهاجمان پیام‌هایی با نام بانک برای شهروندان می‌فرستند و اطلاعات شخصی می‌خواهند."
+    },
+    {
+      "question": "What did the police say banks never ask customers to provide?",
+      "type": "detail",
+      "referenceAnswer": "Banks never ask for a customer's full password.",
+      "evidenceSentenceIndexes": [
+        2
+      ],
+      "evidenceFa": "پلیس گفت بانک‌ها هرگز رمز کامل مشتری را درخواست نمی‌کنند."
+    },
+    {
+      "question": "Based on the attackers sending messages in a bank's name and the police saying real banks never ask for the full password, what can be inferred about those messages?",
+      "type": "inference",
+      "referenceAnswer": "They are fake phishing messages, because they pretend to be from a bank and seek information that real banks do not request.",
+      "evidenceSentenceIndexes": [
+        1,
+        2
+      ],
+      "evidenceFa": "مهاجمان پیام‌هایی با نام بانک برای شهروندان می‌فرستند و اطلاعات شخصی می‌خواهند. … پلیس گفت بانک‌ها هرگز رمز کامل مشتری را درخواست نمی‌کنند."
+    },
+    {
+      "question": "How does the police statement about banks relate to the attackers' messages sent in a bank's name?",
+      "type": "discourse",
+      "referenceAnswer": "It contrasts real banks' behavior with the attackers' false requests.",
+      "evidenceSentenceIndexes": [
+        1,
+        2
+      ],
+      "evidenceFa": "مهاجمان پیام‌هایی با نام بانک برای شهروندان می‌فرستند و اطلاعات شخصی می‌خواهند. … پلیس گفت بانک‌ها هرگز رمز کامل مشتری را درخواست نمی‌کنند."
+    }
+  ],
+  "cycle-dli-ch4-ch5l1-news-2026-09-01-article-30": [
+    {
+      "question": "What is the main purpose of the regional agreement in which several countries reached a deal to protect an important strait?",
+      "type": "main_idea",
+      "referenceAnswer": "To reduce the risk for commercial ships by protecting the strait.",
+      "evidenceSentenceIndexes": [
+        0,
+        3
+      ],
+      "evidenceFa": "چند کشور منطقه برای حفاظت از یک تنگه مهم به توافق رسیدند. … هدف اصلی، کاهش خطر برای کشتی‌های تجاری است."
+    },
+    {
+      "question": "According to the plan, what information will the rescue ships share with one another?",
+      "type": "detail",
+      "referenceAnswer": "Weather and route information.",
+      "evidenceSentenceIndexes": [
+        1
+      ],
+      "evidenceFa": "طبق برنامه، کشتی‌های امدادی اطلاعات هوا و مسیر را با یکدیگر به اشتراک می‌گذارند."
+    },
+    {
+      "question": "What did the ministers say about who the cooperation is not directed against?",
+      "type": "detail",
+      "referenceAnswer": "They said it is not against any other country.",
+      "evidenceSentenceIndexes": [
+        2
+      ],
+      "evidenceFa": "وزیران تأکید کردند این همکاری علیه هیچ کشور دیگری نیست."
+    },
+    {
+      "question": "Why does the passage suggest that the cooperation is meant to be defensive rather than aggressive?",
+      "type": "inference",
+      "referenceAnswer": "Because the ministers said it is not against any other country, and the stated goal is to reduce danger for commercial ships.",
+      "evidenceSentenceIndexes": [
+        2,
+        3
+      ],
+      "evidenceFa": "وزیران تأکید کردند این همکاری علیه هیچ کشور دیگری نیست. … هدف اصلی، کاهش خطر برای کشتی‌های تجاری است."
+    },
+    {
+      "question": "How does the sentence about the rescue ships' information sharing relate to the sentence about the first technical meeting next month?",
+      "type": "discourse",
+      "referenceAnswer": "The first sentence describes an operational plan, while the second adds the next step in putting that cooperation into practice.",
+      "evidenceSentenceIndexes": [
+        1,
+        4
+      ],
+      "evidenceFa": "طبق برنامه، کشتی‌های امدادی اطلاعات هوا و مسیر را با یکدیگر به اشتراک می‌گذارند. … نخستین نشست فنی ماه آینده برگزار می‌شود."
+    }
+  ]
+}

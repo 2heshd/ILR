@@ -239,6 +239,9 @@ export type SpeakingAttempt = {
 };
 
 export type StudyState = {
+  schedulingVersion?: number;
+  dailyNewLimit?: number;
+  studyPlans?: Partial<Record<import('./study-plans').PlanMode,import('./study-plans').StudyPlan>>;
   weekNumber: number;
   currentIlr: IlrLevel;
   skillLevels: {

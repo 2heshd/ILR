@@ -79,6 +79,7 @@ export async function POST(request: Request) {
     if (!selectedVocabulary.length) {
       return NextResponse.json({ error: "Choose vocabulary before generating practice." }, { status: 400 });
     }
+    if(selectedVocabulary.length>250)return NextResponse.json({error:"Choose at most 250 words for one practice plan."},{status:400});
     const sentenceCount = selectedVocabulary.length < 8
       ? "2-3"
       : selectedVocabulary.length < 20
@@ -108,6 +109,11 @@ Requirements:
 - avoid English inside the Persian passage
 - list only selected bank words actually used, using their original dictionary forms from the bank
 - produce 5 comprehension questions in ENGLISH: one main idea, two detail, one inference, one discourse/author-intent
+- every question must name a participant, event, decision, action, contrast, or consequence from THIS passage; never ask generic questions like "What is the main idea?" or "What can be inferred?"
+- detail questions must ask different concrete facts (who did what, where, when, why, sequence, quantity, or consequence); avoid asking for facts not stated
+- inference questions must require combining two stated clues, not outside knowledge; identify both clues in the reference answer
+- discourse questions must name the actual contrast, causal link, or intention being tested; reference answers must cite the supporting Persian clause
+- when the selected vocabulary cannot support five distinct answerable questions, return a shorter passage with genuinely distinct questions rather than fabricating missing events
 - for each question include a concise hidden reference answer used only for grading
 
 Return this exact shape:

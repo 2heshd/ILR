@@ -2,6 +2,10 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
+import StudyPlanPicker from "@/components/StudyPlanPicker";
+import { dueWords, plannedWords, type PlanMode, type StudyPlan } from "@/lib/study-plans";
+import { independentSchedules } from "@/lib/independent-schedules";
+import { patternHints } from "@/lib/persian-patterns";
 import AccountWorkspace from "@/components/AccountWorkspace";
 import ComprehensionGrader from "@/components/ComprehensionGrader";
 import GistListening from "@/components/GistListening";
@@ -47,7 +51,7 @@ const ONBOARDING_KEY = "ilr-persian-onboarding-v1";
 const LEGACY_KEYS = ["ilr-persian-v2", "ilr-persian-v1"];
 const PERSIAN_WORD_PATTERN = /([\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06FA-\u06FC\u200C]+)/g;
 const IS_PERSIAN_WORD = /^[\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06FA-\u06FC\u200C]+$/;
-const SYNAPTX_URL = process.env.NEXT_PUBLIC_SYNAPTX_URL ?? (process.env.NODE_ENV === "production" ? "https://synapt-x.vercel.app" : "http://localhost:3002");
+const SYNAPTX_URL = process.env.NEXT_PUBLIC_SYNAPTX_URL ?? (process.env.NODE_ENV === "production" ? "https://synapt-x.app" : "http://localhost:3002");
 const ASL_URL = process.env.NEXT_PUBLIC_ASL_URL ?? (process.env.NODE_ENV === "production" ? "https://get-asl.vercel.app" : "http://localhost:3000");
 const NEWS_CATALOG = newsVocabulary();
 
@@ -103,9 +107,9 @@ function id() {
 type TimedCaption = { word: string; start: number; end: number };
 
 function hydrateState(raw: Partial<StudyState> | null | undefined): StudyState {
-  const seededPassages = curatedPassages();
-  const seededListening = curatedListeningItems();
-  const seededSpeaking = curatedSpeakingPrompts();
+  const seededPassages = [...(raw?.passages??[]).filter(item=>!curatedPassages().some(seed=>seed.id===item.id)),...curatedPassages()];
+  const seededListening = [...(raw?.listeningItems??[]).filter(item=>!curatedListeningItems().some(seed=>seed.id===item.id)),...curatedListeningItems()];
+  const seededSpeaking = [...(raw?.speakingPrompts??[]).filter(item=>!curatedSpeakingPrompts().some(seed=>seed.id===item.id)),...curatedSpeakingPrompts()];
   const { words: mergedWords, aliases: wordAliases } = dedupeLexicalWords(raw?.words ?? []);
   const wordIds = new Set(mergedWords.map((word) => word.id));
   const passageIds = new Set(seededPassages.map((item) => item.id));
@@ -139,30 +143,29 @@ function hydrateState(raw: Partial<StudyState> | null | undefined): StudyState {
     speakingPrompts: seededSpeaking,
     speakingAttempts: (raw?.speakingAttempts ?? []).filter((attempt) => speakingIds.has(attempt.speakingPromptId)),
   };
+  const reviewsByWord=new Map<string,ReviewEvent[]>();
+  for(const review of state.reviews){const list=reviewsByWord.get(review.lexicalItemId)??[];list.push(review);reviewsByWord.set(review.lexicalItemId,list);}
   state.words = state.words.map((word) => {
-    const savedCards = [word.fsrsCard, word.modalityCards?.visual, word.modalityCards?.audio, word.modalityCards?.cloze].flatMap((card) => card ? [card] : []);
-    const savedCard = savedCards.length
-      ? savedCards.reduce((latest, card) => (
-        new Date(card.due).getTime() > new Date(latest.due).getTime() ? card : latest
-      ))
-      : createSerializedCard(new Date(word.introducedAt || Date.now()));
-    const removeLegacyDailyCap = word.sourceType === "course" && word.sourceWeek === state.weekNumber && word.reviews === 0;
-    const fsrsCard = removeLegacyDailyCap ? { ...savedCard, due: new Date().toISOString() } : savedCard;
+    const modalityCards=independentSchedules(word,reviewsByWord.get(word.id)??[],raw?.schedulingVersion===2);
+    const fsrsCard=modalityCards.visual!;
     const knowledgeState = word.knowledgeState ?? (word.sourceWeek < state.weekNumber ? "known" : "learning");
     const tier = word.tier ?? (word.sourceType === "system_advanced" ? "A" : word.sourceType === "course" ? "B" : "C");
     return {
       ...word,
       tier,
       modalityMastery: word.modalityMastery ?? {},
-      // Keep modality analytics separate while sharing one spacing schedule.
-      modalityCards: { ...word.modalityCards, visual: fsrsCard, audio: fsrsCard, cloze: fsrsCard },
+      modalityCards,
       knowledgeState,
       fsrsCard,
       dueAt: word.dueAt || fsrsCard.due,
     };
   });
+  state.schedulingVersion=2;
   return state;
 }
+
+function weakestAccuracy(word:LexicalItem){const tested=Object.values(word.modalityMastery??{}).filter(item=>item&&item.reviews>0);return tested.length?Math.min(...tested.map(item=>item!.correct/item!.reviews)):word.correct/Math.max(1,word.reviews);}
+function WordPatternHint({word}:{word:string}){const hints=patternHints(word);return hints.length?<details className="vocab-pattern-hint"><summary>Word-building hint</summary>{hints.map(hint=><p key={hint.form}><b lang="fa">{hint.form}</b> · {hint.rule}<br/><small>{hint.example}</small></p>)}</details>:null;}
 
 function median(values: number[]) {
   if (!values.length) return 0;
@@ -596,7 +599,7 @@ export default function Home() {
         knowledgeState: "learning", topic: "Asl derivation",
         introducedAt: now.toISOString(), reviews: 0, correct: 0, lapses: 0,
         dueAt: fsrsCard.due, fsrsCard,
-        modalityCards: { visual: fsrsCard, audio: fsrsCard, cloze: fsrsCard },
+        modalityCards: { visual: fsrsCard, audio: createSerializedCard(), cloze: createSerializedCard() },
       };
       return { ...currentState, words: [...currentState.words, word] };
     });
@@ -605,28 +608,16 @@ export default function Home() {
     window.history.replaceState({}, "", window.location.pathname);
   }, [loaded]);
 
-  const successfullyReviewedToday = useMemo(() => {
-    const today = new Date().toDateString();
-    return new Set(state.reviews
-      .filter((review) => review.correct && new Date(review.reviewedAt).toDateString() === today)
-      .map((review) => review.lexicalItemId));
-  }, [state.reviews]);
-
-  const due = useMemo(() => {
-    const scheduled = state.words
-      // A successful card is complete for the day even if FSRS's initial
-      // learning step becomes due again during a long review session.
-      .filter((word) => !successfullyReviewedToday.has(word.id))
-      .filter((word) => new Date(word.modalityCards?.[reviewModality]?.due ?? word.dueAt).getTime() <= Date.now())
-      .sort((a, b) => new Date(a.modalityCards?.[reviewModality]?.due ?? a.dueAt).getTime() - new Date(b.modalityCards?.[reviewModality]?.due ?? b.dueAt).getTime());
-    if (reviewModality !== "cloze") return scheduled;
-    return [...scheduled.filter(isPatternItem), ...scheduled.filter((word) => !isPatternItem(word))];
-  }, [state.words, reviewModality, successfullyReviewedToday]);
+  const [clockNow,setClockNow]=useState(()=>Date.now());
+  useEffect(()=>{const timer=setInterval(()=>setClockNow(Date.now()),15000);return()=>clearInterval(timer);},[]);
+  const due=useMemo(()=>dueWords(state,reviewModality,new Date(clockNow)),[state,reviewModality,clockNow]);
+  function updatePlan(mode:PlanMode,plan:StudyPlan){setState(current=>({...current,studyPlans:{...current.studyPlans,[mode]:plan}}));}
+  function planPicker(mode:PlanMode){return <StudyPlanPicker key={mode} state={state} mode={mode} onChange={plan=>updatePlan(mode,plan)}/>;}
   const current = due[0];
   const allocation = useMemo(() => adaptiveAllocation(state), [state]);
   const trainingPhase = useMemo(() => currentTrainingPhase(state.weekNumber), [state.weekNumber]);
   const bottleneck = useMemo(() => dominantBottleneck(state), [state]);
-  const mature = state.words.filter((word) => word.reviews >= 4 && word.correct / Math.max(1, word.reviews) >= 0.8).length;
+  const mature = state.words.filter(word=>(["visual","audio","cloze"] as const).every(mode=>{const skill=word.modalityMastery?.[mode];return skill&&skill.reviews>=4&&skill.correct/skill.reviews>=0.9;})).length;
   const retention = state.reviews.length ? Math.round(100 * state.reviews.filter((review) => review.correct).length / state.reviews.length) : 0;
   const medianRecall = median(state.reviews.slice(-250).map((review) => review.responseMs));
   const latestPassage = state.passages.find((item) => item.id === activePassageId) ?? state.passages[0];
@@ -982,7 +973,7 @@ export default function Home() {
   function submitPatternAnswer() {
     if (!current || !patternInput.trim()) return;
     setResponseMs(Date.now() - startRef.current);
-    setPatternMatched(answerMatchesDefinition(patternInput, current.definition));
+    setPatternMatched(answerMatchesDefinition(patternInput, patternHints(current.displayForm)[0]?.rule??current.definition));
     setPatternPhase("result");
   }
 
@@ -1014,7 +1005,7 @@ export default function Home() {
     // Response time remains useful analytics, but must not turn a correct answer
     // into a short-term "hard" card that reappears during the same session.
     const rating: ReviewRating = correct ? "good" : "again";
-    const { before, after } = reviewFsrs(current.fsrsCard ?? current.modalityCards?.[reviewModality], rating, new Date());
+    const { before, after } = reviewFsrs(current.modalityCards?.[reviewModality], rating, new Date());
     const event: ReviewEvent = {
       id: id(),
       lexicalItemId: current.id,
@@ -1045,7 +1036,7 @@ export default function Home() {
             ]),
           },
         },
-        modalityCards: { ...word.modalityCards, visual: after, audio: after, cloze: after },
+        modalityCards: { ...word.modalityCards, [reviewModality]: after },
         knowledgeState: !correct
           ? "new"
           : measured <= 3_000 && word.reviews + 1 >= 5 && (word.correct + 1) / (word.reviews + 1) >= 0.9
@@ -1077,7 +1068,9 @@ export default function Home() {
     setGenerationBusy(kind);
     setStatus(`Generating ${practiceMode === "transfer" ? "fresh transfer" : "controlled"} ${kind}…`);
     try {
-      const words = selectContextWords(state, 80);
+      const words = plannedWords(state,kind).map(word=>word.displayForm);
+      if(!words.length)throw new Error("Choose an active day or week plan below before generating practice.");
+      if(words.length>250)throw new Error("Use up to 250 words per generation plan. Split larger selections into focused sessions.");
       const targetIlr = state.skillLevels[kind];
       const data = await generateJson({ kind, weekNumber: state.weekNumber, targetWords: words, targetIlr, practiceMode });
       if (!isMeaningfulPersianText(data.textFa)) throw new Error(`The generated ${kind} item had no valid Persian text. Please try again.`);
@@ -1474,7 +1467,7 @@ export default function Home() {
             knowledgeState,
             dueAt: due.toISOString(),
             fsrsCard: word.fsrsCard ? { ...word.fsrsCard, due: due.toISOString() } : createSerializedCard(due),
-            modalityCards: Object.fromEntries(Object.entries(word.modalityCards ?? {}).map(([modality, card]) => [modality, { ...card, due: due.toISOString() }])),
+            modalityCards: { ...word.modalityCards, visual: { ...(word.modalityCards?.visual??createSerializedCard()), due: due.toISOString() } },
           }),
         };
       }
@@ -1497,7 +1490,7 @@ export default function Home() {
       };
       return { ...currentState, words: [...currentState.words, word] };
     });
-    setStatus(`${displayForm} marked ${knowledgeState}. Its recall schedule and future practice were updated.`);
+    setStatus(`${displayForm} marked ${knowledgeState}. Its text schedule was updated; audio and patterns are unchanged.`);
     if (!existingBeforeUpdate?.definition) {
       try {
         const data = await generateJson({ kind: "define_words", words: [displayForm] });
@@ -1524,18 +1517,18 @@ export default function Home() {
       return {
         ...currentState,
         weekNumber: Math.min(COURSE_META.weeks, completedWeek + 1),
-        words: currentState.words.map((word) => word.sourceWeek <= completedWeek && word.knowledgeState !== "automatic" ? { ...word, knowledgeState: "known" as const } : word),
+        words: currentState.words,
       };
     });
-    setStatus("Advanced to the next course week. Earlier vocabulary is now marked known and remains active in reviews, Reading, and Listening.");
+    setStatus("Advanced to the next course week. Earlier vocabulary keeps its actual mastery and review schedules.");
   }
 
   if (!loaded) return <main>Loading…</main>;
 
   const weakWords = [...state.words]
-    .filter((word) => word.reviews >= 2)
-    .sort((a, b) => (a.correct / a.reviews) - (b.correct / b.reviews) || (b.medianResponseMs ?? 0) - (a.medianResponseMs ?? 0))
-    .slice(0, 10);
+    .filter((word) => word.reviews >= 1)
+    .sort((a, b) => weakestAccuracy(a) - weakestAccuracy(b) || (b.medianResponseMs ?? 0) - (a.medianResponseMs ?? 0))
+    .slice(0, 50);
   const readingAverage = Math.round(average(state.passageAttempts.slice(-5).map((attempt) => attempt.comprehensionScore)));
   const listeningAverage = Math.round(average(state.listeningAttempts.slice(-5).map((attempt) => attempt.comprehensionScore)));
   const speakingAverage = Math.round(average(state.speakingAttempts.slice(-5).map((attempt) => attempt.grade?.overallScore ?? attempt.selfScore ?? 0).filter(Boolean)));
@@ -1658,6 +1651,7 @@ export default function Home() {
     </header>
 
     <nav className="tabs" aria-label="Cursos navigation">
+      <div className="suite-navigation"><a href="https://synapt-x.app">Synaptx ↗</a><a href="https://get-asl.vercel.app">Asl ↗</a><a href="/classroom">Classroom ↗</a></div>
       <div className="nav-section-heading"><span><i className="nav-flower">✺</i> Cursos <small>by Synaptx</small></span><span>+</span></div>
       <div className="nav-dash" />
       <div className="nav-section-heading"><span><i>▲</i> Study</span><span>−</span></div>
@@ -1684,6 +1678,8 @@ export default function Home() {
     </section>}
 
     {tab === "today" && !showIntake && <section className="grid today-grid">
+      {planPicker(reviewModality)}
+      <div className="card span-12"><label>New words per day, per skill <select value={state.dailyNewLimit??40} onChange={e=>setState(current=>({...current,dailyNewLimit:Number(e.target.value)}))}>{[30,40,50].map(count=><option key={count}>{count}</option>)}</select></label><p className="muted">90% scheduling target · Due reviews come first. Text, audio, and patterns advance independently. Short learning steps may return today.</p></div>
       <Metric label="Due now" value={String(due.length)} />
       <Metric label="Total words" value={String(state.words.length)} />
       <Metric label="Retention" value={`${retention}%`} />
@@ -1692,6 +1688,7 @@ export default function Home() {
       <div className="card span-7 dashboard-primary">
         <div className="row spread"><h2>{state.words.length ? "Review" : "Start here"}</h2>{state.words.length > 0 && <div className="row"><button className={reviewModality === "visual" ? "mode-button active" : "mode-button"} onClick={() => setReviewModality("visual")}>Text</button><button className={reviewModality === "audio" ? "mode-button active" : "mode-button"} onClick={() => setReviewModality("audio")}>Audio</button><button className={reviewModality === "cloze" ? "mode-button active" : "mode-button"} onClick={() => setReviewModality("cloze")}>Patterns</button><span className="pill">{reviewModality === "cloze" ? "1s flash · type" : "3s · 8s · 15s"}</span></div>}</div>
         {current ? <>
+          {(revealed||patternPhase==="result")&&patternHints(current.displayForm).map(hint=><aside className="pattern-hint" key={hint.form}><b lang="fa">{hint.form}</b><span>{hint.rule}</span><small>{hint.example}</small></aside>)}
           {reviewModality === "cloze" ? <div className="pattern-recall" aria-live="polite">
             {patternPhase === "flash" && <div className="pattern-flash">
               <span>{isPatternItem(current) ? "Phrase / compound" : "Word"} · memorize</span>
@@ -1699,7 +1696,7 @@ export default function Home() {
               <div className="pattern-flash-meter" aria-hidden="true"><i /></div>
             </div>}
             {patternPhase === "answer" && <form className="pattern-answer" onSubmit={(event) => { event.preventDefault(); submitPatternAnswer(); }}>
-              <label htmlFor="pattern-answer">The phrase is hidden. Type its English meaning.</label>
+              <label htmlFor="pattern-answer">{patternHints(current.displayForm)[0]?<>In <span lang="fa">{current.displayForm}</span>, what does <span lang="fa">{patternHints(current.displayForm)[0].form}</span> contribute?</>:"The phrase is hidden. Type its English meaning."}</label>
               <input ref={patternInputRef} id="pattern-answer" value={patternInput} onChange={(event) => setPatternInput(event.target.value)} placeholder="Type the meaning…" autoComplete="off" />
               <button className="primary" type="submit" disabled={!patternInput.trim()}>Check answer</button>
             </form>}
@@ -1707,7 +1704,7 @@ export default function Home() {
               <span className={patternMatched ? "pattern-signal match" : "pattern-signal"}>{patternMatched ? "Likely match" : "Check your meaning"}</span>
               <div className="answer-block">
                 <span className="muted">You typed</span><strong>{patternInput}</strong>
-                <span className="muted">Expected</span><strong>{current.definition || "Definition missing"}</strong>
+                <span className="muted">Expected</span><strong>{patternHints(current.displayForm)[0]?.rule??current.definition??"Definition missing"}</strong>
                 {current.romanization && <span className="muted">{current.romanization}</span>}
                 <span className="muted">Answer time {(responseMs / 1000).toFixed(1)}s</span>
               </div>
@@ -1724,7 +1721,7 @@ export default function Home() {
               <div className="row"><button className="danger" onClick={() => rateKnown(false)}>I was wrong</button><button className="primary" onClick={() => rateKnown(true)}>I was right</button></div>
             </>}
           </>}
-        </> : !currentCourseWeekImported ? <div className="next-action course-ready"><span className="next-number">01</span><h3>Start Week {state.weekNumber}.</h3><p>This week contains {currentCourseWordCount} entries from {currentCourseLessonCount} original ChiMishe lesson lists. Every word becomes available immediately, with no daily cap.</p><div className="course-ready-meta"><span>{COURSE_META.entries.toLocaleString()} course entries</span><span>{COURSE_META.lessonLists} lesson lists</span><span>{COURSE_META.weeks} weeks</span></div><button className="primary" onClick={() => void importCourseWeek()} disabled={courseBusy}>{courseBusy ? "Preparing…" : `Start Week ${state.weekNumber}`}</button></div> : state.words.length ? <div className="next-action"><h3>You&apos;re caught up.</h3><p>Choose Reading or Listening from the menu for your next session.</p></div> : <div className="next-action"><span className="next-number">01</span><h3>Add your first words.</h3><p>Add vocabulary manually to create your review schedule.</p><button className="primary" onClick={() => setShowIntake(true)}>Add words</button></div>}
+        </> : !currentCourseWeekImported ? <div className="next-action course-ready"><span className="next-number">01</span><h3>Start Week {state.weekNumber}.</h3><p>This week contains {currentCourseWordCount} entries from {currentCourseLessonCount} original ChiMishe lesson lists. Choose the words you want; new reviews follow your daily limit.</p><div className="course-ready-meta"><span>{COURSE_META.entries.toLocaleString()} course entries</span><span>{COURSE_META.lessonLists} lesson lists</span><span>{COURSE_META.weeks} weeks</span></div><button className="primary" onClick={() => void importCourseWeek()} disabled={courseBusy}>{courseBusy ? "Preparing…" : `Start Week ${state.weekNumber}`}</button></div> : state.words.length ? <div className="next-action"><h3>You&apos;re caught up.</h3><p>Choose Reading or Listening from the menu for your next session.</p></div> : <div className="next-action"><span className="next-number">01</span><h3>Add your first words.</h3><p>Add vocabulary manually to create your review schedule.</p><button className="primary" onClick={() => setShowIntake(true)}>Add words</button></div>}
       </div>
 
       <div className="card span-5 dashboard-secondary">
@@ -1735,7 +1732,7 @@ export default function Home() {
 
       <div className="card span-8 dashboard-secondary">
         <div className="row spread"><h2>Current vocabulary</h2><span className="muted">{mature} mature</span></div>
-        <div className="word-list">{state.words.slice(-14).reverse().map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><span>{word.romanization ? `${word.romanization} · ` : ""}{word.definition || "definition pending"}</span><span>W{word.sourceWeek} · {word.knowledgeState ?? "learning"} · {word.reviews} reviews · {word.sourceType === "system_advanced" ? "advanced" : word.sourceType === "course" || word.sourceType === "dli" ? "course" : "personal / Anki"}</span></div>)}</div>
+        <div className="word-list">{state.words.slice(-14).reverse().map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><WordPatternHint word={word.displayForm}/><span>{word.romanization ? `${word.romanization} · ` : ""}{word.definition || "definition pending"}</span><span>W{word.sourceWeek} · {word.knowledgeState ?? "learning"} · {word.reviews} reviews · {word.sourceType === "system_advanced" ? "advanced" : word.sourceType === "course" || word.sourceType === "dli" ? "course" : "personal / Anki"}</span></div>)}</div>
       </div>
 
       {state.words.length > 0 && <div className="card span-4 dashboard-control">
@@ -1752,6 +1749,7 @@ export default function Home() {
     </section>}
 
     {tab === "reading" && <section className="grid">
+      {planPicker("reading")}
       <div className="card span-12 lab-header"><div><h2>Reading · 30-report cycle</h2><span className="muted">Use the same report for reading, listening, and speaking transfer.</span></div><div className="row"><select aria-label="Choose reading report" value={latestPassage?.id ?? ""} disabled={Boolean(readingStartedAt || readingQuestionsOpen)} onChange={(event) => resetReadingLab(event.target.value)}>{state.passages.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select>{latestPassage && <><a className="secondary button-link" href={`/print/reading/${latestPassage.id}`} target="_blank" rel="noreferrer">Print report</a><a className="secondary button-link" href={syntaxUrl(latestPassage.textFa)} target="_blank" rel="noreferrer">Inspect syntax ↗</a></>}<button className={readingMode === "full" ? "mode-button active" : "mode-button"} disabled={Boolean(readingStartedAt || readingQuestionsOpen)} onClick={() => { setReadingMode("full"); setSentenceGists([]); }}>Full text</button><button className={readingMode === "inference" ? "mode-button active" : "mode-button"} disabled={Boolean(readingStartedAt || readingQuestionsOpen)} onClick={() => { setReadingMode("inference"); setSentenceGists([]); }}>Inference</button></div></div>
       {latestPassage ? <>
         <div className="card span-7">
@@ -1775,6 +1773,7 @@ export default function Home() {
     </section>}
 
     {tab === "listening" && <section className="grid">
+      {planPicker("listening")}
       <div className="card span-12 lab-header"><div><h2>Listening · 30-report cycle</h2><span className="muted">Full tests the report. Gist isolates meaning. Rapid Captions connects sound to Persian words.</span></div><div className="row"><select aria-label="Choose listening report" value={latestListening?.id ?? ""} onChange={(event) => resetListeningLab(event.target.value)}>{state.listeningItems.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select>{latestListening && <><a className="secondary button-link" href={`/print/listening/${latestListening.id}`} target="_blank" rel="noreferrer">Print transcript</a><a className="secondary button-link" href={syntaxUrl(latestListening.transcriptFa)} target="_blank" rel="noreferrer">Inspect syntax ↗</a></>}<button className={listeningMode === "full" ? "mode-button active" : "mode-button"} onClick={() => { releasePlayback(); setListeningMode("full"); setListensCount(0); setListeningGists([]); setGistSentenceListenCounts([]); setGistAnsweredAfterListens([]); setGistHintedSentenceIndexes([]); setRapidCaptionListens(0); }}>Full audio</button><button className={listeningMode === "gist" ? "mode-button active" : "mode-button"} onClick={() => { releasePlayback(); setListeningMode("gist"); setListensCount(0); setTranscriptRevealStep(0); setListeningGists([]); setGistSentenceListenCounts([]); setGistAnsweredAfterListens([]); setGistHintedSentenceIndexes([]); setRapidCaptionListens(0); }}>Gist</button><button className={listeningMode === "rapid" ? "mode-button active" : "mode-button"} onClick={() => { releasePlayback(); setListeningMode("rapid"); setListensCount(0); setTranscriptRevealStep(0); setRapidCaptionListens(0); }}>Rapid captions</button></div></div>
       {latestListening ? <>
         <div className="card span-7">
@@ -1833,8 +1832,8 @@ export default function Home() {
         {!courseCatalog.length && <div className="empty">Loading the course catalog…</div>}
         {courseCatalog.length > 0 && !visibleCatalogEntries.length && <div className="empty">No words match this search.</div>}
       </div>
-      <div className="card span-12 news-catalog"><h2>News vocabulary · {NEWS_META.entries.toLocaleString()}</h2><p className="muted">A 100-term BBC Persian and Iran International frequency sample, expanded with {NEWS_META.newspaperBookEntries.toLocaleString()} ChiMishe Newspaper Book terms and advanced formal-course vocabulary. Choose only the words you want active.</p><label className="catalog-search"><span>Find a news word</span><input value={newsQuery} onChange={(event) => setNewsQuery(event.target.value)} placeholder="Persian, English, or transliteration" /></label><div className="catalog-selection row spread"><span>{visibleNewsEntries.length} shown · {selectedNewsEntries.size} selected</span><div className="row"><button className="text-button" onClick={() => setSelectedNewsEntries(new Set(visibleNewsEntries.filter((word) => !allBankKeys.has(courseWordKey(word.displayForm))).map((word) => word.id)))}>Select shown</button><button className="primary" disabled={!selectedNewsEntries.size} onClick={addSelectedNewsWords}>Add selected</button></div></div><div className="catalog-list news-list">{visibleNewsEntries.map((word) => { const alreadyAdded = allBankKeys.has(courseWordKey(word.displayForm)); return <label className={`catalog-word${alreadyAdded ? " added" : ""}`} key={word.id}><input type="checkbox" checked={alreadyAdded || selectedNewsEntries.has(word.id)} onChange={() => { const bankWord = state.words.find((item) => courseWordKey(item.displayForm) === courseWordKey(word.displayForm)); if (bankWord) removeWord(bankWord.normalizedForm); else setSelectedNewsEntries((current) => { const next = new Set(current); if (next.has(word.id)) next.delete(word.id); else next.add(word.id); return next; }); }} /><strong>{word.displayForm}</strong><span>{word.romanization ? `${word.romanization} · ` : ""}{word.definition}</span><small>{alreadyAdded ? "Selected · uncheck to remove" : word.topic}</small></label>; })}</div></div>
-      <div className="card span-12"><h2>My words · {state.words.filter((word) => word.sourceType === "user").length}</h2><div className="word-list single">{state.words.filter((word) => word.sourceType === "user").map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><span>{word.romanization ? `${word.romanization} · ` : ""}{word.definition}</span><span>{word.topic || "Personal vocabulary"}</span><div className="word-actions"><a className="inspect-word" href={morphologyUrl(word.displayForm, word.definition, word.romanization)} target="_blank" rel="noreferrer">Inspect morphology in Synaptx ↗</a><button className="text-button remove-word" onClick={() => removeWord(word.normalizedForm)}>Remove</button></div></div>)}</div>{!state.words.some((word) => word.sourceType === "user") && <div className="empty">Words researched in Asl will appear here after you choose them.</div>}</div>
+      <div className="card span-12 news-catalog"><h2>News vocabulary · {NEWS_META.entries.toLocaleString()}</h2><p className="muted">A 100-term BBC Persian and Iran International frequency sample, expanded with {NEWS_META.newspaperBookEntries.toLocaleString()} ChiMishe Newspaper Book terms and advanced formal-course vocabulary. Choose only the words you want active.</p><label className="catalog-search"><span>Find a news word</span><input value={newsQuery} onChange={(event) => setNewsQuery(event.target.value)} placeholder="Persian, English, or transliteration" /></label><div className="catalog-selection row spread"><span>{visibleNewsEntries.length} shown · {selectedNewsEntries.size} selected</span><div className="row"><button className="text-button" onClick={() => setSelectedNewsEntries(new Set(visibleNewsEntries.filter((word) => !allBankKeys.has(courseWordKey(word.displayForm))).map((word) => word.id)))}>Select shown</button><button className="primary" disabled={!selectedNewsEntries.size} onClick={addSelectedNewsWords}>Add selected</button></div></div><div className="catalog-list news-list">{visibleNewsEntries.map((word) => { const alreadyAdded = allBankKeys.has(courseWordKey(word.displayForm)); return <label className={`catalog-word${alreadyAdded ? " added" : ""}`} key={word.id}><input type="checkbox" checked={alreadyAdded || selectedNewsEntries.has(word.id)} onChange={() => { const bankWord = state.words.find((item) => courseWordKey(item.displayForm) === courseWordKey(word.displayForm)); if (bankWord) removeWord(bankWord.normalizedForm); else setSelectedNewsEntries((current) => { const next = new Set(current); if (next.has(word.id)) next.delete(word.id); else next.add(word.id); return next; }); }} /><strong>{word.displayForm}</strong><WordPatternHint word={word.displayForm}/><span>{word.romanization ? `${word.romanization} · ` : ""}{word.definition}</span><small>{alreadyAdded ? "Selected · uncheck to remove" : word.topic}</small></label>; })}</div></div>
+      <div className="card span-12"><h2>My words · {state.words.filter((word) => word.sourceType === "user").length}</h2><div className="word-list single">{state.words.filter((word) => word.sourceType === "user").map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><WordPatternHint word={word.displayForm}/><span>{word.romanization ? `${word.romanization} · ` : ""}{word.definition}</span><span>{word.topic || "Personal vocabulary"}</span><div className="word-actions"><a className="inspect-word" href={morphologyUrl(word.displayForm, word.definition, word.romanization)} target="_blank" rel="noreferrer">Inspect morphology in Synaptx ↗</a><button className="text-button remove-word" onClick={() => removeWord(word.normalizedForm)}>Remove</button></div></div>)}</div>{!state.words.some((word) => word.sourceType === "user") && <div className="empty">Words researched in Asl will appear here after you choose them.</div>}</div>
     </section>}
 
     {tab === "analytics" && !showProgressDetails && <section className="guided-workspace"><div className="guided-overview">
@@ -1851,7 +1850,7 @@ export default function Home() {
       <Metric label="Reading avg (5)" value={readingAverage ? `${readingAverage}%` : "—"} />
       <Metric label="Listening avg (5)" value={listeningAverage ? `${listeningAverage}%` : "—"} />
       <div className="card span-12"><h2>Current training phase</h2><div className="queue"><div className="queue-item"><span>{trainingPhase.label}<small>{trainingPhase.focus}</small></span><strong>{trainingPhase.authenticTarget}% authentic target</strong></div><div className="queue-item"><span>Adaptive bottleneck<small>{bottleneck.evidence}</small></span><strong>{bottleneck.label}</strong></div></div></div>
-      <div className="card span-7"><h2>Weak / slow lexical items</h2><div className="word-list single">{weakWords.map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><span>{word.definition}</span><span>{Math.round(100 * word.correct / word.reviews)}% correct · {word.medianResponseMs ? `${(word.medianResponseMs / 1000).toFixed(1)}s median` : "no latency"} · {word.lapses} lapses</span></div>)}</div>{!weakWords.length && <div className="empty">Not enough review history yet.</div>}</div>
+      <div className="card span-7"><h2>Up to 50 words needing practice</h2><div className="word-list single">{weakWords.map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><WordPatternHint word={word.displayForm}/><span>{word.definition}</span><span>{Math.round(100 * weakestAccuracy(word))}% in weakest tested skill · {word.medianResponseMs ? `${(word.medianResponseMs / 1000).toFixed(1)}s median` : "no latency"} · {word.lapses} lapses</span></div>)}</div>{!weakWords.length && <div className="empty">Not enough review history yet.</div>}</div>
       <div className="card span-5"><h2>Performance history</h2><div className="queue"><div className="queue-item"><span>Reading attempts</span><strong>{state.passageAttempts.length}</strong></div><div className="queue-item"><span>Inference-mode attempts</span><strong>{inferenceAttempts.length}</strong></div><div className="queue-item"><span>Listening attempts</span><strong>{state.listeningAttempts.length}</strong></div><div className="queue-item"><span>Gist-listening attempts</span><strong>{gistListeningAttempts.length}</strong></div><div className="queue-item"><span>Speaking attempts</span><strong>{state.speakingAttempts.length}</strong></div><div className="queue-item"><span>Speaking avg (5)</span><strong>{speakingAverage ? `${speakingAverage}%` : "—"}</strong></div><div className="queue-item"><span>Mature vocabulary</span><strong>{mature}</strong></div><div className="queue-item"><span>Current week</span><strong>{state.weekNumber}/{COURSE_META.weeks}</strong></div></div></div>
       <div className="card span-12"><h2>Recent diagnostics</h2><div className="diagnostic-grid"><Diagnostic label="Text retention" value={visualRetention} /><Diagnostic label="Audio retention" value={audioReviews.length ? audioRetention : 0} /><Diagnostic label="Pattern retention" value={patternReviews.length ? patternRetention : 0} /><Diagnostic label="Inference-mode avg" value={inferenceAttempts.length ? inferenceAverage : 0} /><Diagnostic label="Gist-listening avg" value={gistListeningAttempts.length ? gistListeningAverage : 0} /><Diagnostic label="First-listen gists" value={recentGistAnswerCounts.length ? firstListenGistRate : 0} /><Diagnostic label="First-listen score" value={firstListenScore} /><Diagnostic label="Transcript reveal" value={transcriptRate} /><Diagnostic label="Reading inference" value={Math.round(average(state.passageAttempts.slice(-5).map((attempt) => attempt.inferenceScore)))} /><Diagnostic label="Reading discourse" value={Math.round(average(state.passageAttempts.slice(-5).map((attempt) => attempt.discourseScore)))} /><Diagnostic label="Listening detail" value={Math.round(average(state.listeningAttempts.slice(-5).map((attempt) => attempt.detailScore)))} /><Diagnostic label="Listening inference" value={Math.round(average(state.listeningAttempts.slice(-5).map((attempt) => attempt.inferenceScore)))} /></div></div>
       <AnalyticsTable title="Attempts by source" rows={sourceAnalytics} />

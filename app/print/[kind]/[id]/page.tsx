@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import cycle from "@/data/curated-cycle.json";
+import questionBank from "@/data/curated-questions.json";
 import PrintActions from "./PrintActions";
 import styles from "./page.module.css";
 
@@ -40,8 +41,8 @@ export default async function PrintableWorksheet({ params }: { params: Promise<{
         <section className={styles.persianText}>{sentences.map((sentence, index) => <p className={styles.sentence} key={index}>{sentence}</p>)}</section>
         <section className={styles.questions}>
           <h2 className={styles.heading}>Questions</h2>
-          {item.questions.map((question, index) => <section className={styles.question} key={question.question}>
-            <p><strong>{index + 1}.</strong> {englishQuestions[question.type]}</p>
+          {(questionBank[item.id.replace('-listening-','-article-') as keyof typeof questionBank]??item.questions).map((question, index) => <section className={styles.question} key={question.question}>
+            <p dir="ltr" lang="en"><strong>{index + 1}.</strong> {question.question}</p>
           </section>)}
         </section>
         <section className={styles.notes}>

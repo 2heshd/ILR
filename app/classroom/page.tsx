@@ -1,0 +1,27 @@
+'use client';
+import {useEffect,useState} from 'react';
+import {getSupabaseClient} from '@/lib/supabase';
+type ClassRow={id:string;name:string;join_code:string};
+type Report={user_id:string;display_name:string;reviews:number;text_retention:number|null;audio_retention:number|null;pattern_retention:number|null;last_review:string|null};
+export default function Classroom(){
+  const [classes,setClasses]=useState<ClassRow[]>([]),[report,setReport]=useState<Report[]>([]),[selected,setSelected]=useState(''),[status,setStatus]=useState('Sign in on Cursos to manage or join a class.'),[busy,setBusy]=useState(false);
+  const [memberships,setMemberships]=useState<{class_id:string;display_name:string}[]>([]);
+  const client=getSupabaseClient();
+  async function refresh(){
+    if(!client)return;const {data:{user}}=await client.auth.getUser();if(!user)return;
+    const [owned,membership]=await Promise.all([client.from('learning_classes').select('id,name,join_code').eq('owner_id',user.id).order('created_at'),client.from('learning_class_members').select('class_id,display_name').eq('user_id',user.id)]);
+    if(owned.error||membership.error){setStatus('Classrooms are awaiting database setup. Your existing study data is unchanged.');return;}
+    setClasses(owned.data??[]);setMemberships(membership.data??[]);setStatus('Your classes are private. Only the class owner sees reports from students who join.');
+  }
+  useEffect(()=>{void refresh();},[]);
+  async function showReport(id:string){if(!client)return;setSelected(id);setBusy(true);setReport([]);try{const {data,error}=await client.rpc('learning_class_report',{target:id});if(error)throw error;setReport(data??[]);setStatus('Last seven days · correct answers / attempts, measured separately for each skill.');}catch{setStatus('The class report could not load. Retry or check your class access.');}finally{setBusy(false);}}
+  async function create(event:React.FormEvent<HTMLFormElement>){event.preventDefault();if(!client)return;const name=String(new FormData(event.currentTarget).get('name')||'').trim();setBusy(true);const {error}=await client.from('learning_classes').insert({name});setBusy(false);if(error)setStatus('Could not create class. Sign in and try again.');else await refresh();}
+  async function join(event:React.FormEvent<HTMLFormElement>){event.preventDefault();if(!client)return;const data=new FormData(event.currentTarget);setBusy(true);const {error}=await client.rpc('join_learning_class',{code:String(data.get('code')).trim(),learner_name:String(data.get('name')).trim()});setBusy(false);if(error)setStatus('Could not join. Check the class code and sign-in.');else await refresh();}
+  const classroom=classes.find(item=>item.id===selected);
+  return <main className="classroom-workspace"><a href="/">← Cursos</a><header><div><p>BY SYNAPTX</p><h1>Classroom</h1><p>Targeted practice for a class—not one score for every skill.</p></div><a href="https://synapt-x.app/classroom.html">Presentation demo ↗</a></header><p role="status">{status}</p>
+  <div className="classroom-controls"><form onSubmit={create}><h2>Teach a class</h2><label>Class name<input name="name" maxLength={100} required placeholder="Persian · Section 1"/></label><button disabled={busy}>Create class</button></form><form onSubmit={join}><h2>Join a class</h2><label>Class code<input name="code" required maxLength={24}/></label><label>Display name<input name="name" required maxLength={80} placeholder="Use an approved name or class alias"/></label><label className="consent"><input type="checkbox" required/>I agree to share my practice counts and separate text, audio, and pattern recall results with this class’s owner. Private notes and answers are not shared.</label><button disabled={busy}>Join class</button></form></div>
+  <label>Your teaching classes<select value={selected} onChange={e=>void showReport(e.target.value)}><option value="">Choose a class…</option>{classes.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
+  {classroom&&<section><h2>{classroom.name}</h2><p>Join code: <code>{classroom.join_code}</code> · Share only with your students.</p><button disabled={busy} onClick={()=>void showReport(selected)}>Refresh report</button><div className="classroom-table"><table><thead><tr><th>Student</th><th>Text</th><th>Audio</th><th>Patterns</th><th>Reviews</th><th>Last activity</th></tr></thead><tbody>{report.map(row=><tr key={row.user_id}><td>{row.display_name}</td>{[row.text_retention,row.audio_retention,row.pattern_retention].map((score,i)=><td key={i} className={score!==null&&score<90?'below-target':''}>{score===null?'Not tested':`${score}%`}</td>)}<td>{row.reviews}</td><td>{row.last_review?new Date(row.last_review).toLocaleDateString():'No reviews yet'}</td></tr>)}</tbody></table></div>{!busy&&!report.length&&<p>No students have joined yet. Share the class code to invite them.</p>}</section>}
+  {!!memberships.length&&<section><h2>Classes you joined</h2>{memberships.map(item=><p key={item.class_id}>{item.display_name} · <button onClick={async()=>{if(!client||!confirm('Leave this class and stop sharing future reports?'))return;const {error}=await client.from('learning_class_members').delete().eq('class_id',item.class_id);if(error)setStatus('Could not leave. Try again.');else await refresh();}}>Leave class</button></p>)}</section>}
+  <p className="muted">90% is a scheduling target, not a guaranteed outcome. This is an independent learning tool, not an official proficiency assessment. Use only institution-approved data.</p></main>;
+}
