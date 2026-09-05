@@ -2909,3 +2909,6 @@ input[type="range"] {
 .plan-lesson{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0;border-top:1px solid #7773;margin-left:24px;font-size:14px}
 .study-plan .plan-word-list{max-height:none}
 @media(max-width:700px){.plan-chapter,.plan-lesson{margin-left:12px}.plan-lesson{align-items:flex-start;flex-direction:column}.plan-group-actions{width:100%;gap:8px}.plan-group-actions button{flex:1}.plan-group-actions small{width:100%}.plan-mode-tabs button{flex:1 1 40%}.study-plan .row input{min-width:0}}
+.lab-select{display:grid;gap:6px;min-width:min(280px,100%)}
+.lab-select>span{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em}
+.lab-select select{width:100%}
