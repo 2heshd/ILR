@@ -5,6 +5,7 @@ import type { User } from "@supabase/supabase-js";
 import StudyPlanPicker, {planLabels} from "@/components/StudyPlanPicker";
 import {canManageClasses} from "@/lib/classroom-access";
 import { dueWords, plannedWords, type PlanMode, type StudyPlan } from "@/lib/study-plans";
+import {nextReviewWord,reviewWord} from "@/lib/review-session";
 import { independentSchedules } from "@/lib/independent-schedules";
 import { patternHints } from "@/lib/persian-patterns";
 import AccountWorkspace from "@/components/AccountWorkspace";
@@ -291,6 +292,7 @@ export default function Home() {
   const [cloudUsername, setCloudUsername] = useState<string | null>(null);
   const [cloudReady, setCloudReady] = useState(false);
   const [reviewModality, setReviewModality] = useState<Extract<ReviewModality, "visual" | "audio" | "cloze">>("visual");
+  const [lockedReviewForm,setLockedReviewForm]=useState<string|null>(null);
   const [revealed, setRevealed] = useState(false);
   const [playedReviewWord,setPlayedReviewWord]=useState('');
   const [responseMs, setResponseMs] = useState(0);
@@ -656,9 +658,9 @@ export default function Home() {
   const [clockNow,setClockNow]=useState(()=>Date.now());
   useEffect(()=>{const timer=setInterval(()=>setClockNow(Date.now()),15000);return()=>clearInterval(timer);},[]);
   const due=useMemo(()=>dueWords(state,reviewModality,new Date(clockNow)),[state,reviewModality,clockNow]);
-  function updatePlan(mode:PlanMode,plan:StudyPlan){setState(current=>({...current,studyPlans:{...current.studyPlans,[mode]:plan}}));}
+  function updatePlan(mode:PlanMode,plan:StudyPlan){setState(current=>({...current,studyPlans:{...current.studyPlans,[mode]:plan}}));if(mode===reviewModality)setLockedReviewForm(null);}
   function planPicker(mode:PlanMode){const plan=state.studyPlans?.[mode];return <div className="plan-shortcut span-12"><span>{planLabels[mode]} · {plan?.enabled?`${plannedWords(state,mode).length} active words`:(mode==='reading'||mode==='listening'?'Choose vocabulary':'All due words')}</span><button onClick={()=>{setPlanMode(mode);setTab('vocabulary');window.scrollTo({top:0,behavior:'smooth'});}}>Edit plan in Vocabulary →</button></div>;}
-  const current = due[0];
+  const current = reviewWord(state.words,due,lockedReviewForm);
   const allocation = useMemo(() => adaptiveAllocation(state), [state]);
   const trainingPhase = useMemo(() => currentTrainingPhase(state.weekNumber), [state.weekNumber]);
   const bottleneck = useMemo(() => dominantBottleneck(state), [state]);
@@ -677,6 +679,7 @@ export default function Home() {
   );
 
   useEffect(() => {
+    if(current&&current.normalizedForm!==lockedReviewForm)setLockedReviewForm(current.normalizedForm);
     setRevealed(false);
     setPlayedReviewWord('');
     setResponseMs(0);
@@ -691,7 +694,7 @@ export default function Home() {
       window.requestAnimationFrame(() => patternInputRef.current?.focus());
     }, 1_000);
     return () => window.clearTimeout(timer);
-  }, [current?.id, reviewModality]);
+  }, [current?.id, reviewModality, lockedReviewForm]);
 
   useEffect(() => {
     if (!latestListening || !isMeaningfulPersianText(latestListening.transcriptFa)) return;
@@ -1108,6 +1111,12 @@ export default function Home() {
     }));
     const client = getSupabaseClient();
     if (client && cloudUser) appendCloudReview(client, cloudUser, event).catch(console.error);
+    setLockedReviewForm(nextReviewWord(due,current.id)?.normalizedForm??null);
+  }
+
+  function changeReviewModality(mode:Extract<ReviewModality,"visual"|"audio"|"cloze">){
+    setLockedReviewForm(null);
+    setReviewModality(mode);
   }
 
   async function generatePractice(kind: "reading" | "listening", practiceMode: PracticeMode = "controlled") {
@@ -1738,7 +1747,7 @@ export default function Home() {
       <Metric label="Median recall" value={medianRecall ? `${(medianRecall / 1000).toFixed(1)}s` : "—"} />
 
       <div className="card span-7 dashboard-primary">
-        <div className="row spread"><h2>{state.words.length ? "Review" : "Start here"}</h2>{state.words.length > 0 && <div className="row"><button className={reviewModality === "visual" ? "mode-button active" : "mode-button"} onClick={() => setReviewModality("visual")}>Text</button><button className={reviewModality === "audio" ? "mode-button active" : "mode-button"} onClick={() => setReviewModality("audio")}>Audio</button><button className={reviewModality === "cloze" ? "mode-button active" : "mode-button"} onClick={() => setReviewModality("cloze")}>Patterns</button><span className="pill">{reviewModality === "cloze" ? "1s flash · type" : "3s · 8s · 15s"}</span></div>}</div>
+        <div className="row spread"><h2>{state.words.length ? "Review" : "Start here"}</h2>{state.words.length > 0 && <div className="row"><button className={reviewModality === "visual" ? "mode-button active" : "mode-button"} onClick={() => changeReviewModality("visual")}>Text</button><button className={reviewModality === "audio" ? "mode-button active" : "mode-button"} onClick={() => changeReviewModality("audio")}>Audio</button><button className={reviewModality === "cloze" ? "mode-button active" : "mode-button"} onClick={() => changeReviewModality("cloze")}>Patterns</button><span className="pill">{reviewModality === "cloze" ? "1s flash · type" : "3s · 8s · 15s"}</span></div>}</div>
         {current ? <>
           {(revealed||patternPhase==="result")&&patternHints(current.displayForm).map(hint=><aside className="pattern-hint" key={hint.form}><b lang="fa">{hint.form}</b><span>{hint.rule}</span><small>{hint.example}</small></aside>)}
           {reviewModality === "cloze" ? <div className="pattern-recall" aria-live="polite">
