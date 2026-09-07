@@ -9,7 +9,7 @@ const GRAMMAR_WORDS = new Set([
 
 const PRESENT_STEMS: Record<string, string[]> = {
   "آمدن": ["آی"], "آوردن": ["آور"], "بردن": ["بر"], "بودن": ["باش", "هست"], "توانستن": ["توان"], "خوردن": ["خور"],
-  "خواستن": ["خواه"], "خواندن": ["خوان"], "داشتن": ["دار"], "دانستن": ["دان"], "دادن": ["ده"], "دیدن": ["بین"],
+  "خواستن": ["خواه"], "خواندن": ["خوان"], "خریدن": ["خر"], "داشتن": ["دار"], "دانستن": ["دان"], "دادن": ["ده"], "دیدن": ["بین"],
   "رفتن": ["رو"], "رسیدن": ["رس"], "ساختن": ["ساز"], "شدن": ["شو"], "کردن": ["کن"], "گرفتن": ["گیر"],
   "گفتن": ["گو"], "نشستن": ["نشین"], "نوشتن": ["نویس"],
 };
@@ -25,7 +25,7 @@ function normalize(value: string) {
 }
 
 function tokens(value: string) {
-  return value.match(PERSIAN_TOKEN)?.map(normalize).filter(Boolean) ?? [];
+  return value.replace(/[\u064b-\u065f\u0670]/gu, "").match(PERSIAN_TOKEN)?.map(normalize).filter(Boolean) ?? [];
 }
 
 function withoutVerbPrefix(token: string) {
@@ -37,8 +37,10 @@ function withoutVerbPrefix(token: string) {
 }
 
 function matchesStem(token: string, stem: string) {
-  const candidate = withoutVerbPrefix(token);
-  return VERB_ENDINGS.some((ending) => candidate === `${stem}${ending}`);
+  // ن and ب can be part of the stem itself (نوشت، نشین، برد).
+  // Check the intact form as well as the possible grammatical prefix.
+  const candidates = [token, withoutVerbPrefix(token)];
+  return candidates.some(candidate => VERB_ENDINGS.some((ending) => candidate === `${stem}${ending}`));
 }
 
 function nominalBases(token: string) {

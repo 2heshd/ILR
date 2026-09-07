@@ -56,7 +56,10 @@ async function convertToWav(blob: Blob) {
 
 export default function SpeakingLab({ level, prompts, onAttempt, makeId }: Props) {
   const [promptIndex, setPromptIndex] = useState(0);
-  const latestPrompt = prompts[promptIndex] ?? prompts[0];
+  const [generated,setGenerated]=useState<SpeakingPrompt|null>(null);
+  const [promptBusy,setPromptBusy]=useState(false);
+  const [promptHistory,setPromptHistory]=useState<string[]>([]);
+  const latestPrompt = generated ?? prompts[promptIndex] ?? prompts[0];
   const [recording, setRecording] = useState(false);
   const [busy, setBusy] = useState(false);
   const [elapsed, setElapsed] = useState(0);
@@ -82,6 +85,8 @@ export default function SpeakingLab({ level, prompts, onAttempt, makeId }: Props
   }, [audioUrl]);
 
   function nextPrompt() {
+    setGenerated(null);
+    setAudioUrl(old=>{if(old)URL.revokeObjectURL(old);return '';});
     const next = (promptIndex + 1) % prompts.length;
     setPromptIndex(next);
     setAudioBlob(null);
@@ -174,10 +179,24 @@ export default function SpeakingLab({ level, prompts, onAttempt, makeId }: Props
   const seconds = String(elapsed % 60).padStart(2, "0");
   const target = TARGET_SECONDS[level];
 
+  async function generatePrompt(){
+    if(!latestPrompt||recording||busy||promptBusy)return;
+    if(audioBlob&&!window.confirm('Replace this prompt and recording? Saved feedback stays in your history.'))return;
+    setPromptBusy(true);setStatus('Creating another prompt on this topic…');
+    try{
+      const response=await fetch('/api/speaking-prompt',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({topic:latestPrompt.topic,level,previous:[...prompts.filter(p=>p.topic===latestPrompt.topic).map(p=>p.promptEn),...promptHistory]})});
+      const data=await response.json();if(!response.ok)throw new Error(data.error||'Prompt generation failed.');
+      setGenerated({...data,id:makeId(),targetWords:latestPrompt.targetWords,createdAt:new Date().toISOString()});
+      setPromptHistory(history=>[...history,data.promptEn].slice(-20));setAudioBlob(null);setAudioUrl(old=>{if(old)URL.revokeObjectURL(old);return '';});setGrade(null);setElapsed(0);setStatus('New prompt ready.');
+    }catch(error){setStatus(error instanceof Error?error.message:'Prompt generation failed.');}finally{setPromptBusy(false);}
+  }
+
   return <section className="speaking-workspace">
+    <p className="muted">Speaking beta · Optional practice. AI feedback is experimental, not a validated proficiency score.</p>
+    <button onClick={()=>void generatePrompt()} disabled={recording||busy||promptBusy||!latestPrompt}>{promptBusy?'Generating…':'New prompt · same topic'}</button>
     {latestPrompt && <>
       <div className="speaking-prompt">
-        <div className="row spread"><span className="muted">Report {promptIndex + 1} of {prompts.length} · ILR 1+ · {latestPrompt.topic}</span><div className="row"><select aria-label="Choose speaking report" value={promptIndex} onChange={(event) => { setPromptIndex(Number(event.target.value)); setAudioBlob(null); setGrade(null); setElapsed(0); setStatus(""); }}>{prompts.map((prompt, index) => <option key={prompt.id} value={index}>{String(index + 1).padStart(2, "0")} · {prompt.topic}</option>)}</select><button className="text-button" onClick={nextPrompt}>Next report</button></div></div>
+        <div className="row spread"><span className="muted">{generated ? 'New prompt' : 'Practice prompt'} · {latestPrompt.topic}</span><div className="row"><select disabled={recording||busy||promptBusy} aria-label="Choose speaking topic" value={promptIndex} onChange={(event) => { setGenerated(null); setAudioUrl(old=>{if(old)URL.revokeObjectURL(old);return '';}); setPromptIndex(Number(event.target.value)); setAudioBlob(null); setGrade(null); setElapsed(0); setStatus(""); }}>{prompts.map((prompt, index) => <option key={prompt.id} value={index}>{String(index + 1).padStart(2, "0")} · {prompt.topic}</option>)}</select><button className="text-button" disabled={recording||busy||promptBusy} onClick={nextPrompt}>Next topic</button></div></div>
         <h1>{latestPrompt.promptEn}</h1>
         {latestPrompt.promptFa && <p className="fa" dir="rtl">{latestPrompt.promptFa}</p>}
         <p>{latestPrompt.functions.join(" · ")}</p>

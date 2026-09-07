@@ -49,13 +49,14 @@ export default function ComprehensionGrader({
   const [error, setError] = useState("");
   const [selfScore, setSelfScore] = useState(70);
   const submitted = useRef(false);
+  const questionKey = JSON.stringify(questions);
 
   useEffect(() => {
-    setAnswers(questions.map(() => ""));
+    setAnswers((JSON.parse(questionKey) as PassageQuestion[]).map(() => ""));
     setGrade(null);
     setError("");
     submitted.current = false;
-  }, [questions]);
+  }, [questionKey, sourceText, kind]);
 
   async function submit() {
     if (disabled || busy || submitted.current || !questions.length) return;
@@ -109,8 +110,8 @@ export default function ComprehensionGrader({
           className="answer-textarea"
           rows={3}
           value={answers[index] ?? ""}
-          onChange={(event) => setAnswers((current) => current.map((answer, i) => i === index ? event.target.value : answer))}
-          disabled={Boolean(grade)}
+          onChange={(event) => { const value = event.target.value; setAnswers((current) => questions.map((_, i) => i === index ? value : current[i] ?? "")); }}
+          disabled={Boolean(grade) || busy || disabled}
           placeholder="Type your answer in English…"
         />
         {grade?.answers?.find((item) => item.questionIndex === index) && <div className="answer-feedback">

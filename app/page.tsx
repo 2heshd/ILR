@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import StudyPlanPicker, {planLabels} from "@/components/StudyPlanPicker";
+import {revealPriority} from '@/lib/reveal-priority';
 import {canManageClasses} from "@/lib/classroom-access";
 import { dueWords, plannedWords, type PlanMode, type StudyPlan } from "@/lib/study-plans";
 import {nextReviewWord,reviewWord} from "@/lib/review-session";
@@ -70,10 +71,12 @@ function morphologyUrl(word: string, definition?: string, romanization?: string)
   return `${SYNAPTX_URL}/morphology.html?${params}`;
 }
 
-type Tab = "today" | "reading" | "listening" | "speaking" | "vocabulary" | "analytics";
+type Tab = "home" | "today" | "reading" | "listening" | "speaking" | "vocabulary" | "analytics" | "account";
 
 const TAB_LABELS: Record<Tab, string> = {
-  today: "Today",
+  home: "Home",
+  account: "Account",
+  today: "Flashcards",
   reading: "Reading",
   listening: "Listening",
   speaking: "Speaking",
@@ -221,11 +224,7 @@ function progressiveListeningText(text: string, words: LexicalItem[], revealPerc
   const byWord = new Map(words.map((word) => [word.normalizedForm, word]));
   const unknownWords = [...new Set(parts
     .filter((part) => IS_PERSIAN_WORD.test(part))
-    .map((part) => normalizePersian(part))
-    .filter((part) => {
-      const status = byWord.get(part)?.knowledgeState;
-      return status !== "known" && status !== "automatic";
-    }))];
+    .map((part) => normalizePersian(part)))].sort((a,b)=>revealPriority(byWord.get(b))-revealPriority(byWord.get(a)));
   const revealCount = Math.ceil(unknownWords.length * revealPercent / 100);
   const revealed = new Set(unknownWords.slice(0, revealCount));
   return {
@@ -233,7 +232,7 @@ function progressiveListeningText(text: string, words: LexicalItem[], revealPerc
       if (!IS_PERSIAN_WORD.test(part)) return part;
       const normalized = normalizePersian(part);
       const status = byWord.get(normalized)?.knowledgeState;
-      return status !== "known" && status !== "automatic" && revealed.has(normalized) ? part : "•••";
+      return revealed.has(normalized) ? part : "•••";
     }).join(""),
     unknownCount: unknownWords.length,
     revealedCount: revealCount,
@@ -267,14 +266,25 @@ async function generateJson(body: Record<string, unknown>) {
 export default function Home() {
   const [state, setState] = useState<StudyState>(emptyState);
   const latestState = useRef(state);
+  const skillCarousel = useRef<HTMLDivElement>(null);
+  const [skillSlide,setSkillSlide] = useState(0);
+  function moveSkillSlide(direction:number){
+    const track=skillCarousel.current;
+    if(!track)return;
+    const next=Math.max(0,Math.min(5,skillSlide+direction));
+    const card=track.children[next] as HTMLElement;
+    track.scrollTo({left:card.offsetLeft-track.offsetLeft,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+  }
   latestState.current = state;
   const submittedReview = useRef('');
   const localStateKey = useRef(STORAGE_KEY);
   const [loaded, setLoaded] = useState(false);
-  const [tab, setTab] = useState<Tab>("today");
+  const [tab, setTab] = useState<Tab>("home");
+  const [persianFont,setPersianFont]=useState('original');
+  useEffect(()=>{try{const saved=localStorage.getItem('cursos-persian-font');if(saved&&['original','tahoma','arial','serif'].includes(saved))setPersianFont(saved);}catch{}},[]);
+  useEffect(()=>{document.documentElement.style.setProperty('--persian-font',({original:'"Cursos Persian Mono"',tahoma:'"Persian Tahoma"',arial:'"Persian Arial"',serif:'"Persian Times"'} as Record<string,string>)[persianFont]);},[persianFont]);
   const [showIntake, setShowIntake] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [showProgressDetails, setShowProgressDetails] = useState(false);
   const [courseBusy, setCourseBusy] = useState(false);
   const [planMode, setPlanMode] = useState<PlanMode>('visual');
   const [courseCatalog, setCourseCatalog] = useState<CourseVocabularyEntry[]>([]);
@@ -287,6 +297,7 @@ export default function Home() {
   const [newsTopic, setNewsTopic] = useState<NewsTopic>("All topics");
   const [selectedNewsEntries, setSelectedNewsEntries] = useState<Set<string>>(new Set());
   const [generationBusy, setGenerationBusy] = useState<"reading" | "listening" | null>(null);
+  const [practiceRegister,setPracticeRegister]=useState<Record<'reading'|'listening','formal'|'colloquial'>>({reading:'formal',listening:'formal'});
   const [audioBusy, setAudioBusy] = useState(false);
   const [input, setInput] = useState("");
   const [status, setStatus] = useState("");
@@ -660,7 +671,8 @@ export default function Home() {
   const [clockNow,setClockNow]=useState(()=>Date.now());
   useEffect(()=>{const timer=setInterval(()=>setClockNow(Date.now()),15000);return()=>clearInterval(timer);},[]);
   const due=useMemo(()=>dueWords(state,reviewModality,new Date(clockNow)),[state,reviewModality,clockNow]);
-  function updatePlan(mode:PlanMode,plan:StudyPlan){setState(current=>({...current,studyPlans:{...current.studyPlans,[mode]:plan}}));if(mode===reviewModality)setLockedReviewForm(null);}
+  function sharedSelection(mode:PlanMode,plan:StudyPlan){return Object.fromEntries((['visual','audio','cloze'].includes(mode)?['visual','audio','cloze']:[mode]).map(skill=>[skill,{...plan,wordIds:[...plan.wordIds]}]));}
+  function updatePlan(mode:PlanMode,plan:StudyPlan){setState(current=>({...current,studyPlans:{...current.studyPlans,...sharedSelection(mode,plan)}}));if(['visual','audio','cloze'].includes(mode))setLockedReviewForm(null);}
   function refreshTodayQueue(){setClockNow(Date.now());setStatus("Today refreshed. Completed reviews and today’s progress were kept.");}
   function planPicker(mode:PlanMode){const plan=state.studyPlans?.[mode];return <div className="plan-shortcut span-12"><span>{planLabels[mode]} · {plan?.enabled?`${plannedWords(state,mode).length} active words`:(mode==='reading'||mode==='listening'?'Choose vocabulary':'All due words')}</span><button onClick={()=>{setPlanMode(mode);setTab('vocabulary');window.scrollTo({top:0,behavior:'smooth'});}}>Edit plan in Vocabulary →</button></div>;}
   const current = reviewWord(state.words,due,lockedReviewForm);
@@ -950,7 +962,7 @@ export default function Home() {
         const currentPlan=currentState.studyPlans?.[targetPlan.mode]??targetPlan.plan;
         const ids=new Set(targetPlan.action==='replace'?[]:currentPlan.wordIds);
         for(const word of words)if(keys.has(courseWordKey(word.displayForm))){if(targetPlan.action==='remove')ids.delete(word.id);else ids.add(word.id);}
-        return {...currentState,words,studyPlans:{...currentState.studyPlans,[targetPlan.mode]:{...currentPlan,enabled:true,startedAt:new Date().toISOString(),wordIds:[...ids]}}};
+        return {...currentState,words,studyPlans:{...currentState.studyPlans,...sharedSelection(targetPlan.mode,{...currentPlan,enabled:true,startedAt:new Date().toISOString(),wordIds:[...ids]})}};
       }
       return { ...currentState, words };
     });
@@ -959,13 +971,13 @@ export default function Home() {
 
   function addSelectedCourseWords() {
     const chosen = courseCatalog.filter((entry) => selectedCourseEntries.has(entry.id));
-    addCourseEntries(chosen, "course");
+    addCourseEntries(chosen, "course", { mode: planMode, plan: state.studyPlans?.[planMode] ?? { wordIds: [], enabled: false }, action: "add" });
     setSelectedCourseEntries(new Set());
   }
 
   function addSelectedCourseSections() {
     const chosen = courseCatalog.filter((entry) => selectedCourseSections.has(courseSectionLabel(entry.lesson)));
-    addCourseEntries(chosen, "chapter");
+    addCourseEntries(chosen, "chapter", { mode: planMode, plan: state.studyPlans?.[planMode] ?? { wordIds: [], enabled: false }, action: "add" });
     setSelectedCourseSections(new Set());
   }
 
@@ -992,10 +1004,15 @@ export default function Home() {
           modalityCards: { visual: fsrsCard, audio: fsrsCard, cloze: fsrsCard },
         };
       });
-      return { ...currentState, words: [...currentState.words, ...incoming] };
+      const words = [...currentState.words, ...incoming];
+      const keys = new Set(chosen.map((word) => courseWordKey(word.displayForm)));
+      const currentPlan = currentState.studyPlans?.[planMode] ?? { wordIds: [], enabled: false };
+      const planIds = new Set(currentPlan.wordIds);
+      for (const word of words) if (keys.has(courseWordKey(word.displayForm))) planIds.add(word.id);
+      return { ...currentState, words, studyPlans: { ...currentState.studyPlans, ...sharedSelection(planMode,{ ...currentPlan, enabled: true, startedAt: currentPlan.startedAt ?? now.toISOString(), wordIds: [...planIds] }) } };
     });
     setSelectedNewsEntries(new Set());
-    setStatus(`${addable.length} news ${addable.length === 1 ? "word" : "words"} added${addable.length < chosen.length ? ` · ${chosen.length - addable.length} already in your bank` : ""}.`);
+    setStatus(`${chosen.length} news ${chosen.length === 1 ? "word" : "words"} added to the ${planLabels[planMode]} session${addable.length < chosen.length ? ` · ${chosen.length - addable.length} already in your bank` : ""}.`);
   }
 
   function removeWord(normalizedForm: string) {
@@ -1123,9 +1140,9 @@ export default function Home() {
         modalityCards: { ...word.modalityCards, [reviewModality]: after },
         knowledgeState: !correct
           ? "new"
-          : measured <= 3_000 && word.reviews + 1 >= 5 && (word.correct + 1) / (word.reviews + 1) >= 0.9
+          : (["visual","audio","cloze"] as const).every(mode=>{const attempts=[...currentState.reviews,event].filter(item=>item.lexicalItemId===word.id&&item.modality===mode).slice(-5);return attempts.length===5&&attempts.every(item=>item.correct&&item.responseMs<=3000);})
             ? "automatic"
-            : word.reviews + 1 >= 2 && (word.correct + 1) / (word.reviews + 1) >= 0.75
+            : (["visual","audio","cloze"] as const).every(mode=>{const attempts=[...currentState.reviews,event].filter(item=>item.lexicalItemId===word.id&&item.modality===mode).slice(-1);return attempts.length===1&&attempts.every(item=>item.correct&&item.responseMs<15000);})
               ? "known"
               : "learning",
         reviews: word.reviews + 1,
@@ -1162,7 +1179,8 @@ export default function Home() {
       if(!words.length)throw new Error("Choose an active day or week plan below before generating practice.");
       if(words.length>250)throw new Error("Use up to 250 words per generation plan. Split larger selections into focused sessions.");
       const targetIlr = state.skillLevels[kind];
-      const data = await generateJson({ kind, weekNumber: state.weekNumber, targetWords: words, targetIlr, practiceMode });
+      const knownWords=plannedWords(state,kind).filter(word=>word.knowledgeState==='known'||word.knowledgeState==='automatic').map(word=>word.displayForm);
+      const data = await generateJson({ kind, weekNumber: state.weekNumber, targetWords: words, knownWords, targetIlr, practiceMode, register:practiceRegister[kind] });
       if (!isMeaningfulPersianText(data.textFa)) throw new Error(`The generated ${kind} item had no valid Persian text. Please try again.`);
       const selectedContextKeys = new Set(words.map((word) => normalizePersian(word)));
       const reportedWords: unknown[] = Array.isArray(data.knownWordsUsed) ? data.knownWordsUsed : words.slice(0, 12);
@@ -1637,6 +1655,18 @@ export default function Home() {
   const visualRetention = Math.round(100 * visualReviews.filter((review) => review.correct).length / Math.max(1, visualReviews.length));
   const audioRetention = Math.round(100 * audioReviews.filter((review) => review.correct).length / Math.max(1, audioReviews.length));
   const patternRetention = Math.round(100 * patternReviews.filter((review) => review.correct).length / Math.max(1, patternReviews.length));
+  const pacingSignals = ([['visual','Text'],['audio','Audio'],['cloze','Patterns']] as const).flatMap(([mode,label]) => {
+    const attempts = state.reviews.filter(review=>review.modality===mode).slice(-40);
+    if(attempts.length<40)return [];
+    const before=attempts.slice(0,20).filter(review=>review.correct).length/20;
+    const recent=attempts.slice(20).filter(review=>review.correct).length/20;
+    return recent<0.9 && before-recent>=0.15 ? [`${label} accuracy fell from ${Math.round(before*100)}% to ${Math.round(recent*100)}% across the last two groups of 20 reviews. Consider fewer new words or a break, then check your next results.`] : [];
+  });
+  const workflowDue = {
+    visual: dueWords(state, "visual", new Date(clockNow)).length,
+    audio: dueWords(state, "audio", new Date(clockNow)).length,
+    cloze: dueWords(state, "cloze", new Date(clockNow)).length,
+  };
   const firstListenScore = Math.round(average(state.listeningAttempts.filter((attempt) => attempt.firstPass && attempt.listensCount === 1).slice(-5).map((attempt) => attempt.comprehensionScore)));
   const transcriptRate = Math.round(100 * state.listeningAttempts.filter((attempt) => attempt.transcriptRevealed).length / Math.max(1, state.listeningAttempts.length));
   const inferenceAttempts = state.passageAttempts.filter((attempt) => attempt.readingMode === "inference");
@@ -1744,8 +1774,7 @@ export default function Home() {
   }
 
   function openAccount() {
-    setTab("analytics");
-    setShowProgressDetails(false);
+    setTab("account");
     window.requestAnimationFrame(() => window.setTimeout(() => {
       document.querySelector(".account-workspace")?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 0));
@@ -1757,35 +1786,34 @@ export default function Home() {
   return <main>
     <header>
       <h1>{TAB_LABELS[tab]}</h1>
-      <div className="row"><button className={`sync-indicator ${cloudUser && cloudReady ? "ready" : ""}`} onClick={openAccount} aria-label={cloudUser && cloudReady ? "Cloud sync active. Open account." : cloudUser ? "Cloud sync is connecting. Open account." : "Progress is local only. Open account to sign in."}>{cloudUser ? cloudReady ? "● Synced" : "○ Syncing" : "○ Local"}</button><HeaderLevelControls levels={state.skillLevels} onChange={setSkillLevel} /></div>
+      <div className="row"><button className={`sync-indicator ${cloudUser && cloudReady ? "ready" : ""}`} onClick={openAccount} aria-label={cloudUser && cloudReady ? "Cloud sync active. Open account." : cloudUser ? "Cloud sync is connecting. Open account." : "Progress is local only. Open account to sign in."}>{cloudUser ? cloudReady ? "● Synced" : "○ Syncing" : "○ Local"}</button></div>
     </header>
 
     <nav className="tabs" aria-label="Cursos navigation">
-      <div className="suite-navigation"><a href="https://synapt-x.vercel.app">Synaptx ↗</a><a href="https://get-asl.vercel.app">Asl ↗</a>{canManageClasses(cloudUser)&&<a href="/classroom">Classroom ↗</a>}</div>
-      <div className="nav-section-heading"><span><i className="nav-flower">✺</i> Cursos <small>by Synaptx</small></span><span>+</span></div>
+      <div className="nav-section-heading"><span><i className="nav-flower">✺</i> Cursos <small>by Synaptx</small></span></div>
       <div className="nav-dash" />
-      <div className="nav-section-heading"><span><i>▲</i> Study</span><span>−</span></div>
-      <div className="nav-dash" />
-      <div className="nav-path-label">Learning path</div>
+      <div className="nav-items nav-home"><button className={tab==='home'?'tab active':'tab'} onClick={()=>setTab('home')}><span className="nav-bullet">⌂</span>Home</button></div>
+      <div className="nav-path-label">Train in order</div>
       <div className="nav-items learning-path">
-        {([['visual','Text'],['audio','Audio'],['cloze','Patterns']] as const).map(([mode,label],index)=><button key={mode} className={tab==='today'&&reviewModality===mode?'tab active':'tab'} onClick={()=>{setReviewModality(mode);setTab('today');}}><span className="path-step">{index+1}</span>{label}</button>)}
+        <button className={tab==='today'?'tab active':'tab'} onClick={()=>setTab('today')}>Flashcards</button>
         <button className={tab==='reading'?'tab active':'tab'} onClick={()=>setTab('reading')}><span className="path-step">4</span>Reading</button>
         <button className={tab==='listening'?'tab active':'tab'} onClick={()=>setTab('listening')}><span className="path-step">5</span>Listening</button>
+        <button className={tab==='speaking'?'tab active':'tab'} onClick={()=>setTab('speaking')}><span className="path-step">6</span>Speaking</button>
       </div>
-      <div className="nav-path-label">Manage</div>
+      <div className="nav-path-label">Your workspace</div>
       <div className="nav-items">
-        {(["vocabulary","speaking","analytics"] as Tab[]).map((name)=><button key={name} className={tab===name?'tab active':'tab'} onClick={()=>setTab(name)}><span className="nav-bullet">{tab===name?'●':'·'}</span>{name==='vocabulary'?'Vocabulary session':TAB_LABELS[name]}</button>)}
+        {(["vocabulary","analytics"] as Tab[]).map((name)=><button key={name} className={tab===name?'tab active':'tab'} onClick={()=>setTab(name)}><span className="nav-bullet">{tab===name?'●':'·'}</span>{name==='vocabulary'?'Words':TAB_LABELS[name]}</button>)}
       </div>
       <div className="nav-course">
         <div className="platform-switcher"><a href={ASL_URL}>Asl</a><a href={SYNAPTX_URL}>Synaptx</a></div>
-        <span>Week {state.weekNumber}/{COURSE_META.weeks}</span>
-        <span>Reading {state.skillLevels.reading} · Listening {state.skillLevels.listening}</span>
-        <span>Speaking {state.skillLevels.speaking}</span>
+        {canManageClasses(cloudUser)&&<a href="/classroom">Classroom ↗</a>}
+        <span>{state.words.length} saved words</span>
       </div>
       <button className="guide-button" onClick={() => setShowOnboarding(true)} aria-label="Open getting started guide">?</button>
     </nav>
 
-    {status && <div className="notice">{status}</div>}
+    {status && tab==='account' && <p className="account-status" role="status">{status}</p>}
+    {status && tab!=='account' && /failed|error|incomplete|did not pass|not configured|unavailable|could not|invalid|choose.*first|up to 250|choose an active/i.test(status) && <div className="action-error" role="alert"><span>{status}</span><button aria-label="Dismiss message" onClick={()=>setStatus('')}>×</button></div>}
 
     {showIntake && <section className="card intake">
       <h2>Week {state.weekNumber} intake</h2>
@@ -1794,9 +1822,29 @@ export default function Home() {
       <div className="row"><button className="primary" onClick={importWeek}>Import selected words</button><button className="secondary" onClick={() => setShowIntake(false)}>Cancel</button></div>
     </section>}
 
+    {tab === "home" && !showIntake && <section className="workflow-home">
+      <div className="workflow-intro"><span className="workflow-kicker">Today&apos;s path</span><h2>Your study space.</h2><p>Pick up where you left off.</p></div>
+      <div className="workflow-start">
+        <div><small>Start here</small><h3>{state.words.length ? "Continue studying" : "Choose your vocabulary"}</h3><p>{state.words.length ? "Work at your own pace. Your progress carries across sessions." : "Pick a course chapter or add-on news topic to create your first session."}</p></div>
+        <button className="primary" onClick={()=>state.words.length?(setReviewModality("visual"),setTab("today")):setTab("vocabulary")}>{state.words.length ? "Begin text recall →" : "Choose words →"}</button>
+      </div>
+      <button className="workflow-choose" onClick={()=>setTab("vocabulary")}><span>SET</span><div><strong>Choose words</strong><small>{state.words.length} in your bank</small></div><i>Prepare →</i></button>
+      <section className="skill-carousel" aria-label="Learning skills carousel"><div className="skill-carousel-controls"><span>Explore your skills · {skillSlide+1} / 6</span><div><button aria-label="Previous skill" disabled={skillSlide===0} onClick={()=>moveSkillSlide(-1)}>←</button><button aria-label="Next skill" disabled={skillSlide===5} onClick={()=>moveSkillSlide(1)}>→</button></div></div>
+      <div ref={skillCarousel} className="workflow-steps" aria-label="Learning workflow" onScroll={event=>{const track=event.currentTarget;const width=(track.children[1] as HTMLElement).offsetLeft-(track.children[0] as HTMLElement).offsetLeft;setSkillSlide(Math.max(0,Math.min(5,Math.round(track.scrollLeft/width))));}}>
+        <button onClick={()=>{setReviewModality("visual");setTab("today");}}><span>01</span><div><strong>Text recall</strong></div><i>See it</i></button>
+        <button onClick={()=>{setReviewModality("audio");setTab("today");}}><span>02</span><div><strong>Audio recall</strong></div><i>Hear it</i></button>
+        <button onClick={()=>{setReviewModality("cloze");setTab("today");}}><span>03</span><div><strong>Patterns</strong></div><i>Notice it</i></button>
+        <button onClick={()=>setTab("reading")}><span>04</span><div><strong>Reading</strong><small>{state.passageAttempts.length} completed</small></div><i>Use it</i></button>
+        <button onClick={()=>setTab("listening")}><span>05</span><div><strong>Listening</strong><small>{state.listeningAttempts.length} completed</small></div><i>Understand it</i></button>
+        <button onClick={()=>setTab("speaking")}><span>06</span><div><strong>Speaking</strong><small>{state.speakingAttempts.length} completed</small></div><i>Produce it</i></button>
+      </div>
+      </section>
+      <div className="workflow-footer"><span className="workflow-kicker">Your progress</span><h3>{state.reviews.length.toLocaleString()} reviews completed</h3><p>See recall, comprehension, and the words that need another look.</p><button onClick={()=>setTab("analytics")}>Explore progress →</button></div>
+    </section>}
+
     {tab === "today" && !showIntake && <section className="grid today-grid">
       {planPicker(reviewModality)}
-      <div className="card span-12 today-controls"><div className="row spread"><label>New words per day, per skill <select value={state.dailyNewLimit??40} onChange={e=>setState(current=>({...current,dailyNewLimit:Number(e.target.value)}))}>{[30,40,50].map(count=><option key={count}>{count}</option>)}</select></label><button className="secondary" onClick={refreshTodayQueue}>Refresh Today</button></div><p className="muted">90% scheduling target · Due reviews come first. Refresh only checks the queue; it never erases completed work. Text, audio, and patterns advance independently.</p></div>
+      <div className="card span-12 today-controls"><div className="row spread"><span>Study at your pace · All selected due words are available</span><button className="secondary" onClick={refreshTodayQueue}>Refresh Today</button></div><p className="muted">Due reviews come first. Text, audio, and patterns advance independently.</p></div>
       <Metric label="Due now" value={String(due.length)} />
       <Metric label="Total words" value={String(state.words.length)} />
       <Metric label="Review accuracy" value={`${retention}%`} />
@@ -1852,28 +1900,19 @@ export default function Home() {
         <div className="word-list">{state.words.slice(-14).reverse().map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><WordPatternHint word={word.displayForm}/><span>{word.romanization ? `${word.romanization} · ` : ""}{word.definition || "definition pending"}</span><span>W{word.sourceWeek} · {word.knowledgeState ?? "learning"} · {word.reviews} reviews · {word.sourceType === "system_advanced" ? "advanced" : word.sourceType === "course" || word.sourceType === "dli" ? "course" : "personal / Anki"}</span></div>)}</div>
       </div>
 
-      {state.words.length > 0 && <div className="card span-4 dashboard-control">
-        <h2>Course control</h2>
-        <div className="queue">
-          <button className="queue-button" onClick={() => setTab("reading")}><span>Reading lab</span><strong>{readingAverage || "start"}</strong></button>
-          <button className="queue-button" onClick={() => setTab("listening")}><span>Listening lab</span><strong>{listeningAverage || "start"}</strong></button>
-          <button className="queue-button" onClick={() => setTab("speaking")}><span>Speaking</span><strong>{speakingAverage || `S${state.skillLevels.speaking}`}</strong></button>
-          <button className="queue-button" onClick={() => setTab("analytics")}><span>Difficult items</span><strong>{weakWords.length}</strong></button>
-          <div className="queue-button"><span>Practice library</span><strong>30 readings · 30 listenings</strong></div>
-        </div>
-      </div>}
-
     </section>}
 
-    {tab === "reading" && <section className="grid">
+    {tab === "reading" && <section className={`grid reading-workspace${readingQuestionsOpen ? ' answering' : ''}`}>
+      <label className="difficulty-control span-12">Sentence difficulty <select aria-label="Reading sentence difficulty" value={state.skillLevels.reading} onChange={event=>setSkillLevel('reading',Number(event.target.value) as IlrLevel)}>{['Simple','Everyday','Complex','Advanced'].map((label,index)=><option key={label} value={index+1}>{label}</option>)}</select><small>Applies to your next generated passage.</small></label>
+      <label className="difficulty-control span-12">Language style <select aria-label="reading language style" value={practiceRegister.reading} onChange={event=>setPracticeRegister(current=>({...current,reading:event.target.value as 'formal'|'colloquial'}))}><option value="formal">Formal</option><option value="colloquial">Colloquial</option></select><small>Applies to the next generated item.</small></label>
       {planPicker("reading")}
-      <div className="card span-12 lab-header"><div><h2>Reading · 30-report cycle</h2><span className="muted">Use the same report for reading, listening, and speaking transfer.</span></div><div className="row"><label className="lab-select"><span>Report</span><select aria-label="Choose reading report" value={latestPassage?.id ?? ""} disabled={Boolean(readingStartedAt || readingQuestionsOpen)} onChange={(event) => resetReadingLab(event.target.value)}>{state.passages.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label><label className="lab-select"><span>Practice mode</span><select aria-label="Reading practice mode" value={readingMode} disabled={Boolean(readingStartedAt || readingQuestionsOpen)} onChange={event=>changeReadingMode(event.target.value as "full"|"inference")}><option value="full">Full text</option><option value="inference">Inference</option></select></label>{latestPassage && <><a className="secondary button-link" href={`/print/reading/${latestPassage.id}`} target="_blank" rel="noreferrer">Print report</a><a className="secondary button-link" href={syntaxUrl(latestPassage.textFa)} target="_blank" rel="noreferrer">Inspect syntax ↗</a></>}</div></div>
+      <div className="card span-12 lab-header"><div><h2>Reading</h2><span className="muted">Use the same report for reading, listening, and speaking transfer.</span></div><div className="row"><button disabled={Boolean(generationBusy)} onClick={()=>{if((readingStartedAt||readingQuestionsOpen)&&!window.confirm("Generate a new passage? Unsaved answers for this passage will be replaced."))return;void generatePractice("reading");}}>{generationBusy==="reading"?"Generating…":"Generate new"}</button><label className="lab-select"><span>Report</span><select aria-label="Choose reading report" value={latestPassage?.id ?? ""} disabled={Boolean(readingStartedAt || readingQuestionsOpen)} onChange={(event) => resetReadingLab(event.target.value)}>{state.passages.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label><label className="lab-select"><span>Practice mode</span><select aria-label="Reading practice mode" value={readingMode} disabled={Boolean(readingStartedAt || readingQuestionsOpen)} onChange={event=>changeReadingMode(event.target.value as "full"|"inference")}><option value="full">Full text</option><option value="inference">Inference</option></select></label>{latestPassage && <><a className="secondary button-link" href={`/print/reading/${latestPassage.id}`} target="_blank" rel="noreferrer">Print report</a></>}</div></div>
       {latestPassage ? <>
         <div className="card span-7">
-          <div className="row spread"><div><div className="muted">ILR ~{latestPassage.ilrEstimate} · {latestPassage.topic} · {latestPassage.genre} · {latestPassage.register}</div><h2>{latestPassage.title}</h2><SourceLine item={latestPassage} /></div>{!readingStartedAt && !readingQuestionsOpen && <button className="primary" onClick={() => { setReadingStartedAt(Date.now()); setReadingDurationMs(0); }}>Start timer</button>}</div>
+          <div className="row spread"><div><div className="muted">ILR ~{latestPassage.ilrEstimate} · {latestPassage.topic} · {latestPassage.genre} · {latestPassage.register}</div><h2>{latestPassage.title}</h2><SourceLine item={latestPassage} /></div>{!readingStartedAt && !readingQuestionsOpen && <button className="primary" onClick={() => { setReadingStartedAt(Date.now()); setReadingDurationMs(0); }}>1 · Start reading</button>}</div>
           {!readingQuestionsOpen && (readingMode === "inference" ? <InferenceReadingText text={latestPassage.textFa} words={state.words} targetWords={latestPassage.targetWords} gists={sentenceGists} onGistsChange={setSentenceGists} disabled={!readingStartedAt} /> : <InteractivePersianText text={latestPassage.textFa} words={state.words} onStatus={setWordKnowledge} disabled={!readingStartedAt} className={readingStartedAt ? "fa passage" : "fa passage blurred"} />)}
           {readingMode === "full" && !!latestPassage.targetWords.length && <div className="target-strip"><span className="muted">Extracted targets</span>{latestPassage.targetWords.map((word) => <span className="pill fa-inline" key={word}>{word}</span>)}</div>}
-          {readingStartedAt && !readingQuestionsOpen && <div className="row"><button className="primary" disabled={!inferenceReady} onClick={finishReading}>Finish reading · hide passage next</button>{readingMode === "inference" && !inferenceReady && <span className="muted">Capture the gist of each sentence first.</span>}<label>Unknown words <input className="small-input" type="number" min="0" value={readingUnknown} onChange={(event) => setReadingUnknown(Number(event.target.value))}/></label><label>Rereads <input className="small-input" type="number" min="0" value={readingRereads} onChange={(event) => setReadingRereads(Number(event.target.value))}/></label></div>}
+          {readingStartedAt && !readingQuestionsOpen && <div className="row"><button className="primary" disabled={!inferenceReady} onClick={finishReading}>2 · Answer questions →</button>{readingMode === "inference" && !inferenceReady && <span className="muted">Capture the gist of each sentence first.</span>}<label>Unknown words <input className="small-input" type="number" min="0" value={readingUnknown} onChange={(event) => setReadingUnknown(Number(event.target.value))}/></label><label>Rereads <input className="small-input" type="number" min="0" value={readingRereads} onChange={(event) => setReadingRereads(Number(event.target.value))}/></label></div>}
           {readingQuestionsOpen && <div className="locked-source"><strong>{readingMode === "inference" ? "Sentence gists saved. Passage locked for recall." : "Passage locked for recall."}</strong><span className="muted">Reading time: {(readingDurationMs / 1000).toFixed(0)}s · unknown words: {readingUnknown} · rereads: {readingRereads}</span></div>}
         </div>
         <div className="card span-5">
@@ -1884,14 +1923,16 @@ export default function Home() {
             questions={activeReadingQuestions}
             ilrEstimate={latestPassage.ilrEstimate}
             onComplete={completeReading}
-          /> : <div className="empty">Finish reading to unlock questions.</div>}
+          /> : <div className="empty">Start reading, then choose “Answer questions” below the passage. Your comprehension check opens here.</div>}
         </div>
       </> : <div className="card span-12 empty">No passage. Generate one to begin.</div>}
     </section>}
 
-    {tab === "listening" && <section className="grid">
+    {tab === "listening" && <section className={`grid listening-workspace${(listeningMode==='gist'?gistListeningReady:listensCount>0)&&listeningMode!=='rapid'?' answering':''}${transcriptVisible?' with-transcript':''}`}>
+      <label className="difficulty-control span-12">Sentence difficulty <select aria-label="Listening sentence difficulty" value={state.skillLevels.listening} onChange={event=>setSkillLevel('listening',Number(event.target.value) as IlrLevel)}>{['Simple','Everyday','Complex','Advanced'].map((label,index)=><option key={label} value={index+1}>{label}</option>)}</select><small>Applies to your next generated audio.</small></label>
+      <label className="difficulty-control span-12">Language style <select aria-label="listening language style" value={practiceRegister.listening} onChange={event=>setPracticeRegister(current=>({...current,listening:event.target.value as 'formal'|'colloquial'}))}><option value="formal">Formal</option><option value="colloquial">Colloquial</option></select><small>Applies to the next generated item.</small></label>
       {planPicker("listening")}
-      <div className="card span-12 lab-header"><div><h2>Listening · 30-report cycle</h2><span className="muted">Full tests the report. Gist isolates meaning. Rapid Captions connects sound to Persian words.</span></div><div className="row"><label className="lab-select"><span>Report</span><select aria-label="Choose listening report" value={latestListening?.id ?? ""} onChange={(event) => resetListeningLab(event.target.value)}>{state.listeningItems.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label><label className="lab-select"><span>Practice mode</span><select aria-label="Listening practice mode" value={listeningMode} onChange={event=>changeListeningMode(event.target.value as "full"|"gist"|"rapid")}><option value="full">Full audio</option><option value="gist">Gist</option><option value="rapid">Rapid captions</option></select></label>{latestListening && <><a className="secondary button-link" href={`/print/listening/${latestListening.id}`} target="_blank" rel="noreferrer">Print transcript</a><a className="secondary button-link" href={syntaxUrl(latestListening.transcriptFa)} target="_blank" rel="noreferrer">Inspect syntax ↗</a></>}</div></div>
+      <div className="card span-12 lab-header"><div><h2>Listening</h2><span className="muted">Full tests the report. Gist isolates meaning. Rapid Captions connects sound to Persian words.</span></div><div className="row"><button disabled={Boolean(generationBusy || audioBusy)} onClick={()=>void generatePractice("listening")}>{generationBusy==="listening"?"Generating…":"Generate new"}</button><label className="lab-select"><span>Report</span><select aria-label="Choose listening report" value={latestListening?.id ?? ""} onChange={(event) => resetListeningLab(event.target.value)}>{state.listeningItems.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label><label className="lab-select"><span>Practice mode</span><select aria-label="Listening practice mode" value={listeningMode} onChange={event=>changeListeningMode(event.target.value as "full"|"gist"|"rapid")}><option value="full">Full audio</option><option value="gist">Gist</option><option value="rapid">Rapid captions</option></select></label>{latestListening && <><a className="secondary button-link" href={`/print/listening/${latestListening.id}`} target="_blank" rel="noreferrer">Print transcript</a></>}</div></div>
       {latestListening ? <>
         <div className="card span-7">
           <div className="muted">ILR ~{latestListening.ilrEstimate} · {latestListening.topic} · {latestListening.genre} · {latestListening.register}</div><h2>{latestListening.title}</h2><SourceLine item={latestListening} />
@@ -1899,8 +1940,8 @@ export default function Home() {
             <div className="audio-stage"><button className="primary big-button" disabled={audioBusy} onClick={playListening}>{audioBusy ? "Starting…" : "▶ Play Persian audio"}</button><span className="muted">listens: {listensCount}</span></div>
             {transcriptVisible && listeningReveal ? <InteractivePersianText text={listeningReveal.text} words={state.words} onStatus={setWordKnowledge} className="fa passage progressive-transcript" /> : <div className="transcript-hidden">Transcript hidden</div>}
             <div className="row">
-              <button className="secondary" disabled={transcriptRevealPercent >= 100 || listeningReveal?.unknownCount === 0} onClick={() => setTranscriptRevealStep((step) => Math.min(4, step + 1))}>{transcriptRevealPercent === 0 ? "Reveal 30% of unknown words" : transcriptRevealPercent < 90 ? "Reveal 30% more" : transcriptRevealPercent < 100 ? "Reveal final 10%" : "All unknown words revealed"}</button>
-              {transcriptVisible && listeningReveal && <span className="pill">{listeningReveal.revealedCount}/{listeningReveal.unknownCount} unknown words · reveal logged</span>}
+              <button className="secondary" disabled={transcriptRevealPercent >= 100 || listeningReveal?.unknownCount === 0} onClick={() => setTranscriptRevealStep((step) => Math.min(4, step + 1))}>{transcriptRevealPercent === 0 ? "Reveal first 30% · weakest words" : transcriptRevealPercent < 90 ? "Reveal 30% more" : transcriptRevealPercent < 100 ? "Reveal final 10%" : "Full transcript revealed"}</button>
+              {transcriptVisible && listeningReveal && <span className="pill">{listeningReveal.revealedCount}/{listeningReveal.unknownCount} words revealed</span>}
             </div>
           </>}
         </div>
@@ -1935,14 +1976,14 @@ export default function Home() {
           <summary>Choose whole chapters or modules</summary>
           <p>Select several sections, then add their vocabulary in one step.</p>
           <div className="chapter-options">{courseSections.map((section) => <label key={section.label}><input type="checkbox" checked={selectedCourseSections.has(section.label)} onChange={() => setSelectedCourseSections((current) => { const next = new Set(current); if (next.has(section.label)) next.delete(section.label); else next.add(section.label); return next; })} /><span>{section.label}</span><small>{section.count} words</small></label>)}</div>
-          <div className="chapter-actions"><button className="text-button" disabled={!selectedCourseSections.size} onClick={() => setSelectedCourseSections(new Set())}>Clear</button><button className="primary" disabled={!selectedCourseSections.size} onClick={addSelectedCourseSections}>Add {selectedCourseSections.size || "selected"} {selectedCourseSections.size === 1 ? "chapter" : "chapters"} · {selectedCourseSectionEntryCount.toLocaleString()} words</button></div>
+          <div className="chapter-actions"><button className="text-button" disabled={!selectedCourseSections.size} onClick={() => setSelectedCourseSections(new Set())}>Clear</button><button className="primary" disabled={!selectedCourseSections.size} onClick={addSelectedCourseSections}>Add {selectedCourseSections.size || "selected"} {selectedCourseSections.size === 1 ? "chapter" : "chapters"} to {planLabels[planMode]} · {selectedCourseSectionEntryCount.toLocaleString()} words</button></div>
         </details>
         <div className="catalog-controls">
           <label><span>Week</span><select value={catalogWeek} onChange={(event) => { setCatalogWeek(Number(event.target.value)); setCatalogLesson(""); setSelectedCourseEntries(new Set()); }}>{Array.from({ length: COURSE_META.weeks }, (_, index) => index + 1).map((week) => <option key={week} value={week}>Week {week} · {COURSE_META.weekCounts[week - 1]} words</option>)}</select></label>
           <label><span>Lesson</span><select value={activeCatalogLesson} onChange={(event) => { setCatalogLesson(event.target.value); setSelectedCourseEntries(new Set()); }}>{catalogLessons.map((lesson) => <option key={lesson} value={lesson}>{lesson}</option>)}</select></label>
           <label><span>Find a word</span><input value={catalogQuery} onChange={(event) => setCatalogQuery(event.target.value)} placeholder="Persian or English" /></label>
         </div>
-        <div className="catalog-selection row spread"><span>{visibleCatalogEntries.length} shown · {selectedCourseEntries.size} selected</span><div className="row"><button className="text-button" onClick={() => setSelectedCourseEntries(new Set(visibleCatalogEntries.map((entry) => entry.id)))}>Select shown</button><button className="text-button" onClick={() => setSelectedCourseEntries(new Set())}>Deselect all</button><button className="primary" disabled={!selectedCourseEntries.size} onClick={addSelectedCourseWords}>Add selected</button><button className="secondary" disabled={!selectedCourseEntries.size} onClick={removeSelectedCourseWords}>Remove selected</button></div></div>
+        <div className="catalog-selection row spread"><span>{visibleCatalogEntries.length} shown · {selectedCourseEntries.size} selected</span><div className="row"><button className="text-button" onClick={() => setSelectedCourseEntries(new Set(visibleCatalogEntries.map((entry) => entry.id)))}>Select shown</button><button className="text-button" onClick={() => setSelectedCourseEntries(new Set())}>Deselect all</button><button className="primary" disabled={!selectedCourseEntries.size} onClick={addSelectedCourseWords}>Add to {planLabels[planMode]}</button><button className="secondary" disabled={!selectedCourseEntries.size} onClick={removeSelectedCourseWords}>Remove selected</button></div></div>
         <div className="catalog-list">{visibleCatalogEntries.map((entry) => {
           const alreadyAdded = bankCourseKeys.has(courseWordKey(entry.fa));
           return <label className={`catalog-word${alreadyAdded ? " added" : ""}`} key={entry.id}><input type="checkbox" checked={selectedCourseEntries.has(entry.id)} onChange={() => setSelectedCourseEntries((current) => { const next = new Set(current); if (next.has(entry.id)) next.delete(entry.id); else next.add(entry.id); return next; })} /><strong>{entry.fa}</strong><span>{entry.en}</span><small>{alreadyAdded ? "In your bank" : `List ${entry.list}`}</small></label>;
@@ -1950,27 +1991,21 @@ export default function Home() {
         {!courseCatalog.length && <div className="empty">Loading the course catalog…</div>}
         {courseCatalog.length > 0 && !visibleCatalogEntries.length && <div className="empty">No words match this search.</div>}
       </div>
-      <div className="card span-12 news-catalog"><h2>News Vocabulary · {NEWS_META.entries.toLocaleString()}</h2><p className="muted">Optional vocabulary for building current-events reading and listening. Filter by topic, then add only what you want.</p><div className="news-catalog-controls"><label className="catalog-search"><span>Topic</span><select value={newsTopic} onChange={(event) => { setNewsTopic(event.target.value as NewsTopic); setSelectedNewsEntries(new Set()); }}>{NEWS_TOPICS.map((topic) => <option key={topic}>{topic}</option>)}</select></label><label className="catalog-search"><span>Find a news word</span><input value={newsQuery} onChange={(event) => setNewsQuery(event.target.value)} placeholder="Persian, English, or transliteration" /></label></div><div className="catalog-selection row spread"><span>{visibleNewsEntries.length} shown · {selectedNewsEntries.size} selected</span><div className="row"><button className="text-button" onClick={() => setSelectedNewsEntries(new Set(visibleNewsEntries.map((word) => word.id)))}>Select shown</button><button className="text-button" onClick={() => setSelectedNewsEntries(new Set())}>Deselect all</button><button className="primary" disabled={!selectedNewsEntries.size} onClick={addSelectedNewsWords}>Add selected</button><button className="secondary" disabled={!selectedNewsEntries.size} onClick={removeSelectedNewsWords}>Remove selected</button></div></div><div className="catalog-list news-list">{visibleNewsEntries.map((word) => { const alreadyAdded = allBankKeys.has(courseWordKey(word.displayForm)); return <label className={`catalog-word${alreadyAdded ? " added" : ""}`} key={word.id}><input type="checkbox" checked={selectedNewsEntries.has(word.id)} onChange={() => setSelectedNewsEntries((current) => { const next = new Set(current); if (next.has(word.id)) next.delete(word.id); else next.add(word.id); return next; })} /><strong>{word.displayForm}</strong><WordPatternHint word={word.displayForm}/><span>{word.romanization ? `${word.romanization} · ` : ""}{word.definition}</span><small>{alreadyAdded ? "In your bank" : newsTopicFor(word)}</small></label>; })}</div></div>
+      <div className="card span-12 news-catalog"><h2>News Vocabulary · {NEWS_META.entries.toLocaleString()}</h2><p className="muted">Optional vocabulary for building current-events reading and listening. Filter by topic, then add only what you want.</p><div className="news-catalog-controls"><label className="catalog-search"><span>Topic</span><select value={newsTopic} onChange={(event) => { setNewsTopic(event.target.value as NewsTopic); setSelectedNewsEntries(new Set()); }}>{NEWS_TOPICS.map((topic) => <option key={topic}>{topic}</option>)}</select></label><label className="catalog-search"><span>Find a news word</span><input value={newsQuery} onChange={(event) => setNewsQuery(event.target.value)} placeholder="Persian, English, or transliteration" /></label></div><div className="catalog-selection row spread"><span>{visibleNewsEntries.length} shown · {selectedNewsEntries.size} selected</span><div className="row"><button className="text-button" onClick={() => setSelectedNewsEntries(new Set(visibleNewsEntries.map((word) => word.id)))}>Select shown</button><button className="text-button" onClick={() => setSelectedNewsEntries(new Set())}>Deselect all</button><button className="primary" disabled={!selectedNewsEntries.size} onClick={addSelectedNewsWords}>Add to {planLabels[planMode]}</button><button className="secondary" disabled={!selectedNewsEntries.size} onClick={removeSelectedNewsWords}>Remove selected</button></div></div><div className="catalog-list news-list">{visibleNewsEntries.map((word) => { const alreadyAdded = allBankKeys.has(courseWordKey(word.displayForm)); return <label className={`catalog-word${alreadyAdded ? " added" : ""}`} key={word.id}><input type="checkbox" checked={selectedNewsEntries.has(word.id)} onChange={() => setSelectedNewsEntries((current) => { const next = new Set(current); if (next.has(word.id)) next.delete(word.id); else next.add(word.id); return next; })} /><strong>{word.displayForm}</strong><WordPatternHint word={word.displayForm}/><span>{word.romanization ? `${word.romanization} · ` : ""}{word.definition}</span><small>{alreadyAdded ? "In your bank" : newsTopicFor(word)}</small></label>; })}</div></div>
       <div className="card span-12"><h2>My words · {state.words.filter((word) => word.sourceType === "user").length}</h2><div className="word-list single">{state.words.filter((word) => word.sourceType === "user").map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><WordPatternHint word={word.displayForm}/><span>{word.romanization ? `${word.romanization} · ` : ""}{word.definition}</span><span>{word.topic || "Personal vocabulary"}</span><div className="word-actions"><a className="inspect-word" href={morphologyUrl(word.displayForm, word.definition, word.romanization)} target="_blank" rel="noreferrer">Inspect morphology in Synaptx ↗</a><button className="text-button remove-word" onClick={() => removeWord(word.normalizedForm)}>Remove</button></div></div>)}</div>{!state.words.some((word) => word.sourceType === "user") && <div className="empty">Words researched in Asl will appear here after you choose them.</div>}</div>
     </section>}
 
-    {tab === "analytics" && !showProgressDetails && <section className="guided-workspace"><div className="guided-overview">
-      <span className="next-number">01</span><h2>Know why you&apos;re improving.</h2>
-      <p>Progress is based on evidence from practice—not a streak or time spent in the app. The system looks for faster recall, stronger comprehension, and reliable performance across different material.</p>
-      <div className="guided-capabilities"><div><span>Recall</span><p>Separate text, audio, and rapid-pattern accuracy, response time, lapses, and difficult vocabulary.</p></div><div><span>Comprehension</span><p>Main idea, detail, inference, discourse, first-pass listening, and transcript dependence.</p></div><div><span>Coverage</span><p>Performance by topic, source, genre, register, origin, and difficulty.</p></div><div><span>Readiness</span><p>Fresh target-level attempts—not familiar practice—control level-up decisions.</p></div></div>
-      <div className="progress-snapshot"><span><small>Words</small><strong>{state.words.length}</strong></span><span><small>Reviews</small><strong>{state.reviews.length}</strong></span><span><small>Reading</small><strong>{readingAverage ? `${readingAverage}%` : "—"}</strong></span><span><small>Listening</small><strong>{listeningAverage ? `${listeningAverage}%` : "—"}</strong></span></div>
-      <button className="primary" onClick={() => setShowProgressDetails(true)}>View detailed progress</button>
-    </div></section>}
-
-    {tab === "analytics" && showProgressDetails && <><button className="back-link progress-back" onClick={() => setShowProgressDetails(false)}>← Back</button><section className="grid analytics-grid">
-      <Metric label="Words learned" value={String(state.words.length)} />
+    {tab === "analytics" && <><div className="progress-navigation"><a href="#progress-overview">Overview</a><a href="#progress-practice">Practice priorities</a><a href="#progress-skills">Skills</a><a href="#progress-coverage">Coverage</a><button onClick={openAccount}>Account →</button></div><section id="progress-overview" className="grid analytics-grid">
+      <Metric label="Saved vocabulary" value={String(state.words.length)} />
       <Metric label="Reviews logged" value={String(state.reviews.length)} />
       <Metric label="Reading avg (5)" value={readingAverage ? `${readingAverage}%` : "—"} />
       <Metric label="Listening avg (5)" value={listeningAverage ? `${listeningAverage}%` : "—"} />
+      <div id="progress-practice" className="progress-section-heading span-12"><h2>Practice priorities</h2><p>{pacingSignals.length ? pacingSignals.join(' ') : 'Study as much as you choose. Pacing suggestions appear when enough recent reviews show a decline in accuracy.'}</p></div>
       <div className="card span-12"><h2>Current training phase</h2><div className="queue"><div className="queue-item"><span>{trainingPhase.label}<small>{trainingPhase.focus}</small></span><strong>{trainingPhase.authenticTarget}% authentic target</strong></div><div className="queue-item"><span>Adaptive bottleneck<small>{bottleneck.evidence}</small></span><strong>{bottleneck.label}</strong></div></div></div>
       <div className="card span-7"><h2>Up to 50 words needing practice</h2><div className="word-list single">{weakWords.map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><WordPatternHint word={word.displayForm}/><span>{word.definition}</span><span>{Math.round(100 * weakestAccuracy(word))}% in weakest tested skill · {word.medianResponseMs ? `${(word.medianResponseMs / 1000).toFixed(1)}s median` : "no latency"} · {word.lapses} lapses</span></div>)}</div>{!weakWords.length && <div className="empty">Not enough review history yet.</div>}</div>
       <div className="card span-5"><h2>Performance history</h2><div className="queue"><div className="queue-item"><span>Reading attempts</span><strong>{state.passageAttempts.length}</strong></div><div className="queue-item"><span>Inference-mode attempts</span><strong>{inferenceAttempts.length}</strong></div><div className="queue-item"><span>Listening attempts</span><strong>{state.listeningAttempts.length}</strong></div><div className="queue-item"><span>Gist-listening attempts</span><strong>{gistListeningAttempts.length}</strong></div><div className="queue-item"><span>Speaking attempts</span><strong>{state.speakingAttempts.length}</strong></div><div className="queue-item"><span>Speaking avg (5)</span><strong>{speakingAverage ? `${speakingAverage}%` : "—"}</strong></div><div className="queue-item"><span>Mature vocabulary</span><strong>{mature}</strong></div><div className="queue-item"><span>Current week</span><strong>{state.weekNumber}/{COURSE_META.weeks}</strong></div></div></div>
-      <div className="card span-12"><h2>Recent diagnostics</h2><div className="diagnostic-grid"><Diagnostic label="Text retention" value={visualRetention} /><Diagnostic label="Audio retention" value={audioReviews.length ? audioRetention : 0} /><Diagnostic label="Pattern retention" value={patternReviews.length ? patternRetention : 0} /><Diagnostic label="Inference-mode avg" value={inferenceAttempts.length ? inferenceAverage : 0} /><Diagnostic label="Gist-listening avg" value={gistListeningAttempts.length ? gistListeningAverage : 0} /><Diagnostic label="First-listen gists" value={recentGistAnswerCounts.length ? firstListenGistRate : 0} /><Diagnostic label="First-listen score" value={firstListenScore} /><Diagnostic label="Transcript reveal" value={transcriptRate} /><Diagnostic label="Reading inference" value={Math.round(average(state.passageAttempts.slice(-5).map((attempt) => attempt.inferenceScore)))} /><Diagnostic label="Reading discourse" value={Math.round(average(state.passageAttempts.slice(-5).map((attempt) => attempt.discourseScore)))} /><Diagnostic label="Listening detail" value={Math.round(average(state.listeningAttempts.slice(-5).map((attempt) => attempt.detailScore)))} /><Diagnostic label="Listening inference" value={Math.round(average(state.listeningAttempts.slice(-5).map((attempt) => attempt.inferenceScore)))} /></div></div>
+<div id="progress-skills" className="card span-12"><h2>Skills at a glance</h2><div className="diagnostic-grid"><Diagnostic label="Text retention" value={visualRetention} /><Diagnostic label="Audio retention" value={audioReviews.length ? audioRetention : 0} /><Diagnostic label="Pattern retention" value={patternReviews.length ? patternRetention : 0} /><Diagnostic label="Inference-mode avg" value={inferenceAttempts.length ? inferenceAverage : 0} /><Diagnostic label="Gist-listening avg" value={gistListeningAttempts.length ? gistListeningAverage : 0} /><Diagnostic label="First-listen gists" value={recentGistAnswerCounts.length ? firstListenGistRate : 0} /><Diagnostic label="First-listen score" value={firstListenScore} /><Diagnostic label="Transcript reveal" value={transcriptRate} /><Diagnostic label="Reading inference" value={Math.round(average(state.passageAttempts.slice(-5).map((attempt) => attempt.inferenceScore)))} /><Diagnostic label="Reading discourse" value={Math.round(average(state.passageAttempts.slice(-5).map((attempt) => attempt.discourseScore)))} /><Diagnostic label="Listening detail" value={Math.round(average(state.listeningAttempts.slice(-5).map((attempt) => attempt.detailScore)))} /><Diagnostic label="Listening inference" value={Math.round(average(state.listeningAttempts.slice(-5).map((attempt) => attempt.inferenceScore)))} /></div></div>
+      <div id="progress-coverage" className="progress-section-heading span-12"><h2>Coverage</h2><p>Compare results across the material you practice.</p></div>
       <AnalyticsTable title="Attempts by source" rows={sourceAnalytics} />
       <AnalyticsTable title="Attempts by genre" rows={genreAnalytics} />
       <AnalyticsTable title="Attempts by register" rows={registerAnalytics} />
@@ -1979,7 +2014,7 @@ export default function Home() {
       <AnalyticsTable title="Authentic vs generated" rows={originAnalytics} />
     </section></>}
 
-    {tab === "analytics" && <AccountWorkspace
+    {tab === "account" && <AccountWorkspace
       user={cloudUser}
       username={cloudUsername}
       cloudReady={cloudReady}
@@ -1991,6 +2026,7 @@ export default function Home() {
       onChangePassword={changePassword}
       onChangeUsername={changeUsername}
     />}
+    {tab === "account" && <section className="font-preferences"><h2>Account settings</h2><label>Persian font <select value={persianFont} onChange={event=>{setPersianFont(event.target.value);try{localStorage.setItem('cursos-persian-font',event.target.value);}catch{}}}><option value="original">Original · Cursos</option><option value="tahoma">Tahoma · system</option><option value="arial">Arial · system</option><option value="serif">Times New Roman · system</option></select></label><p className="fa">هر روز با خواندن و شنیدن، فارسی را بهتر یاد می‌گیریم.</p><small>Saved on this browser. System font availability varies by device.</small></section>}
   </main>;
 }
 

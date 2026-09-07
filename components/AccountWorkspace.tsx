@@ -86,16 +86,9 @@ export default function AccountWorkspace({ user, username: savedUsername, cloudR
 
   return <section className="account-workspace" id="account">
     <div className="account-overview">
-      <span className="next-number">01</span>
-      <h2>{user ? "Your progress is saved." : mode === "signup" ? "Create your account." : mode === "reset" ? "Reset your password." : "Keep your course with you."}</h2>
-      <p>{user ? `Signed in as ${displayName}. New reviews, vocabulary, source work, and progress are saved automatically. This device remembers your session until you choose Sign out.` : mode === "signup" ? "Choose a unique username, then use your email and password to protect the account." : mode === "reset" ? "Enter the email attached to your account. We will send a secure recovery link." : "Sign in with your email and password to merge the progress already on this device and keep one private course history across your computer, phone, and future sessions."}</p>
+      <h2>{user ? 'Your account' : mode==='signup'?'Create account':mode==='reset'?'Reset password':'Sign in'}</h2>
+      <p>{user?`Signed in as ${displayName}.`:'Use your account across Cursos, Synaptx, and Asl.'}</p>
 
-      <div className="guided-capabilities">
-        <div><span>Private</span><p>Every account can read and update only its own learning data.</p></div>
-        <div><span>Automatic</span><p>Changes save after you study; there is no separate upload step.</p></div>
-        <div><span>Portable</span><p>Sign in on another device and your course state follows you.</p></div>
-        <div><span>Local-safe</span><p>Your current device keeps a local copy if cloud storage is temporarily unavailable.</p></div>
-      </div>
 
       {user ? <><div className="account-action"><span className={`service-state ${cloudReady ? "ready" : "waiting"}`}>{cloudReady ? `Cloud sync active · ${accountLabel}` : "Connecting…"}</span><div className="row"><button className="secondary" onClick={() => { setManageOpen((value) => !value); setNewUsername(usernameValue); }}>{manageOpen ? "Close settings" : "Manage account"}</button><button className="secondary" onClick={() => void onSignOut()}>Sign out</button></div></div>
         {manageOpen && <form className="account-form account-manage" onSubmit={(event) => { event.preventDefault(); void updateProfile(); }}>
@@ -112,12 +105,9 @@ export default function AccountWorkspace({ user, username: savedUsername, cloudR
         {mode === "signup" && <label>Confirm password<input type="password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} placeholder="Type it again" autoComplete="new-password" minLength={8} required/><small>{confirmPassword && password !== confirmPassword ? "Passwords must match." : ""}</small></label>}
         {mode==='signup'&&<><label>Class code · optional<input value={classCode} onChange={e=>{setClassCode(e.target.value);setClassConsent(false);}} maxLength={48} autoCapitalize="none" autoCorrect="off" placeholder="Invite code from your teacher"/><small>You can also join later from My classes. If email confirmation is required, your code is kept for your first sign-in.</small></label>{classCode.trim()&&<label className="class-consent"><input type="checkbox" checked={classConsent} onChange={e=>setClassConsent(e.target.checked)} required/>Join this class using my username and share my vocabulary practice counts and text, audio, and pattern recall results with its owner. Reading/listening comprehension requires a separate opt-in; answers and notes stay private.</label>}</>}
         <div className="account-form-actions"><button className="primary" type="submit" disabled={!formValid || busy}>{busy ? "Working…" : mode === "signup" ? "Create account" : mode === "reset" ? "Send reset link" : "Sign in"}</button><button className="secondary" type="button" onClick={() => { setMode(mode === "signup" ? "signin" : "signup"); setPassword(""); setConfirmPassword(""); }}>{mode === "signup" ? "I already have an account" : "Create an account"}</button>{mode === "signin" && <button className="text-button" type="button" onClick={() => setMode("reset")}>Forgot password?</button>}{mode === "reset" && <button className="text-button" type="button" onClick={() => setMode("signin")}>Back to sign in</button>}</div>
-      </form> : <div className="account-action setup-needed"><span>Account storage is not connected yet.</span><small>Add the Supabase project URL and public anon key to <code>.env.local</code>, then restart the app.</small></div>}
+      </form> : <p className="muted">Sign-in is currently unavailable here. You can continue practicing locally.</p>}
       {status && <p className="account-status">{status}</p>}
     </div>
 
-    <div className="service-list" aria-label="Connected services">
-      <div><span>Account storage</span><strong className={setup?.accounts.configured ? "ready" : "waiting"}>{setup ? setup.accounts.configured ? "Configured" : "Needs Supabase" : "Checking…"}</strong><small>{user ? `Signed in as ${accountLabel}` : "Username · email · password"}</small></div>
-    </div>
   </section>;
 }

@@ -89,12 +89,19 @@ test("new learners choose vocabulary instead of receiving the pilot bank", () =>
   assert.match(pageSource, /words:\s*\[\]/u);
   assert.doesNotMatch(pageSource, /words:\s*curatedVocabulary\(\)/u);
   assert.match(pageSource, /NEWS_CATALOG/u);
-  assert.match(pageSource, /Add selected/u);
+  assert.match(pageSource, /Add to \{planLabels\[planMode\]\}/u);
   assert.doesNotMatch(pageSource, /Course words ·/u);
   assert.match(pageSource, /span-12 news-catalog/u);
   assert.match(pageSource, /Course Vocabulary is your main library/u);
   assert.match(pageSource, /News Vocabulary is an optional add-on/u);
   assert.doesNotMatch(pageSource, /Selected · uncheck to remove/u);
+});
+
+test("the local workflow gives learners one ordered starting point", () => {
+  assert.match(pageSource, /Today&apos;s path/u);
+  assert.match(pageSource, /Choose words[\s\S]*Text recall[\s\S]*Audio recall[\s\S]*Patterns[\s\S]*Reading[\s\S]*Listening[\s\S]*Speaking/u);
+  assert.match(pageSource, /<span className="path-step">6<\/span>Speaking/u);
+  assert.match(pageSource, /const \[tab, setTab\] = useState<Tab>\("home"\)/u);
 });
 
 test("news vocabulary is grouped into learner-facing topics", () => {
@@ -119,7 +126,10 @@ test("reading and listening generation are constrained to learner-selected vocab
   assert.match(route, /prefer a shorter, clear, idiomatic passage/u);
   assert.match(route, /name: "persian_practice_item"/u);
   assert.match(route, /newWordsIntroduced: \{ type: "array", maxItems: 0/u);
-  assert.match(route, /reasoning: \{ effort: isPractice \? "low" : "none" \}/u);
+  assert.match(route, /reasoning: \{ effort: isPractice \? "medium" : "none" \}/u);
+  assert.match(route, /All questions may be type detail/u);
+  assert.match(route, /Include an inference question ONLY/u);
+  assert.doesNotMatch(route, /one main idea, two detail, one inference/u);
   assert.match(route, /REPAIR THE PREVIOUS DRAFT/u);
   assert.match(route, /status: 422/u);
   assert.match(route, /suggestedWords: violations\.slice\(0, 8\)/u);

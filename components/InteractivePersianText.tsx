@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { normalizePersian } from "@/lib/persian";
+import InspectSelection from './InspectSelection';
 import type { LexicalItem, WordKnowledgeState } from "@/lib/types";
 
 type Props = {
@@ -28,28 +29,47 @@ const STATES: Array<{ value: WordKnowledgeState; label: string; detail: string }
 
 export default function InteractivePersianText({ text, words, className = "", disabled = false, onStatus }: Props) {
   const [selected, setSelected] = useState("");
+  const [position,setPosition]=useState({left:0,top:0,above:true});
+  const popup=useRef<HTMLDivElement>(null);
+  const anchor=useRef<HTMLElement|null>(null);
+  function choose(part:string,element:HTMLElement){
+    const rect=element.getBoundingClientRect();anchor.current=element;
+    setPosition({left:Math.max(12,Math.min(rect.left+rect.width/2-190,window.innerWidth-392)),top:rect.top>230?rect.top-10:rect.bottom+10,above:rect.top>230});
+    setSelected(current=>current===part?'':part);
+  }
+  useEffect(()=>{
+    if(!selected)return;
+    const outside=(event:MouseEvent)=>{if(!popup.current?.contains(event.target as Node)&&!anchor.current?.contains(event.target as Node))setSelected('');};
+    const close=()=>setSelected('');
+    const key=(event:KeyboardEvent)=>{if(event.key==='Escape'){close();anchor.current?.focus();}};
+    document.addEventListener('click',outside);window.addEventListener('scroll',close,true);window.addEventListener('resize',close);document.addEventListener('keydown',key);
+    return()=>{document.removeEventListener('click',outside);window.removeEventListener('scroll',close,true);window.removeEventListener('resize',close);document.removeEventListener('keydown',key);};
+  },[selected]);
   const parts = useMemo(() => text.split(WORD_PATTERN), [text]);
   const byWord = useMemo(() => new Map(words.map((word) => [word.normalizedForm, word])), [words]);
   const selectedItem = selected ? byWord.get(normalizePersian(selected)) : undefined;
 
   return <div className="interactive-text-wrap">
-    <div className={className} dir="rtl">
+    <InspectSelection disabled={disabled}><div className={className} dir="rtl">
       {parts.map((part, index) => {
         if (!IS_WORD.test(part)) return <span key={`${index}-${part}`}>{part}</span>;
         const item = byWord.get(normalizePersian(part));
         const status = item?.knowledgeState ?? "untracked";
-        return <button
-          type="button"
+        return <span
+          role="button"
+          tabIndex={disabled ? -1 : 0}
+          data-inspect-word={part}
           key={`${index}-${part}`}
           className={`passage-word word-${status} ${selected === part ? "selected" : ""}`}
-          onClick={() => !disabled && setSelected((current) => current === part ? "" : part)}
-          disabled={disabled}
+          onClick={event => !disabled && !window.getSelection()?.toString().trim() && choose(part,event.currentTarget)}
+          onKeyDown={event => { if (!disabled && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); choose(part,event.currentTarget); } }}
+          aria-disabled={disabled}
           title={disabled ? undefined : `${part} · ${item?.knowledgeState ?? "not tracked"}`}
-        >{part}</button>;
+        >{part}</span>;
       })}
-    </div>
+    </div></InspectSelection>
 
-    {selected && !disabled && <div className="word-status-panel">
+    {selected && !disabled && <div ref={popup} role="dialog" aria-label="Word familiarity" className="word-status-panel word-status-popover" style={{left:position.left,top:position.top,transform:position.above?'translateY(-100%)':undefined}}>
       <div className="word-status-heading"><strong className="fa" dir="rtl">{selected}</strong><span>{selectedItem?.definition || "Choose how well you know this word."}</span><button type="button" onClick={() => setSelected("")} aria-label="Close word status">×</button></div>
       <div className="word-status-options">
         {STATES.map((state) => <button

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { normalizePersian } from "@/lib/persian";
+import InspectSelection from './InspectSelection';
 import type { LexicalItem } from "@/lib/types";
 
 type Props = {
@@ -54,7 +55,7 @@ function maskedSentence(sentence: string, words: LexicalItem[], targetWords: str
 
   return parts.map((part, index) => hidden.has(index)
     ? <span className="inference-blank" key={`${index}-${part}`} aria-label="hidden predictable word">•••</span>
-    : <span key={`${index}-${part}`}>{part}</span>);
+    : <span data-inspect-word={IS_WORD.test(part)?part:undefined} key={`${index}-${part}`}>{part}</span>);
 }
 
 export default function InferenceReadingText({ text, words, targetWords, disabled = false, gists, onGistsChange }: Props) {
@@ -71,9 +72,9 @@ export default function InferenceReadingText({ text, words, targetWords, disable
       <span>Sentence {activeSentence + 1}/{sentences.length}</span>
       <span>{completeCount}/{sentences.length} gists captured · 30% masked</span>
     </div>
-    <div className="fa inference-sentence" dir="rtl">
+    <InspectSelection disabled={disabled}><div className="fa inference-sentence" dir="rtl">
       {maskedSentence(sentences[activeSentence] ?? "", words, targetWords)}
-    </div>
+    </div></InspectSelection>
     {!disabled && <label className="inference-gist">
       <span>Main idea in a few words—not a translation.</span>
       <input
