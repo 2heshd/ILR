@@ -26,7 +26,7 @@ type CourseCatalog = {
 
 export const COURSE_META = {
   id: "chimishe-v22-2",
-  title: "ChiMishe course vocabulary",
+  title: "Course Vocabulary",
   sourceFile: "ChiMishe V22.2.xlsm",
   entries: 6060,
   lessonLists: 154,

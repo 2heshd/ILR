@@ -25,11 +25,11 @@ test('new-word limit never caps already learned due reviews',()=>{
   const words=Array.from({length:110},(_,i)=>({...word,id:String(i),modalityCards:{visual:{...card,reps:i<60?3:0}}}));
   assert.equal(dueWords({words,reviews:[],dailyNewLimit:40},'visual',now).length,100);
 });
-test('day/week plans are independent, expire, and cannot resurrect deleted words',()=>{
+test('vocabulary sessions stay active until replaced and cannot resurrect deleted words',()=>{
   const state={words:[word],studyPlans:{reading:{enabled:true,wordIds:['one','deleted'],period:'day',startsOn:'2026-09-03'}}};
   assert.equal(plannedWords(state,'reading',now).length,1);
   assert.equal(plannedWords(state,'listening',now).length,0);
-  assert.equal(plannedWords(state,'reading',new Date('2026-09-04T12:00:00')).length,0);
+  assert.equal(plannedWords(state,'reading',new Date('2026-10-04T12:00:00')).length,1);
 });
 test('saving preserves reviewed channel schedules and generated exercises',()=>{
   const reviewed={...word,reviews:1};

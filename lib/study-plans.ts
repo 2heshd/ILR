@@ -1,11 +1,8 @@
 import type { LexicalItem, StudyState, ReviewModality } from './types.ts';
 export type PlanMode = 'visual'|'audio'|'cloze'|'reading'|'listening';
-export type StudyPlan = { wordIds:string[]; period:'day'|'week'; startsOn:string; enabled:boolean };
-export function activePlan(plan:StudyPlan|undefined,now=new Date()){
-  if(!plan?.enabled)return false;
-  const start=new Date(`${plan.startsOn}T00:00:00`),end=new Date(start);
-  end.setDate(end.getDate()+(plan.period==='week'?7:1));
-  return now>=start&&now<end;
+export type StudyPlan = { wordIds:string[]; enabled:boolean; startedAt?:string; period?:'day'|'week'; startsOn?:string };
+export function activePlan(plan:StudyPlan|undefined,_now=new Date()){
+  return Boolean(plan?.enabled);
 }
 export function plannedWords(state:StudyState,mode:PlanMode,now=new Date()):LexicalItem[]{
   const plan=state.studyPlans?.[mode];

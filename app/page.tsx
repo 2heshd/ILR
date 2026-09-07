@@ -23,6 +23,7 @@ import { COURSE_META, courseSectionLabel, loadCourseCatalog, loadCourseWeek, typ
 import { curatedListeningItems, curatedPassages, curatedSpeakingPrompts } from "@/lib/curated-cycle";
 import { createSerializedCard, reviewFsrs } from "@/lib/fsrs";
 import { NEWS_META, newsVocabulary } from "@/lib/news";
+import { NEWS_TOPICS, newsTopicFor, type NewsTopic } from "@/lib/news-topics";
 import { removeDeletedSharedWord } from "@/lib/word-merge.js";
 import { normalizePersian, parseWeeklyInput } from "@/lib/persian";
 import { isMeaningfulPersianText, sanitizePersianSpeechText } from "@/lib/persian-speech";
@@ -283,6 +284,7 @@ export default function Home() {
   const [selectedCourseEntries, setSelectedCourseEntries] = useState<Set<number>>(new Set());
   const [selectedCourseSections, setSelectedCourseSections] = useState<Set<string>>(new Set());
   const [newsQuery, setNewsQuery] = useState("");
+  const [newsTopic, setNewsTopic] = useState<NewsTopic>("All topics");
   const [selectedNewsEntries, setSelectedNewsEntries] = useState<Set<string>>(new Set());
   const [generationBusy, setGenerationBusy] = useState<"reading" | "listening" | null>(null);
   const [audioBusy, setAudioBusy] = useState(false);
@@ -659,6 +661,7 @@ export default function Home() {
   useEffect(()=>{const timer=setInterval(()=>setClockNow(Date.now()),15000);return()=>clearInterval(timer);},[]);
   const due=useMemo(()=>dueWords(state,reviewModality,new Date(clockNow)),[state,reviewModality,clockNow]);
   function updatePlan(mode:PlanMode,plan:StudyPlan){setState(current=>({...current,studyPlans:{...current.studyPlans,[mode]:plan}}));if(mode===reviewModality)setLockedReviewForm(null);}
+  function refreshTodayQueue(){setClockNow(Date.now());setStatus("Today refreshed. Completed reviews and today’s progress were kept.");}
   function planPicker(mode:PlanMode){const plan=state.studyPlans?.[mode];return <div className="plan-shortcut span-12"><span>{planLabels[mode]} · {plan?.enabled?`${plannedWords(state,mode).length} active words`:(mode==='reading'||mode==='listening'?'Choose vocabulary':'All due words')}</span><button onClick={()=>{setPlanMode(mode);setTab('vocabulary');window.scrollTo({top:0,behavior:'smooth'});}}>Edit plan in Vocabulary →</button></div>;}
   const current = reviewWord(state.words,due,lockedReviewForm);
   const allocation = useMemo(() => adaptiveAllocation(state), [state]);
@@ -900,7 +903,7 @@ export default function Home() {
     }
   }
 
-  function addCourseEntries(chosen: CourseVocabularyEntry[], sourceLabel: string, targetPlan?:{mode:PlanMode;plan:StudyPlan;add:boolean}) {
+  function addCourseEntries(chosen: CourseVocabularyEntry[], sourceLabel: string, targetPlan?:{mode:PlanMode;plan:StudyPlan;action:'replace'|'add'|'remove'}) {
     if (!chosen.length) return;
     const existingKeys = new Set(state.words.map((word) => courseWordKey(word.displayForm)));
     const addable = chosen.filter((entry) => {
@@ -911,7 +914,7 @@ export default function Home() {
     });
     setState((currentState) => {
       const existing = new Set(currentState.words.map((word) => courseWordKey(word.displayForm)));
-      const incoming = (targetPlan&&!targetPlan.add?[]:chosen).filter((entry) => {
+      const incoming = (targetPlan?.action==='remove'?[]:chosen).filter((entry) => {
         const key = courseWordKey(entry.fa);
         if (!key || existing.has(key)) return false;
         existing.add(key);
@@ -945,13 +948,13 @@ export default function Home() {
       if(targetPlan){
         const keys=new Set(chosen.map(entry=>courseWordKey(entry.fa)));
         const currentPlan=currentState.studyPlans?.[targetPlan.mode]??targetPlan.plan;
-        const ids=new Set(currentPlan.wordIds);
-        for(const word of words)if(keys.has(courseWordKey(word.displayForm))){if(targetPlan.add)ids.add(word.id);else ids.delete(word.id);}
-        return {...currentState,words,studyPlans:{...currentState.studyPlans,[targetPlan.mode]:{...currentPlan,enabled:true,wordIds:[...ids]}}};
+        const ids=new Set(targetPlan.action==='replace'?[]:currentPlan.wordIds);
+        for(const word of words)if(keys.has(courseWordKey(word.displayForm))){if(targetPlan.action==='remove')ids.delete(word.id);else ids.add(word.id);}
+        return {...currentState,words,studyPlans:{...currentState.studyPlans,[targetPlan.mode]:{...currentPlan,enabled:true,startedAt:new Date().toISOString(),wordIds:[...ids]}}};
       }
       return { ...currentState, words };
     });
-    setStatus(targetPlan?`${planLabels[targetPlan.mode]} plan updated. ${targetPlan.add?'Missing words were added to your bank.':'Your saved vocabulary and other plans are unchanged.'}`:`${addable.length} ${sourceLabel} ${addable.length === 1 ? "word" : "words"} added${addable.length < chosen.length ? ` · ${chosen.length - addable.length} already in your bank` : ""}.`);
+    setStatus(targetPlan?`${planLabels[targetPlan.mode]} session ${targetPlan.action==='replace'?'started':targetPlan.action==='add'?'expanded':'updated'}. ${targetPlan.action==='remove'?'The words remain saved in your bank.':'It is ready on Today now.'}`:`${addable.length} ${sourceLabel} ${addable.length === 1 ? "word" : "words"} added${addable.length < chosen.length ? ` · ${chosen.length - addable.length} already in your bank` : ""}.`);
   }
 
   function addSelectedCourseWords() {
@@ -1010,6 +1013,32 @@ export default function Home() {
       });
     }
     setStatus(`${removed.displayForm} removed from your vocabulary bank.`);
+  }
+
+  function removeWordsFromBank(normalizedForms:Set<string>,label:string) {
+    if (!normalizedForms.size) return;
+    let removedCount=0;
+    setState((currentState) => {
+      const removedIds=new Set(currentState.words.filter(word=>normalizedForms.has(word.normalizedForm)).map(word=>word.id));
+      removedCount=removedIds.size;
+      const studyPlans=Object.fromEntries(Object.entries(currentState.studyPlans??{}).map(([mode,plan])=>[mode,plan?{...plan,wordIds:plan.wordIds.filter(id=>!removedIds.has(id))}:plan]));
+      return {...currentState,words:currentState.words.filter(word=>!removedIds.has(word.id)),studyPlans};
+    });
+    setStatus(`${label} removed from your bank and active sessions. Completed review history was kept.`);
+  }
+
+  function removeSelectedCourseWords() {
+    const keys=new Set(courseCatalog.filter(entry=>selectedCourseEntries.has(entry.id)).map(entry=>courseWordKey(entry.fa)));
+    const forms=new Set(state.words.filter(word=>keys.has(courseWordKey(word.displayForm))).map(word=>word.normalizedForm));
+    removeWordsFromBank(forms,`${forms.size} course ${forms.size===1?'word':'words'}`);
+    setSelectedCourseEntries(new Set());
+  }
+
+  function removeSelectedNewsWords() {
+    const keys=new Set(NEWS_CATALOG.filter(word=>selectedNewsEntries.has(word.id)).map(word=>courseWordKey(word.displayForm)));
+    const forms=new Set(state.words.filter(word=>keys.has(courseWordKey(word.displayForm))).map(word=>word.normalizedForm));
+    removeWordsFromBank(forms,`${forms.size} news ${forms.size===1?'word':'words'}`);
+    setSelectedNewsEntries(new Set());
   }
 
   function reveal() {
@@ -1639,7 +1668,10 @@ export default function Home() {
   const bankCourseKeys = new Set(state.words.filter((word) => word.sourceType === "course").map((word) => courseWordKey(word.displayForm)));
   const allBankKeys = new Set(state.words.map((word) => courseWordKey(word.displayForm)));
   const normalizedNewsQuery = newsQuery.trim().toLocaleLowerCase();
-  const visibleNewsEntries = NEWS_CATALOG.filter((word) => !normalizedNewsQuery || `${word.displayForm} ${word.definition ?? ""} ${word.romanization ?? ""}`.toLocaleLowerCase().includes(normalizedNewsQuery));
+  const visibleNewsEntries = NEWS_CATALOG.filter((word) => (
+    (newsTopic === "All topics" || newsTopicFor(word) === newsTopic)
+    && (!normalizedNewsQuery || `${word.displayForm} ${word.definition ?? ""} ${word.romanization ?? ""}`.toLocaleLowerCase().includes(normalizedNewsQuery))
+  ));
   const inferenceSentenceCount = latestPassage ? persianSentences(latestPassage.textFa).length : 0;
   const inferenceReady = readingMode !== "inference"
     || (sentenceGists.length === inferenceSentenceCount && sentenceGists.every((gist) => gist.trim()));
@@ -1734,8 +1766,15 @@ export default function Home() {
       <div className="nav-dash" />
       <div className="nav-section-heading"><span><i>▲</i> Study</span><span>−</span></div>
       <div className="nav-dash" />
+      <div className="nav-path-label">Learning path</div>
+      <div className="nav-items learning-path">
+        {([['visual','Text'],['audio','Audio'],['cloze','Patterns']] as const).map(([mode,label],index)=><button key={mode} className={tab==='today'&&reviewModality===mode?'tab active':'tab'} onClick={()=>{setReviewModality(mode);setTab('today');}}><span className="path-step">{index+1}</span>{label}</button>)}
+        <button className={tab==='reading'?'tab active':'tab'} onClick={()=>setTab('reading')}><span className="path-step">4</span>Reading</button>
+        <button className={tab==='listening'?'tab active':'tab'} onClick={()=>setTab('listening')}><span className="path-step">5</span>Listening</button>
+      </div>
+      <div className="nav-path-label">Manage</div>
       <div className="nav-items">
-        {(["today", "reading", "listening", "speaking", "vocabulary", "analytics"] as Tab[]).map((name) => <button key={name} className={tab === name ? "tab active" : "tab"} onClick={() => setTab(name)}><span className="nav-bullet">{tab === name ? "●" : "·"}</span>{TAB_LABELS[name]}</button>)}
+        {(["vocabulary","speaking","analytics"] as Tab[]).map((name)=><button key={name} className={tab===name?'tab active':'tab'} onClick={()=>setTab(name)}><span className="nav-bullet">{tab===name?'●':'·'}</span>{name==='vocabulary'?'Vocabulary session':TAB_LABELS[name]}</button>)}
       </div>
       <div className="nav-course">
         <div className="platform-switcher"><a href={ASL_URL}>Asl</a><a href={SYNAPTX_URL}>Synaptx</a></div>
@@ -1757,7 +1796,7 @@ export default function Home() {
 
     {tab === "today" && !showIntake && <section className="grid today-grid">
       {planPicker(reviewModality)}
-      <div className="card span-12"><label>New words per day, per skill <select value={state.dailyNewLimit??40} onChange={e=>setState(current=>({...current,dailyNewLimit:Number(e.target.value)}))}>{[30,40,50].map(count=><option key={count}>{count}</option>)}</select></label><p className="muted">90% scheduling target · Due reviews come first. Text, audio, and patterns advance independently. Short learning steps may return today.</p></div>
+      <div className="card span-12 today-controls"><div className="row spread"><label>New words per day, per skill <select value={state.dailyNewLimit??40} onChange={e=>setState(current=>({...current,dailyNewLimit:Number(e.target.value)}))}>{[30,40,50].map(count=><option key={count}>{count}</option>)}</select></label><button className="secondary" onClick={refreshTodayQueue}>Refresh Today</button></div><p className="muted">90% scheduling target · Due reviews come first. Refresh only checks the queue; it never erases completed work. Text, audio, and patterns advance independently.</p></div>
       <Metric label="Due now" value={String(due.length)} />
       <Metric label="Total words" value={String(state.words.length)} />
       <Metric label="Review accuracy" value={`${retention}%`} />
@@ -1799,7 +1838,7 @@ export default function Home() {
               <div className="row"><button className="danger" onClick={() => rateKnown(false)}>I was wrong</button><button className="primary" onClick={() => rateKnown(true)}>I was right</button></div>
             </>}
           </>}
-        </> : state.words.length ? <div className="next-action"><h3>No reviews due in this selection.</h3><p>Your word bank is still saved. If you expected words here, check the plan dates, selection, and daily new-word limit above. Short learning steps will return when due.</p><button onClick={()=>setTab("reading")}>Open reading</button></div> : !currentCourseWeekImported ? <div className="next-action course-ready"><span className="next-number">01</span><h3>Start Week {state.weekNumber}.</h3><p>This week contains {currentCourseWordCount} entries from {currentCourseLessonCount} original ChiMishe lesson lists. Choose the words you want; new reviews follow your daily limit.</p><div className="course-ready-meta"><span>{COURSE_META.entries.toLocaleString()} course entries</span><span>{COURSE_META.lessonLists} lesson lists</span><span>{COURSE_META.weeks} weeks</span></div><button className="primary" onClick={() => void importCourseWeek()} disabled={courseBusy}>{courseBusy ? "Preparing…" : `Start Week ${state.weekNumber}`}</button></div> : state.words.length ? <div className="next-action"><h3>You&apos;re caught up.</h3><p>Choose Reading or Listening from the menu for your next session.</p></div> : <div className="next-action"><span className="next-number">01</span><h3>Add your first words.</h3><p>Add vocabulary manually to create your review schedule.</p><button className="primary" onClick={() => setShowIntake(true)}>Add words</button></div>}
+        </> : state.words.length ? <div className="next-action"><h3>No reviews due right now.</h3><p>Your vocabulary session and completed work are safe. Refresh the queue, choose a different learning-path step, or edit the active words.</p><div className="row"><button onClick={refreshTodayQueue}>Refresh Today</button><button onClick={()=>{setPlanMode(reviewModality);setTab("vocabulary");}}>Edit session</button></div></div> : !currentCourseWeekImported ? <div className="next-action course-ready"><span className="next-number">01</span><h3>Start Week {state.weekNumber}.</h3><p>This week contains {currentCourseWordCount} entries from {currentCourseLessonCount} original ChiMishe lesson lists. Choose the words you want; new reviews follow your daily limit.</p><div className="course-ready-meta"><span>{COURSE_META.entries.toLocaleString()} course entries</span><span>{COURSE_META.lessonLists} lesson lists</span><span>{COURSE_META.weeks} weeks</span></div><button className="primary" onClick={() => void importCourseWeek()} disabled={courseBusy}>{courseBusy ? "Preparing…" : `Start Week ${state.weekNumber}`}</button></div> : state.words.length ? <div className="next-action"><h3>You&apos;re caught up.</h3><p>Choose Reading or Listening from the menu for your next session.</p></div> : <div className="next-action"><span className="next-number">01</span><h3>Add your first words.</h3><p>Add vocabulary manually to create your review schedule.</p><button className="primary" onClick={() => setShowIntake(true)}>Add words</button></div>}
       </div>
 
       <div className="card span-5 dashboard-secondary">
@@ -1888,8 +1927,8 @@ export default function Home() {
     />}
 
     {tab === "vocabulary" && <section className="grid">
-      <StudyPlanPicker state={state} mode={planMode} catalog={courseCatalog} onModeChange={setPlanMode} onChange={plan=>updatePlan(planMode,plan)} onCourseChange={(entries,add,plan)=>addCourseEntries(entries,'course',{mode:planMode,plan,add})}/>
-      <div className="card span-12"><div className="row spread"><div><h2>Vocabulary bank</h2><p className="muted">Choose words from ChiMishe by week and lesson. Anything you add can appear in reviews, readings, and listenings.</p></div><span className="pill">{state.words.length} in your bank</span></div></div>
+      <StudyPlanPicker state={state} mode={planMode} onModeChange={setPlanMode} onChange={plan=>updatePlan(planMode,plan)}/>
+      <div className="card span-12 vocabulary-library-heading"><div className="row spread"><div><h2>Choose vocabulary</h2><p className="muted">Course Vocabulary is your main library. News Vocabulary is an optional add-on. Both work across Today, Reading, and Listening.</p></div><span className="pill">{state.words.length} in your bank</span></div></div>
       <div className="card span-12 course-catalog">
         <div className="row spread catalog-heading"><div><h2>{COURSE_META.title}</h2><p className="muted">{COURSE_META.entries.toLocaleString()} entries · {COURSE_META.lessonLists} lesson lists · {COURSE_META.weeks} weeks</p></div><button className="secondary" onClick={() => void importCourseWeek(catalogWeek)} disabled={courseBusy || state.course.importedWeeks.includes(catalogWeek)}>{state.course.importedWeeks.includes(catalogWeek) ? `Week ${catalogWeek} added` : courseBusy ? "Adding…" : `Add all of Week ${catalogWeek}`}</button></div>
         <details className="chapter-picker">
@@ -1903,15 +1942,15 @@ export default function Home() {
           <label><span>Lesson</span><select value={activeCatalogLesson} onChange={(event) => { setCatalogLesson(event.target.value); setSelectedCourseEntries(new Set()); }}>{catalogLessons.map((lesson) => <option key={lesson} value={lesson}>{lesson}</option>)}</select></label>
           <label><span>Find a word</span><input value={catalogQuery} onChange={(event) => setCatalogQuery(event.target.value)} placeholder="Persian or English" /></label>
         </div>
-        <div className="catalog-selection row spread"><span>{visibleCatalogEntries.length} shown · {selectedCourseEntries.size} selected</span><div className="row"><button className="text-button" onClick={() => setSelectedCourseEntries(new Set(visibleCatalogEntries.filter((entry) => !bankCourseKeys.has(courseWordKey(entry.fa))).map((entry) => entry.id)))}>Select shown</button><button className="primary" disabled={!selectedCourseEntries.size} onClick={addSelectedCourseWords}>Add selected</button></div></div>
+        <div className="catalog-selection row spread"><span>{visibleCatalogEntries.length} shown · {selectedCourseEntries.size} selected</span><div className="row"><button className="text-button" onClick={() => setSelectedCourseEntries(new Set(visibleCatalogEntries.map((entry) => entry.id)))}>Select shown</button><button className="text-button" onClick={() => setSelectedCourseEntries(new Set())}>Deselect all</button><button className="primary" disabled={!selectedCourseEntries.size} onClick={addSelectedCourseWords}>Add selected</button><button className="secondary" disabled={!selectedCourseEntries.size} onClick={removeSelectedCourseWords}>Remove selected</button></div></div>
         <div className="catalog-list">{visibleCatalogEntries.map((entry) => {
           const alreadyAdded = bankCourseKeys.has(courseWordKey(entry.fa));
-          return <label className={`catalog-word${alreadyAdded ? " added" : ""}`} key={entry.id}><input type="checkbox" checked={alreadyAdded || selectedCourseEntries.has(entry.id)} onChange={() => { const bankWord = state.words.find((word) => courseWordKey(word.displayForm) === courseWordKey(entry.fa)); if (bankWord) removeWord(bankWord.normalizedForm); else setSelectedCourseEntries((current) => { const next = new Set(current); if (next.has(entry.id)) next.delete(entry.id); else next.add(entry.id); return next; }); }} /><strong>{entry.fa}</strong><span>{entry.en}</span><small>{alreadyAdded ? "Selected · uncheck to remove" : `List ${entry.list}`}</small></label>;
+          return <label className={`catalog-word${alreadyAdded ? " added" : ""}`} key={entry.id}><input type="checkbox" checked={selectedCourseEntries.has(entry.id)} onChange={() => setSelectedCourseEntries((current) => { const next = new Set(current); if (next.has(entry.id)) next.delete(entry.id); else next.add(entry.id); return next; })} /><strong>{entry.fa}</strong><span>{entry.en}</span><small>{alreadyAdded ? "In your bank" : `List ${entry.list}`}</small></label>;
         })}</div>
         {!courseCatalog.length && <div className="empty">Loading the course catalog…</div>}
         {courseCatalog.length > 0 && !visibleCatalogEntries.length && <div className="empty">No words match this search.</div>}
       </div>
-      <div className="card span-12 news-catalog"><h2>News vocabulary · {NEWS_META.entries.toLocaleString()}</h2><p className="muted">A 100-term BBC Persian and Iran International frequency sample, expanded with {NEWS_META.newspaperBookEntries.toLocaleString()} ChiMishe Newspaper Book terms and advanced formal-course vocabulary. Choose only the words you want active.</p><label className="catalog-search"><span>Find a news word</span><input value={newsQuery} onChange={(event) => setNewsQuery(event.target.value)} placeholder="Persian, English, or transliteration" /></label><div className="catalog-selection row spread"><span>{visibleNewsEntries.length} shown · {selectedNewsEntries.size} selected</span><div className="row"><button className="text-button" onClick={() => setSelectedNewsEntries(new Set(visibleNewsEntries.filter((word) => !allBankKeys.has(courseWordKey(word.displayForm))).map((word) => word.id)))}>Select shown</button><button className="primary" disabled={!selectedNewsEntries.size} onClick={addSelectedNewsWords}>Add selected</button></div></div><div className="catalog-list news-list">{visibleNewsEntries.map((word) => { const alreadyAdded = allBankKeys.has(courseWordKey(word.displayForm)); return <label className={`catalog-word${alreadyAdded ? " added" : ""}`} key={word.id}><input type="checkbox" checked={alreadyAdded || selectedNewsEntries.has(word.id)} onChange={() => { const bankWord = state.words.find((item) => courseWordKey(item.displayForm) === courseWordKey(word.displayForm)); if (bankWord) removeWord(bankWord.normalizedForm); else setSelectedNewsEntries((current) => { const next = new Set(current); if (next.has(word.id)) next.delete(word.id); else next.add(word.id); return next; }); }} /><strong>{word.displayForm}</strong><WordPatternHint word={word.displayForm}/><span>{word.romanization ? `${word.romanization} · ` : ""}{word.definition}</span><small>{alreadyAdded ? "Selected · uncheck to remove" : word.topic}</small></label>; })}</div></div>
+      <div className="card span-12 news-catalog"><h2>News Vocabulary · {NEWS_META.entries.toLocaleString()}</h2><p className="muted">Optional vocabulary for building current-events reading and listening. Filter by topic, then add only what you want.</p><div className="news-catalog-controls"><label className="catalog-search"><span>Topic</span><select value={newsTopic} onChange={(event) => { setNewsTopic(event.target.value as NewsTopic); setSelectedNewsEntries(new Set()); }}>{NEWS_TOPICS.map((topic) => <option key={topic}>{topic}</option>)}</select></label><label className="catalog-search"><span>Find a news word</span><input value={newsQuery} onChange={(event) => setNewsQuery(event.target.value)} placeholder="Persian, English, or transliteration" /></label></div><div className="catalog-selection row spread"><span>{visibleNewsEntries.length} shown · {selectedNewsEntries.size} selected</span><div className="row"><button className="text-button" onClick={() => setSelectedNewsEntries(new Set(visibleNewsEntries.map((word) => word.id)))}>Select shown</button><button className="text-button" onClick={() => setSelectedNewsEntries(new Set())}>Deselect all</button><button className="primary" disabled={!selectedNewsEntries.size} onClick={addSelectedNewsWords}>Add selected</button><button className="secondary" disabled={!selectedNewsEntries.size} onClick={removeSelectedNewsWords}>Remove selected</button></div></div><div className="catalog-list news-list">{visibleNewsEntries.map((word) => { const alreadyAdded = allBankKeys.has(courseWordKey(word.displayForm)); return <label className={`catalog-word${alreadyAdded ? " added" : ""}`} key={word.id}><input type="checkbox" checked={selectedNewsEntries.has(word.id)} onChange={() => setSelectedNewsEntries((current) => { const next = new Set(current); if (next.has(word.id)) next.delete(word.id); else next.add(word.id); return next; })} /><strong>{word.displayForm}</strong><WordPatternHint word={word.displayForm}/><span>{word.romanization ? `${word.romanization} · ` : ""}{word.definition}</span><small>{alreadyAdded ? "In your bank" : newsTopicFor(word)}</small></label>; })}</div></div>
       <div className="card span-12"><h2>My words · {state.words.filter((word) => word.sourceType === "user").length}</h2><div className="word-list single">{state.words.filter((word) => word.sourceType === "user").map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><WordPatternHint word={word.displayForm}/><span>{word.romanization ? `${word.romanization} · ` : ""}{word.definition}</span><span>{word.topic || "Personal vocabulary"}</span><div className="word-actions"><a className="inspect-word" href={morphologyUrl(word.displayForm, word.definition, word.romanization)} target="_blank" rel="noreferrer">Inspect morphology in Synaptx ↗</a><button className="text-button remove-word" onClick={() => removeWord(word.normalizedForm)}>Remove</button></div></div>)}</div>{!state.words.some((word) => word.sourceType === "user") && <div className="empty">Words researched in Asl will appear here after you choose them.</div>}</div>
     </section>}
 

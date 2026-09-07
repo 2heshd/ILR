@@ -6,6 +6,7 @@ import { courseSectionLabel } from "../lib/course.ts";
 import { unselectedContentWords } from "../lib/practice-vocabulary.ts";
 import { dedupeLexicalWords, removeDeletedSharedWord } from "../lib/word-merge.js";
 import { compactStudyState, readStudyState, writeStudyState } from "../lib/storage.ts";
+import { NEWS_TOPICS, newsTopicFor } from "../lib/news-topics.ts";
 
 const course = JSON.parse(await readFile(new URL("../data/course-vocabulary.json", import.meta.url), "utf8"));
 const cycle = JSON.parse(await readFile(new URL("../data/curated-cycle.json", import.meta.url), "utf8"));
@@ -77,6 +78,13 @@ test("news catalog contains 2,000 unique sourced usable terms", () => {
   assert.equal(news.filter((word) => !["frequency_sample", "newspaper_book", "advanced_course"].includes(word.provenance)).length, 0);
 });
 
+test("course and news catalogs use explicit bulk add and remove selection", () => {
+  assert.match(pageSource, /Deselect all/u);
+  assert.match(pageSource, /Remove selected/u);
+  assert.match(pageSource, /In your bank/u);
+  assert.doesNotMatch(pageSource, /Selected · uncheck to remove/u);
+});
+
 test("new learners choose vocabulary instead of receiving the pilot bank", () => {
   assert.match(pageSource, /words:\s*\[\]/u);
   assert.doesNotMatch(pageSource, /words:\s*curatedVocabulary\(\)/u);
@@ -84,8 +92,16 @@ test("new learners choose vocabulary instead of receiving the pilot bank", () =>
   assert.match(pageSource, /Add selected/u);
   assert.doesNotMatch(pageSource, /Course words ·/u);
   assert.match(pageSource, /span-12 news-catalog/u);
-  assert.match(pageSource, /Selected · uncheck to remove/u);
-  assert.match(pageSource, /removeWord\(word\.normalizedForm\)/u);
+  assert.match(pageSource, /Course Vocabulary is your main library/u);
+  assert.match(pageSource, /News Vocabulary is an optional add-on/u);
+  assert.doesNotMatch(pageSource, /Selected · uncheck to remove/u);
+});
+
+test("news vocabulary is grouped into learner-facing topics", () => {
+  assert.equal(NEWS_TOPICS[0], "All topics");
+  assert.equal(newsCatalog.entries.filter((word) => !newsTopicFor(word)).length, 0);
+  assert.ok(new Set(newsCatalog.entries.map(newsTopicFor)).size >= 6);
+  assert.match(pageSource, /newsTopicFor\(word\)/u);
 });
 
 test("reading and listening generation are constrained to learner-selected vocabulary", async () => {
