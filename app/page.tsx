@@ -1981,7 +1981,6 @@ export default function Home() {
 
     {tab === "vocabulary" && <section className="grid">
       <StudyPlanPicker state={state} mode={planMode} onModeChange={setPlanMode} onChange={plan=>updatePlan(planMode,plan)}/>
-      <div className="card span-12 vocabulary-library-heading"><div className="row spread"><div><h2>Choose vocabulary</h2><p className="muted">Course Vocabulary is your main library. News Vocabulary is an optional add-on. Both work across Today, Reading, and Listening.</p></div><span className="pill">{state.words.length} in your bank</span></div></div>
       <div className="card span-12 course-catalog">
         <div className="row spread catalog-heading"><div><h2>{COURSE_META.title}</h2><p className="muted">Choose a unit, chapter, or lesson. Selection stays checked while you browse.</p></div></div>
         <details className="chapter-picker">
