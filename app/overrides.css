@@ -3055,7 +3055,7 @@ main>.today-grid>.card{background:transparent;border:0;box-shadow:none;border-ra
 main>.today-grid>.today-controls{padding:0;margin-bottom:20px}
 main>.today-grid>.dashboard-primary{width:100%;max-width:1100px;margin:36px auto 0;padding:24px;min-height:58vh;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px}
 .today-grid .dashboard-primary>.row.spread{width:100%;justify-content:center;gap:24px;flex-wrap:wrap}
-.today-grid .dashboard-primary .hero-fa{font-size:clamp(56px,7vw,112px);line-height:1.8;margin:20px 0;overflow-wrap:anywhere}
+.today-grid .dashboard-primary .hero-fa{font-size:clamp(40px,7vw,112px);line-height:1.8;margin:20px 0;overflow-wrap:normal;word-break:normal;hyphens:none;max-width:100%;overflow-x:auto}
 .today-grid .dashboard-primary .answer-block{width:100%;max-width:760px;align-items:center;font-size:22px}
 .today-grid .dashboard-primary>.row,.today-grid .pattern-result>.row{justify-content:center}
 .today-grid .dashboard-primary .pattern-recall{width:100%;max-width:800px}

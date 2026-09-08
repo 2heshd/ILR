@@ -1875,7 +1875,7 @@ export default function Home() {
           {reviewModality === "cloze" ? <div className="pattern-recall" aria-live="polite">
             {patternPhase === "flash" && <div className="pattern-flash">
               <span>{isPatternItem(current) ? "Phrase / compound" : "Word"} · memorize</span>
-              <div className="fa hero-fa">{current.displayForm}</div>
+              <div className="fa hero-fa" lang="fa">{current.displayForm.replace(/[\u00ad\u200b]/g, "")}</div>
               <div className="pattern-flash-meter" aria-hidden="true"><i /></div>
             </div>}
             {patternPhase === "answer" && <form className="pattern-answer" onSubmit={(event) => { event.preventDefault(); submitPatternAnswer(); }}>
@@ -1894,7 +1894,7 @@ export default function Home() {
               <div className="row"><button className="danger" onClick={() => rateKnown(false)}>Needs work</button><button className="primary" onClick={() => rateKnown(true)}>Got it</button></div>
             </div>}
           </div> : <>
-            {reviewModality === "visual" ? <div className="fa hero-fa">{current.displayForm}</div> : <div className="audio-recall"><button className="primary" onClick={() => void playCurrentWord()}>Play word</button><span className="muted">Identify it by sound before revealing.</span></div>}
+            {reviewModality === "visual" ? <div className="fa hero-fa" lang="fa">{current.displayForm.replace(/[\u00ad\u200b]/g, "")}</div> : <div className="audio-recall"><button className="primary" onClick={() => void playCurrentWord()}>Play word</button><span className="muted">Identify it by sound before revealing.</span></div>}
             {!revealed ? <button className="primary" onClick={reveal} disabled={reviewModality==="audio"&&playedReviewWord!==current.id}>{reviewModality==="audio"&&playedReviewWord!==current.id?"Play audio first":"Reveal meaning"}</button> : <>
               <div className="answer-block">
                 <strong>{current.definition || "Definition missing — add it during intake or enable AI enrichment."}</strong>
