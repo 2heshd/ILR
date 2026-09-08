@@ -92,8 +92,8 @@ test("new learners choose vocabulary instead of receiving the pilot bank", () =>
   assert.match(pageSource, /Add to \{planLabels\[planMode\]\}/u);
   assert.doesNotMatch(pageSource, /Course words ·/u);
   assert.match(pageSource, /span-12 news-catalog/u);
-  assert.match(pageSource, /Course Vocabulary is your main library/u);
-  assert.match(pageSource, /News Vocabulary is an optional add-on/u);
+  assert.match(pageSource, /Choose a unit, chapter, or lesson/u);
+  assert.match(pageSource, /Optional vocabulary for building current-events reading and listening/u);
   assert.doesNotMatch(pageSource, /Selected · uncheck to remove/u);
 });
 

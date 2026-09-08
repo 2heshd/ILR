@@ -1,4 +1,5 @@
 import OpenAI, { toFile } from "openai";
+import { captionsCoverText } from '@/lib/caption-integrity';
 import { openAiErrorResponse } from "@/lib/openai-error";
 import { isPlayablePersianText, sanitizePersianSpeechText } from "@/lib/persian-speech";
 
@@ -40,8 +41,8 @@ export async function POST(request: Request) {
       .map(({ word, start, end }) => ({ word: word.trim(), start, end }))
       .filter(({ word, start, end }) => word && Number.isFinite(start) && Number.isFinite(end) && end >= start);
 
-    if (!words.length) {
-      return Response.json({ error: "No word timestamps were detected in the audio." }, { status: 422 });
+    if (!captionsCoverText(speechText,words)) {
+      return Response.json({ error: "The captions did not match the complete transcript. Please retry, or use Full audio." }, { status: 422 });
     }
 
     // Keep the audio binary. Base64 makes an already-large narration roughly 33%

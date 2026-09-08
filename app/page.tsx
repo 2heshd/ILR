@@ -26,6 +26,7 @@ import { createSerializedCard, reviewFsrs } from "@/lib/fsrs";
 import { NEWS_META, newsVocabulary } from "@/lib/news";
 import { NEWS_TOPICS, newsTopicFor, type NewsTopic } from "@/lib/news-topics";
 import { removeDeletedSharedWord } from "@/lib/word-merge.js";
+import { captionsCoverText, nextCaption } from '@/lib/caption-integrity';
 import { normalizePersian, parseWeeklyInput } from "@/lib/persian";
 import { isMeaningfulPersianText, sanitizePersianSpeechText } from "@/lib/persian-speech";
 import { sourceMetrics } from "@/lib/source-analytics";
@@ -444,7 +445,7 @@ export default function Home() {
 
   async function prepareAlignedSpeech(text: string, cacheKey: string) {
     const [cachedAudio, cachedTimings] = await Promise.all([readCachedSpeech(cacheKey), readCachedSpeechTimings(cacheKey)]);
-    if (cachedAudio && cachedTimings) return { audio: cachedAudio, timings: cachedTimings };
+    if (cachedAudio && cachedTimings && captionsCoverText(text,cachedTimings)) return { audio: cachedAudio, timings: cachedTimings };
     const pending = speechTimingRequestsRef.current.get(cacheKey);
     if (pending) return pending;
 
@@ -466,7 +467,7 @@ export default function Home() {
         mimeType?: string;
         words?: TimedCaption[];
       };
-      if (!metadata.words?.length) throw new Error("Exact word timing is unavailable.");
+      if (!metadata.words?.length || !captionsCoverText(text,metadata.words)) throw new Error("The captions are incomplete. Please retry or use Full audio.");
       const audio = new Blob([payload.slice(4 + metadataLength)], { type: metadata.mimeType || "audio/mpeg" });
       speechCacheRef.current.set(cacheKey, audio);
       speechTimingsRef.current.set(cacheKey, metadata.words);
@@ -1399,7 +1400,9 @@ export default function Home() {
     audio.onended = () => {
       if (finished) return;
       finished = true;
-      finishRapidListen();
+      const remaining=nextCaption(timings,timingIndex,Infinity);
+      if(remaining.word) setRapidCaptionWord(remaining.word);
+      window.setTimeout(()=>{if(playbackRef.current===audio) finishRapidListen();},Math.max(400,(remaining.index-timingIndex)*200));
     };
     audio.onerror = () => {
       if (finished) return;
@@ -1410,10 +1413,10 @@ export default function Home() {
     setRapidPlaying(true);
     const updateCaption = () => {
       const now = audio.currentTime;
-      while (timingIndex + 1 < timings.length && timings[timingIndex + 1].start <= now) timingIndex += 1;
-      const activeTiming = timingIndex >= 0 && now <= timings[timingIndex].end ? timings[timingIndex] : null;
-      const word = activeTiming?.word ?? "";
-      if (word !== lastWord) {
+      const next=nextCaption(timings,timingIndex,now);
+      timingIndex=next.index;
+      const word=next.word;
+      if (word !== null) {
         lastWord = word;
         setRapidCaptionWord(word);
       }
@@ -1427,7 +1430,7 @@ export default function Home() {
   async function playRapidListening() {
     if (!latestListening || audioBusy || rapidPlaying) return;
     const speechText = sanitizePersianSpeechText(latestListening.transcriptFa);
-    const cacheKey = `aligned-${latestListening.id}`;
+    const cacheKey = `aligned-v2-${latestListening.id}-${speechText}`;
     setAudioBusy(true);
     setStatus("Aligning every word to the audio…");
     try {
