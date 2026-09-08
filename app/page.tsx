@@ -31,7 +31,7 @@ import { isMeaningfulPersianText, sanitizePersianSpeechText } from "@/lib/persia
 import { sourceMetrics } from "@/lib/source-analytics";
 import { compactStudyState, readStudyState, writeStudyState } from "@/lib/storage";
 import { appendCloudReview, deletePlatformVocabulary, getSupabaseClient, loadCloudState, loadPlatformVocabulary, loadUsername, mergePlatformVocabulary, mergeStudyStates, saveCloudState, syncPlatformVocabulary, updateUsername } from "@/lib/supabase";
-import { dedupeLexicalWords } from "@/lib/word-merge";
+import { dedupeLexicalWords, restoreCourseDefinitions } from "@/lib/word-merge";
 import type {
   ComprehensionGrade,
   LexicalItem,
@@ -288,8 +288,17 @@ export default function Home() {
   const [courseBusy, setCourseBusy] = useState(false);
   const [planMode, setPlanMode] = useState<PlanMode>('visual');
   const [courseCatalog, setCourseCatalog] = useState<CourseVocabularyEntry[]>([]);
+  useEffect(() => {
+    if (!courseCatalog.length) return;
+    setState(previous => {
+      const words = restoreCourseDefinitions(previous.words, courseCatalog);
+      return words.some((word,index)=>word!==previous.words[index]) ? {...previous,words} : previous;
+    });
+  }, [courseCatalog, state.words]);
   const [catalogWeek, setCatalogWeek] = useState(1);
   const [catalogLesson, setCatalogLesson] = useState("");
+  const [catalogUnit, setCatalogUnit] = useState("");
+  const [catalogChapter, setCatalogChapter] = useState("");
   const [catalogQuery, setCatalogQuery] = useState("");
   const [selectedCourseEntries, setSelectedCourseEntries] = useState<Set<number>>(new Set());
   const [selectedCourseSections, setSelectedCourseSections] = useState<Set<string>>(new Set());
@@ -969,9 +978,9 @@ export default function Home() {
     setStatus(targetPlan?`${planLabels[targetPlan.mode]} session ${targetPlan.action==='replace'?'started':targetPlan.action==='add'?'expanded':'updated'}. ${targetPlan.action==='remove'?'The words remain saved in your bank.':'It is ready on Today now.'}`:`${addable.length} ${sourceLabel} ${addable.length === 1 ? "word" : "words"} added${addable.length < chosen.length ? ` · ${chosen.length - addable.length} already in your bank` : ""}.`);
   }
 
-  function addSelectedCourseWords() {
+  function addSelectedCourseWords(action:'add'|'replace'='add') {
     const chosen = courseCatalog.filter((entry) => selectedCourseEntries.has(entry.id));
-    addCourseEntries(chosen, "course", { mode: planMode, plan: state.studyPlans?.[planMode] ?? { wordIds: [], enabled: false }, action: "add" });
+    addCourseEntries(chosen, "course", { mode: planMode, plan: state.studyPlans?.[planMode] ?? { wordIds: [], enabled: false }, action });
     setSelectedCourseEntries(new Set());
   }
 
@@ -1045,9 +1054,8 @@ export default function Home() {
   }
 
   function removeSelectedCourseWords() {
-    const keys=new Set(courseCatalog.filter(entry=>selectedCourseEntries.has(entry.id)).map(entry=>courseWordKey(entry.fa)));
-    const forms=new Set(state.words.filter(word=>keys.has(courseWordKey(word.displayForm))).map(word=>word.normalizedForm));
-    removeWordsFromBank(forms,`${forms.size} course ${forms.size===1?'word':'words'}`);
+    const chosen=courseCatalog.filter(entry=>selectedCourseEntries.has(entry.id));
+    addCourseEntries(chosen,'course',{mode:planMode,plan:state.studyPlans?.[planMode]??{wordIds:[],enabled:false},action:'remove'});
     setSelectedCourseEntries(new Set());
   }
 
@@ -1687,9 +1695,13 @@ export default function Home() {
   const selectedCourseSectionEntryCount = courseSections
     .filter((section) => selectedCourseSections.has(section.label))
     .reduce((total, section) => total + section.count, 0);
-  const catalogWeekEntries = courseCatalog.filter((entry) => entry.week === catalogWeek);
+  const unitOf = (lesson:string) => lesson.split(' - ')[0];
+  const catalogUnits = [...new Set(courseCatalog.map(entry=>unitOf(entry.lesson)))];
+  const unitEntries = courseCatalog.filter(entry=>!catalogUnit || unitOf(entry.lesson)===catalogUnit);
+  const catalogChapters = [...new Set(unitEntries.map(entry=>courseSectionLabel(entry.lesson)))];
+  const catalogWeekEntries = unitEntries.filter(entry=>!catalogChapter || courseSectionLabel(entry.lesson)===catalogChapter);
   const catalogLessons = [...new Set(catalogWeekEntries.map((entry) => entry.lesson))];
-  const activeCatalogLesson = catalogLessons.includes(catalogLesson) ? catalogLesson : (catalogLessons[0] ?? "");
+  const activeCatalogLesson = catalogLessons.includes(catalogLesson) ? catalogLesson : "";
   const normalizedCatalogQuery = catalogQuery.trim().toLocaleLowerCase();
   const visibleCatalogEntries = catalogWeekEntries.filter((entry) => (
     (!activeCatalogLesson || entry.lesson === activeCatalogLesson)
@@ -1971,7 +1983,7 @@ export default function Home() {
       <StudyPlanPicker state={state} mode={planMode} onModeChange={setPlanMode} onChange={plan=>updatePlan(planMode,plan)}/>
       <div className="card span-12 vocabulary-library-heading"><div className="row spread"><div><h2>Choose vocabulary</h2><p className="muted">Course Vocabulary is your main library. News Vocabulary is an optional add-on. Both work across Today, Reading, and Listening.</p></div><span className="pill">{state.words.length} in your bank</span></div></div>
       <div className="card span-12 course-catalog">
-        <div className="row spread catalog-heading"><div><h2>{COURSE_META.title}</h2><p className="muted">{COURSE_META.entries.toLocaleString()} entries · {COURSE_META.lessonLists} lesson lists · {COURSE_META.weeks} weeks</p></div><button className="secondary" onClick={() => void importCourseWeek(catalogWeek)} disabled={courseBusy || state.course.importedWeeks.includes(catalogWeek)}>{state.course.importedWeeks.includes(catalogWeek) ? `Week ${catalogWeek} added` : courseBusy ? "Adding…" : `Add all of Week ${catalogWeek}`}</button></div>
+        <div className="row spread catalog-heading"><div><h2>{COURSE_META.title}</h2><p className="muted">Choose a unit, chapter, or lesson. Selection stays checked while you browse.</p></div></div>
         <details className="chapter-picker">
           <summary>Choose whole chapters or modules</summary>
           <p>Select several sections, then add their vocabulary in one step.</p>
@@ -1979,11 +1991,11 @@ export default function Home() {
           <div className="chapter-actions"><button className="text-button" disabled={!selectedCourseSections.size} onClick={() => setSelectedCourseSections(new Set())}>Clear</button><button className="primary" disabled={!selectedCourseSections.size} onClick={addSelectedCourseSections}>Add {selectedCourseSections.size || "selected"} {selectedCourseSections.size === 1 ? "chapter" : "chapters"} to {planLabels[planMode]} · {selectedCourseSectionEntryCount.toLocaleString()} words</button></div>
         </details>
         <div className="catalog-controls">
-          <label><span>Week</span><select value={catalogWeek} onChange={(event) => { setCatalogWeek(Number(event.target.value)); setCatalogLesson(""); setSelectedCourseEntries(new Set()); }}>{Array.from({ length: COURSE_META.weeks }, (_, index) => index + 1).map((week) => <option key={week} value={week}>Week {week} · {COURSE_META.weekCounts[week - 1]} words</option>)}</select></label>
-          <label><span>Lesson</span><select value={activeCatalogLesson} onChange={(event) => { setCatalogLesson(event.target.value); setSelectedCourseEntries(new Set()); }}>{catalogLessons.map((lesson) => <option key={lesson} value={lesson}>{lesson}</option>)}</select></label>
+          <label><span>Unit / book</span><select value={catalogUnit} onChange={event=>{setCatalogUnit(event.target.value);setCatalogChapter("");setCatalogLesson("");}}><option value="">All units and books</option>{catalogUnits.map(unit=><option key={unit}>{unit}</option>)}</select></label><label><span>Chapter / module</span><select value={catalogChapter} onChange={event=>{setCatalogChapter(event.target.value);setCatalogLesson("");}}><option value="">All chapters</option>{catalogChapters.map(chapter=><option key={chapter}>{chapter}</option>)}</select></label>
+          <label><span>Lesson</span><select value={activeCatalogLesson} onChange={event=>setCatalogLesson(event.target.value)}><option value="">All lessons</option>{catalogLessons.map(lesson=><option key={lesson}>{lesson}</option>)}</select></label>
           <label><span>Find a word</span><input value={catalogQuery} onChange={(event) => setCatalogQuery(event.target.value)} placeholder="Persian or English" /></label>
         </div>
-        <div className="catalog-selection row spread"><span>{visibleCatalogEntries.length} shown · {selectedCourseEntries.size} selected</span><div className="row"><button className="text-button" onClick={() => setSelectedCourseEntries(new Set(visibleCatalogEntries.map((entry) => entry.id)))}>Select shown</button><button className="text-button" onClick={() => setSelectedCourseEntries(new Set())}>Deselect all</button><button className="primary" disabled={!selectedCourseEntries.size} onClick={addSelectedCourseWords}>Add to {planLabels[planMode]}</button><button className="secondary" disabled={!selectedCourseEntries.size} onClick={removeSelectedCourseWords}>Remove selected</button></div></div>
+        <div className="catalog-selection row spread"><span>{visibleCatalogEntries.length} shown · {selectedCourseEntries.size} selected</span><div className="row"><button className="text-button" onClick={() => setSelectedCourseEntries(current=>new Set([...current,...visibleCatalogEntries.map(entry=>entry.id)]))}>Select shown</button><button className="text-button" onClick={() => setSelectedCourseEntries(new Set())}>Deselect all</button><button className="primary" disabled={!selectedCourseEntries.size} onClick={()=>addSelectedCourseWords()}>Add to {planLabels[planMode]}</button><button className="secondary" disabled={!selectedCourseEntries.size} onClick={()=>addSelectedCourseWords("replace")}>Use only selected</button><button className="secondary" disabled={!selectedCourseEntries.size} onClick={removeSelectedCourseWords}>Remove from session</button></div></div>
         <div className="catalog-list">{visibleCatalogEntries.map((entry) => {
           const alreadyAdded = bankCourseKeys.has(courseWordKey(entry.fa));
           return <label className={`catalog-word${alreadyAdded ? " added" : ""}`} key={entry.id}><input type="checkbox" checked={selectedCourseEntries.has(entry.id)} onChange={() => setSelectedCourseEntries((current) => { const next = new Set(current); if (next.has(entry.id)) next.delete(entry.id); else next.add(entry.id); return next; })} /><strong>{entry.fa}</strong><span>{entry.en}</span><small>{alreadyAdded ? "In your bank" : `List ${entry.list}`}</small></label>;

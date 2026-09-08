@@ -1,4 +1,5 @@
 type MergeableWord = {
+  courseEntryId?: number;
   id: string;
   displayForm: string;
   normalizedForm?: string;
@@ -11,6 +12,7 @@ type MergeableWord = {
   lapses?: number;
   sourceType?: string;
 };
+export function restoreCourseDefinitions<T extends MergeableWord>(words:T[],entries:{fa:string;en:string}[]):T[];
 
 type DeletedPlatformVocabularyRow = {
   normalized_form?: string;
