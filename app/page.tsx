@@ -609,7 +609,10 @@ export default function Home() {
           return;
         }
         void loadPlatformVocabulary(client, cloudUser)
-          .then((sharedWords) => setState((current) => hydrateState(mergePlatformVocabulary(current, sharedWords))))
+          .then((sharedWords) => setState((current) => {
+            const merged=mergePlatformVocabulary(current, sharedWords);
+            return merged===current?current:hydrateState(merged);
+          }))
           .catch((error) => console.error("Shared vocabulary refresh failed", error));
       })
       .subscribe();

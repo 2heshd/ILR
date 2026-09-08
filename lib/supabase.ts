@@ -109,6 +109,7 @@ export function mergePlatformVocabulary(state: StudyState, sharedWords: LexicalI
   return changed ? { ...state, words } : state;
 }
 
+const syncedVocabulary = new WeakMap<SupabaseClient,Map<string,string>>();
 export async function syncPlatformVocabulary(client: SupabaseClient, user: User, words: LexicalItem[]) {
   const rows = words.filter((word) => word.sourceType === "user").map((word) => ({
     user_id: user.id,
@@ -119,15 +120,21 @@ export async function syncPlatformVocabulary(client: SupabaseClient, user: User,
     source_platform: word.topic === "Asl derivation" ? "asl" : "cursos",
     source_context: word.topic ?? "Personal vocabulary",
     source_week: Math.max(1, Number(word.sourceWeek) || 1),
-    updated_at: new Date().toISOString(),
   }));
   if (!rows.length) return;
-  const { error } = await client.from("platform_vocabulary").upsert(rows, { onConflict: "user_id,normalized_form" });
-  if (missingPlatformTable(error)) return;
-  if (error) throw error;
+  const cache=syncedVocabulary.get(client)??new Map<string,string>();
+  syncedVocabulary.set(client,cache);
+  const changed=rows.filter(row=>cache.get(`${user.id}:${row.normalized_form}`)!==JSON.stringify(row));
+  for(let offset=0;offset<changed.length;offset+=100){
+    const batch=changed.slice(offset,offset+100);
+    const {error}=await client.from('platform_vocabulary').upsert(batch.map(row=>({...row,updated_at:new Date().toISOString()})),{onConflict:'user_id,normalized_form'});
+    if(error) throw error;
+    batch.forEach(row=>cache.set(`${user.id}:${row.normalized_form}`,JSON.stringify(row)));
+  }
 }
 
 export async function deletePlatformVocabulary(client: SupabaseClient, user: User, normalizedForm: string) {
+  syncedVocabulary.get(client)?.delete(`${user.id}:${normalizedForm}`);
   const { error } = await client
     .from("platform_vocabulary")
     .delete()
