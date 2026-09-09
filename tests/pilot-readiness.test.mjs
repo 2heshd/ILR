@@ -16,6 +16,8 @@ test('pilot schema covers consent, intervention, assessments, QA, review, and re
 test('suite soak fails closed and reports latency percentiles',()=>{
  assert.match(soak,/AbortSignal\.timeout\(10000\)/u);
  assert.match(soak,/response\.ok/u);
+ assert.match(soak,/app-shell\.html\?page=syntax\.html/u);
+ assert.match(soak,/route:'\/derivations'/u);
  assert.match(soak,/p50/u);assert.match(soak,/p95/u);
  assert.match(soak,/process\.exitCode=failures\.length\?1:0/u);
 });
