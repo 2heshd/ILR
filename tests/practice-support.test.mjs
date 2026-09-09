@@ -23,6 +23,11 @@ test('unused supporting labels are removed without an AI repair',()=>{
   assert.deepEqual(checkSupportingVocabulary('کتاب',[],['کتاب','خانه']).words,['کتاب']);
 });
 
+test('malformed model labels cannot hide passage vocabulary and are repaired from the passage',()=>{
+  const result=checkSupportingVocabulary('کتاب خریدم',[],['not Persian']);
+  assert.deepEqual(result,{words:['کتاب','خریدم'],unknown:[],issues:[]});
+});
+
 test('common finite supporting verbs are stored as dictionary forms',()=>{
  const result=checkSupportingVocabulary('پزشک بیمار را معاینه کرد.',['پزشک','بیمار','معاینه'],['کرد']);
  assert.deepEqual(result,{words:['کردن'],unknown:[],issues:[]});

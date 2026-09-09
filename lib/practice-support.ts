@@ -16,10 +16,15 @@ function dictionarySupportingForm(value:string) {
 /** Limit additional lexical entries, while allowing their normal inflections. */
 export function checkSupportingVocabulary(text: string, selected: string[], declared: unknown) {
   const issues: string[] = [];
-  if (!Array.isArray(declared) || declared.some(word => typeof word !== 'string' || !word.trim() || word.length > 60 || word.trim().split(/\s+/u).length > 3 || !/[\u0600-\u06ff]/u.test(word))) {
+  if (!Array.isArray(declared)) {
     return {words: [] as string[], unknown: [] as string[], issues: ['List supporting vocabulary as short Persian dictionary entries.']};
   }
-  const candidates = [...new Set(declared.map(word => dictionarySupportingForm(String(word))))];
+  // Treat this model-produced list as an untrusted hint. Invalid or unused labels
+  // are discarded; the passage itself is still checked token by token below and
+  // cannot become visible unless every extra item fits the bounded allowance.
+  const validLabels=declared.filter((word):word is string=>typeof word==='string'&&Boolean(word.trim())&&word.length<=60&&word.trim().split(/\s+/u).length<=3&&/[\u0600-\u06ff]/u.test(word));
+  if(validLabels.length!==declared.length&&!text.trim())issues.push('List supporting vocabulary as short Persian dictionary entries.');
+  const candidates = [...new Set(validLabels.map(dictionarySupportingForm))];
   if (candidates.length > SUPPORTING_VOCABULARY_LIMIT) issues.push(`Use at most ${SUPPORTING_VOCABULARY_LIMIT} supporting dictionary entries.`);
   const words: string[] = [];
   let unknown = unselectedContentWords(text, selected);
