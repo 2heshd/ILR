@@ -39,6 +39,9 @@ test('every pilot report is bound to the consented class event set',()=>{
 test('pilot storage and review access fail closed at the database boundary',()=>{
  assert.match(migration,/pg_column_size\(metadata\) <= 16384/u);
  assert.match(migration,/cardinality\(supports_used\) <= 32/u);
+ assert.match(migration,/cardinality\(issue_codes\)<=64/u);
+ assert.match(migration,/pg_column_size\(content_payload\)<=262144/u);
+ assert.match(migration,/length\(blocking_issue\)<=2000/u);
  assert.match(migration,/g\.created_at>=m\.consented_at/u);
  assert.match(migration,/grant select,insert,update on public\.deployment_releases to service_role/u);
  assert.equal((migration.match(/not public\.learning_can_manage_classes\(\)/gu)??[]).length,7);
@@ -49,7 +52,7 @@ test('pilot storage and review access fail closed at the database boundary',()=>
 });
 
 test('production database smoke is transactional and exercises isolation',()=>{
- for(const phrase of ['begin;','Cross-user event insert unexpectedly succeeded','Review queue crossed the consent boundary','Non-owner report access unexpectedly succeeded','Withdrawal retained class-linked evidence','Withdrawal retained class assessment data','Withdrawal retained membership identity','Post-withdrawal event was attached to a class','Rejoining exposed evidence from an earlier consent period','Rejoined event was not attached to its class','Pilot identity deletion failed','Retention purge did not remove all class-scoped records','Retention purge kept participant identity','Retention purge deleted learner-owned evidence','rollback;','pilot-db-smoke-passed'])assert.match(databaseSmoke,new RegExp(phrase,'i'));
+ for(const phrase of ['begin;','Cross-user event insert unexpectedly succeeded','Oversized generation review payload unexpectedly succeeded','Review queue crossed the consent boundary','Non-owner report access unexpectedly succeeded','Withdrawal retained class-linked evidence','Withdrawal retained class assessment data','Withdrawal retained membership identity','Post-withdrawal event was attached to a class','Rejoining exposed evidence from an earlier consent period','Rejoined event was not attached to its class','Pilot identity deletion failed','Retention purge did not remove all class-scoped records','Retention purge kept participant identity','Retention purge deleted learner-owned evidence','rollback;','pilot-db-smoke-passed'])assert.match(databaseSmoke,new RegExp(phrase,'i'));
 });
 
 test('browser responses use the pilot security header baseline',()=>{

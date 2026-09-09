@@ -44,6 +44,13 @@ begin
   exception when check_violation then null;
   end;
 
+  begin
+    insert into public.generation_quality_runs(user_id,modality,schema_valid,release_status,content_payload)
+    values(auth.uid(),'reading',true,'rejected',jsonb_build_object('textFa',(select string_agg(md5(n::text),'') from generate_series(1,9000) n)));
+    raise exception 'Oversized generation review payload unexpectedly succeeded';
+  exception when check_violation then null;
+  end;
+
   insert into public.generation_quality_runs(user_id,modality,schema_valid,vocabulary_valid,grammar_valid,register_valid,question_evidence_valid,answers_valid,duplicate_free,release_status,content_payload)
   values(auth.uid(),'listening',true,true,true,true,true,true,true,'learner_visible','{"textFa":"current"}') returning id into current_run;
   perform set_config('pilot.smoke.current_run',current_run::text,true);

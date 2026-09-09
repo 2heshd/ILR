@@ -139,11 +139,11 @@ create table if not exists public.generation_quality_runs (
   created_at timestamptz not null default now(),
   product text not null default 'cursos' check(product in ('cursos','synaptx','asl')),
   modality text not null check(modality in ('reading','listening','speaking','analysis')),
-  item_id text,
-  content_hash text,
-  model text,
-  source_kind text,
-  register text,
+  item_id text check(item_id is null or length(item_id)<=240),
+  content_hash text check(content_hash is null or length(content_hash)<=128),
+  model text check(model is null or length(model)<=120),
+  source_kind text check(source_kind is null or length(source_kind)<=80),
+  register text check(register is null or length(register)<=80),
   latency_ms integer check(latency_ms is null or latency_ms between 0 and 3600000),
   schema_valid boolean not null default false,
   vocabulary_valid boolean,
@@ -154,10 +154,10 @@ create table if not exists public.generation_quality_runs (
   duplicate_free boolean,
   provenance_valid boolean,
   release_status text not null check(release_status in ('generated','deterministically_valid','linguistically_reviewed','learner_visible','rejected')),
-  issue_codes text[] not null default '{}',
-  metadata jsonb not null default '{}'::jsonb check(jsonb_typeof(metadata)='object')
+  issue_codes text[] not null default '{}' check(cardinality(issue_codes)<=64),
+  metadata jsonb not null default '{}'::jsonb check(jsonb_typeof(metadata)='object' and pg_column_size(metadata)<=16384)
 );
-alter table public.generation_quality_runs add column if not exists content_payload jsonb check(content_payload is null or jsonb_typeof(content_payload)='object');
+alter table public.generation_quality_runs add column if not exists content_payload jsonb check(content_payload is null or (jsonb_typeof(content_payload)='object' and pg_column_size(content_payload)<=262144));
 create index if not exists generation_quality_time_idx on public.generation_quality_runs(created_at desc,product,modality);
 alter table public.generation_quality_runs enable row level security;
 drop policy if exists "own generation quality select" on public.generation_quality_runs;
@@ -188,7 +188,7 @@ create table if not exists public.content_human_reviews (
   linguistically_accurate boolean,
   pedagogically_useful boolean,
   would_use_in_instruction boolean,
-  blocking_issue text,
+  blocking_issue text check(blocking_issue is null or length(blocking_issue)<=2000),
   reviewed_at timestamptz not null default now(),
   unique(generation_run_id,reviewer_id)
 );
