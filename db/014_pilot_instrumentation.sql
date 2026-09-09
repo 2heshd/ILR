@@ -8,10 +8,10 @@ create table if not exists public.learning_events (
   product text not null check (product in ('cursos','synaptx','asl')),
   event_type text not null check (event_type ~ '^[a-z][a-z0-9_]{1,63}$'),
   session_id uuid,
-  source_item_id text,
+  source_item_id text check (source_item_id is null or length(source_item_id) <= 240),
   target_language text not null default 'fa' check (target_language in ('fa','ar','ru')),
   skill text check (skill is null or skill in ('vocabulary','reading','listening','speaking','morphology','syntax','verb','lexical_structure')),
-  linguistic_concept text,
+  linguistic_concept text check (linguistic_concept is null or length(linguistic_concept) <= 240),
   problem_id uuid,
   intervention_type text,
   intervention_id text,
@@ -19,13 +19,13 @@ create table if not exists public.learning_events (
   correctness boolean,
   response_ms integer check (response_ms is null or response_ms between 0 and 3600000),
   attempt_number integer check (attempt_number is null or attempt_number between 1 and 10000),
-  supports_used text[] not null default '{}',
-  source_kind text,
-  register text,
+  supports_used text[] not null default '{}' check (cardinality(supports_used) <= 32),
+  source_kind text check (source_kind is null or length(source_kind) <= 80),
+  register text check (register is null or length(register) <= 80),
   difficulty numeric,
   course_week integer check (course_week is null or course_week between 0 and 520),
-  topic text,
-  metadata jsonb not null default '{}'::jsonb check (jsonb_typeof(metadata) = 'object'),
+  topic text check (topic is null or length(topic) <= 240),
+  metadata jsonb not null default '{}'::jsonb check (jsonb_typeof(metadata) = 'object' and pg_column_size(metadata) <= 16384),
   created_at timestamptz not null default now()
 );
 
@@ -208,7 +208,7 @@ language plpgsql security definer set search_path=public as $$
 declare saved uuid;
 begin
   if role not in ('native_speaker','instructor','linguist') or review_verdict not in ('accepted','minor_correction','major_correction','rejected') then raise exception 'Invalid review'; end if;
-  if not exists(select 1 from public.generation_quality_runs g join public.learning_class_members m on m.user_id=g.user_id join public.learning_classes c on c.id=m.class_id where g.id=run_id and c.owner_id=auth.uid() and m.consented_at is not null and m.withdrawn_at is null) then raise exception 'Review access required'; end if;
+  if not exists(select 1 from public.generation_quality_runs g join public.learning_class_members m on m.user_id=g.user_id join public.learning_classes c on c.id=m.class_id where g.id=run_id and c.owner_id=auth.uid() and m.consented_at is not null and m.withdrawn_at is null and g.created_at>=m.consented_at) then raise exception 'Review access required'; end if;
   insert into public.content_human_reviews(generation_run_id,reviewer_id,reviewer_role,verdict,language_natural,linguistically_accurate,pedagogically_useful,would_use_in_instruction,blocking_issue,reviewed_at)
   values(run_id,auth.uid(),role,review_verdict,natural,accurate,useful,usable,nullif(trim(issue),''),now())
   on conflict(generation_run_id,reviewer_id) do update set reviewer_role=excluded.reviewer_role,verdict=excluded.verdict,language_natural=excluded.language_natural,linguistically_accurate=excluded.linguistically_accurate,pedagogically_useful=excluded.pedagogically_useful,would_use_in_instruction=excluded.would_use_in_instruction,blocking_issue=excluded.blocking_issue,reviewed_at=excluded.reviewed_at
@@ -234,6 +234,7 @@ alter table public.deployment_releases enable row level security;
 drop policy if exists "authenticated release manifest read" on public.deployment_releases;
 create policy "authenticated release manifest read" on public.deployment_releases for select to authenticated using(true);
 grant select on public.deployment_releases to authenticated;
+grant select,insert,update on public.deployment_releases to service_role;
 
 create or replace function public.class_intervention_report(target uuid, days integer default 30) returns jsonb
 language plpgsql security definer set search_path=public as $$

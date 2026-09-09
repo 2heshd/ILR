@@ -28,3 +28,10 @@ test('every pilot report is bound to the consented class event set',()=>{
  assert.match(migration,/left join public\.learning_event_classes ec on ec\.class_id=target and ec\.user_id=m\.user_id/u);
  assert.match(migration,/a\.class_id=target and m\.consented_at is not null and m\.withdrawn_at is null/u);
 });
+
+test('pilot storage and review access fail closed at the database boundary',()=>{
+ assert.match(migration,/pg_column_size\(metadata\) <= 16384/u);
+ assert.match(migration,/cardinality\(supports_used\) <= 32/u);
+ assert.match(migration,/g\.created_at>=m\.consented_at/u);
+ assert.match(migration,/grant select,insert,update on public\.deployment_releases to service_role/u);
+});
