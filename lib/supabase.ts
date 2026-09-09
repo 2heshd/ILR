@@ -111,7 +111,10 @@ export function mergePlatformVocabulary(state: StudyState, sharedWords: LexicalI
 
 const syncedVocabulary = new WeakMap<SupabaseClient,Map<string,string>>();
 export async function syncPlatformVocabulary(client: SupabaseClient, user: User, words: LexicalItem[]) {
-  const rows = words.filter((word) => word.sourceType === "user").map((word) => ({
+  // Multiple local IDs can refer to the same shared word. PostgreSQL rejects
+  // an upsert that would update one conflict key twice in the same batch.
+  const uniqueWords = new Map(words.filter(word => word.sourceType === "user" && word.normalizedForm?.trim()).map(word => [word.normalizedForm, word]));
+  const rows = [...uniqueWords.values()].map((word) => ({
     user_id: user.id,
     display_form: word.displayForm,
     normalized_form: word.normalizedForm,

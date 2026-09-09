@@ -113,28 +113,22 @@ test("news vocabulary is grouped into learner-facing topics", () => {
 
 test("reading and listening generation are constrained to learner-selected vocabulary", async () => {
   const route = await readFile(new URL("../app/api/generate/route.ts", import.meta.url), "utf8");
-  assert.match(route, /Learner-selected vocabulary bank/u);
-  assert.match(route, /use ONLY vocabulary selected in the learner bank/u);
-  assert.match(route, /newWordsIntroduced must be \[\]/u);
-  assert.match(route, /treat bank entries as dictionary forms/u);
-  assert.match(route, /never use an infinitive ending in کردن, شدن, دادن, گرفتن, داشتن, or بودن as a finite sentence predicate/u);
-  assert.match(route, /selected-only vocabulary must never produce broken Persian/u);
-  assert.match(route, /never omit the copula from a nominal sentence/u);
-  assert.match(route, /check semantic roles and Persian collocations/u);
-  assert.match(route, /selectedVocabulary\.length < 8/u);
-  assert.match(route, /never force awkward repetition/u);
-  assert.match(route, /prefer a shorter, clear, idiomatic passage/u);
-  assert.match(route, /name: "persian_practice_item"/u);
-  assert.match(route, /newWordsIntroduced: \{ type: "array", maxItems: 0/u);
-  assert.match(route, /reasoning: \{ effort: isPractice \? "medium" : "none" \}/u);
-  assert.match(route, /All questions may be type detail/u);
-  assert.match(route, /Include an inference question ONLY/u);
+  assert.match(route, /AT MOST FIVE additional supporting/u);
+  assert.match(route, /data.newWordsIntroduced=supporting.words/u);
+  assert.match(route, /rejectionIssues=\[\.\.\.supporting.issues,\.\.\.practiceAnswerIssues\(data.questions\)\]/u);
+  assert.doesNotMatch(route, /data\s*=\s*verdict.exercise/u);
+  assert.match(route, /if \(rejectionIssues.length === 0\)/u);
+  assert.match(route, /newWordsIntroduced: \{ type: "array", maxItems: 5/u);
+  assert.match(route, /No inference question is required/u);
   assert.doesNotMatch(route, /one main idea, two detail, one inference/u);
   assert.match(route, /REPAIR THE PREVIOUS DRAFT/u);
   assert.match(route, /status: 422/u);
   assert.match(route, /suggestedWords: violations\.slice\(0, 8\)/u);
-  assert.match(pageSource, /if \(!state\.words\.length\)/u);
+  assert.match(pageSource, /if \(!currentState\.words\.length\)/u);
   assert.match(pageSource, /selectedContextKeys/u);
+  assert.match(pageSource, /practicePrefetchRef\.current\[kind\]/u);
+  assert.match(pageSource, /activatePreparedPractice\(kind, prepared\)/u);
+  assert.match(pageSource, /fetchBackgroundPractice\(context\)/u);
 });
 
 test("closed-vocabulary validation accepts inflections and rejects unselected content", () => {
@@ -143,7 +137,7 @@ test("closed-vocabulary validation accepts inflections and rejects unselected co
   assert.deepEqual(unselectedContentWords("دولت‌ها گزارش را اعلام کردند.", selected), []);
   assert.deepEqual(unselectedContentWords("اقتصاد کشور کاهش داشت.", selected), ["داشت"]);
   assert.deepEqual(unselectedContentWords("گزارش افزایش را نشان داد.", [...selected, "افزایش", "نشان دادن"]), []);
-  assert.deepEqual(unselectedContentWords("شرکت تولید را افزایش داد.", [...selected, "شرکت", "تولید", "افزایش", "نشان دادن"]), ["افزایش دادن"]);
+  assert.deepEqual(unselectedContentWords("شرکت تولید را افزایش داد.", [...selected, "شرکت", "تولید", "افزایش", "نشان دادن"]), ["داد"]);
 });
 
 test("shared vocabulary merges by normalized Persian form without losing review references", () => {

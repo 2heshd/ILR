@@ -31,6 +31,7 @@ import {COURSE_TOPICS,PRACTICE_TOPICS,courseTopicFor} from '@/lib/course-topics'
 import { normalizePersian, parseWeeklyInput } from "@/lib/persian";
 import { isMeaningfulPersianText, sanitizePersianSpeechText } from "@/lib/persian-speech";
 import { sourceMetrics } from "@/lib/source-analytics";
+import { LatestPracticePrefetch, loadPracticeWithRetries, practicePrefetchKey } from "@/lib/practice-prefetch";
 import { compactStudyState, readStudyState, writeStudyState } from "@/lib/storage";
 import { appendCloudReview, deletePlatformVocabulary, getSupabaseClient, loadCloudState, loadPlatformVocabulary, loadUsername, mergePlatformVocabulary, mergeStudyStates, saveCloudState, syncPlatformVocabulary, updateUsername } from "@/lib/supabase";
 import { dedupeLexicalWords, restoreCourseDefinitions } from "@/lib/word-merge";
@@ -90,6 +91,35 @@ type GradingResult = {
   answers: string[];
   grade: ComprehensionGrade;
   gradingMode: "ai" | "self";
+};
+
+type GeneratedPractice = {
+  title: string;
+  textFa: string;
+  topic: string;
+  register: string;
+  knownWordsUsed?: unknown[];
+  newWordsIntroduced?: unknown[];
+  questions?: Passage["questions"];
+};
+
+type PreparedPractice = {
+  data: GeneratedPractice;
+  targetIlr: number;
+  practiceMode: PracticeMode;
+  words: string[];
+  generatedTargets: string[];
+  generatedWordCount: number;
+  supportingWords: string[];
+};
+
+type PracticeGenerationContext = {
+  key: string;
+  kind: "reading" | "listening";
+  request: Record<string, unknown>;
+  targetIlr: number;
+  practiceMode: PracticeMode;
+  words: string[];
 };
 
 const emptyState: StudyState = {
@@ -255,14 +285,22 @@ function friendlyAccountError(error: unknown) {
 }
 
 async function generateJson(body: Record<string, unknown>) {
+  try {
   const response = await fetch("/api/generate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
+    signal: AbortSignal.timeout(100_000),
   });
-  const data = await response.json();
+  const data = await response.json().catch(() => ({error: 'The generation service did not respond. Please try again; your current practice is unchanged.'}));
   if (!response.ok) throw new Error(data.error || "Generation failed");
   return data;
+  } catch (error) {
+    if (error instanceof Error && /^(TimeoutError|AbortError)$/.test(error.name)) {
+      throw new Error('Generation took too long. Please try again; your current practice is unchanged.');
+    }
+    throw error;
+  }
 }
 
 export default function Home() {
@@ -353,6 +391,10 @@ export default function Home() {
   const speechRequestsRef = useRef(new Map<string, Promise<Blob>>());
   const speechTimingsRef = useRef(new Map<string, TimedCaption[]>());
   const speechTimingRequestsRef = useRef(new Map<string, Promise<{ audio: Blob; timings: TimedCaption[] }>>());
+  const practicePrefetchRef = useRef({
+    reading: new LatestPracticePrefetch<PreparedPractice>(),
+    listening: new LatestPracticePrefetch<PreparedPractice>(),
+  });
 
   useEffect(() => {
     if (tab !== "vocabulary" || courseCatalog.length) return;
@@ -408,6 +450,7 @@ export default function Home() {
     const request = (async () => {
       const response = await fetch("/api/speech", {
         method: "POST",
+        signal: AbortSignal.timeout(25_000),
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: sanitizePersianSpeechText(text) }),
       });
@@ -455,6 +498,7 @@ export default function Home() {
     const request = (async () => {
       const response = await fetch("/api/speech-timings", {
         method: "POST",
+        signal: AbortSignal.timeout(25_000),
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text }),
       });
@@ -631,9 +675,15 @@ export default function Home() {
     const client = getSupabaseClient();
     if (!client) return;
     const timer = window.setTimeout(() => {
-      Promise.all([saveCloudState(client, cloudUser, compactStudyState(state)), syncPlatformVocabulary(client, cloudUser, state.words)]).catch((error) => {
-        console.error(error);
-        setStatus("Cloud save failed; local history remains available.");
+      void Promise.allSettled([saveCloudState(client, cloudUser, compactStudyState(state)), syncPlatformVocabulary(client, cloudUser, state.words)]).then((results) => {
+        const failures = results.flatMap((result, index) => {
+          if (result.status === 'fulfilled') return [];
+          const code = String(result.reason?.code || 'network');
+          console.error('Cloud sync failed', {area:index === 0 ? 'history' : 'vocabulary',code});
+          return [`${index === 0 ? 'History' : 'Shared vocabulary'} sync failed (${code}).`];
+        });
+        if (failures.length) setStatus(`${failures.join(' ')} This session is unchanged; cloud sync will retry on your next change.`);
+        else setStatus(current => /^(History|Shared vocabulary) sync failed/.test(current) ? '' : current);
       });
     }, 700);
     return () => window.clearTimeout(timer);
@@ -1180,87 +1230,162 @@ export default function Home() {
     setReviewModality(mode);
   }
 
+  function practiceGenerationContext(kind: "reading" | "listening", practiceMode: PracticeMode, currentState = latestState.current): PracticeGenerationContext {
+    const planned = plannedWords(currentState, kind);
+    const words = planned.map((word) => word.displayForm);
+    const targetIlr = currentState.skillLevels[kind];
+    const knownWords = planned
+      .filter((word) => word.knowledgeState === "known" || word.knowledgeState === "automatic")
+      .map((word) => word.displayForm);
+    const wordDefinitions = planned.map((word) => ({ word: word.displayForm, meaning: word.definition || "" }));
+    const fingerprint = {
+      kind,
+      topic: practiceTopic[kind],
+      weekNumber: currentState.weekNumber,
+      targetIlr,
+      practiceMode,
+      register: practiceRegister[kind],
+      targetWords: words,
+      wordDefinitions,
+      knownWords,
+    };
+    return {
+      key: practicePrefetchKey(fingerprint),
+      kind,
+      targetIlr,
+      practiceMode,
+      words,
+      request: {
+        ...fingerprint,
+        previousTitles: (kind === "reading" ? currentState.passages : currentState.listeningItems)
+          .slice(-10)
+          .map((item) => item.title),
+      },
+    };
+  }
+
+  async function fetchPreparedPractice(context: PracticeGenerationContext, request = context.request): Promise<PreparedPractice> {
+    const data = await generateJson(request) as GeneratedPractice;
+    if (!isMeaningfulPersianText(data.textFa)) throw new Error(`The generated ${context.kind} item had no valid Persian text. Please try again.`);
+    const selectedContextKeys = new Set(context.words.map((word) => normalizePersian(word)));
+    const reportedWords = Array.isArray(data.knownWordsUsed) ? data.knownWordsUsed : context.words.slice(0, 12);
+    const reportedSelectedWords = reportedWords
+      .filter((word): word is string => typeof word === "string")
+      .filter((word) => selectedContextKeys.has(normalizePersian(word)));
+    const generatedTargets = (reportedSelectedWords.length ? reportedSelectedWords : context.words.slice(0, 12)).slice(0, 16);
+    const generatedWordCount = data.textFa.trim().split(/\s+/).filter(Boolean).length;
+    const supportingWords = Array.isArray(data.newWordsIntroduced)
+      ? data.newWordsIntroduced.filter((word): word is string => typeof word === "string")
+      : [];
+    return { data, targetIlr: context.targetIlr, practiceMode: context.practiceMode, words: context.words, generatedTargets, generatedWordCount, supportingWords };
+  }
+
+  async function fetchBackgroundPractice(context: PracticeGenerationContext, request = context.request) {
+    // Background preparation can retry rejected drafts without extending the
+    // learner's visible wait. Each attempt still passes the complete API gate.
+    return loadPracticeWithRetries(() => fetchPreparedPractice(context, request));
+  }
+
+  function activatePreparedPractice(kind: "reading" | "listening", prepared: PreparedPractice) {
+    const { data, targetIlr, practiceMode, generatedTargets, generatedWordCount, supportingWords } = prepared;
+    const unknownCount = supportingWords.length;
+    if (kind === "reading") {
+      const passage: Passage = {
+        id: id(),
+        title: data.title,
+        textFa: data.textFa,
+        ilrEstimate: targetIlr,
+        topic: data.topic,
+        register: data.register,
+        genre: practiceMode === "transfer" ? "fresh transfer" : "controlled coverage",
+        sourceType: "generated",
+        practiceMode,
+        wordCount: generatedWordCount,
+        unknownTokenRatio: generatedWordCount ? Number((unknownCount / generatedWordCount).toFixed(3)) : 0,
+        targetWords: generatedTargets,
+        supportingWords,
+        questions: data.questions ?? [],
+        createdAt: new Date().toISOString(),
+      };
+      setState((currentState) => ({ ...currentState, passages: [...currentState.passages, passage] }));
+      setActivePassageId(passage.id);
+      setReadingStartedAt(null);
+      setReadingDurationMs(0);
+      setReadingQuestionsOpen(false);
+      setSentenceGists([]);
+      setReadingUnknown(0);
+      setReadingRereads(0);
+    } else {
+      const item: ListeningItem = {
+        id: id(),
+        title: data.title,
+        transcriptFa: data.textFa,
+        ilrEstimate: targetIlr,
+        topic: data.topic,
+        register: data.register,
+        genre: practiceMode === "transfer" ? "fresh transfer" : "controlled coverage",
+        sourceType: "generated",
+        practiceMode,
+        wordCount: generatedWordCount,
+        unknownTokenRatio: generatedWordCount ? Number((unknownCount / generatedWordCount).toFixed(3)) : 0,
+        targetWords: generatedTargets,
+        supportingWords,
+        questions: data.questions ?? [],
+        createdAt: new Date().toISOString(),
+      };
+      setState((currentState) => ({ ...currentState, listeningItems: [...currentState.listeningItems, item] }));
+      setActiveListeningId(item.id);
+      setListensCount(0);
+      setListeningGists([]);
+      setGistSentenceListenCounts([]);
+      setGistAnsweredAfterListens([]);
+      setGistHintedSentenceIndexes([]);
+      setRapidCaptionListens(0);
+      setRapidCaptionWord("");
+      setTranscriptRevealStep(0);
+      void prepareSpeech(item.transcriptFa, `listening-${item.id}`).catch(() => {
+        // The device voice is the no-wait fallback if this background request fails.
+      });
+    }
+  }
+
+  function prepareNextPractice(context: PracticeGenerationContext, currentTitle: string) {
+    const previousTitles = [
+      ...((context.request.previousTitles as string[] | undefined) ?? []),
+      currentTitle,
+    ].slice(-10);
+    void practicePrefetchRef.current[context.kind].prepare(
+      context.key,
+      () => fetchBackgroundPractice(context, { ...context.request, previousTitles }),
+    );
+  }
+
   async function generatePractice(kind: "reading" | "listening", practiceMode: PracticeMode = "controlled") {
     if (generationBusy) return;
-    if (!state.words.length) {
+    const currentState = latestState.current;
+    if (!currentState.words.length) {
       setTab("vocabulary");
-      setStatus("Choose some vocabulary first. Reading and Listening only use words in your bank.");
+      setStatus("Choose some vocabulary first. Reading and Listening focus on your bank, with a few labeled supporting words when needed.");
+      return;
+    }
+    const context = practiceGenerationContext(kind, practiceMode, currentState);
+    if (!context.words.length) {
+      setStatus("Choose an active day or week plan below before generating practice.");
+      return;
+    }
+    if (context.words.length > 250) {
+      setStatus("Use up to 250 words per generation plan. Split larger selections into focused sessions.");
       return;
     }
     setGenerationBusy(kind);
     setStatus(`Generating ${practiceMode === "transfer" ? "fresh transfer" : "controlled"} ${kind}…`);
     try {
-      const words = plannedWords(state,kind).map(word=>word.displayForm);
-      if(!words.length)throw new Error("Choose an active day or week plan below before generating practice.");
-      if(words.length>250)throw new Error("Use up to 250 words per generation plan. Split larger selections into focused sessions.");
-      const targetIlr = state.skillLevels[kind];
-      const knownWords=plannedWords(state,kind).filter(word=>word.knowledgeState==='known'||word.knowledgeState==='automatic').map(word=>word.displayForm);
-      const data = await generateJson({ kind, topic:practiceTopic[kind], previousTitles:(kind==='reading'?state.passages:state.listeningItems).slice(-10).map(item=>item.title), weekNumber: state.weekNumber, targetWords: words, knownWords, targetIlr, practiceMode, register:practiceRegister[kind] });
-      if (!isMeaningfulPersianText(data.textFa)) throw new Error(`The generated ${kind} item had no valid Persian text. Please try again.`);
-      const selectedContextKeys = new Set(words.map((word) => normalizePersian(word)));
-      const reportedWords: unknown[] = Array.isArray(data.knownWordsUsed) ? data.knownWordsUsed : words.slice(0, 12);
-      const reportedSelectedWords = reportedWords
-        .filter((word): word is string => typeof word === "string")
-        .filter((word) => selectedContextKeys.has(normalizePersian(word)));
-      const generatedTargets = (reportedSelectedWords.length ? reportedSelectedWords : words.slice(0, 12)).slice(0, 16);
-      const generatedWordCount = data.textFa.trim().split(/\s+/).filter(Boolean).length;
-      const unknownCount = 0;
-      if (kind === "reading") {
-        const passage: Passage = {
-          id: id(),
-          title: data.title,
-          textFa: data.textFa,
-          ilrEstimate: targetIlr,
-          topic: data.topic,
-          register: data.register,
-          genre: practiceMode === "transfer" ? "fresh transfer" : "controlled coverage",
-          sourceType: "generated",
-          practiceMode,
-          wordCount: generatedWordCount,
-          unknownTokenRatio: generatedWordCount ? Number((unknownCount / generatedWordCount).toFixed(3)) : 0,
-          targetWords: generatedTargets,
-          questions: data.questions ?? [],
-          createdAt: new Date().toISOString(),
-        };
-        setState((currentState) => ({ ...currentState, passages: [...currentState.passages, passage] }));
-        setActivePassageId(passage.id);
-        setReadingStartedAt(null);
-        setReadingDurationMs(0);
-        setReadingQuestionsOpen(false);
-        setSentenceGists([]);
-        setReadingUnknown(0);
-        setReadingRereads(0);
-      } else {
-        const item: ListeningItem = {
-          id: id(),
-          title: data.title,
-          transcriptFa: data.textFa,
-          ilrEstimate: targetIlr,
-          topic: data.topic,
-          register: data.register,
-          genre: practiceMode === "transfer" ? "fresh transfer" : "controlled coverage",
-          sourceType: "generated",
-          practiceMode,
-          wordCount: generatedWordCount,
-          unknownTokenRatio: generatedWordCount ? Number((unknownCount / generatedWordCount).toFixed(3)) : 0,
-          targetWords: generatedTargets,
-          questions: data.questions ?? [],
-          createdAt: new Date().toISOString(),
-        };
-        setState((currentState) => ({ ...currentState, listeningItems: [...currentState.listeningItems, item] }));
-        setActiveListeningId(item.id);
-        setListensCount(0);
-        setListeningGists([]);
-        setGistSentenceListenCounts([]);
-        setGistAnsweredAfterListens([]);
-        setGistHintedSentenceIndexes([]);
-        setRapidCaptionListens(0);
-        setRapidCaptionWord("");
-        setTranscriptRevealStep(0);
-        void prepareSpeech(item.transcriptFa, `listening-${item.id}`).catch(() => {
-          // The device voice is the no-wait fallback if this background request fails.
-        });
-      }
+      const cache = practicePrefetchRef.current[kind];
+      let prepared = cache.take(context.key);
+      if (!prepared) prepared = await cache.waitAndTake(context.key);
+      if (!prepared) prepared = await fetchPreparedPractice(context);
+      activatePreparedPractice(kind, prepared);
+      prepareNextPractice(context, prepared.data.title);
       setStatus(`${practiceMode === "transfer" ? "Fresh transfer" : "Controlled coverage"} ${kind} ready.`);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Generation failed.");
@@ -1268,6 +1393,19 @@ export default function Home() {
       setGenerationBusy(null);
     }
   }
+
+  useEffect(() => {
+    if (!loaded || generationBusy || (tab !== "reading" && tab !== "listening")) return;
+    const kind = tab;
+    const currentState = latestState.current;
+    if (!currentState.words.length) return;
+    const context = practiceGenerationContext(kind, "controlled", currentState);
+    if (!context.words.length || context.words.length > 250) return;
+    void practicePrefetchRef.current[kind].prepare(
+      context.key,
+      () => fetchBackgroundPractice(context),
+    );
+  }, [loaded, tab, generationBusy, practiceTopic, practiceRegister, state.weekNumber, state.skillLevels, state.words, state.studyPlans]);
 
   function finishReading() {
     if (!readingStartedAt) return;
@@ -1931,7 +2069,7 @@ export default function Home() {
       <div className="card span-12 lab-header"><div><h2>Reading</h2><span className="muted">Use the same report for reading, listening, and speaking transfer.</span></div><div className="row"><button disabled={Boolean(generationBusy)} onClick={()=>{if((readingStartedAt||readingQuestionsOpen)&&!window.confirm("Generate a new passage? Unsaved answers for this passage will be replaced."))return;void generatePractice("reading");}}>{generationBusy==="reading"?"Generating…":"Generate new"}</button><label className="lab-select"><span>Topic</span><select aria-label="reading topic" value={practiceTopic.reading} disabled={Boolean(generationBusy)} onChange={event=>setPracticeTopic(current=>({...current,reading:event.target.value}))}>{PRACTICE_TOPICS.map(topic=><option key={topic}>{topic}</option>)}</select></label><details className="lab-select"><summary>Exercise history</summary><label className="lab-select"><span>Open a previous exercise</span><select aria-label="Choose reading report" value={latestPassage?.id ?? ""} disabled={Boolean(readingStartedAt || readingQuestionsOpen)} onChange={(event) => resetReadingLab(event.target.value)}>{state.passages.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label></details><label className="lab-select"><span>Practice mode</span><select aria-label="Reading practice mode" value={readingMode} disabled={Boolean(readingStartedAt || readingQuestionsOpen)} onChange={event=>changeReadingMode(event.target.value as "full"|"inference")}><option value="full">Full text</option><option value="inference">Inference</option></select></label>{latestPassage && <><a className="secondary button-link" href={`/print/reading/${latestPassage.id}`} target="_blank" rel="noreferrer">Print report</a></>}</div></div>
       {latestPassage ? <>
         <div className="card span-7">
-          <div className="row spread"><div><div className="muted">ILR ~{latestPassage.ilrEstimate} · {latestPassage.topic} · {latestPassage.genre} · {latestPassage.register}</div><h2>{latestPassage.title}</h2><SourceLine item={latestPassage} /></div>{!readingStartedAt && !readingQuestionsOpen && <button className="primary" onClick={() => { setReadingStartedAt(Date.now()); setReadingDurationMs(0); }}>1 · Start reading</button>}</div>
+          <div className="row spread"><div><div className="muted">ILR ~{latestPassage.ilrEstimate} · {latestPassage.topic} · {latestPassage.genre} · {latestPassage.register}</div><h2>{latestPassage.title}</h2><SourceLine item={latestPassage} />{!!latestPassage.supportingWords?.length && <p className="muted">Includes {latestPassage.supportingWords.length} supporting words beyond your selected bank.</p>}</div>{!readingStartedAt && !readingQuestionsOpen && <button className="primary" onClick={() => { setReadingStartedAt(Date.now()); setReadingDurationMs(0); }}>1 · Start reading</button>}</div>
           {!readingQuestionsOpen && (readingMode === "inference" ? <InferenceReadingText text={latestPassage.textFa} words={state.words} targetWords={latestPassage.targetWords} gists={sentenceGists} onGistsChange={setSentenceGists} disabled={!readingStartedAt} /> : <InteractivePersianText text={latestPassage.textFa} words={state.words} onStatus={setWordKnowledge} disabled={!readingStartedAt} className={readingStartedAt ? "fa passage" : "fa passage blurred"} />)}
           {readingMode === "full" && !!latestPassage.targetWords.length && <div className="target-strip"><span className="muted">Extracted targets</span>{latestPassage.targetWords.map((word) => <span className="pill fa-inline" key={word}>{word}</span>)}</div>}
           {readingStartedAt && !readingQuestionsOpen && <div className="row"><button className="primary" disabled={!inferenceReady} onClick={finishReading}>2 · Answer questions →</button>{readingMode === "inference" && !inferenceReady && <span className="muted">Capture the gist of each sentence first.</span>}<label>Unknown words <input className="small-input" type="number" min="0" value={readingUnknown} onChange={(event) => setReadingUnknown(Number(event.target.value))}/></label><label>Rereads <input className="small-input" type="number" min="0" value={readingRereads} onChange={(event) => setReadingRereads(Number(event.target.value))}/></label></div>}
@@ -1957,7 +2095,7 @@ export default function Home() {
       <div className="card span-12 lab-header"><div><h2>Listening</h2><span className="muted">Full tests the report. Gist isolates meaning. Rapid Captions connects sound to Persian words.</span></div><div className="row"><button disabled={Boolean(generationBusy || audioBusy)} onClick={()=>void generatePractice("listening")}>{generationBusy==="listening"?"Generating…":"Generate new"}</button><label className="lab-select"><span>Topic</span><select aria-label="listening topic" value={practiceTopic.listening} disabled={Boolean(generationBusy)} onChange={event=>setPracticeTopic(current=>({...current,listening:event.target.value}))}>{PRACTICE_TOPICS.map(topic=><option key={topic}>{topic}</option>)}</select></label><details className="lab-select"><summary>Exercise history</summary><label className="lab-select"><span>Open a previous exercise</span><select aria-label="Choose listening report" value={latestListening?.id ?? ""} onChange={(event) => resetListeningLab(event.target.value)}>{state.listeningItems.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label></details><label className="lab-select"><span>Practice mode</span><select aria-label="Listening practice mode" value={listeningMode} onChange={event=>changeListeningMode(event.target.value as "full"|"gist"|"rapid")}><option value="full">Full audio</option><option value="gist">Gist</option><option value="rapid">Rapid captions</option></select></label>{latestListening && <><a className="secondary button-link" href={`/print/listening/${latestListening.id}`} target="_blank" rel="noreferrer">Print transcript</a></>}</div></div>
       {latestListening ? <>
         <div className="card span-7">
-          <div className="muted">ILR ~{latestListening.ilrEstimate} · {latestListening.topic} · {latestListening.genre} · {latestListening.register}</div><h2>{latestListening.title}</h2><SourceLine item={latestListening} />
+          <div className="muted">ILR ~{latestListening.ilrEstimate} · {latestListening.topic} · {latestListening.genre} · {latestListening.register}</div><h2>{latestListening.title}</h2><SourceLine item={latestListening} />{!!latestListening.supportingWords?.length && <p className="muted">Includes {latestListening.supportingWords.length} supporting words beyond your selected bank.</p>}
           {listeningMode === "gist" ? <GistListening sentences={gistListeningSentences} words={state.words} gists={listeningGists} listenCounts={gistSentenceListenCounts} hintedSentenceIndexes={gistHintedSentenceIndexes} busy={audioBusy} onPlay={(index) => void playGistSentence(index)} onGistChange={updateListeningGist} onHint={(index) => setGistHintedSentenceIndexes((current) => [...new Set([...current, index])])} /> : listeningMode === "rapid" ? <RapidCaptions currentWord={rapidCaptionWord} captionListens={rapidCaptionListens} playing={rapidPlaying} preparing={audioBusy} onPlay={() => void playRapidListening()} onExit={() => changeListeningMode("full")} /> : <>
             <div className="audio-stage"><button className="primary big-button" disabled={audioBusy} onClick={playListening}>{audioBusy ? "Starting…" : "▶ Play Persian audio"}</button><span className="muted">listens: {listensCount}</span></div>
             {transcriptVisible && listeningReveal ? <InteractivePersianText text={listeningReveal.text} words={state.words} onStatus={setWordKnowledge} className="fa passage progressive-transcript" /> : <div className="transcript-hidden">Transcript hidden</div>}

@@ -124,6 +124,7 @@ export type Passage = {
   publishedAt?: string;
   wordCount?: number;
   unknownTokenRatio?: number;
+  supportingWords?: string[];
   culturalTags?: string[];
   targetWords: string[];
   questions: PassageQuestion[];
@@ -170,6 +171,7 @@ export type ListeningItem = {
   audioDurationSec?: number;
   wordCount?: number;
   unknownTokenRatio?: number;
+  supportingWords?: string[];
   culturalTags?: string[];
   targetWords: string[];
   questions: PassageQuestion[];

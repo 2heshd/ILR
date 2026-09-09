@@ -1,5 +1,5 @@
 import OpenAI, { toFile } from "openai";
-import { captionsCoverText } from '@/lib/caption-integrity';
+import { captionsCoverText, reconcileCaptionSpellings } from '@/lib/caption-integrity';
 import { openAiErrorResponse } from "@/lib/openai-error";
 import { isPlayablePersianText, sanitizePersianSpeechText } from "@/lib/persian-speech";
 
@@ -15,9 +15,11 @@ export async function POST(request: Request) {
     return Response.json({ error: "A valid Persian transcript is required." }, { status: 400 });
   }
   const speechText = sanitizePersianSpeechText(text);
+  // One deadline spans narration AND alignment, not a new allowance per call.
+  const signal = AbortSignal.any([request.signal, AbortSignal.timeout(20_000)]);
 
   try {
-    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, timeout: 20_000, maxRetries: 0 });
     const speech = await client.audio.speech.create({
       model: process.env.OPENAI_TTS_MODEL || "gpt-4o-mini-tts",
       voice: process.env.OPENAI_TTS_VOICE || "marin",
@@ -25,7 +27,7 @@ export async function POST(request: Request) {
       instructions: "Read only the supplied Persian text. Speak in natural educated Iranian Persian at a clear, slightly slower-than-normal broadcast pace for an intermediate learner. Keep natural phrasing and rhythm. Never describe punctuation, translate the text, or add commentary.",
       speed: 0.88,
       response_format: "mp3",
-    });
+    }, { signal });
     const audioBuffer = Buffer.from(await speech.arrayBuffer());
     const transcription = await client.audio.transcriptions.create({
       file: await toFile(audioBuffer, "persian-speech.mp3", { type: "audio/mpeg" }),
@@ -35,14 +37,16 @@ export async function POST(request: Request) {
       response_format: "verbose_json",
       timestamp_granularities: ["word"],
       temperature: 0,
-    });
+    }, { signal });
 
-    const words = (transcription.words ?? [])
+    const words = reconcileCaptionSpellings(speechText, (transcription.words ?? [])
       .map(({ word, start, end }) => ({ word: word.trim(), start, end }))
-      .filter(({ word, start, end }) => word && Number.isFinite(start) && Number.isFinite(end) && end >= start);
+      .filter(({ word, start, end }) => word && Number.isFinite(start) && Number.isFinite(end) && end >= start));
 
     if (!captionsCoverText(speechText,words)) {
-      return Response.json({ error: "The captions did not match the complete transcript. Please retry, or use Full audio." }, { status: 422 });
+      return Response.json({ error: "The captions did not match the complete transcript. Please retry, or use Full audio.",
+        ...(process.env.VERCEL_ENV === 'preview' && process.env.PRACTICE_AUDIT === '1' ? {expected:speechText,words} : {}),
+      }, { status: 422 });
     }
 
     // Keep the audio binary. Base64 makes an already-large narration roughly 33%
@@ -65,6 +69,9 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
+    if (signal.aborted || error instanceof OpenAI.APIConnectionTimeoutError) {
+      return Response.json({ error: "Audio alignment took too long. Your practice is unchanged; retry or use Full audio." }, { status: 504 });
+    }
     console.error(error);
     return openAiErrorResponse(error, "Word alignment failed.");
   }
