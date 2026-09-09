@@ -137,6 +137,7 @@ ${body.register === 'colloquial'
   : 'Keep the entire passage in standard written Persian. Do not use colloquial forms such as توی, رو as an object marker, یه, اینا, اونا, می‌خوام, or spoken plural verb endings.'}
 Return exactly three distinct English questions about explicit facts in the passage, with concise English reference answers preserving tense, person and meaning. Do not invent gender or unstated motives. No inference question is required; use inference only when concrete clues support it.
 Use explicit participant roles (the student, the father, the speaker) or singular they in answers. Never use he, she, his, her or him. Avoid direct speech unless its person and imperative endings are correct.
+The participant label in each English question and answer must match the Persian passage exactly. If textFa uses first-person من or an omitted first-person subject, call that person "the speaker"—never invent "the student," "the traveler," or another role.
 Count the additional dictionary entries before finishing; do not introduce a dialogue that needs many extra reporting verbs. A simple coherent description with three concrete details is enough for a narrow bank.
 knownWordsUsed must contain only original selected bank entries actually used. newWordsIntroduced contains additional supporting words, not newly mastered vocabulary.
 English title, English questions and English reference answers; only textFa is Persian. Silently check grammar, collocations, coherence and question evidence before returning.`;
@@ -172,6 +173,8 @@ English title, English questions and English reference answers; only textFa is P
       prompt,
       `${prompt}\nINDEPENDENT CANDIDATE A: Choose a different compatible subset and situation. Do not imitate or revise another draft.`,
       `${prompt}\nINDEPENDENT CANDIDATE B: Prefer the simplest idiomatic description the bank supports. Use copular sentences when natural, avoid unnecessary reporting verbs and time adverbs, and verify the five-item supporting allowance token by token.`,
+      `${prompt}\nINDEPENDENT CANDIDATE C: Use one clearly named participant or the speaker throughout. Before returning, compare every English question subject word-for-word with the participant stated in textFa. Prefer three plain declarative facts over narrative transitions.`,
+      `${prompt}\nINDEPENDENT CANDIDATE D: Start by selecting the smallest idiomatic cluster in the bank. Write a compact factual description with conventional Persian roles and collocations; never treat the name of an institution, service, or field as a person. Recount every supporting content lemma before returning.`,
     ];
     type CandidateResult = {data: Record<string, any>; issues: string[]; rejectedWords: string[]};
     const evaluateCandidate = async (candidatePrompt: string, index: number): Promise<CandidateResult> => {
