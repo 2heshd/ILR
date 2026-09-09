@@ -158,8 +158,12 @@ English title, English questions and English reference answers; only textFa is P
     // fails either deterministic or editorial QA, using the already-running
     // candidate is both faster and less likely to preserve the same defect than
     // asking it to REPAIR THE PREVIOUS DRAFT in place.
-    const backupResponse = isPractice ? generate(`${prompt}\nINDEPENDENT CANDIDATE: Choose a different compatible subset and situation. Do not imitate or revise another draft.`, true) : null;
-    let response = await generate(prompt);
+    const candidateResponses = isPractice ? [
+      generate(prompt),
+      generate(`${prompt}\nINDEPENDENT CANDIDATE A: Choose a different compatible subset and situation. Do not imitate or revise another draft.`, true),
+      generate(`${prompt}\nINDEPENDENT CANDIDATE B: Prefer the simplest idiomatic description the bank supports. Avoid vague or incomplete noun phrases.`, true),
+    ] : [generate(prompt)];
+    let response = await candidateResponses[0];
     let data = parseJson(response.output_text);
 
     if (isPractice) {
@@ -168,7 +172,7 @@ English title, English questions and English reference answers; only textFa is P
       let approved = false;
       let rejectionIssues: string[] = [];
       let rejectedWords: string[] = [];
-      for (let attempt = 0; attempt < 2; attempt++) {
+      for (let attempt = 0; attempt < candidateResponses.length; attempt++) {
         data.questions=repairPracticeAnswerArticles(data.questions);
         const supporting=practiceSource === 'selected'
           ? checkSupportingVocabulary(String(data.textFa??''),selectedVocabulary,data.newWordsIntroduced)
@@ -194,8 +198,8 @@ English title, English questions and English reference answers; only textFa is P
         if(verdict.approved === true && Array.isArray(verdict.issues) && rejectionIssues.length===0){approved=true;break;}
         if (!rejectionIssues.length) rejectionIssues.push('The language reviewer did not approve this exact exercise.');
         }
-        if(attempt<1){
-          response=await backupResponse!;
+        if(attempt<candidateResponses.length-1){
+          response=await candidateResponses[attempt+1];
           data=parseJson(response.output_text);
         }
       }
