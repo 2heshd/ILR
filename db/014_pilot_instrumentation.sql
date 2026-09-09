@@ -105,20 +105,6 @@ end $$;
 revoke all on function public.join_learning_class(text,text) from public,anon;
 grant execute on function public.join_learning_class(text,text) to authenticated;
 
-create or replace function public.withdraw_from_learning_class(target uuid) returns void
-language plpgsql security definer set search_path=public as $$
-begin
-  if not exists(select 1 from public.learning_class_members where class_id=target and user_id=auth.uid() and withdrawn_at is null) then
-    raise exception 'Active membership not found';
-  end if;
-  delete from public.learning_event_classes where class_id=target and user_id=auth.uid();
-  delete from public.pilot_assessments where class_id=target and user_id=auth.uid();
-  delete from public.learning_class_members where class_id=target and user_id=auth.uid();
-  if not found then raise exception 'Active membership not found'; end if;
-end $$;
-revoke all on function public.withdraw_from_learning_class(uuid) from public,anon;
-grant execute on function public.withdraw_from_learning_class(uuid) to authenticated;
-
 create table if not exists public.pilot_assessments (
   id uuid primary key default gen_random_uuid(),
   class_id uuid not null references public.learning_classes(id) on delete cascade,
@@ -132,6 +118,20 @@ alter table public.pilot_assessments enable row level security;
 drop policy if exists "learner reads own pilot assessments" on public.pilot_assessments;
 create policy "learner reads own pilot assessments" on public.pilot_assessments for select to authenticated using(auth.uid()=user_id);
 grant select on public.pilot_assessments to authenticated;
+
+create or replace function public.withdraw_from_learning_class(target uuid) returns void
+language plpgsql security definer set search_path=public as $$
+begin
+  if not exists(select 1 from public.learning_class_members where class_id=target and user_id=auth.uid() and withdrawn_at is null) then
+    raise exception 'Active membership not found';
+  end if;
+  delete from public.learning_event_classes where class_id=target and user_id=auth.uid();
+  delete from public.pilot_assessments where class_id=target and user_id=auth.uid();
+  delete from public.learning_class_members where class_id=target and user_id=auth.uid();
+  if not found then raise exception 'Active membership not found'; end if;
+end $$;
+revoke all on function public.withdraw_from_learning_class(uuid) from public,anon;
+grant execute on function public.withdraw_from_learning_class(uuid) to authenticated;
 
 create table if not exists public.generation_quality_runs (
   id uuid primary key default gen_random_uuid(),
