@@ -83,6 +83,9 @@ begin
   on conflict do nothing;
   return new;
 end $$;
+revoke all on function public.attach_learning_event_classes() from public,anon,authenticated;
+-- Both helpers are invoked by database triggers, never directly through the API.
+revoke all on function public.handle_new_user() from public,anon,authenticated;
 drop trigger if exists attach_learning_event_classes_after_insert on public.learning_events;
 create trigger attach_learning_event_classes_after_insert after insert on public.learning_events for each row execute function public.attach_learning_event_classes();
 insert into public.learning_event_classes(event_id,class_id,user_id)
