@@ -338,6 +338,24 @@ $$;
 revoke all on function public.my_learning_event_export() from public,anon;
 grant execute on function public.my_learning_event_export() to authenticated;
 
+create or replace function public.class_pilot_event_export(target uuid) returns jsonb
+language plpgsql security definer set search_path=public as $$
+declare report jsonb;
+begin
+  if not exists(select 1 from public.learning_classes where id=target and owner_id=auth.uid()) then raise exception 'Class owner access required'; end if;
+  select coalesce(jsonb_agg(row_to_json(x) order by x.occurred_at,x.event_id),'[]'::jsonb) into report from (
+    select m.participant_code,e.id event_id,e.occurred_at,e.product,e.event_type,e.target_language,e.skill,e.linguistic_concept,
+      e.intervention_type,e.intervention_id,e.related_event_id,e.correctness,e.response_ms,e.attempt_number,e.supports_used,
+      e.source_kind,e.register,e.difficulty,e.course_week,e.topic
+    from public.learning_events e join public.learning_event_classes ec on ec.event_id=e.id and ec.class_id=target
+    join public.learning_class_members m on m.class_id=target and m.user_id=e.user_id
+    where m.consented_at is not null and m.withdrawn_at is null
+  ) x;
+  return report;
+end $$;
+revoke all on function public.class_pilot_event_export(uuid) from public,anon;
+grant execute on function public.class_pilot_event_export(uuid) to authenticated;
+
 create or replace function public.purge_expired_pilot_class_data() returns integer
 language plpgsql security definer set search_path=public as $$
 declare removed integer;

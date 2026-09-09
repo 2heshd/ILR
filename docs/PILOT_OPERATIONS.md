@@ -4,7 +4,7 @@
 
 1. The pilot owner creates one class with its language, course label, start/end dates, and retention period.
 2. The institution approves the consent language and assigns aliases. The product generates a participant code; email addresses are never included in research exports.
-3. Learners join with the private code and explicit consent. Leaving deletes the membership, stops future classroom reporting, and removes that learner from subsequent aggregates.
+3. Learners join with the private code and explicit consent. Withdrawal timestamps the membership, stops future event attachment, and removes that learner from subsequent reports. The separate deletion action removes the learner's pilot events, quality records, and snapshots.
 4. The owner captures a baseline before normal use, a midpoint on the planned date, and an endline before closing access.
 
 ## Data dictionary
@@ -18,7 +18,7 @@
 ## Access, retention, deletion, and export
 
 - Row-level security limits learners to their own learning events. Classroom owners receive only consented-member aggregates through owner-checked functions.
-- The anonymized pilot export uses participant codes. The ordinary weekly teaching report may show the learner-approved class display name and must stay with authorized teaching staff.
+- Aggregate and raw-event pilot exports use participant codes. The raw export omits names, emails, answers, passages, notes, and free-form metadata. The ordinary weekly teaching report may show the learner-approved class display name and must stay with authorized teaching staff.
 - Account deletion cascades learning events and generated QA records through the authentication user ID. Leaving a class deletes membership and stops future sharing. A pilot owner must delete or export-and-destroy pilot data at the configured retention date.
 - Do not paste controlled, classified, medical, legal, operational, or personally identifying text into generated-practice or analysis fields unless the institution has approved that use.
 
