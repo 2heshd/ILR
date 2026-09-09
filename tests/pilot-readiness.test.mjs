@@ -10,6 +10,7 @@ const databaseSmoke=readFileSync(new URL('../scripts/pilot-db-smoke.sql',import.
 test('pilot schema covers consent, intervention, assessments, QA, review, and releases',()=>{
  for(const name of ['learning_events','learning_event_classes','generation_quality_runs','content_human_reviews','deployment_releases','class_intervention_report','class_pilot_event_report','class_pilot_event_export','capture_class_pilot_assessment','content_review_queue','withdraw_from_learning_class','delete_my_pilot_data','purge_expired_pilot_class_data'])assert.match(migration,new RegExp(name));
  assert.match(migration,/consented_at is not null/u);assert.match(migration,/withdrawn_at is null/u);
+ assert.match(migration,/begin;[\s\S]*commit;\s*$/u);
 });
 
 test('suite soak fails closed and reports latency percentiles',()=>{

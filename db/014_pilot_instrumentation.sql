@@ -1,6 +1,8 @@
 -- Shared pilot instrumentation for Cursos, SynaptX, and Aṣl.
 -- Apply after 013_classroom_owner_only.sql.
 
+begin;
+
 create table if not exists public.learning_events (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade default auth.uid(),
@@ -370,3 +372,5 @@ begin
 end $$;
 revoke all on function public.purge_expired_pilot_class_data() from public,anon,authenticated;
 grant execute on function public.purge_expired_pilot_class_data() to service_role;
+
+commit;
