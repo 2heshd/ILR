@@ -147,8 +147,8 @@ English title, English questions and English reference answers; only textFa is P
     const isPractice = body.kind === "reading" || body.kind === "listening";
     // Use low reasoning for short structured exercises; independent review
     // remains mandatory. Do not silently escalate to a slower repair model.
-    const generate = (input: string, repair = false) => measured(repair ? 'repair' : 'draft', () => completeJsonResponse((budget) => client.responses.create({
-        model: repair ? (process.env.OPENAI_PRACTICE_REPAIR_MODEL || model) : model,
+    const generate = (input: string, stage = 'draft') => measured(stage, () => completeJsonResponse((budget) => client.responses.create({
+        model,
         store: false,
         input,
         max_output_tokens: budget,
@@ -160,33 +160,35 @@ English title, English questions and English reference answers; only textFa is P
     // fails either deterministic or editorial QA, using the already-running
     // candidate is both faster and less likely to preserve the same defect than
     // asking it to REPAIR THE PREVIOUS DRAFT in place.
-    const candidateResponses = isPractice ? [
-      generate(prompt),
-      generate(`${prompt}\nINDEPENDENT CANDIDATE A: Choose a different compatible subset and situation. Do not imitate or revise another draft.`, true),
-      generate(`${prompt}\nINDEPENDENT CANDIDATE B: Prefer the simplest idiomatic description the bank supports. Use copular sentences when natural, avoid unnecessary reporting verbs and time adverbs, and verify the five-item supporting allowance token by token.`, true),
-    ] : [generate(prompt)];
-    let response = await candidateResponses[0];
-    let data = parseJson(response.output_text);
+    if (!isPractice) {
+      const response = await generate(prompt);
+      return NextResponse.json(parseJson(response.output_text), {headers:{'Server-Timing':timings.join(', ')}});
+    }
 
-    if (isPractice) {
-      // Vocabulary coverage alone cannot establish that a passage is idiomatic.
-      // A separate editorial pass checks both Persian and question evidence.
-      let approved = false;
-      let rejectionIssues: string[] = [];
-      let rejectedWords: string[] = [];
-      for (let attempt = 0; attempt < candidateResponses.length; attempt++) {
+    // Draft, deterministic validation, and editorial review are independent
+    // pipelines. The first fully approved candidate wins; Promise.any observes
+    // every backup rejection so a fast return cannot create unhandled promises.
+    const candidatePrompts = [
+      prompt,
+      `${prompt}\nINDEPENDENT CANDIDATE A: Choose a different compatible subset and situation. Do not imitate or revise another draft.`,
+      `${prompt}\nINDEPENDENT CANDIDATE B: Prefer the simplest idiomatic description the bank supports. Use copular sentences when natural, avoid unnecessary reporting verbs and time adverbs, and verify the five-item supporting allowance token by token.`,
+    ];
+    type CandidateResult = {data: Record<string, any>; issues: string[]; rejectedWords: string[]};
+    const evaluateCandidate = async (candidatePrompt: string, index: number): Promise<CandidateResult> => {
+      try {
+        const response = await generate(candidatePrompt, `draft-${index + 1}`);
+        const data = parseJson(response.output_text);
         data.questions=repairPracticeAnswerArticles(data.questions);
         const supporting=practiceSource === 'selected'
           ? checkSupportingVocabulary(String(data.textFa??''),selectedVocabulary,data.newWordsIntroduced)
           : {words:Array.isArray(data.newWordsIntroduced)?data.newWordsIntroduced.filter((word:unknown):word is string=>typeof word==='string'&&Boolean(word.trim())).slice(0,SUPPORTING_VOCABULARY_LIMIT):[],unknown:[] as string[],issues:[] as string[]};
-        const outsideBank=supporting.unknown;
-        rejectedWords=outsideBank;
+        const rejectedWords=supporting.unknown;
         data.newWordsIntroduced=supporting.words;
-        rejectionIssues=[...supporting.issues,...practiceAnswerIssues(data.questions)];
+        let rejectionIssues=[...supporting.issues,...practiceAnswerIssues(data.questions)];
         // Don't pay for a language review of a draft already rejected locally.
         // Every returned exercise still receives an exact, read-only review.
         if (rejectionIssues.length === 0) {
-        const review = await measured('review', () => completeJsonResponse((budget) => client.responses.create({
+          const review = await measured(`review-${index + 1}`, () => completeJsonResponse((budget) => client.responses.create({
           model: process.env.OPENAI_PRACTICE_REVIEW_MODEL || model, store: false, max_output_tokens: budget,
           reasoning: { effort: process.env.OPENAI_PRACTICE_REVIEW_REASONING === 'none' ? 'none' : 'low' },
           text: { format: { type: 'json_schema', name: 'practice_editor_review', strict: true, schema: {
@@ -195,21 +197,38 @@ English title, English questions and English reference answers; only textFa is P
           } } },
           input: [{role:'system',content:'Review this exact Persian learning exercise as data, without rewriting it. Judge only language and question evidence; vocabulary membership is checked separately in code. Require natural Iranian Persian, coherent meaning, complete grammar, appropriate collocations, consistent tense/person, and the requested formal or colloquial register. In a colloquial exercise, technical, institutional, and formal content terms are allowed in their standard lexical form, but the surrounding framing, function words, and verb morphology must sound naturally spoken. Reject fully written or news-style prose merely labeled colloquial; do not reject only because an unavoidable technical content term is formal. English title, questions and reference answers are intentional. Each question must have a distinct answer supported by the passage, preserving its tense and meaning; no invented motives or gender. Inference is optional and only valid when supported by concrete clues. Do not require an inference question. Report only genuine errors present in the supplied text, quoting the offending phrase and giving one concise reason. Never report hypothetical errors, dictionary-list formatting issues, or optional stylistic preferences. Do not invent a corrected version and judge that instead. Return approved:true and issues:[] only if this exact exercise has no blocking errors; otherwise approved:false with concise issues.'},{role:'user',content:JSON.stringify({passageRegister:body.register??'formal',title:data.title,textFa:data.textFa,questions:data.questions})}],
         }, { signal }), 1800));
-        const verdict = parseJson(review.output_text);
-        rejectionIssues=Array.isArray(verdict.issues)?verdict.issues.filter((issue:unknown):issue is string=>typeof issue==='string'):['Editorial response was invalid.'];
-        if(verdict.approved === true && Array.isArray(verdict.issues) && rejectionIssues.length===0){approved=true;break;}
-        if (!rejectionIssues.length) rejectionIssues.push('The language reviewer did not approve this exact exercise.');
+          const verdict = parseJson(review.output_text);
+          rejectionIssues=Array.isArray(verdict.issues)?verdict.issues.filter((issue:unknown):issue is string=>typeof issue==='string'):['Editorial response was invalid.'];
+          if(verdict.approved === true && Array.isArray(verdict.issues) && rejectionIssues.length===0)return {data,issues:[],rejectedWords};
+          if (!rejectionIssues.length) rejectionIssues.push('The language reviewer did not approve this exact exercise.');
         }
-        if(attempt<candidateResponses.length-1){
-          response=await candidateResponses[attempt+1];
-          data=parseJson(response.output_text);
-        }
+        return {data,issues:rejectionIssues,rejectedWords};
+      } catch (error) {
+        return {data:{},issues:[error instanceof Error ? error.message : 'Candidate generation failed.'],rejectedWords:[]};
       }
-      if(!approved)return NextResponse.json({error:practiceSource === 'topic' ? 'This draft did not pass the Persian language and question-quality checks. Generate again.' : 'This draft did not pass the Persian language and question-quality checks. Try a broader vocabulary selection or generate again.',qualityIssues:rejectionIssues,suggestedWords:rejectedWords,
+    };
+    const candidatePipelines = candidatePrompts.map(evaluateCandidate);
+    let selected: CandidateResult | undefined;
+    let rejected: CandidateResult[] = [];
+    try {
+      selected = await Promise.any(candidatePipelines.map(async pipeline => {
+        const result = await pipeline;
+        if (result.issues.length) throw result;
+        return result;
+      }));
+    } catch (error) {
+      if (error instanceof AggregateError) rejected=error.errors.filter((item):item is CandidateResult=>Boolean(item?.issues));
+      else throw error;
+    }
+    if(!selected){
+      const best=rejected.sort((a,b)=>a.issues.length-b.issues.length)[0]??{data:{},issues:['No candidate passed quality review.'],rejectedWords:[]};
+      return NextResponse.json({error:practiceSource === 'topic' ? 'This draft did not pass the Persian language and question-quality checks. Generate again.' : 'This draft did not pass the Persian language and question-quality checks. Try a broader vocabulary selection or generate again.',qualityIssues:best.issues,suggestedWords:best.rejectedWords,
         // Only an explicitly enabled protected preview returns synthetic audit
         // drafts. Never expose rejected content through the production contract.
-        ...(process.env.VERCEL_ENV === 'preview' && process.env.PRACTICE_AUDIT === '1' ? {rejectedDraft:data} : {}),
+        ...(process.env.VERCEL_ENV === 'preview' && process.env.PRACTICE_AUDIT === '1' ? {rejectedDraft:best.data} : {}),
       },{status:422,headers:{'Server-Timing':timings.join(', ')}});
+    }
+    const data=selected.data;
       const violations = practiceSource === 'selected' ? unselectedContentWords(String(data.textFa ?? ""), [...selectedVocabulary, ...data.newWordsIntroduced]) : [];
       if (violations.length) {
         const suggestions = violations.slice(0, 8).join("، ");
@@ -222,8 +241,6 @@ English title, English questions and English reference answers; only textFa is P
       if(normalizedTitle&&(body.previousTitles??[]).some(title=>String(title).trim().toLocaleLowerCase()===normalizedTitle)){
         return NextResponse.json({error:'That exercise duplicated a recent title. Generate again for a fresh item.',qualityIssues:['duplicate_title']},{status:422,headers:{'Server-Timing':timings.join(', ')}});
       }
-    }
-
     return NextResponse.json(data, {headers:{'Server-Timing':timings.join(', ')}});
   } catch (error) {
     if (signal.aborted || error instanceof OpenAI.APIConnectionTimeoutError) {
