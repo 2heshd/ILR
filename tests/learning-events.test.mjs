@@ -15,3 +15,12 @@ test('suite events preserve attribution and remove private metadata',()=>{
 test('event names are bounded machine-readable identifiers',()=>{
   assert.throws(()=>makeLearningEvent({product:'cursos',eventType:'Reading answer',targetLanguage:'fa'}));
 });
+
+test('event normalization cannot jam the database outbox',()=>{
+  const event=makeLearningEvent({id:'not-a-uuid',occurredAt:'invalid',product:'cursos',eventType:'bounded_event',targetLanguage:'fa',sessionId:'bad',problemId:'bad',relatedEventId:'bad',sourceItemId:'x'.repeat(400),interventionType:'i'.repeat(100),interventionId:'j'.repeat(300),responseMs:9_000_000,attemptNumber:20_000,supportsUsed:Array.from({length:40},(_,index)=>`support-${index}`),metadata:Object.fromEntries(Array.from({length:40},(_,index)=>[`safe_${index}`,'v'.repeat(600)]))});
+  assert.match(event.id,/^[0-9a-f-]{36}$/u);
+  assert.equal(event.sessionId,undefined);assert.equal(event.problemId,undefined);assert.equal(event.relatedEventId,undefined);
+  assert.equal(event.sourceItemId?.length,240);assert.equal(event.interventionType?.length,80);assert.equal(event.interventionId?.length,240);
+  assert.equal(event.responseMs,3_600_000);assert.equal(event.attemptNumber,10_000);assert.equal(event.supportsUsed?.length,32);
+  assert.ok(JSON.stringify(event.metadata).length<=12000);
+});
