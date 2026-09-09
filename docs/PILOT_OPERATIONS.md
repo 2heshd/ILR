@@ -19,7 +19,7 @@
 
 - Row-level security limits learners to their own learning events. Classroom owners receive only consented-member aggregates through owner-checked functions.
 - Aggregate and raw-event pilot exports use participant codes. The raw export omits names, emails, answers, passages, notes, and free-form metadata. The ordinary weekly teaching report may show the learner-approved class display name and must stay with authorized teaching staff.
-- Account deletion cascades learning events and generated QA records through the authentication user ID. Leaving a class deletes membership and stops future sharing. A pilot owner must delete or export-and-destroy pilot data at the configured retention date.
+- Account deletion cascades learning events and generated QA records through the authentication user ID. Leaving a class deletes membership and stops future sharing. At the configured retention deadline, the service purge removes class-event links, assessment snapshots, and participant membership identities; the learner's underlying personal practice events remain available only to that learner until they use pilot-data or account deletion.
 - Do not paste controlled, classified, medical, legal, operational, or personally identifying text into generated-practice or analysis fields unless the institution has approved that use.
 
 ## Incident response

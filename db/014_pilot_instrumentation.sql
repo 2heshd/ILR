@@ -369,13 +369,17 @@ grant execute on function public.class_pilot_event_export(uuid) to authenticated
 
 create or replace function public.purge_expired_pilot_class_data() returns integer
 language plpgsql security definer set search_path=public as $$
-declare removed integer;
+declare removed integer:=0; step_removed integer;
 begin
   delete from public.learning_event_classes ec using public.learning_classes c
   where ec.class_id=c.id and c.pilot_ends_on is not null and now()>=c.pilot_ends_on::timestamptz+make_interval(days=>c.data_retention_days);
-  get diagnostics removed=row_count;
+  get diagnostics step_removed=row_count; removed:=removed+step_removed;
   delete from public.pilot_assessments a using public.learning_classes c
   where a.class_id=c.id and c.pilot_ends_on is not null and now()>=c.pilot_ends_on::timestamptz+make_interval(days=>c.data_retention_days);
+  get diagnostics step_removed=row_count; removed:=removed+step_removed;
+  delete from public.learning_class_members m using public.learning_classes c
+  where m.class_id=c.id and c.pilot_ends_on is not null and now()>=c.pilot_ends_on::timestamptz+make_interval(days=>c.data_retention_days);
+  get diagnostics step_removed=row_count; removed:=removed+step_removed;
   return removed;
 end $$;
 revoke all on function public.purge_expired_pilot_class_data() from public,anon,authenticated;

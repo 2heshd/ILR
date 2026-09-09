@@ -114,6 +114,23 @@ begin
 end $$;
 
 reset role;
+
+insert into public.learning_classes(id,owner_id,name,join_code,target_language,course_label,pilot_starts_on,pilot_ends_on,data_retention_days)
+values('7f020000-0000-4000-8000-000000000002','7f010000-0000-4000-8000-000000000001','Expired pilot smoke','expired-pilot-smoke-code','fa','Expired smoke course',current_date-90,current_date-31,30);
+insert into public.learning_class_members(class_id,user_id,display_name,participant_code,consented_at,withdrawn_at)
+values('7f020000-0000-4000-8000-000000000002','7f010000-0000-4000-8000-000000000002','Expired identity','P-EXPIRED',now()-interval '60 days',null);
+insert into public.learning_events(user_id,product,event_type) values('7f010000-0000-4000-8000-000000000002','cursos','expired_class_event');
+insert into public.pilot_assessments(class_id,user_id,period,assessed_at,metrics)
+values('7f020000-0000-4000-8000-000000000002','7f010000-0000-4000-8000-000000000002','baseline',now()-interval '45 days','{}');
+do $$
+begin
+  if public.purge_expired_pilot_class_data()<3 then raise exception 'Retention purge did not remove all class-scoped records'; end if;
+  if exists(select 1 from public.learning_event_classes where class_id='7f020000-0000-4000-8000-000000000002') then raise exception 'Retention purge kept class-event links'; end if;
+  if exists(select 1 from public.pilot_assessments where class_id='7f020000-0000-4000-8000-000000000002') then raise exception 'Retention purge kept assessment snapshots'; end if;
+  if exists(select 1 from public.learning_class_members where class_id='7f020000-0000-4000-8000-000000000002') then raise exception 'Retention purge kept participant identity'; end if;
+  if not exists(select 1 from public.learning_events where event_type='expired_class_event') then raise exception 'Retention purge deleted learner-owned evidence'; end if;
+end $$;
+
 rollback;
 
 select 'pilot-db-smoke-passed' as result;
