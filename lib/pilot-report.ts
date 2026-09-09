@@ -3,6 +3,7 @@ export type PilotLearner={participant_code:string|null;attempts:number;correct:n
 export type PilotEventReport={since:string;learners:PilotLearner[];bottlenecks:PilotBottleneck[]};
 export type InterventionReport={linguistic_concept:string|null;interventions:number;pre_accuracy:number|null;post_accuracy:number|null;pre_latency_ms:number|null;post_latency_ms:number|null};
 export type AssessmentRow={participant_code:string|null;period:'baseline'|'midpoint'|'endline';assessed_at:string;metrics:Record<string,number|null>};
+export type GenerationQualityReport={since:string;total:number;learner_visible:number;rejected:number;success_rate:number|null;p50_latency_ms:number|null;p95_latency_ms:number|null;by_modality:{modality:string;source_kind:string|null;register:string|null;total:number;learner_visible:number;rejected:number;p95_latency_ms:number|null}[]};
 export type PilotRawEvent={participant_code:string|null;event_id:string;occurred_at:string;product:string;event_type:string;target_language:string;skill:string|null;linguistic_concept:string|null;intervention_type:string|null;intervention_id:string|null;related_event_id:string|null;correctness:boolean|null;response_ms:number|null;attempt_number:number|null;supports_used:string[];source_kind:string|null;register:string|null;difficulty:number|null;course_week:number|null;topic:string|null};
 
 export function evidenceAction(item:PilotBottleneck){

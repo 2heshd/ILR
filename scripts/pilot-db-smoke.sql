@@ -64,7 +64,7 @@ select set_config('request.jwt.claim.sub','eef89588-eab7-4543-9dad-e1b8a209553f'
 select set_config('request.jwt.claims','{"sub":"eef89588-eab7-4543-9dad-e1b8a209553f","role":"authenticated"}',true);
 
 do $$
-declare queue jsonb; report jsonb; review_id uuid; saved integer; current_run uuid:=current_setting('pilot.smoke.current_run')::uuid;
+declare queue jsonb; report jsonb; quality jsonb; review_id uuid; saved integer; current_run uuid:=current_setting('pilot.smoke.current_run')::uuid;
 begin
   queue:=public.content_review_queue('7f020000-0000-4000-8000-000000000001',25);
   if jsonb_array_length(queue)<>1 or queue->0->>'id'<>current_run::text then raise exception 'Review queue crossed the consent boundary'; end if;
@@ -80,6 +80,8 @@ begin
 
   report:=public.class_pilot_event_report('7f020000-0000-4000-8000-000000000001',30);
   if jsonb_array_length(report->'learners')<>1 then raise exception 'Consented learner missing from report'; end if;
+  quality:=public.class_generation_quality_report('7f020000-0000-4000-8000-000000000001',30);
+  if (quality->>'total')::integer<>1 or (quality->>'learner_visible')::integer<>1 then raise exception 'Generation reliability report crossed the consent boundary'; end if;
   saved:=public.capture_class_pilot_assessment('7f020000-0000-4000-8000-000000000001','baseline');
   if saved<>1 or jsonb_array_length(public.class_pilot_assessment_report('7f020000-0000-4000-8000-000000000001'))<>1 then
     raise exception 'Pilot assessment capture/report failed';

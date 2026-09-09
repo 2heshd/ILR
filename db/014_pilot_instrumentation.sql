@@ -311,6 +311,34 @@ end $$;
 revoke all on function public.class_pilot_event_report(uuid,integer) from public,anon;
 grant execute on function public.class_pilot_event_report(uuid,integer) to authenticated;
 
+create or replace function public.class_generation_quality_report(target uuid, days integer default 30) returns jsonb
+language plpgsql security definer set search_path=public as $$
+declare report jsonb; since_time timestamptz;
+begin
+  if not public.learning_can_manage_classes() or not exists(select 1 from public.learning_classes where id=target and owner_id=auth.uid()) then raise exception 'Class owner access required'; end if;
+  select case when days=0 then coalesce(pilot_starts_on::timestamptz,created_at) else now()-make_interval(days=>greatest(1,least(days,3650))) end into since_time from public.learning_classes where id=target;
+  with eligible as (
+    select g.* from public.generation_quality_runs g join public.learning_class_members m on m.user_id=g.user_id and m.class_id=target
+    where m.consented_at is not null and m.withdrawn_at is null and g.created_at>=m.consented_at and g.created_at>=since_time
+  ), totals as (
+    select count(*) total,count(*) filter(where release_status='learner_visible') learner_visible,count(*) filter(where release_status='rejected') rejected,
+      round(100.0*count(*) filter(where release_status='learner_visible')/nullif(count(*),0)) success_rate,
+      round(percentile_cont(.5) within group(order by latency_ms) filter(where latency_ms is not null)) p50_latency_ms,
+      round(percentile_cont(.95) within group(order by latency_ms) filter(where latency_ms is not null)) p95_latency_ms
+    from eligible
+  )
+  select jsonb_build_object('since',since_time,'total',total,'learner_visible',learner_visible,'rejected',rejected,'success_rate',success_rate,
+    'p50_latency_ms',p50_latency_ms,'p95_latency_ms',p95_latency_ms,
+    'by_modality',coalesce((select jsonb_agg(row_to_json(x) order by x.modality,x.source_kind,x.register) from (
+      select modality,source_kind,register,count(*) total,count(*) filter(where release_status='learner_visible') learner_visible,
+        count(*) filter(where release_status='rejected') rejected,round(percentile_cont(.95) within group(order by latency_ms) filter(where latency_ms is not null)) p95_latency_ms
+      from eligible group by modality,source_kind,register
+    ) x),'[]'::jsonb)) into report from totals;
+  return report;
+end $$;
+revoke all on function public.class_generation_quality_report(uuid,integer) from public,anon;
+grant execute on function public.class_generation_quality_report(uuid,integer) to authenticated;
+
 create or replace function public.capture_class_pilot_assessment(target uuid, assessment_period text) returns integer
 language plpgsql security definer set search_path=public as $$
 declare saved integer;
