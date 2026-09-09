@@ -6,6 +6,7 @@ const migration=readFileSync(new URL('../db/014_pilot_instrumentation.sql',impor
 const operations=readFileSync(new URL('../docs/PILOT_OPERATIONS.md',import.meta.url),'utf8');
 const soak=readFileSync(new URL('../scripts/suite-soak.mjs',import.meta.url),'utf8');
 const databaseSmoke=readFileSync(new URL('../scripts/pilot-db-smoke.sql',import.meta.url),'utf8');
+const nextConfig=readFileSync(new URL('../next.config.mjs',import.meta.url),'utf8');
 
 test('pilot schema covers consent, intervention, assessments, QA, review, and releases',()=>{
  for(const name of ['learning_events','learning_event_classes','generation_quality_runs','content_human_reviews','deployment_releases','class_intervention_report','class_pilot_event_report','class_pilot_event_export','capture_class_pilot_assessment','content_review_queue','withdraw_from_learning_class','delete_my_pilot_data','purge_expired_pilot_class_data'])assert.match(migration,new RegExp(name));
@@ -42,4 +43,8 @@ test('pilot storage and review access fail closed at the database boundary',()=>
 
 test('production database smoke is transactional and exercises isolation',()=>{
  for(const phrase of ['begin;','Cross-user event insert unexpectedly succeeded','Review queue crossed the consent boundary','Non-owner report access unexpectedly succeeded','Post-withdrawal event was attached to a class','rollback;','pilot-db-smoke-passed'])assert.match(databaseSmoke,new RegExp(phrase,'i'));
+});
+
+test('browser responses use the pilot security header baseline',()=>{
+ for(const header of ['X-Content-Type-Options','Referrer-Policy','Permissions-Policy','X-Frame-Options'])assert.match(nextConfig,new RegExp(header));
 });
