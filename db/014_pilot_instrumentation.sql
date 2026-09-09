@@ -216,14 +216,14 @@ end $$;
 revoke all on function public.content_review_queue(uuid,integer) from public,anon;
 grant execute on function public.content_review_queue(uuid,integer) to authenticated;
 
-create or replace function public.submit_content_human_review(run_id uuid, role text, review_verdict text, natural boolean, accurate boolean, useful boolean, usable boolean, issue text default null) returns uuid
+create or replace function public.submit_content_human_review(run_id uuid, role text, review_verdict text, review_natural boolean, review_accurate boolean, review_useful boolean, review_usable boolean, issue text default null) returns uuid
 language plpgsql security definer set search_path=public as $$
 declare saved uuid;
 begin
   if role not in ('native_speaker','instructor','linguist') or review_verdict not in ('accepted','minor_correction','major_correction','rejected') then raise exception 'Invalid review'; end if;
   if not public.learning_can_manage_classes() or not exists(select 1 from public.generation_quality_runs g join public.learning_class_members m on m.user_id=g.user_id join public.learning_classes c on c.id=m.class_id where g.id=run_id and c.owner_id=auth.uid() and m.consented_at is not null and m.withdrawn_at is null and g.created_at>=m.consented_at) then raise exception 'Review access required'; end if;
   insert into public.content_human_reviews(generation_run_id,reviewer_id,reviewer_role,verdict,language_natural,linguistically_accurate,pedagogically_useful,would_use_in_instruction,blocking_issue,reviewed_at)
-  values(run_id,auth.uid(),role,review_verdict,natural,accurate,useful,usable,nullif(trim(issue),''),now())
+  values(run_id,auth.uid(),role,review_verdict,review_natural,review_accurate,review_useful,review_usable,nullif(trim(issue),''),now())
   on conflict(generation_run_id,reviewer_id) do update set reviewer_role=excluded.reviewer_role,verdict=excluded.verdict,language_natural=excluded.language_natural,linguistically_accurate=excluded.linguistically_accurate,pedagogically_useful=excluded.pedagogically_useful,would_use_in_instruction=excluded.would_use_in_instruction,blocking_issue=excluded.blocking_issue,reviewed_at=excluded.reviewed_at
   returning id into saved; return saved;
 end $$;
