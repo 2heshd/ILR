@@ -8,13 +8,16 @@ evidence, vocabulary labels, and total latency (including listening audio).
 
 `node scripts/generation-audit.mjs <exact-preview-url> <limit> <offset> <report>`
 
-The matrix groups all 8,060 course/news entries into 69 vocabulary selections.
-This tests availability of the bank, not a claim that every entry appears in a
-generated passage. Each result is checkpointed. Compare the same cases across
-changes; do not discard failures and report only successful reruns.
+The static gate checks all 8,060 course/news entries. The live matrix then tests
+all 44 learner-facing topic banks plus 24 selected-word cases spanning 12, 30,
+and 80-word plans, both modalities, four difficulty bands, and formal and
+colloquial Persian. This tests the actual learner contracts; it does not claim
+that every catalog entry appears in a generated passage. Each result is
+checkpointed. Compare the same cases across changes; do not discard failures
+and report only successful reruns.
 
 Release target: successful, coherent exercises with source-supported questions,
-no more than five supporting vocabulary entries, and the requested 20-second
+a bounded validated supporting vocabulary set, and the requested 20-second
 generation target. Provider timing varies; a finite passing run cannot guarantee
 that every future request will succeed.
 
@@ -28,11 +31,28 @@ that every future request will succeed.
 - Missing support labels caused unnecessary AI repair round-trips.
 - Duplicate shared-vocabulary conflict keys could fail an entire upsert.
 
+## Current candidate — 2026-09-09
+
+The five independent candidates now run through deterministic and read-only
+editorial validation in parallel; the first fully approved result wins. Topic
+mode passed **44/44** live cases. After adapting narrow selected banks to use a
+smaller compatible focus and a bounded twelve-entry validator allowance,
+selected-word mode passed **24/24** live cases. Every returned case completed
+within 20 seconds; selected-word median was 5.99 seconds and p95 was 8.53
+seconds. The static catalog check covered all 8,060 entries with zero empty or
+normalization-invalid records.
+
+An accepted listening passage also passed the final audio paths: MP3 narration
+returned in 4.42 seconds, and narration plus complete word-level captions
+returned in 7.57 seconds. The caption packet covered all 25 transcript words,
+from the first through the last, and contained a valid 15-second MP3.
+
+These are reproducible automated release checks, not native-speaker
+certification or a guarantee about every future provider response. Human review
+remains a separate protected workflow.
+
 ## Remaining verification
 
-- Complete the broad generation matrix on the final configuration.
-- Inspect returned content, rather than relying solely on the model's approval.
-- Verify timing through speech creation, not only transcript generation.
 - Verify account save/reload against a connected account before claiming cloud
   synchronization is fixed. The duplicate-key regression test alone does not
   establish the cause of every reported cloud-save failure.
