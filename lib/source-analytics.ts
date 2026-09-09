@@ -13,7 +13,7 @@ export function sourceMetrics(
   const scores: Record<string, number[]> = {};
   const labelFor = (item: Passage | ListeningItem) => {
     if (dimension === "source") return item.publisher || (item.sourceType === "generated" ? "AI-generated" : "Unknown source");
-    if (dimension === "difficulty") return `ILR ${Math.floor(item.ilrEstimate)}–${Math.min(4, Math.floor(item.ilrEstimate) + 0.75)}`;
+    if (dimension === "difficulty") return `Internal difficulty ${Math.floor(item.ilrEstimate)}–${Math.min(4, Math.floor(item.ilrEstimate) + 0.75)} (ILR-oriented; not an official rating)`;
     if (dimension === "origin") return item.sourceType;
     return item[dimension] || "Unclassified";
   };

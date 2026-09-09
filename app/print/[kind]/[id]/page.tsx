@@ -34,7 +34,7 @@ export default async function PrintableWorksheet({ params }: { params: Promise<{
     <PrintActions />
     <article className={styles.sheet} lang="fa" dir="rtl">
       <header className={styles.header}>
-        <div className={styles.meta}>GetCursos · {label} · ILR 1+ · {item.topic} · {item.genre}</div>
+        <div className={styles.meta}>GetCursos · {label} · internal difficulty 1+ · ILR-oriented, not an official rating · {item.topic} · {item.genre}</div>
         <h1 className={styles.title}>{item.title}</h1>
       </header>
       <main>
