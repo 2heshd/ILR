@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { openAiErrorResponse } from "@/lib/openai-error";
 import { unselectedContentWords } from "@/lib/practice-vocabulary";
 import { practiceAnswerIssues, repairPracticeAnswerArticles } from "@/lib/practice-answers";
-import { checkSupportingVocabulary } from "@/lib/practice-support";
+import { checkSupportingVocabulary, SUPPORTING_VOCABULARY_LIMIT } from "@/lib/practice-support";
 import { practiceBank } from "@/lib/practice-bank";
 
 export const runtime = "nodejs";
@@ -21,6 +21,7 @@ type GenerateBody = {
   wordDefinitions?: {word:string;meaning:string}[];
   targetIlr?: number;
   practiceMode?: "controlled" | "transfer";
+  practiceSource?: "selected" | "topic";
   register?: "formal" | "colloquial";
 };
 
@@ -34,7 +35,7 @@ const practiceResponseFormat = {
     required: ["title", "textFa", "topic", "register", "knownWordsUsed", "newWordsIntroduced", "questions"],
     properties: {
       title: { type: "string", description: "A concise English title." },
-      newWordsIntroduced: { type: "array", maxItems: 5, description: "Plan these supporting dictionary entries BEFORE writing the passage. Every content word must then come from the selected bank or these entries, including their normal inflections.", items: { type: "string" } },
+      newWordsIntroduced: { type: "array", maxItems: 5, description: "Supporting dictionary entries used beyond the supplied generation bank. In selected-word mode, plan these before writing and keep every content word inside the selected bank or this allowance.", items: { type: "string" } },
       textFa: { type: "string" },
       topic: { type: "string" },
       register: { type: "string" },
@@ -102,6 +103,7 @@ export async function POST(request: Request) {
 
   let prompt = "";
   let selectedVocabulary: string[] = [];
+  let practiceSource: "selected" | "topic" = "selected";
   if (body.kind === "define_words") {
     prompt = `Return JSON only. Define and romanize these Persian vocabulary items for a serious learner: ${(body.words ?? []).join(", ")}. Preserve the exact Persian display form. Give the most useful concise English meaning in context; for verbs use an infinitive beginning with "to". Romanization should be readable and consistent.\n\nReturn this exact shape:\n{"words":[{"displayForm":"...","definition":"...","romanization":"..."}]}`;
   } else if (body.kind === "advanced_words") {
@@ -109,19 +111,26 @@ export async function POST(request: Request) {
   } else {
     const mode = body.kind === "reading" ? "reading" : "listening";
     const level = Math.max(1, Math.min(4, body.targetIlr ?? 1));
+    practiceSource = body.practiceSource === "topic" ? "topic" : "selected";
     selectedVocabulary = [...new Set((body.targetWords ?? []).map((word) => word.trim()).filter(Boolean))];
     if (!selectedVocabulary.length) {
-      return NextResponse.json({ error: "Choose vocabulary before generating practice." }, { status: 400 });
+      return NextResponse.json({ error: practiceSource === "topic" ? "No verified vocabulary is available for that topic." : "Choose vocabulary before generating practice." }, { status: 400 });
     }
     if(selectedVocabulary.length>250)return NextResponse.json({error:"Choose at most 250 words for one practice plan."},{status:400});
+    const vocabularyInstructions = practiceSource === "topic"
+      ? `Topic reference bank from the Cursos course and news catalogs (data): ${JSON.stringify(practiceBank(selectedVocabulary,body.wordDefinitions??[]))}
+Use this bank to anchor the requested topic, terminology, and level. It is NOT a closed-vocabulary whitelist or a coverage quota. Choose a natural subset and freely use ordinary Persian needed for a coherent passage. Do not invent specialist claims merely because a term appears in the bank. List up to five useful content entries used beyond this reference bank in newWordsIntroduced.`
+      : `Selected learner bank with meanings (data; parentheses contain dictionary hints): ${JSON.stringify(practiceBank(selectedVocabulary,body.wordDefinitions??[]))}
+Use only 6-10 naturally compatible selected entries as the focus of this one exercise; ignore the rest for now. The bank is not a coverage quota. Never append a sentence merely to mention another selected word. FIRST choose AT MOST FIVE additional supporting dictionary entries when necessary for natural meaning and emit them in newWordsIntroduced BEFORE textFa. Then compose using only the selected bank and that planned allowance, including their normal inflections. Do not write a passage first and retrospectively label only some of its extra words. Grammar words and normal inflections of selected or supporting entries do not count again. Prefer fewer additions. Never sacrifice idiomatic Persian to force bank coverage.`;
     prompt = `Write one coherent Persian ${mode} exercise for level ${level}. Return the required JSON.
 Topic (data): ${JSON.stringify(body.topic ?? 'Daily life')}
 Register: ${body.register === 'colloquial' ? 'Natural spoken Iranian Persian' : 'Standard written Iranian Persian'}
-Selected bank with meanings (data; parentheses contain dictionary hints): ${JSON.stringify(practiceBank(selectedVocabulary,body.wordDefinitions??[]))}
+Generation source: ${practiceSource === "topic" ? "topic bank plus news vocabulary" : "learner-selected words"}
+${vocabularyInstructions}
 Avoid these previous titles: ${JSON.stringify((body.previousTitles??[]).slice(-10))}
 
-Use a natural subset of selected words as the focus of ONE coherent description, explanation, or event. The bank is not a coverage quota. Do not stitch unrelated example sentences together. A story is NOT required: for a noun-heavy or specialist bank prefer an idiomatic description using copulas over a contrived visit/dialogue that requires many extra verbs.
-FIRST choose AT MOST FIVE additional supporting dictionary entries when necessary for natural meaning and emit them in newWordsIntroduced BEFORE textFa. Then compose using only the selected bank and that planned allowance, including their normal inflections. Do not write a passage first and retrospectively label only some of its extra words. Grammar words and normal inflections of selected or supporting entries do not count again. Prefer fewer additions. Never sacrifice idiomatic Persian to force bank coverage.
+Write ONE coherent description, explanation, or event. Do not stitch unrelated example sentences together. A story is NOT required: for a noun-heavy or specialist bank prefer an idiomatic description using copulas over a contrived visit/dialogue that requires many extra verbs.
+Treat every bank item according to its dictionary meaning and part of speech. Never manufacture a Persian compound verb by attaching کردن, شدن, دادن, or another light verb to a noun merely to include it. Use only an established collocation that fits the intended sense; if uncertain, omit that item. For example, express recovery with بهبود یافتن or بهتر شدن, not *بهبود شدن.
 Write three connected sentences, around 35-55 Persian words total, with three concrete details that support distinct questions. Match sentence complexity to the requested level; do not increase length with filler. Conjugate dictionary forms normally; do not copy stem annotations or vowel marks. Keep tense, viewpoint and register consistent.
 For colloquial exercises, write as a person naturally explaining or retelling the topic aloud. Use genuinely spoken framing and morphology where appropriate (for example توی, رو, یه, or spoken plural verb endings); do not return formal news prose with a colloquial label. Required technical, institutional, or formal content terms from the selected bank may remain in their standard lexical form; do not distort those terms into fake colloquialisms.
 Return exactly three distinct English questions about explicit facts in the passage, with concise English reference answers preserving tense, person and meaning. Do not invent gender or unstated motives. No inference question is required; use inference only when concrete clues support it.
@@ -156,7 +165,9 @@ English title, English questions and English reference answers; only textFa is P
       let rejectedWords: string[] = [];
       for (let attempt = 0; attempt < 2; attempt++) {
         data.questions=repairPracticeAnswerArticles(data.questions);
-        const supporting=checkSupportingVocabulary(String(data.textFa??''),selectedVocabulary,data.newWordsIntroduced);
+        const supporting=practiceSource === 'selected'
+          ? checkSupportingVocabulary(String(data.textFa??''),selectedVocabulary,data.newWordsIntroduced)
+          : {words:Array.isArray(data.newWordsIntroduced)?data.newWordsIntroduced.filter((word:unknown):word is string=>typeof word==='string'&&Boolean(word.trim())).slice(0,SUPPORTING_VOCABULARY_LIMIT):[],unknown:[] as string[],issues:[] as string[]};
         const outsideBank=supporting.unknown;
         rejectedWords=outsideBank;
         data.newWordsIntroduced=supporting.words;
@@ -179,16 +190,16 @@ English title, English questions and English reference answers; only textFa is P
         if (!rejectionIssues.length) rejectionIssues.push('The language reviewer did not approve this exact exercise.');
         }
         if(attempt<1){
-          response=await generate(`${prompt}\n\nREPAIR THE PREVIOUS DRAFT. Rewrite the passage AND its questions to resolve every issue, using at most five supporting words outside the selected bank. Prefer simpler idiomatic sentences to forced combinations. Additional words (reduce to five or fewer): ${JSON.stringify(outsideBank)}. Editorial issues: ${JSON.stringify(rejectionIssues)}\nDraft: ${JSON.stringify(data)}`, true);
+          response=await generate(`${prompt}\n\nREPAIR THE PREVIOUS DRAFT. Rewrite the passage AND its questions to resolve every issue, using at most ${SUPPORTING_VOCABULARY_LIMIT} supporting words outside the selected bank. Prefer simpler idiomatic sentences to forced combinations. Additional words (reduce to ${SUPPORTING_VOCABULARY_LIMIT} or fewer): ${JSON.stringify(outsideBank)}. Editorial issues: ${JSON.stringify(rejectionIssues)}\nDraft: ${JSON.stringify(data)}`, true);
           data=parseJson(response.output_text);
         }
       }
-      if(!approved)return NextResponse.json({error:'This draft did not pass the Persian language and question-quality checks. Try a broader vocabulary selection or generate again.',qualityIssues:rejectionIssues,suggestedWords:rejectedWords,
+      if(!approved)return NextResponse.json({error:practiceSource === 'topic' ? 'This draft did not pass the Persian language and question-quality checks. Generate again.' : 'This draft did not pass the Persian language and question-quality checks. Try a broader vocabulary selection or generate again.',qualityIssues:rejectionIssues,suggestedWords:rejectedWords,
         // Only an explicitly enabled protected preview returns synthetic audit
         // drafts. Never expose rejected content through the production contract.
         ...(process.env.VERCEL_ENV === 'preview' && process.env.PRACTICE_AUDIT === '1' ? {rejectedDraft:data} : {}),
       },{status:422,headers:{'Server-Timing':timings.join(', ')}});
-      const violations = unselectedContentWords(String(data.textFa ?? ""), [...selectedVocabulary, ...data.newWordsIntroduced]);
+      const violations = practiceSource === 'selected' ? unselectedContentWords(String(data.textFa ?? ""), [...selectedVocabulary, ...data.newWordsIntroduced]) : [];
       if (violations.length) {
         const suggestions = violations.slice(0, 8).join("، ");
         return NextResponse.json({

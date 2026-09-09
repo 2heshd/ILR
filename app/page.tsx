@@ -32,6 +32,7 @@ import { normalizePersian, parseWeeklyInput } from "@/lib/persian";
 import { isMeaningfulPersianText, sanitizePersianSpeechText } from "@/lib/persian-speech";
 import { sourceMetrics } from "@/lib/source-analytics";
 import { LatestPracticePrefetch, loadPracticeWithRetries, practicePrefetchKey } from "@/lib/practice-prefetch";
+import { focusedSelectedPracticeWords, topicPracticeWords, type PracticeSource } from "@/lib/practice-sources";
 import { compactStudyState, readStudyState, writeStudyState } from "@/lib/storage";
 import { appendCloudReview, deletePlatformVocabulary, getSupabaseClient, loadCloudState, loadPlatformVocabulary, loadUsername, mergePlatformVocabulary, mergeStudyStates, saveCloudState, syncPlatformVocabulary, updateUsername } from "@/lib/supabase";
 import { dedupeLexicalWords, restoreCourseDefinitions } from "@/lib/word-merge";
@@ -119,6 +120,7 @@ type PracticeGenerationContext = {
   request: Record<string, unknown>;
   targetIlr: number;
   practiceMode: PracticeMode;
+  practiceSource: PracticeSource;
   words: string[];
 };
 
@@ -339,6 +341,7 @@ export default function Home() {
   const [catalogLesson, setCatalogLesson] = useState("");
   const [courseTopic,setCourseTopic]=useState('All topics');
   const [practiceTopic,setPracticeTopic]=useState({reading:'Daily life',listening:'Daily life'});
+  const [practiceSource,setPracticeSource]=useState<Record<'reading'|'listening',PracticeSource>>({reading:'selected',listening:'selected'});
   const [catalogUnit, setCatalogUnit] = useState("");
   const [catalogChapter, setCatalogChapter] = useState("");
   const [catalogQuery, setCatalogQuery] = useState("");
@@ -397,9 +400,10 @@ export default function Home() {
   });
 
   useEffect(() => {
-    if (tab !== "vocabulary" || courseCatalog.length) return;
+    const needsTopicCatalog = (tab === "reading" || tab === "listening") && practiceSource[tab] === "topic";
+    if ((tab !== "vocabulary" && !needsTopicCatalog) || courseCatalog.length) return;
     void loadCourseCatalog().then((catalog) => setCourseCatalog(catalog.entries));
-  }, [tab, courseCatalog.length]);
+  }, [tab, courseCatalog.length, practiceSource]);
 
   function releasePlayback() {
     if (rapidFrameRef.current !== null) window.cancelAnimationFrame(rapidFrameRef.current);
@@ -1230,23 +1234,28 @@ export default function Home() {
     setReviewModality(mode);
   }
 
-  function practiceGenerationContext(kind: "reading" | "listening", practiceMode: PracticeMode, currentState = latestState.current): PracticeGenerationContext {
+  function practiceGenerationContext(kind: "reading" | "listening", source: PracticeSource, currentState = latestState.current): PracticeGenerationContext {
     const planned = plannedWords(currentState, kind);
-    const words = planned.map((word) => word.displayForm);
+    const bank = source === "selected"
+      ? focusedSelectedPracticeWords(planned)
+      : topicPracticeWords(practiceTopic[kind], courseCatalog, NEWS_CATALOG);
+    const words = bank.map((entry) => entry.word);
     const targetIlr = currentState.skillLevels[kind];
-    const knownWords = planned
+    const knownKeys = new Set(currentState.words
       .filter((word) => word.knowledgeState === "known" || word.knowledgeState === "automatic")
-      .map((word) => word.displayForm);
-    const wordDefinitions = planned.map((word) => ({ word: word.displayForm, meaning: word.definition || "" }));
+      .map((word) => normalizePersian(word.displayForm)));
+    const knownWords = words.filter((word) => knownKeys.has(normalizePersian(word)));
+    const practiceMode: PracticeMode = source === "selected" ? "controlled" : "transfer";
     const fingerprint = {
       kind,
       topic: practiceTopic[kind],
       weekNumber: currentState.weekNumber,
       targetIlr,
       practiceMode,
+      practiceSource: source,
       register: practiceRegister[kind],
       targetWords: words,
-      wordDefinitions,
+      wordDefinitions: bank,
       knownWords,
     };
     return {
@@ -1254,6 +1263,7 @@ export default function Home() {
       kind,
       targetIlr,
       practiceMode,
+      practiceSource: source,
       words,
       request: {
         ...fingerprint,
@@ -1360,25 +1370,28 @@ export default function Home() {
     );
   }
 
-  async function generatePractice(kind: "reading" | "listening", practiceMode: PracticeMode = "controlled") {
+  async function generatePractice(kind: "reading" | "listening") {
     if (generationBusy) return;
     const currentState = latestState.current;
+    const source = practiceSource[kind];
     if (!currentState.words.length) {
-      setTab("vocabulary");
-      setStatus("Choose some vocabulary first. Reading and Listening focus on your bank, with a few labeled supporting words when needed.");
+      if (source === "selected") {
+        setTab("vocabulary");
+        setStatus("Choose some vocabulary first, or switch Generation source to Topic bank + news.");
+        return;
+      }
+    }
+    if (source === "topic" && !courseCatalog.length) {
+      setStatus("The topic vocabulary bank is still loading. Try again in a moment.");
       return;
     }
-    const context = practiceGenerationContext(kind, practiceMode, currentState);
+    const context = practiceGenerationContext(kind, source, currentState);
     if (!context.words.length) {
-      setStatus("Choose an active day or week plan below before generating practice.");
-      return;
-    }
-    if (context.words.length > 250) {
-      setStatus("Use up to 250 words per generation plan. Split larger selections into focused sessions.");
+      setStatus(source === "selected" ? "Choose an active vocabulary plan before generating practice." : "No verified vocabulary is available for that topic yet.");
       return;
     }
     setGenerationBusy(kind);
-    setStatus(`Generating ${practiceMode === "transfer" ? "fresh transfer" : "controlled"} ${kind}…`);
+    setStatus(`Generating ${source === "topic" ? "topic" : "selected-word"} ${kind}…`);
     try {
       const cache = practicePrefetchRef.current[kind];
       let prepared = cache.take(context.key);
@@ -1386,7 +1399,7 @@ export default function Home() {
       if (!prepared) prepared = await fetchPreparedPractice(context);
       activatePreparedPractice(kind, prepared);
       prepareNextPractice(context, prepared.data.title);
-      setStatus(`${practiceMode === "transfer" ? "Fresh transfer" : "Controlled coverage"} ${kind} ready.`);
+      setStatus(`${source === "topic" ? "Topic" : "Selected-word"} ${kind} ready.`);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Generation failed.");
     } finally {
@@ -1398,14 +1411,15 @@ export default function Home() {
     if (!loaded || generationBusy || (tab !== "reading" && tab !== "listening")) return;
     const kind = tab;
     const currentState = latestState.current;
-    if (!currentState.words.length) return;
-    const context = practiceGenerationContext(kind, "controlled", currentState);
-    if (!context.words.length || context.words.length > 250) return;
+    const source = practiceSource[kind];
+    if ((source === "selected" && !currentState.words.length) || (source === "topic" && !courseCatalog.length)) return;
+    const context = practiceGenerationContext(kind, source, currentState);
+    if (!context.words.length) return;
     void practicePrefetchRef.current[kind].prepare(
       context.key,
       () => fetchBackgroundPractice(context),
     );
-  }, [loaded, tab, generationBusy, practiceTopic, practiceRegister, state.weekNumber, state.skillLevels, state.words, state.studyPlans]);
+  }, [loaded, tab, generationBusy, practiceTopic, practiceRegister, practiceSource, courseCatalog, state.weekNumber, state.skillLevels, state.words, state.studyPlans]);
 
   function finishReading() {
     if (!readingStartedAt) return;
@@ -2065,11 +2079,11 @@ export default function Home() {
     {tab === "reading" && <section className={`grid reading-workspace${readingQuestionsOpen ? ' answering' : ''}`}>
       <label className="difficulty-control span-12">Sentence difficulty <select aria-label="Reading sentence difficulty" value={state.skillLevels.reading} onChange={event=>setSkillLevel('reading',Number(event.target.value) as IlrLevel)}>{['Simple','Everyday','Complex','Advanced'].map((label,index)=><option key={label} value={index+1}>{label}</option>)}</select><small>Applies to your next generated passage.</small></label>
       <label className="difficulty-control span-12">Language style <select aria-label="reading language style" value={practiceRegister.reading} onChange={event=>setPracticeRegister(current=>({...current,reading:event.target.value as 'formal'|'colloquial'}))}><option value="formal">Formal</option><option value="colloquial">Colloquial</option></select><small>Applies to the next generated item.</small></label>
-      {planPicker("reading")}
-      <div className="card span-12 lab-header"><div><h2>Reading</h2><span className="muted">Use the same report for reading, listening, and speaking transfer.</span></div><div className="row"><button disabled={Boolean(generationBusy)} onClick={()=>{if((readingStartedAt||readingQuestionsOpen)&&!window.confirm("Generate a new passage? Unsaved answers for this passage will be replaced."))return;void generatePractice("reading");}}>{generationBusy==="reading"?"Generating…":"Generate new"}</button><label className="lab-select"><span>Topic</span><select aria-label="reading topic" value={practiceTopic.reading} disabled={Boolean(generationBusy)} onChange={event=>setPracticeTopic(current=>({...current,reading:event.target.value}))}>{PRACTICE_TOPICS.map(topic=><option key={topic}>{topic}</option>)}</select></label><details className="lab-select"><summary>Exercise history</summary><label className="lab-select"><span>Open a previous exercise</span><select aria-label="Choose reading report" value={latestPassage?.id ?? ""} disabled={Boolean(readingStartedAt || readingQuestionsOpen)} onChange={(event) => resetReadingLab(event.target.value)}>{state.passages.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label></details><label className="lab-select"><span>Practice mode</span><select aria-label="Reading practice mode" value={readingMode} disabled={Boolean(readingStartedAt || readingQuestionsOpen)} onChange={event=>changeReadingMode(event.target.value as "full"|"inference")}><option value="full">Full text</option><option value="inference">Inference</option></select></label>{latestPassage && <><a className="secondary button-link" href={`/print/reading/${latestPassage.id}`} target="_blank" rel="noreferrer">Print report</a></>}</div></div>
+      {practiceSource.reading === "selected" && planPicker("reading")}
+      <div className="card span-12 lab-header"><div><h2>Reading</h2><span className="muted">Practice your selected words, or generate freely from a vocabulary and news topic.</span></div><div className="row"><button disabled={Boolean(generationBusy || (practiceSource.reading === "topic" && !courseCatalog.length))} onClick={()=>{if((readingStartedAt||readingQuestionsOpen)&&!window.confirm("Generate a new passage? Unsaved answers for this passage will be replaced."))return;void generatePractice("reading");}}>{generationBusy==="reading"?"Generating…":practiceSource.reading === "topic" && !courseCatalog.length?"Loading topic bank…":"Generate new"}</button><label className="lab-select"><span>Generation source</span><select aria-label="reading generation source" value={practiceSource.reading} disabled={Boolean(generationBusy)} onChange={event=>setPracticeSource(current=>({...current,reading:event.target.value as PracticeSource}))}><option value="selected">Selected words</option><option value="topic">Topic bank + news</option></select></label><label className="lab-select"><span>Topic</span><select aria-label="reading topic" value={practiceTopic.reading} disabled={Boolean(generationBusy)} onChange={event=>setPracticeTopic(current=>({...current,reading:event.target.value}))}>{PRACTICE_TOPICS.map(topic=><option key={topic}>{topic}</option>)}</select></label><details className="lab-select"><summary>Exercise history</summary><label className="lab-select"><span>Open a previous exercise</span><select aria-label="Choose reading report" value={latestPassage?.id ?? ""} disabled={Boolean(readingStartedAt || readingQuestionsOpen)} onChange={(event) => resetReadingLab(event.target.value)}>{state.passages.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label></details><label className="lab-select"><span>Practice mode</span><select aria-label="Reading practice mode" value={readingMode} disabled={Boolean(readingStartedAt || readingQuestionsOpen)} onChange={event=>changeReadingMode(event.target.value as "full"|"inference")}><option value="full">Full text</option><option value="inference">Inference</option></select></label>{latestPassage && <><a className="secondary button-link" href={`/print/reading/${latestPassage.id}`} target="_blank" rel="noreferrer">Print report</a></>}</div></div>
       {latestPassage ? <>
         <div className="card span-7">
-          <div className="row spread"><div><div className="muted">ILR ~{latestPassage.ilrEstimate} · {latestPassage.topic} · {latestPassage.genre} · {latestPassage.register}</div><h2>{latestPassage.title}</h2><SourceLine item={latestPassage} />{!!latestPassage.supportingWords?.length && <p className="muted">Includes {latestPassage.supportingWords.length} supporting words beyond your selected bank.</p>}</div>{!readingStartedAt && !readingQuestionsOpen && <button className="primary" onClick={() => { setReadingStartedAt(Date.now()); setReadingDurationMs(0); }}>1 · Start reading</button>}</div>
+          <div className="row spread"><div><div className="muted">ILR ~{latestPassage.ilrEstimate} · {latestPassage.topic} · {latestPassage.genre} · {latestPassage.register}</div><h2>{latestPassage.title}</h2><SourceLine item={latestPassage} />{!!latestPassage.supportingWords?.length && <p className="muted">Includes {latestPassage.supportingWords.length} supporting words beyond the generation bank.</p>}</div>{!readingStartedAt && !readingQuestionsOpen && <button className="primary" onClick={() => { setReadingStartedAt(Date.now()); setReadingDurationMs(0); }}>1 · Start reading</button>}</div>
           {!readingQuestionsOpen && (readingMode === "inference" ? <InferenceReadingText text={latestPassage.textFa} words={state.words} targetWords={latestPassage.targetWords} gists={sentenceGists} onGistsChange={setSentenceGists} disabled={!readingStartedAt} /> : <InteractivePersianText text={latestPassage.textFa} words={state.words} onStatus={setWordKnowledge} disabled={!readingStartedAt} className={readingStartedAt ? "fa passage" : "fa passage blurred"} />)}
           {readingMode === "full" && !!latestPassage.targetWords.length && <div className="target-strip"><span className="muted">Extracted targets</span>{latestPassage.targetWords.map((word) => <span className="pill fa-inline" key={word}>{word}</span>)}</div>}
           {readingStartedAt && !readingQuestionsOpen && <div className="row"><button className="primary" disabled={!inferenceReady} onClick={finishReading}>2 · Answer questions →</button>{readingMode === "inference" && !inferenceReady && <span className="muted">Capture the gist of each sentence first.</span>}<label>Unknown words <input className="small-input" type="number" min="0" value={readingUnknown} onChange={(event) => setReadingUnknown(Number(event.target.value))}/></label><label>Rereads <input className="small-input" type="number" min="0" value={readingRereads} onChange={(event) => setReadingRereads(Number(event.target.value))}/></label></div>}
@@ -2091,11 +2105,11 @@ export default function Home() {
     {tab === "listening" && <section className={`grid listening-workspace${(listeningMode==='gist'?gistListeningReady:listensCount>0)&&listeningMode!=='rapid'?' answering':''}${transcriptVisible?' with-transcript':''}`}>
       <label className="difficulty-control span-12">Sentence difficulty <select aria-label="Listening sentence difficulty" value={state.skillLevels.listening} onChange={event=>setSkillLevel('listening',Number(event.target.value) as IlrLevel)}>{['Simple','Everyday','Complex','Advanced'].map((label,index)=><option key={label} value={index+1}>{label}</option>)}</select><small>Applies to your next generated audio.</small></label>
       <label className="difficulty-control span-12">Language style <select aria-label="listening language style" value={practiceRegister.listening} onChange={event=>setPracticeRegister(current=>({...current,listening:event.target.value as 'formal'|'colloquial'}))}><option value="formal">Formal</option><option value="colloquial">Colloquial</option></select><small>Applies to the next generated item.</small></label>
-      {planPicker("listening")}
-      <div className="card span-12 lab-header"><div><h2>Listening</h2><span className="muted">Full tests the report. Gist isolates meaning. Rapid Captions connects sound to Persian words.</span></div><div className="row"><button disabled={Boolean(generationBusy || audioBusy)} onClick={()=>void generatePractice("listening")}>{generationBusy==="listening"?"Generating…":"Generate new"}</button><label className="lab-select"><span>Topic</span><select aria-label="listening topic" value={practiceTopic.listening} disabled={Boolean(generationBusy)} onChange={event=>setPracticeTopic(current=>({...current,listening:event.target.value}))}>{PRACTICE_TOPICS.map(topic=><option key={topic}>{topic}</option>)}</select></label><details className="lab-select"><summary>Exercise history</summary><label className="lab-select"><span>Open a previous exercise</span><select aria-label="Choose listening report" value={latestListening?.id ?? ""} onChange={(event) => resetListeningLab(event.target.value)}>{state.listeningItems.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label></details><label className="lab-select"><span>Practice mode</span><select aria-label="Listening practice mode" value={listeningMode} onChange={event=>changeListeningMode(event.target.value as "full"|"gist"|"rapid")}><option value="full">Full audio</option><option value="gist">Gist</option><option value="rapid">Rapid captions</option></select></label>{latestListening && <><a className="secondary button-link" href={`/print/listening/${latestListening.id}`} target="_blank" rel="noreferrer">Print transcript</a></>}</div></div>
+      {practiceSource.listening === "selected" && planPicker("listening")}
+      <div className="card span-12 lab-header"><div><h2>Listening</h2><span className="muted">Practice your selected words, or generate freely from a vocabulary and news topic.</span></div><div className="row"><button disabled={Boolean(generationBusy || audioBusy || (practiceSource.listening === "topic" && !courseCatalog.length))} onClick={()=>void generatePractice("listening")}>{generationBusy==="listening"?"Generating…":practiceSource.listening === "topic" && !courseCatalog.length?"Loading topic bank…":"Generate new"}</button><label className="lab-select"><span>Generation source</span><select aria-label="listening generation source" value={practiceSource.listening} disabled={Boolean(generationBusy)} onChange={event=>setPracticeSource(current=>({...current,listening:event.target.value as PracticeSource}))}><option value="selected">Selected words</option><option value="topic">Topic bank + news</option></select></label><label className="lab-select"><span>Topic</span><select aria-label="listening topic" value={practiceTopic.listening} disabled={Boolean(generationBusy)} onChange={event=>setPracticeTopic(current=>({...current,listening:event.target.value}))}>{PRACTICE_TOPICS.map(topic=><option key={topic}>{topic}</option>)}</select></label><details className="lab-select"><summary>Exercise history</summary><label className="lab-select"><span>Open a previous exercise</span><select aria-label="Choose listening report" value={latestListening?.id ?? ""} onChange={(event) => resetListeningLab(event.target.value)}>{state.listeningItems.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label></details><label className="lab-select"><span>Practice mode</span><select aria-label="Listening practice mode" value={listeningMode} onChange={event=>changeListeningMode(event.target.value as "full"|"gist"|"rapid")}><option value="full">Full audio</option><option value="gist">Gist</option><option value="rapid">Rapid captions</option></select></label>{latestListening && <><a className="secondary button-link" href={`/print/listening/${latestListening.id}`} target="_blank" rel="noreferrer">Print transcript</a></>}</div></div>
       {latestListening ? <>
         <div className="card span-7">
-          <div className="muted">ILR ~{latestListening.ilrEstimate} · {latestListening.topic} · {latestListening.genre} · {latestListening.register}</div><h2>{latestListening.title}</h2><SourceLine item={latestListening} />{!!latestListening.supportingWords?.length && <p className="muted">Includes {latestListening.supportingWords.length} supporting words beyond your selected bank.</p>}
+          <div className="muted">ILR ~{latestListening.ilrEstimate} · {latestListening.topic} · {latestListening.genre} · {latestListening.register}</div><h2>{latestListening.title}</h2><SourceLine item={latestListening} />{!!latestListening.supportingWords?.length && <p className="muted">Includes {latestListening.supportingWords.length} supporting words beyond the generation bank.</p>}
           {listeningMode === "gist" ? <GistListening sentences={gistListeningSentences} words={state.words} gists={listeningGists} listenCounts={gistSentenceListenCounts} hintedSentenceIndexes={gistHintedSentenceIndexes} busy={audioBusy} onPlay={(index) => void playGistSentence(index)} onGistChange={updateListeningGist} onHint={(index) => setGistHintedSentenceIndexes((current) => [...new Set([...current, index])])} /> : listeningMode === "rapid" ? <RapidCaptions currentWord={rapidCaptionWord} captionListens={rapidCaptionListens} playing={rapidPlaying} preparing={audioBusy} onPlay={() => void playRapidListening()} onExit={() => changeListeningMode("full")} /> : <>
             <div className="audio-stage"><button className="primary big-button" disabled={audioBusy} onClick={playListening}>{audioBusy ? "Starting…" : "▶ Play Persian audio"}</button><span className="muted">listens: {listensCount}</span></div>
             {transcriptVisible && listeningReveal ? <InteractivePersianText text={listeningReveal.text} words={state.words} onStatus={setWordKnowledge} className="fa passage progressive-transcript" /> : <div className="transcript-hidden">Transcript hidden</div>}
@@ -2191,7 +2205,7 @@ export default function Home() {
 }
 
 function SourceLine({ item }: { item: Passage | ListeningItem }) {
-  if (item.sourceType === "generated") return <div className="source-line"><span className="pill">{item.practiceMode === "transfer" ? "fresh transfer" : "controlled"}</span></div>;
+  if (item.sourceType === "generated") return <div className="source-line"><span className="pill">{item.practiceMode === "transfer" ? "topic bank + news" : "selected words"}</span></div>;
   return <div className="source-line"><span className={`pill origin-${item.sourceType}`}>{item.sourceType}</span><span>{item.publisher}</span>{item.author && <span>{item.author}</span>}{item.publishedAt && <span>{item.publishedAt}</span>}{item.wordCount && <span>{item.wordCount} words</span>}{item.unknownTokenRatio !== undefined && <span>{Math.round(item.unknownTokenRatio * 100)}% unknown load</span>}{item.sourceUrl && <a href={item.sourceUrl} target="_blank" rel="noreferrer">Open original ↗</a>}</div>;
 }
 
