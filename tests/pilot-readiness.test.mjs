@@ -13,3 +13,10 @@ test('pilot schema covers consent, intervention, assessments, QA, review, and re
 test('operations contract covers privacy, deletion, incidents, and non-causal language',()=>{
  for(const phrase of ['Row-level security','Account deletion','Incident response','Do not report causal impact','not official ILR'])assert.match(operations,new RegExp(phrase,'i'));
 });
+
+test('every pilot report is bound to the consented class event set',()=>{
+ assert.match(migration,/g\.created_at>=m\.consented_at/u);
+ assert.match(migration,/pec\.event_id=p\.id and pec\.class_id=target/u);
+ assert.match(migration,/left join public\.learning_event_classes ec on ec\.class_id=target and ec\.user_id=m\.user_id/u);
+ assert.match(migration,/a\.class_id=target and m\.consented_at is not null and m\.withdrawn_at is null/u);
+});

@@ -195,7 +195,7 @@ begin
       r.verdict,r.reviewer_role,r.language_natural,r.linguistically_accurate,r.pedagogically_useful,r.would_use_in_instruction,r.blocking_issue,r.reviewed_at
     from public.generation_quality_runs g join public.learning_class_members m on m.user_id=g.user_id and m.class_id=target
     left join public.content_human_reviews r on r.generation_run_id=g.id and r.reviewer_id=auth.uid()
-    where m.consented_at is not null and m.withdrawn_at is null and g.content_payload is not null
+    where m.consented_at is not null and m.withdrawn_at is null and g.created_at>=m.consented_at and g.content_payload is not null
     order by g.created_at desc limit greatest(1,least(queue_limit,100))
   ) x;
   return report;
@@ -249,10 +249,10 @@ begin
       where e.intervention_id is not null and e.occurred_at>=now()-make_interval(days=>greatest(1,least(days,3650)))
     ), scored as (
       select i.user_id,i.intervention_id,i.linguistic_concept,i.occurred_at,
-        (select avg(case when p.correctness then 1.0 else 0.0 end) from public.learning_events p where p.user_id=i.user_id and p.linguistic_concept is not distinct from i.linguistic_concept and p.correctness is not null and p.occurred_at<i.occurred_at and p.occurred_at>=i.occurred_at-interval '30 days') pre_accuracy,
-        (select avg(p.response_ms) from public.learning_events p where p.user_id=i.user_id and p.linguistic_concept is not distinct from i.linguistic_concept and p.response_ms is not null and p.occurred_at<i.occurred_at and p.occurred_at>=i.occurred_at-interval '30 days') pre_latency,
-        (select avg(case when p.correctness then 1.0 else 0.0 end) from public.learning_events p where p.user_id=i.user_id and p.linguistic_concept is not distinct from i.linguistic_concept and p.correctness is not null and p.occurred_at>i.occurred_at and p.occurred_at<=i.occurred_at+interval '30 days') post_accuracy,
-        (select avg(p.response_ms) from public.learning_events p where p.user_id=i.user_id and p.linguistic_concept is not distinct from i.linguistic_concept and p.response_ms is not null and p.occurred_at>i.occurred_at and p.occurred_at<=i.occurred_at+interval '30 days') post_latency
+        (select avg(case when p.correctness then 1.0 else 0.0 end) from public.learning_events p where p.user_id=i.user_id and p.linguistic_concept is not distinct from i.linguistic_concept and p.correctness is not null and p.occurred_at<i.occurred_at and p.occurred_at>=i.occurred_at-interval '30 days' and exists(select 1 from public.learning_event_classes pec where pec.event_id=p.id and pec.class_id=target)) pre_accuracy,
+        (select avg(p.response_ms) from public.learning_events p where p.user_id=i.user_id and p.linguistic_concept is not distinct from i.linguistic_concept and p.response_ms is not null and p.occurred_at<i.occurred_at and p.occurred_at>=i.occurred_at-interval '30 days' and exists(select 1 from public.learning_event_classes pec where pec.event_id=p.id and pec.class_id=target)) pre_latency,
+        (select avg(case when p.correctness then 1.0 else 0.0 end) from public.learning_events p where p.user_id=i.user_id and p.linguistic_concept is not distinct from i.linguistic_concept and p.correctness is not null and p.occurred_at>i.occurred_at and p.occurred_at<=i.occurred_at+interval '30 days' and exists(select 1 from public.learning_event_classes pec where pec.event_id=p.id and pec.class_id=target)) post_accuracy,
+        (select avg(p.response_ms) from public.learning_events p where p.user_id=i.user_id and p.linguistic_concept is not distinct from i.linguistic_concept and p.response_ms is not null and p.occurred_at>i.occurred_at and p.occurred_at<=i.occurred_at+interval '30 days' and exists(select 1 from public.learning_event_classes pec where pec.event_id=p.id and pec.class_id=target)) post_latency
       from interventions i
     )
     select linguistic_concept,count(*) interventions,
@@ -310,7 +310,7 @@ begin
     'median_response_ms',percentile_cont(.5) within group(order by e.response_ms) filter(where e.response_ms is not null),
     'active_days',count(distinct date(e.occurred_at))
   ),now()
-  from public.learning_class_members m left join public.learning_events e on e.user_id=m.user_id
+  from public.learning_class_members m left join public.learning_event_classes ec on ec.class_id=target and ec.user_id=m.user_id left join public.learning_events e on e.id=ec.event_id
   where m.class_id=target and m.consented_at is not null and m.withdrawn_at is null group by m.user_id
   on conflict(class_id,user_id,period) do update set metrics=excluded.metrics,assessed_at=excluded.assessed_at;
   get diagnostics saved=row_count; return saved;
@@ -324,7 +324,7 @@ declare report jsonb;
 begin
   if not exists(select 1 from public.learning_classes where id=target and owner_id=auth.uid()) then raise exception 'Class owner access required'; end if;
   select coalesce(jsonb_agg(row_to_json(x) order by x.participant_code,x.period),'[]'::jsonb) into report from (
-    select m.participant_code,a.period,a.assessed_at,a.metrics from public.pilot_assessments a join public.learning_class_members m on m.class_id=a.class_id and m.user_id=a.user_id where a.class_id=target
+    select m.participant_code,a.period,a.assessed_at,a.metrics from public.pilot_assessments a join public.learning_class_members m on m.class_id=a.class_id and m.user_id=a.user_id where a.class_id=target and m.consented_at is not null and m.withdrawn_at is null
   ) x;
   return report;
 end $$;
