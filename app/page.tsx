@@ -33,6 +33,7 @@ import { isMeaningfulPersianText, sanitizePersianSpeechText } from "@/lib/persia
 import { sourceMetrics } from "@/lib/source-analytics";
 import { LatestPracticePrefetch, loadPracticeWithRetries, practicePrefetchKey } from "@/lib/practice-prefetch";
 import { focusedSelectedPracticeWords, topicPracticeWords, type PracticeSource } from "@/lib/practice-sources";
+import { appendLearningEvents, makeLearningEvent, type LearningEvent } from "@/lib/learning-events";
 import { compactStudyState, readStudyState, writeStudyState } from "@/lib/storage";
 import { appendCloudReview, deletePlatformVocabulary, getSupabaseClient, loadCloudState, loadPlatformVocabulary, loadUsername, mergePlatformVocabulary, mergeStudyStates, saveCloudState, syncPlatformVocabulary, updateUsername } from "@/lib/supabase";
 import { dedupeLexicalWords, restoreCourseDefinitions } from "@/lib/word-merge";
@@ -57,6 +58,7 @@ import type {
 const STORAGE_KEY = "ilr-persian-v3";
 const ONBOARDING_KEY = "ilr-persian-onboarding-v1";
 const LEGACY_KEYS = ["ilr-persian-v2", "ilr-persian-v1"];
+const EVENT_OUTBOX_KEY = "synaptx-suite-event-outbox-v1";
 const PERSIAN_WORD_PATTERN = /([\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06FA-\u06FC\u200C]+)/g;
 const IS_PERSIAN_WORD = /^[\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06FA-\u06FC\u200C]+$/;
 const SYNAPTX_URL = process.env.NEXT_PUBLIC_SYNAPTX_URL ?? (process.env.NODE_ENV === "production" ? "https://synapt-x.vercel.app" : "http://localhost:3002");
@@ -398,6 +400,29 @@ export default function Home() {
     reading: new LatestPracticePrefetch<PreparedPractice>(),
     listening: new LatestPracticePrefetch<PreparedPractice>(),
   });
+  const eventOutboxRef = useRef<LearningEvent[]>([]);
+
+  function saveEventOutbox(events:LearningEvent[]){
+    eventOutboxRef.current=events.slice(-2000);
+    localStorage.setItem(EVENT_OUTBOX_KEY,JSON.stringify(eventOutboxRef.current));
+  }
+
+  async function flushEventOutbox(user:User){
+    const client=getSupabaseClient();
+    const pending=[...eventOutboxRef.current];
+    if(!client||!pending.length)return;
+    try{
+      const stored=await appendLearningEvents(client,user,pending);
+      if(stored)saveEventOutbox(eventOutboxRef.current.filter(event=>!pending.some(item=>item.id===event.id)));
+    }catch(error){console.error('Learning event sync failed',error);}
+  }
+
+  function recordSuiteEvent(input:Parameters<typeof makeLearningEvent>[0]){
+    const event=makeLearningEvent(input);
+    saveEventOutbox([...eventOutboxRef.current,event]);
+    if(cloudUser)void flushEventOutbox(cloudUser);
+    return event;
+  }
 
   useEffect(() => {
     const needsTopicCatalog = (tab === "reading" || tab === "listening") && practiceSource[tab] === "topic";
@@ -555,6 +580,10 @@ export default function Home() {
   }
 
   useEffect(() => {
+    try{
+      const saved=JSON.parse(localStorage.getItem(EVENT_OUTBOX_KEY)??'[]');
+      eventOutboxRef.current=Array.isArray(saved)?saved.slice(-2000):[];
+    }catch{eventOutboxRef.current=[];}
     const previousOwner=localStorage.getItem(`${STORAGE_KEY}:owner`);
     localStateKey.current=previousOwner?`${STORAGE_KEY}:guest`:STORAGE_KEY;
     const saved = readStudyState(localStorage, localStateKey.current, previousOwner?[]:LEGACY_KEYS);
@@ -603,6 +632,7 @@ export default function Home() {
         if(!active||version!==connectionVersion)return;
         setCloudUsername(username);
         setCloudReady(true);
+        await flushEventOutbox(user);
       } catch (error) {
         console.error(error);
         setStatus("Cloud sync setup needs attention; local history is still safe on this device.");
@@ -1226,6 +1256,12 @@ export default function Home() {
     }));
     const client = getSupabaseClient();
     if (client && cloudUser) appendCloudReview(client, cloudUser, event).catch(console.error);
+    recordSuiteEvent({
+      product:'cursos',eventType:'vocabulary_review',targetLanguage:'fa',skill:'vocabulary',
+      sourceItemId:current.id,linguisticConcept:current.normalizedForm,correctness:correct,responseMs:measured,
+      attemptNumber:current.reviews+1,courseWeek:state.weekNumber,topic:current.topic,
+      metadata:{modality:reviewModality,rating,knowledgeState:current.knowledgeState},
+    });
     setLockedReviewForm(nextReviewWord(due,current.id)?.normalizedForm??null);
   }
 
@@ -1450,6 +1486,18 @@ export default function Home() {
       sentenceGists: readingMode === "inference" ? sentenceGists : undefined,
     };
     setState((currentState) => ({ ...currentState, passageAttempts: [...currentState.passageAttempts, attempt] }));
+    activeReadingQuestions.forEach((question,index)=>{
+      const graded=result.grade.answers?.find(answer=>answer.questionIndex===index);
+      recordSuiteEvent({
+        product:'cursos',eventType:'reading_answer',targetLanguage:'fa',skill:'reading',sourceItemId:latestPassage.id,
+        linguisticConcept:question.type,correctness:graded?graded.score>=70:undefined,
+        responseMs:Math.round(readingDurationMs/Math.max(1,activeReadingQuestions.length)),attemptNumber:1,
+        supportsUsed:[readingMode==='inference'?'masked_text':'full_text',...(readingRereads?['reread']:[])],
+        sourceKind:latestPassage.sourceType,register:latestPassage.register,difficulty:latestPassage.ilrEstimate,
+        courseWeek:state.weekNumber,topic:latestPassage.topic,
+        metadata:{questionType:question.type,score:graded?.score??result.grade.overallScore,gradingMode:result.gradingMode,unknownWordCount:readingUnknown},
+      });
+    });
     setReadingStartedAt(null);
     setReadingDurationMs(0);
     setSentenceGists([]);
@@ -1644,6 +1692,17 @@ export default function Home() {
       gistHintedSentenceIndexes: listeningMode === "gist" ? gistHintedSentenceIndexes : undefined,
     };
     setState((currentState) => ({ ...currentState, listeningAttempts: [...currentState.listeningAttempts, attempt] }));
+    activeListeningQuestions.forEach((question,index)=>{
+      const graded=result.grade.answers?.find(answer=>answer.questionIndex===index);
+      recordSuiteEvent({
+        product:'cursos',eventType:'listening_answer',targetLanguage:'fa',skill:'listening',sourceItemId:latestListening.id,
+        linguisticConcept:question.type,correctness:graded?graded.score>=70:undefined,attemptNumber:1,
+        supportsUsed:[...(transcriptVisible?['transcript']:[]),...(listensCount>1?['replay']:[]),...(gistHintedSentenceIndexes.length?['vocabulary_hint']:[])],
+        sourceKind:latestListening.sourceType,register:latestListening.register,difficulty:latestListening.ilrEstimate,
+        courseWeek:state.weekNumber,topic:latestListening.topic,
+        metadata:{questionType:question.type,score:graded?.score??result.grade.overallScore,gradingMode:result.gradingMode,listensCount,listeningMode},
+      });
+    });
     setStatus(listeningMode === "gist"
       ? `Gist listening saved · ${result.grade.overallScore}% comprehension · ${gistAnsweredAfterListens.filter((count) => count === 1).length}/${listeningGists.length} captured after one listen · ${gistHintedSentenceIndexes.length} vocabulary aids.`
       : `Listening saved · ${result.grade.overallScore}% comprehension after ${listensCount} listen${listensCount === 1 ? "" : "s"}.`);

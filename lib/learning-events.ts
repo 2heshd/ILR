@@ -50,10 +50,11 @@ export function learningEventRow(user:User,event:LearningEvent){
 }
 
 export async function appendLearningEvents(client:SupabaseClient,user:User,events:LearningEvent[]){
-  if(!events.length)return;
+  if(!events.length)return true;
   for(let offset=0;offset<events.length;offset+=100){
     const {error}=await client.from('learning_events').upsert(events.slice(offset,offset+100).map(event=>learningEventRow(user,event)),{onConflict:'id',ignoreDuplicates:true});
-    if(error&&error.code!=='42P01'&&error.code!=='PGRST205')throw error;
+    if(error?.code==='42P01'||error?.code==='PGRST205')return false;
+    if(error)throw error;
   }
+  return true;
 }
-
