@@ -207,6 +207,10 @@ English title, English questions and English reference answers; only textFa is P
           suggestedWords: violations.slice(0, 8),
         }, { status: 422 });
       }
+      const normalizedTitle=String(data.title??'').trim().toLocaleLowerCase();
+      if(normalizedTitle&&(body.previousTitles??[]).some(title=>String(title).trim().toLocaleLowerCase()===normalizedTitle)){
+        return NextResponse.json({error:'That exercise duplicated a recent title. Generate again for a fresh item.',qualityIssues:['duplicate_title']},{status:422,headers:{'Server-Timing':timings.join(', ')}});
+      }
     }
 
     return NextResponse.json(data, {headers:{'Server-Timing':timings.join(', ')}});

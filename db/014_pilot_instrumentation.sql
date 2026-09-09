@@ -14,7 +14,7 @@ create table if not exists public.learning_events (
   linguistic_concept text,
   problem_id uuid,
   intervention_type text,
-  intervention_id uuid,
+  intervention_id text,
   related_event_id uuid references public.learning_events(id) on delete set null,
   correctness boolean,
   response_ms integer check (response_ms is null or response_ms between 0 and 3600000),
@@ -55,6 +55,60 @@ alter table public.learning_class_members add column if not exists consented_at 
 alter table public.learning_class_members add column if not exists withdrawn_at timestamptz;
 create unique index if not exists learning_class_participant_code_idx on public.learning_class_members(class_id,participant_code) where participant_code is not null;
 
+-- Freeze the class consent context at event time. Reports use this junction rather
+-- than joining every event a learner has ever produced to every class they join.
+create table if not exists public.learning_event_classes (
+  event_id uuid not null references public.learning_events(id) on delete cascade,
+  class_id uuid not null references public.learning_classes(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  primary key(event_id,class_id)
+);
+create index if not exists learning_event_classes_class_idx on public.learning_event_classes(class_id,user_id);
+alter table public.learning_event_classes enable row level security;
+drop policy if exists "own learning event class links select" on public.learning_event_classes;
+create policy "own learning event class links select" on public.learning_event_classes for select to authenticated using(auth.uid()=user_id);
+grant select on public.learning_event_classes to authenticated;
+
+create or replace function public.attach_learning_event_classes() returns trigger
+language plpgsql security definer set search_path=public as $$
+begin
+  insert into public.learning_event_classes(event_id,class_id,user_id)
+  select new.id,m.class_id,new.user_id from public.learning_class_members m
+  where m.user_id=new.user_id and m.consented_at is not null and m.withdrawn_at is null
+  on conflict do nothing;
+  return new;
+end $$;
+drop trigger if exists attach_learning_event_classes_after_insert on public.learning_events;
+create trigger attach_learning_event_classes_after_insert after insert on public.learning_events for each row execute function public.attach_learning_event_classes();
+insert into public.learning_event_classes(event_id,class_id,user_id)
+select e.id,m.class_id,e.user_id from public.learning_events e join public.learning_class_members m on m.user_id=e.user_id
+where m.consented_at is not null and m.withdrawn_at is null and e.occurred_at>=m.consented_at
+on conflict do nothing;
+
+create or replace function public.join_learning_class(code text, learner_name text) returns uuid
+language plpgsql security definer set search_path=public as $$
+declare target uuid;
+begin
+  if auth.uid() is null then raise exception 'Sign in first'; end if;
+  select id into target from public.learning_classes where join_code=code;
+  if target is null then raise exception 'Invalid class code'; end if;
+  insert into public.learning_class_members(class_id,user_id,display_name,participant_code,consented_at,withdrawn_at)
+    values(target,auth.uid(),trim(learner_name),'P-'||upper(substr(replace(auth.uid()::text,'-',''),1,10)),now(),null)
+  on conflict(class_id,user_id) do update set display_name=excluded.display_name,consented_at=coalesce(learning_class_members.consented_at,now()),withdrawn_at=null;
+  return target;
+end $$;
+revoke all on function public.join_learning_class(text,text) from public,anon;
+grant execute on function public.join_learning_class(text,text) to authenticated;
+
+create or replace function public.withdraw_from_learning_class(target uuid) returns void
+language plpgsql security definer set search_path=public as $$
+begin
+  update public.learning_class_members set withdrawn_at=now() where class_id=target and user_id=auth.uid();
+  if not found then raise exception 'Active membership not found'; end if;
+end $$;
+revoke all on function public.withdraw_from_learning_class(uuid) from public,anon;
+grant execute on function public.withdraw_from_learning_class(uuid) to authenticated;
+
 create table if not exists public.pilot_assessments (
   id uuid primary key default gen_random_uuid(),
   class_id uuid not null references public.learning_classes(id) on delete cascade,
@@ -93,6 +147,7 @@ create table if not exists public.generation_quality_runs (
   issue_codes text[] not null default '{}',
   metadata jsonb not null default '{}'::jsonb check(jsonb_typeof(metadata)='object')
 );
+alter table public.generation_quality_runs add column if not exists content_payload jsonb check(content_payload is null or jsonb_typeof(content_payload)='object');
 create index if not exists generation_quality_time_idx on public.generation_quality_runs(created_at desc,product,modality);
 alter table public.generation_quality_runs enable row level security;
 drop policy if exists "own generation quality select" on public.generation_quality_runs;
@@ -100,6 +155,18 @@ drop policy if exists "own generation quality insert" on public.generation_quali
 create policy "own generation quality select" on public.generation_quality_runs for select to authenticated using(auth.uid()=user_id);
 create policy "own generation quality insert" on public.generation_quality_runs for insert to authenticated with check(auth.uid()=user_id);
 grant select,insert on public.generation_quality_runs to authenticated;
+
+create or replace function public.delete_my_pilot_data() returns void
+language plpgsql security definer set search_path=public as $$
+begin
+  if auth.uid() is null then raise exception 'Sign in first'; end if;
+  delete from public.generation_quality_runs where user_id=auth.uid();
+  delete from public.pilot_assessments where user_id=auth.uid();
+  delete from public.learning_events where user_id=auth.uid();
+  update public.learning_class_members set withdrawn_at=coalesce(withdrawn_at,now()) where user_id=auth.uid();
+end $$;
+revoke all on function public.delete_my_pilot_data() from public,anon;
+grant execute on function public.delete_my_pilot_data() to authenticated;
 
 create table if not exists public.content_human_reviews (
   id uuid primary key default gen_random_uuid(),
@@ -117,6 +184,38 @@ create table if not exists public.content_human_reviews (
 );
 alter table public.content_human_reviews enable row level security;
 -- Review assignment is intentionally service/admin managed; no broad client policy.
+
+create or replace function public.content_review_queue(target uuid, queue_limit integer default 25) returns jsonb
+language plpgsql security definer set search_path=public as $$
+declare report jsonb;
+begin
+  if not exists(select 1 from public.learning_classes where id=target and owner_id=auth.uid()) then raise exception 'Class owner access required'; end if;
+  select coalesce(jsonb_agg(row_to_json(x) order by x.created_at desc),'[]'::jsonb) into report from (
+    select g.id,g.created_at,g.modality,g.source_kind,g.register,g.latency_ms,g.release_status,g.issue_codes,g.content_payload,
+      r.verdict,r.reviewer_role,r.language_natural,r.linguistically_accurate,r.pedagogically_useful,r.would_use_in_instruction,r.blocking_issue,r.reviewed_at
+    from public.generation_quality_runs g join public.learning_class_members m on m.user_id=g.user_id and m.class_id=target
+    left join public.content_human_reviews r on r.generation_run_id=g.id and r.reviewer_id=auth.uid()
+    where m.consented_at is not null and m.withdrawn_at is null and g.content_payload is not null
+    order by g.created_at desc limit greatest(1,least(queue_limit,100))
+  ) x;
+  return report;
+end $$;
+revoke all on function public.content_review_queue(uuid,integer) from public,anon;
+grant execute on function public.content_review_queue(uuid,integer) to authenticated;
+
+create or replace function public.submit_content_human_review(run_id uuid, role text, review_verdict text, natural boolean, accurate boolean, useful boolean, usable boolean, issue text default null) returns uuid
+language plpgsql security definer set search_path=public as $$
+declare saved uuid;
+begin
+  if role not in ('native_speaker','instructor','linguist') or review_verdict not in ('accepted','minor_correction','major_correction','rejected') then raise exception 'Invalid review'; end if;
+  if not exists(select 1 from public.generation_quality_runs g join public.learning_class_members m on m.user_id=g.user_id join public.learning_classes c on c.id=m.class_id where g.id=run_id and c.owner_id=auth.uid() and m.consented_at is not null and m.withdrawn_at is null) then raise exception 'Review access required'; end if;
+  insert into public.content_human_reviews(generation_run_id,reviewer_id,reviewer_role,verdict,language_natural,linguistically_accurate,pedagogically_useful,would_use_in_instruction,blocking_issue,reviewed_at)
+  values(run_id,auth.uid(),role,review_verdict,natural,accurate,useful,usable,nullif(trim(issue),''),now())
+  on conflict(generation_run_id,reviewer_id) do update set reviewer_role=excluded.reviewer_role,verdict=excluded.verdict,language_natural=excluded.language_natural,linguistically_accurate=excluded.linguistically_accurate,pedagogically_useful=excluded.pedagogically_useful,would_use_in_instruction=excluded.would_use_in_instruction,blocking_issue=excluded.blocking_issue,reviewed_at=excluded.reviewed_at
+  returning id into saved; return saved;
+end $$;
+revoke all on function public.submit_content_human_review(uuid,text,text,boolean,boolean,boolean,boolean,text) from public,anon;
+grant execute on function public.submit_content_human_review(uuid,text,text,boolean,boolean,boolean,boolean,text) to authenticated;
 
 create table if not exists public.deployment_releases (
   id uuid primary key default gen_random_uuid(),
@@ -146,7 +245,7 @@ begin
       select user_id from public.learning_class_members
       where class_id=target and consented_at is not null and withdrawn_at is null
     ), interventions as (
-      select e.* from public.learning_events e join opted_in m using(user_id)
+      select e.* from public.learning_events e join public.learning_event_classes ec on ec.event_id=e.id and ec.class_id=target join opted_in m using(user_id)
       where e.intervention_id is not null and e.occurred_at>=now()-make_interval(days=>greatest(1,least(days,3650)))
     ), scored as (
       select i.user_id,i.intervention_id,i.linguistic_concept,i.occurred_at,
@@ -169,6 +268,69 @@ end $$;
 revoke all on function public.class_intervention_report(uuid,integer) from public,anon;
 grant execute on function public.class_intervention_report(uuid,integer) to authenticated;
 
+create or replace function public.class_pilot_event_report(target uuid, days integer default 30) returns jsonb
+language plpgsql security definer set search_path=public as $$
+declare report jsonb; since_time timestamptz;
+begin
+  if not exists(select 1 from public.learning_classes where id=target and owner_id=auth.uid()) then raise exception 'Class owner access required'; end if;
+  select case when days=0 then coalesce(pilot_starts_on::timestamptz,created_at) else now()-make_interval(days=>greatest(1,least(days,3650))) end into since_time from public.learning_classes where id=target;
+  select jsonb_build_object(
+    'since',since_time,
+    'learners',coalesce((select jsonb_agg(row_to_json(x) order by x.participant_code) from (
+      select m.participant_code,count(e.id) attempts,count(e.id) filter(where e.correctness) correct,
+        round(avg(e.response_ms)) average_response_ms,count(distinct e.product) products_used,count(distinct date(e.occurred_at)) active_days
+      from public.learning_class_members m left join public.learning_event_classes ec on ec.class_id=m.class_id and ec.user_id=m.user_id left join public.learning_events e on e.id=ec.event_id and e.occurred_at>=since_time
+      where m.class_id=target and m.consented_at is not null and m.withdrawn_at is null
+      group by m.user_id,m.participant_code
+    ) x),'[]'::jsonb),
+    'bottlenecks',coalesce((select jsonb_agg(row_to_json(x) order by x.accuracy nulls first,x.attempts desc) from (
+      select e.product,e.skill,e.linguistic_concept,count(*) attempts,count(*) filter(where e.correctness) correct,
+        round(100.0*count(*) filter(where e.correctness)/nullif(count(*) filter(where e.correctness is not null),0)) accuracy,
+        round(avg(e.response_ms)) average_response_ms
+      from public.learning_events e join public.learning_event_classes ec on ec.event_id=e.id and ec.class_id=target join public.learning_class_members m on m.user_id=e.user_id and m.class_id=target
+      where e.occurred_at>=since_time and m.consented_at is not null and m.withdrawn_at is null
+      group by e.product,e.skill,e.linguistic_concept having count(*)>=3 order by accuracy nulls first,attempts desc limit 20
+    ) x),'[]'::jsonb)
+  ) into report;
+  return report;
+end $$;
+revoke all on function public.class_pilot_event_report(uuid,integer) from public,anon;
+grant execute on function public.class_pilot_event_report(uuid,integer) to authenticated;
+
+create or replace function public.capture_class_pilot_assessment(target uuid, assessment_period text) returns integer
+language plpgsql security definer set search_path=public as $$
+declare saved integer;
+begin
+  if assessment_period not in ('baseline','midpoint','endline') then raise exception 'Invalid assessment period'; end if;
+  if not exists(select 1 from public.learning_classes where id=target and owner_id=auth.uid()) then raise exception 'Class owner access required'; end if;
+  insert into public.pilot_assessments(class_id,user_id,period,metrics,assessed_at)
+  select target,m.user_id,assessment_period,jsonb_build_object(
+    'events',count(e.id),'scored_events',count(e.id) filter(where e.correctness is not null),
+    'accuracy',round(100.0*count(e.id) filter(where e.correctness)/nullif(count(e.id) filter(where e.correctness is not null),0)),
+    'median_response_ms',percentile_cont(.5) within group(order by e.response_ms) filter(where e.response_ms is not null),
+    'active_days',count(distinct date(e.occurred_at))
+  ),now()
+  from public.learning_class_members m left join public.learning_events e on e.user_id=m.user_id
+  where m.class_id=target and m.consented_at is not null and m.withdrawn_at is null group by m.user_id
+  on conflict(class_id,user_id,period) do update set metrics=excluded.metrics,assessed_at=excluded.assessed_at;
+  get diagnostics saved=row_count; return saved;
+end $$;
+revoke all on function public.capture_class_pilot_assessment(uuid,text) from public,anon;
+grant execute on function public.capture_class_pilot_assessment(uuid,text) to authenticated;
+
+create or replace function public.class_pilot_assessment_report(target uuid) returns jsonb
+language plpgsql security definer set search_path=public as $$
+declare report jsonb;
+begin
+  if not exists(select 1 from public.learning_classes where id=target and owner_id=auth.uid()) then raise exception 'Class owner access required'; end if;
+  select coalesce(jsonb_agg(row_to_json(x) order by x.participant_code,x.period),'[]'::jsonb) into report from (
+    select m.participant_code,a.period,a.assessed_at,a.metrics from public.pilot_assessments a join public.learning_class_members m on m.class_id=a.class_id and m.user_id=a.user_id where a.class_id=target
+  ) x;
+  return report;
+end $$;
+revoke all on function public.class_pilot_assessment_report(uuid) from public,anon;
+grant execute on function public.class_pilot_assessment_report(uuid) to authenticated;
+
 create or replace function public.my_learning_event_export() returns setof public.learning_events
 language sql security invoker set search_path=public as $$
   select * from public.learning_events where user_id=auth.uid() order by occurred_at,id;
@@ -176,3 +338,16 @@ $$;
 revoke all on function public.my_learning_event_export() from public,anon;
 grant execute on function public.my_learning_event_export() to authenticated;
 
+create or replace function public.purge_expired_pilot_class_data() returns integer
+language plpgsql security definer set search_path=public as $$
+declare removed integer;
+begin
+  delete from public.learning_event_classes ec using public.learning_classes c
+  where ec.class_id=c.id and c.pilot_ends_on is not null and now()>=c.pilot_ends_on::timestamptz+make_interval(days=>c.data_retention_days);
+  get diagnostics removed=row_count;
+  delete from public.pilot_assessments a using public.learning_classes c
+  where a.class_id=c.id and c.pilot_ends_on is not null and now()>=c.pilot_ends_on::timestamptz+make_interval(days=>c.data_retention_days);
+  return removed;
+end $$;
+revoke all on function public.purge_expired_pilot_class_data() from public,anon,authenticated;
+grant execute on function public.purge_expired_pilot_class_data() to service_role;

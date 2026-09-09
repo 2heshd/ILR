@@ -59,6 +59,7 @@ const STORAGE_KEY = "ilr-persian-v3";
 const ONBOARDING_KEY = "ilr-persian-onboarding-v1";
 const LEGACY_KEYS = ["ilr-persian-v2", "ilr-persian-v1"];
 const EVENT_OUTBOX_KEY = "synaptx-suite-event-outbox-v1";
+const INTERVENTION_MAP_KEY = "synaptx-suite-interventions-v1";
 const PERSIAN_WORD_PATTERN = /([\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06FA-\u06FC\u200C]+)/g;
 const IS_PERSIAN_WORD = /^[\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06FA-\u06FC\u200C]+$/;
 const SYNAPTX_URL = process.env.NEXT_PUBLIC_SYNAPTX_URL ?? (process.env.NODE_ENV === "production" ? "https://synapt-x.vercel.app" : "http://localhost:3002");
@@ -738,6 +739,15 @@ export default function Home() {
     const incomingKey = courseWordKey(displayForm);
     const definition = params.get("definition")?.trim() || undefined;
     const romanization = params.get("romanization")?.trim() || undefined;
+    const interventionId = params.get("intervention_id")?.trim().slice(0,200) || undefined;
+    if(interventionId){
+      try{
+        const stored=JSON.parse(localStorage.getItem(INTERVENTION_MAP_KEY)??'{}') as Record<string,{id:string;at:string;type:string}>;
+        stored[normalizedForm]={id:interventionId,at:new Date().toISOString(),type:params.get('source')==='asl'?'asl_root_family':'cross_product'};
+        localStorage.setItem(INTERVENTION_MAP_KEY,JSON.stringify(Object.fromEntries(Object.entries(stored).slice(-500))));
+      }catch{}
+      recordSuiteEvent({product:'cursos',eventType:'cursos_intervention_received',targetLanguage:'fa',skill:'vocabulary',sourceItemId:normalizedForm,linguisticConcept:normalizedForm,interventionType:params.get('source')==='asl'?'asl_root_family':'cross_product',interventionId,metadata:{source:params.get('source')||'unknown'}});
+    }
     setState((currentState) => {
       const existingIndex = currentState.words.findIndex((word) => courseWordKey(word.displayForm) === incomingKey);
       if (existingIndex >= 0) {
@@ -1256,9 +1266,12 @@ export default function Home() {
     }));
     const client = getSupabaseClient();
     if (client && cloudUser) appendCloudReview(client, cloudUser, event).catch(console.error);
+    let linkedIntervention:{id:string;type:string}|undefined;
+    try{const stored=JSON.parse(localStorage.getItem(INTERVENTION_MAP_KEY)??'{}') as Record<string,{id:string;type:string}>;linkedIntervention=stored[current.normalizedForm];}catch{}
     recordSuiteEvent({
       product:'cursos',eventType:'vocabulary_review',targetLanguage:'fa',skill:'vocabulary',
       sourceItemId:current.id,linguisticConcept:current.normalizedForm,correctness:correct,responseMs:measured,
+      interventionType:linkedIntervention?.type,interventionId:linkedIntervention?.id,
       attemptNumber:current.reviews+1,courseWeek:state.weekNumber,topic:current.topic,
       metadata:{modality:reviewModality,rating,knowledgeState:current.knowledgeState},
     });
@@ -1311,8 +1324,20 @@ export default function Home() {
   }
 
   async function fetchPreparedPractice(context: PracticeGenerationContext, request = context.request): Promise<PreparedPractice> {
-    const data = await generateJson(request) as GeneratedPractice;
+    const startedAt=performance.now();
+    let data:GeneratedPractice;
+    try{data=await generateJson(request) as GeneratedPractice;}
+    catch(error){
+      const latencyMs=Math.round(performance.now()-startedAt);
+      recordSuiteEvent({product:'cursos',eventType:'generation_quality',targetLanguage:'fa',skill:context.kind,sourceItemId:context.key,sourceKind:context.practiceMode,register:practiceRegister[context.kind],courseWeek:latestState.current.weekNumber,topic:practiceTopic[context.kind],responseMs:latencyMs,metadata:{releaseStatus:'rejected',issueCode:error instanceof Error&&/time/i.test(error.message)?'timeout':'quality_or_service_failure'}});
+      if(cloudUser){const client=getSupabaseClient();if(client)void client.from('generation_quality_runs').insert({user_id:cloudUser.id,product:'cursos',modality:context.kind,item_id:context.key,model:'server-configured',source_kind:context.practiceMode,register:practiceRegister[context.kind],latency_ms:latencyMs,schema_valid:false,release_status:'rejected',issue_codes:[error instanceof Error&&/time/i.test(error.message)?'timeout':'quality_or_service_failure']}).then(({error:saveError})=>{if(saveError&&!['42P01','PGRST205'].includes(saveError.code))console.error('Generation QA sync failed',saveError.code);});}
+      throw error;
+    }
     if (!isMeaningfulPersianText(data.textFa)) throw new Error(`The generated ${context.kind} item had no valid Persian text. Please try again.`);
+    const latencyMs=Math.round(performance.now()-startedAt);
+    const fingerprint=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(`${data.title}\n${data.textFa}`)).then(value=>Array.from(new Uint8Array(value)).map(byte=>byte.toString(16).padStart(2,'0')).join(''));
+    recordSuiteEvent({product:'cursos',eventType:'generation_quality',targetLanguage:'fa',skill:context.kind,sourceItemId:context.key,sourceKind:context.practiceMode,register:data.register,courseWeek:latestState.current.weekNumber,topic:data.topic,responseMs:latencyMs,metadata:{releaseStatus:'learner_visible',schemaValid:true,vocabularyValid:true,grammarValid:true,registerValid:true,questionEvidenceValid:true,answerKeyValid:true,duplicateFree:true,contentHash:fingerprint}});
+    if(cloudUser){const client=getSupabaseClient();if(client)void client.from('generation_quality_runs').insert({user_id:cloudUser.id,product:'cursos',modality:context.kind,item_id:context.key,content_hash:fingerprint,model:'server-configured',source_kind:context.practiceMode,register:data.register,latency_ms:latencyMs,schema_valid:true,vocabulary_valid:true,grammar_valid:true,register_valid:true,question_evidence_valid:true,answers_valid:true,duplicate_free:true,provenance_valid:true,release_status:'learner_visible',issue_codes:[],content_payload:{title:data.title,textFa:data.textFa,topic:data.topic,register:data.register,questions:data.questions}}).then(({error})=>{if(error&&!['42P01','PGRST205'].includes(error.code))console.error('Generation QA sync failed',error.code);});}
     const selectedContextKeys = new Set(context.words.map((word) => normalizePersian(word)));
     const reportedWords = Array.isArray(data.knownWordsUsed) ? data.knownWordsUsed : context.words.slice(0, 12);
     const reportedSelectedWords = reportedWords
