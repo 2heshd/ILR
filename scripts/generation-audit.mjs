@@ -6,6 +6,8 @@ import {unselectedContentWords} from '../lib/practice-vocabulary.ts';
 import {courseSectionLabel} from '../lib/course.ts';
 import {checkSupportingVocabulary} from '../lib/practice-support.ts';
 import {practiceAnswerIssues} from '../lib/practice-answers.ts';
+import {PRACTICE_TOPICS} from '../lib/course-topics.ts';
+import {topicPracticeWords} from '../lib/practice-sources.ts';
 
 const course=JSON.parse(await readFile(new URL('../data/course-vocabulary.json',import.meta.url),'utf8')).entries;
 const news=JSON.parse(await readFile(new URL('../data/news-vocabulary.json',import.meta.url),'utf8')).entries;
@@ -13,13 +15,28 @@ const rows=[...course.map(e=>({word:e.fa,meaning:e.en,group:courseSectionLabel(e
 const groups=new Map();
 for(const row of rows){const group=groups.get(row.group)||[];group.push(row);groups.set(row.group,group);}
 const cases=[];
-for(const [group,entries] of groups){
-  for(let i=0;i<entries.length;i+=200){
-    const bank=entries.slice(i,i+200),index=cases.length;
-    cases.push({name:`${group} / ${1+i/200}`,body:{kind:index%2?'listening':'reading',topic:'One coherent situation appropriate to the selected vocabulary',targetIlr:1+index%4,register:index%3===0?'colloquial':'formal',targetWords:[...new Set(bank.map(e=>e.word))],wordDefinitions:bank.map(e=>({word:e.word,meaning:e.meaning}))}});
+// Exercise every learner-facing topic with the same mixed, attested bank the UI
+// supplies. Static checks below still cover every catalog row; asking the model
+// to force an isolated chapter's arbitrary words into one passage is not a valid
+// quality test and was producing contrived prose by construction.
+for(const [index,topic] of PRACTICE_TOPICS.entries()){
+  const bank=topicPracticeWords(topic,course,news);
+  cases.push({name:`topic / ${topic}`,body:{kind:index%2?'listening':'reading',practiceSource:'topic',topic,targetIlr:1+index%4,register:index%3===0?'colloquial':'formal',targetWords:bank.map(e=>e.word),wordDefinitions:bank}});
+}
+// Selected-word mode is a distinct contract. Cover small, medium, and maximum
+// focused plans across modalities, levels, and registers using coherent sourced
+// banks rather than generated combinations.
+const selectedSizes=[12,30,80];
+const selectedTopics=['Daily life','Food & shopping','Education','Health','Work & economy','Government & society','Nature & weather','Travel & transport'];
+for(const [topicIndex,topic] of selectedTopics.entries()){
+  const source=topicPracticeWords(topic,course,news);
+  for(const [sizeIndex,size] of selectedSizes.entries()){
+    const bank=source.slice(0,size);
+    const index=cases.length;
+    cases.push({name:`selected / ${topic} / ${size}`,body:{kind:index%2?'listening':'reading',practiceSource:'selected',topic,targetIlr:1+(topicIndex+sizeIndex)%4,register:(topicIndex+sizeIndex)%2?'colloquial':'formal',targetWords:bank.map(e=>e.word),wordDefinitions:bank}});
   }
 }
-const staticAudit={entries:rows.length,groups:groups.size,cases:cases.length,empty:rows.filter(r=>!r.word?.trim()||!r.meaning?.trim()).length,rejectedIdentity:rows.filter(r=>unselectedContentWords(r.word,[r.word]).length).map(r=>r.word)};
+const staticAudit={entries:rows.length,groups:groups.size,topics:PRACTICE_TOPICS.length,cases:cases.length,empty:rows.filter(r=>!r.word?.trim()||!r.meaning?.trim()).length,rejectedIdentity:rows.filter(r=>unselectedContentWords(r.word,[r.word]).length).map(r=>r.word)};
 console.log(JSON.stringify({staticAudit}));
 const deployment=process.argv[2];
 if(!deployment)process.exit(0);
@@ -75,4 +92,4 @@ await writeFile(output,JSON.stringify({deployment,staticAudit,complete:true,summ
 console.log(JSON.stringify({summary,report:output}));
 // A completed command is not a passing audit. Fail the release gate for any
 // unsuccessful exercise or request beyond the user's timing target.
-process.exitCode = summary.returned === selected.length && (backgroundAttempts > 1 || summary.within20 === selected.length) ? 0 : 1;
+process.exitCode = summary.returned === selected.length && summary.within20 === selected.length ? 0 : 1;
