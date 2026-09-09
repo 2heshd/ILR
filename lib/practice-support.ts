@@ -1,6 +1,6 @@
 import {unselectedContentWords} from './practice-vocabulary.ts';
 
-export const SUPPORTING_VOCABULARY_LIMIT = 8;
+export const SUPPORTING_VOCABULARY_LIMIT = 12;
 
 const COMMON_PAST_TO_INFINITIVE: Record<string,string> = {
   'آمد':'آمدن','آورد':'آوردن','برد':'بردن','بود':'بودن','خورد':'خوردن','خواست':'خواستن','خواند':'خواندن','خرید':'خریدن',
