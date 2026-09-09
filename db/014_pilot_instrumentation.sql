@@ -56,6 +56,8 @@ alter table public.learning_class_members add column if not exists participant_c
 alter table public.learning_class_members add column if not exists consented_at timestamptz;
 alter table public.learning_class_members add column if not exists withdrawn_at timestamptz;
 create unique index if not exists learning_class_participant_code_idx on public.learning_class_members(class_id,participant_code) where participant_code is not null;
+drop policy if exists "Learners leave their own class" on public.learning_class_members;
+revoke delete on public.learning_class_members from authenticated;
 
 -- Freeze the class consent context at event time. Reports use this junction rather
 -- than joining every event a learner has ever produced to every class they join.

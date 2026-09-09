@@ -101,6 +101,12 @@ begin
     if sqlerrm='Non-owner report access unexpectedly succeeded' then raise; end if;
   end;
 
+  begin
+    delete from public.learning_class_members where class_id='7f020000-0000-4000-8000-000000000001' and user_id=auth.uid();
+    raise exception 'Direct membership deletion unexpectedly succeeded';
+  exception when insufficient_privilege then null;
+  end;
+
   select count(*) into linked_before_withdrawal from public.learning_event_classes where class_id='7f020000-0000-4000-8000-000000000001' and user_id=auth.uid();
   if linked_before_withdrawal<>1 then raise exception 'Withdrawal fixture did not contain one class-linked event'; end if;
   perform public.withdraw_from_learning_class('7f020000-0000-4000-8000-000000000001');
