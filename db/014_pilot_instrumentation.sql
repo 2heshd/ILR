@@ -199,7 +199,7 @@ create or replace function public.content_review_queue(target uuid, queue_limit 
 language plpgsql security definer set search_path=public as $$
 declare report jsonb;
 begin
-  if not exists(select 1 from public.learning_classes where id=target and owner_id=auth.uid()) then raise exception 'Class owner access required'; end if;
+  if not public.learning_can_manage_classes() or not exists(select 1 from public.learning_classes where id=target and owner_id=auth.uid()) then raise exception 'Class owner access required'; end if;
   select coalesce(jsonb_agg(row_to_json(x) order by x.created_at desc),'[]'::jsonb) into report from (
     select g.id,g.created_at,g.modality,g.source_kind,g.register,g.latency_ms,g.release_status,g.issue_codes,g.content_payload,
       r.verdict,r.reviewer_role,r.language_natural,r.linguistically_accurate,r.pedagogically_useful,r.would_use_in_instruction,r.blocking_issue,r.reviewed_at
@@ -218,7 +218,7 @@ language plpgsql security definer set search_path=public as $$
 declare saved uuid;
 begin
   if role not in ('native_speaker','instructor','linguist') or review_verdict not in ('accepted','minor_correction','major_correction','rejected') then raise exception 'Invalid review'; end if;
-  if not exists(select 1 from public.generation_quality_runs g join public.learning_class_members m on m.user_id=g.user_id join public.learning_classes c on c.id=m.class_id where g.id=run_id and c.owner_id=auth.uid() and m.consented_at is not null and m.withdrawn_at is null and g.created_at>=m.consented_at) then raise exception 'Review access required'; end if;
+  if not public.learning_can_manage_classes() or not exists(select 1 from public.generation_quality_runs g join public.learning_class_members m on m.user_id=g.user_id join public.learning_classes c on c.id=m.class_id where g.id=run_id and c.owner_id=auth.uid() and m.consented_at is not null and m.withdrawn_at is null and g.created_at>=m.consented_at) then raise exception 'Review access required'; end if;
   insert into public.content_human_reviews(generation_run_id,reviewer_id,reviewer_role,verdict,language_natural,linguistically_accurate,pedagogically_useful,would_use_in_instruction,blocking_issue,reviewed_at)
   values(run_id,auth.uid(),role,review_verdict,natural,accurate,useful,usable,nullif(trim(issue),''),now())
   on conflict(generation_run_id,reviewer_id) do update set reviewer_role=excluded.reviewer_role,verdict=excluded.verdict,language_natural=excluded.language_natural,linguistically_accurate=excluded.linguistically_accurate,pedagogically_useful=excluded.pedagogically_useful,would_use_in_instruction=excluded.would_use_in_instruction,blocking_issue=excluded.blocking_issue,reviewed_at=excluded.reviewed_at
@@ -250,7 +250,7 @@ create or replace function public.class_intervention_report(target uuid, days in
 language plpgsql security definer set search_path=public as $$
 declare report jsonb;
 begin
-  if not exists(select 1 from public.learning_classes where id=target and owner_id=auth.uid()) then raise exception 'Class owner access required'; end if;
+  if not public.learning_can_manage_classes() or not exists(select 1 from public.learning_classes where id=target and owner_id=auth.uid()) then raise exception 'Class owner access required'; end if;
   select coalesce(jsonb_agg(row_to_json(rows)), '[]'::jsonb) into report from (
     with opted_in as (
       select user_id from public.learning_class_members
@@ -283,7 +283,7 @@ create or replace function public.class_pilot_event_report(target uuid, days int
 language plpgsql security definer set search_path=public as $$
 declare report jsonb; since_time timestamptz;
 begin
-  if not exists(select 1 from public.learning_classes where id=target and owner_id=auth.uid()) then raise exception 'Class owner access required'; end if;
+  if not public.learning_can_manage_classes() or not exists(select 1 from public.learning_classes where id=target and owner_id=auth.uid()) then raise exception 'Class owner access required'; end if;
   select case when days=0 then coalesce(pilot_starts_on::timestamptz,created_at) else now()-make_interval(days=>greatest(1,least(days,3650))) end into since_time from public.learning_classes where id=target;
   select jsonb_build_object(
     'since',since_time,
@@ -313,7 +313,7 @@ language plpgsql security definer set search_path=public as $$
 declare saved integer;
 begin
   if assessment_period not in ('baseline','midpoint','endline') then raise exception 'Invalid assessment period'; end if;
-  if not exists(select 1 from public.learning_classes where id=target and owner_id=auth.uid()) then raise exception 'Class owner access required'; end if;
+  if not public.learning_can_manage_classes() or not exists(select 1 from public.learning_classes where id=target and owner_id=auth.uid()) then raise exception 'Class owner access required'; end if;
   insert into public.pilot_assessments(class_id,user_id,period,metrics,assessed_at)
   select target,m.user_id,assessment_period,jsonb_build_object(
     'events',count(e.id),'scored_events',count(e.id) filter(where e.correctness is not null),
@@ -333,7 +333,7 @@ create or replace function public.class_pilot_assessment_report(target uuid) ret
 language plpgsql security definer set search_path=public as $$
 declare report jsonb;
 begin
-  if not exists(select 1 from public.learning_classes where id=target and owner_id=auth.uid()) then raise exception 'Class owner access required'; end if;
+  if not public.learning_can_manage_classes() or not exists(select 1 from public.learning_classes where id=target and owner_id=auth.uid()) then raise exception 'Class owner access required'; end if;
   select coalesce(jsonb_agg(row_to_json(x) order by x.participant_code,x.period),'[]'::jsonb) into report from (
     select m.participant_code,a.period,a.assessed_at,a.metrics from public.pilot_assessments a join public.learning_class_members m on m.class_id=a.class_id and m.user_id=a.user_id where a.class_id=target and m.consented_at is not null and m.withdrawn_at is null and a.assessed_at>=m.consented_at
   ) x;
@@ -353,7 +353,7 @@ create or replace function public.class_pilot_event_export(target uuid) returns 
 language plpgsql security definer set search_path=public as $$
 declare report jsonb;
 begin
-  if not exists(select 1 from public.learning_classes where id=target and owner_id=auth.uid()) then raise exception 'Class owner access required'; end if;
+  if not public.learning_can_manage_classes() or not exists(select 1 from public.learning_classes where id=target and owner_id=auth.uid()) then raise exception 'Class owner access required'; end if;
   select coalesce(jsonb_agg(row_to_json(x) order by x.occurred_at,x.event_id),'[]'::jsonb) into report from (
     select m.participant_code,e.id event_id,e.occurred_at,e.product,e.event_type,e.target_language,e.skill,e.linguistic_concept,
       e.intervention_type,e.intervention_id,e.related_event_id,e.correctness,e.response_ms,e.attempt_number,e.supports_used,

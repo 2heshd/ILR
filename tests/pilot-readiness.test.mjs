@@ -41,6 +41,7 @@ test('pilot storage and review access fail closed at the database boundary',()=>
  assert.match(migration,/cardinality\(supports_used\) <= 32/u);
  assert.match(migration,/g\.created_at>=m\.consented_at/u);
  assert.match(migration,/grant select,insert,update on public\.deployment_releases to service_role/u);
+ assert.equal((migration.match(/not public\.learning_can_manage_classes\(\)/gu)??[]).length,7);
  assert.match(migration,/delete from public\.learning_event_classes where class_id=target and user_id=auth\.uid\(\)/u);
  assert.match(migration,/delete from public\.pilot_assessments where class_id=target and user_id=auth\.uid\(\)/u);
  assert.match(migration,/delete from public\.learning_class_members where user_id=auth\.uid\(\)/u);

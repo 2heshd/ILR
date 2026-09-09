@@ -5,12 +5,12 @@ begin;
 
 insert into auth.users(id,instance_id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at)
 values
-  ('7f010000-0000-4000-8000-000000000001','00000000-0000-0000-0000-000000000000','authenticated','authenticated','pilot-smoke-owner@example.invalid','',now(),'{}','{}',now(),now()),
+  ('eef89588-eab7-4543-9dad-e1b8a209553f','00000000-0000-0000-0000-000000000000','authenticated','authenticated','pilot-smoke-owner@example.invalid','',now(),'{}','{}',now(),now()),
   ('7f010000-0000-4000-8000-000000000002','00000000-0000-0000-0000-000000000000','authenticated','authenticated','pilot-smoke-learner@example.invalid','',now(),'{}','{}',now(),now())
 on conflict(id) do nothing;
 
 insert into public.learning_classes(id,owner_id,name,join_code,target_language,course_label,pilot_starts_on,pilot_ends_on,data_retention_days)
-values('7f020000-0000-4000-8000-000000000001','7f010000-0000-4000-8000-000000000001','Pilot smoke','pilot-smoke-code','fa','Smoke course',current_date,current_date+30,30);
+values('7f020000-0000-4000-8000-000000000001','eef89588-eab7-4543-9dad-e1b8a209553f','Pilot smoke','pilot-smoke-code','fa','Smoke course',current_date,current_date+30,30);
 
 insert into public.learning_class_members(class_id,user_id,display_name,participant_code,consented_at,withdrawn_at)
 values('7f020000-0000-4000-8000-000000000001','7f010000-0000-4000-8000-000000000002','Pilot learner','P-SMOKE',now()-interval '1 minute',null);
@@ -33,7 +33,7 @@ begin
   end if;
 
   begin
-    insert into public.learning_events(user_id,product,event_type) values('7f010000-0000-4000-8000-000000000001','cursos','foreign_write');
+    insert into public.learning_events(user_id,product,event_type) values('eef89588-eab7-4543-9dad-e1b8a209553f','cursos','foreign_write');
     raise exception 'Cross-user event insert unexpectedly succeeded';
   exception when insufficient_privilege then null;
   end;
@@ -53,8 +53,8 @@ end $$;
 
 reset role;
 set local role authenticated;
-select set_config('request.jwt.claim.sub','7f010000-0000-4000-8000-000000000001',true);
-select set_config('request.jwt.claims','{"sub":"7f010000-0000-4000-8000-000000000001","role":"authenticated"}',true);
+select set_config('request.jwt.claim.sub','eef89588-eab7-4543-9dad-e1b8a209553f',true);
+select set_config('request.jwt.claims','{"sub":"eef89588-eab7-4543-9dad-e1b8a209553f","role":"authenticated"}',true);
 
 do $$
 declare queue jsonb; report jsonb; review_id uuid; saved integer; current_run uuid:=current_setting('pilot.smoke.current_run')::uuid;
@@ -116,7 +116,7 @@ end $$;
 reset role;
 
 insert into public.learning_classes(id,owner_id,name,join_code,target_language,course_label,pilot_starts_on,pilot_ends_on,data_retention_days)
-values('7f020000-0000-4000-8000-000000000002','7f010000-0000-4000-8000-000000000001','Expired pilot smoke','expired-pilot-smoke-code','fa','Expired smoke course',current_date-90,current_date-31,30);
+values('7f020000-0000-4000-8000-000000000002','eef89588-eab7-4543-9dad-e1b8a209553f','Expired pilot smoke','expired-pilot-smoke-code','fa','Expired smoke course',current_date-90,current_date-31,30);
 insert into public.learning_class_members(class_id,user_id,display_name,participant_code,consented_at,withdrawn_at)
 values('7f020000-0000-4000-8000-000000000002','7f010000-0000-4000-8000-000000000002','Expired identity','P-EXPIRED',now()-interval '60 days',null);
 insert into public.learning_events(user_id,product,event_type) values('7f010000-0000-4000-8000-000000000002','cursos','expired_class_event');
