@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "latest",
-    "next": "latest",
+    "next": "^16.3.3",
     "openai": "latest",
     "react": "latest",
     "react-dom": "latest",
@@ -26,5 +26,8 @@
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "typescript": "latest"
+  },
+  "overrides": {
+    "sharp": "0.35.4"
   }
 }
