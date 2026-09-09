@@ -85,7 +85,7 @@ select set_config('request.jwt.claim.sub','7f010000-0000-4000-8000-000000000002'
 select set_config('request.jwt.claims','{"sub":"7f010000-0000-4000-8000-000000000002","role":"authenticated"}',true);
 
 do $$
-declare detached uuid;
+declare detached uuid; rejoined uuid; linked_before_withdrawal integer;
 begin
   begin
     perform public.class_pilot_event_report('7f020000-0000-4000-8000-000000000001',30);
@@ -94,11 +94,23 @@ begin
     if sqlerrm='Non-owner report access unexpectedly succeeded' then raise; end if;
   end;
 
+  select count(*) into linked_before_withdrawal from public.learning_event_classes where class_id='7f020000-0000-4000-8000-000000000001' and user_id=auth.uid();
+  if linked_before_withdrawal<>1 then raise exception 'Withdrawal fixture did not contain one class-linked event'; end if;
   perform public.withdraw_from_learning_class('7f020000-0000-4000-8000-000000000001');
+  if exists(select 1 from public.learning_event_classes where class_id='7f020000-0000-4000-8000-000000000001' and user_id=auth.uid()) then raise exception 'Withdrawal retained class-linked evidence'; end if;
+  if exists(select 1 from public.pilot_assessments where class_id='7f020000-0000-4000-8000-000000000001' and user_id=auth.uid()) then raise exception 'Withdrawal retained class assessment data'; end if;
+  if exists(select 1 from public.learning_class_members where class_id='7f020000-0000-4000-8000-000000000001' and user_id=auth.uid()) then raise exception 'Withdrawal retained membership identity'; end if;
   insert into public.learning_events(product,event_type) values('asl','post_withdrawal') returning id into detached;
   if exists(select 1 from public.learning_event_classes where event_id=detached) then raise exception 'Post-withdrawal event was attached to a class'; end if;
+  perform public.join_learning_class('pilot-smoke-code','Delete me');
+  if exists(select 1 from public.learning_event_classes ec join public.learning_events e on e.id=ec.event_id where ec.class_id='7f020000-0000-4000-8000-000000000001' and ec.user_id=auth.uid() and e.event_type in ('pilot_smoke','post_withdrawal')) then
+    raise exception 'Rejoining exposed evidence from an earlier consent period';
+  end if;
+  insert into public.learning_events(product,event_type) values('asl','post_rejoin') returning id into rejoined;
+  if not exists(select 1 from public.learning_event_classes where event_id=rejoined and class_id='7f020000-0000-4000-8000-000000000001') then raise exception 'Rejoined event was not attached to its class'; end if;
   perform public.delete_my_pilot_data();
   if exists(select 1 from public.learning_events where user_id=auth.uid()) then raise exception 'Learner event deletion failed'; end if;
+  if exists(select 1 from public.learning_class_members where user_id=auth.uid()) then raise exception 'Pilot identity deletion failed'; end if;
 end $$;
 
 reset role;

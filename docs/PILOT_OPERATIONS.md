@@ -4,7 +4,7 @@
 
 1. The pilot owner creates one class with its language, course label, start/end dates, and retention period.
 2. The institution approves the consent language and assigns aliases. The product generates a participant code; email addresses are never included in research exports.
-3. Learners join with the private code and explicit consent. Withdrawal timestamps the membership, stops future event attachment, and removes that learner from subsequent reports. The separate deletion action removes the learner's pilot events, quality records, and snapshots.
+3. Learners join with the private code and explicit consent. Withdrawal removes the membership, its class-event links, and class assessment snapshots, stopping both future sharing and later reappearance of previously shared evidence. The separate deletion action removes all of the learner's pilot events, quality records, snapshots, and stored class identity.
 4. The owner captures a baseline before normal use, a midpoint on the planned date, and an endline before closing access.
 
 ## Data dictionary

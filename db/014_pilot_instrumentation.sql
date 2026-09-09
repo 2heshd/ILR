@@ -96,7 +96,10 @@ begin
   if target is null then raise exception 'Invalid class code'; end if;
   insert into public.learning_class_members(class_id,user_id,display_name,participant_code,consented_at,withdrawn_at)
     values(target,auth.uid(),trim(learner_name),'P-'||upper(substr(replace(auth.uid()::text,'-',''),1,10)),now(),null)
-  on conflict(class_id,user_id) do update set display_name=excluded.display_name,consented_at=coalesce(learning_class_members.consented_at,now()),withdrawn_at=null;
+  on conflict(class_id,user_id) do update set
+    display_name=excluded.display_name,
+    consented_at=case when learning_class_members.withdrawn_at is not null then now() else coalesce(learning_class_members.consented_at,now()) end,
+    withdrawn_at=null;
   return target;
 end $$;
 revoke all on function public.join_learning_class(text,text) from public,anon;
@@ -105,7 +108,12 @@ grant execute on function public.join_learning_class(text,text) to authenticated
 create or replace function public.withdraw_from_learning_class(target uuid) returns void
 language plpgsql security definer set search_path=public as $$
 begin
-  update public.learning_class_members set withdrawn_at=now() where class_id=target and user_id=auth.uid();
+  if not exists(select 1 from public.learning_class_members where class_id=target and user_id=auth.uid() and withdrawn_at is null) then
+    raise exception 'Active membership not found';
+  end if;
+  delete from public.learning_event_classes where class_id=target and user_id=auth.uid();
+  delete from public.pilot_assessments where class_id=target and user_id=auth.uid();
+  delete from public.learning_class_members where class_id=target and user_id=auth.uid();
   if not found then raise exception 'Active membership not found'; end if;
 end $$;
 revoke all on function public.withdraw_from_learning_class(uuid) from public,anon;
@@ -165,7 +173,7 @@ begin
   delete from public.generation_quality_runs where user_id=auth.uid();
   delete from public.pilot_assessments where user_id=auth.uid();
   delete from public.learning_events where user_id=auth.uid();
-  update public.learning_class_members set withdrawn_at=coalesce(withdrawn_at,now()) where user_id=auth.uid();
+  delete from public.learning_class_members where user_id=auth.uid();
 end $$;
 revoke all on function public.delete_my_pilot_data() from public,anon;
 grant execute on function public.delete_my_pilot_data() to authenticated;
@@ -327,7 +335,7 @@ declare report jsonb;
 begin
   if not exists(select 1 from public.learning_classes where id=target and owner_id=auth.uid()) then raise exception 'Class owner access required'; end if;
   select coalesce(jsonb_agg(row_to_json(x) order by x.participant_code,x.period),'[]'::jsonb) into report from (
-    select m.participant_code,a.period,a.assessed_at,a.metrics from public.pilot_assessments a join public.learning_class_members m on m.class_id=a.class_id and m.user_id=a.user_id where a.class_id=target and m.consented_at is not null and m.withdrawn_at is null
+    select m.participant_code,a.period,a.assessed_at,a.metrics from public.pilot_assessments a join public.learning_class_members m on m.class_id=a.class_id and m.user_id=a.user_id where a.class_id=target and m.consented_at is not null and m.withdrawn_at is null and a.assessed_at>=m.consented_at
   ) x;
   return report;
 end $$;
