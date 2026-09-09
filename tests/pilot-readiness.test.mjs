@@ -50,6 +50,8 @@ test('pilot storage and review access fail closed at the database boundary',()=>
  assert.match(migration,/delete from public\.learning_class_members where user_id=auth\.uid\(\)/u);
  assert.match(migration,/delete from public\.learning_class_members m using public\.learning_classes c/u);
  assert.match(migration,/revoke delete on public\.learning_class_members from authenticated/u);
+ assert.match(migration,/update public\.learning_class_members set participant_code='P-'\|\|upper\(substr\(replace\(gen_random_uuid\(\)::text/u);
+ assert.doesNotMatch(migration,/participant_code,consented_at,withdrawn_at\)[\s\S]{0,200}replace\(auth\.uid\(\)::text/u);
 });
 
 test('production database smoke is transactional and exercises isolation',()=>{

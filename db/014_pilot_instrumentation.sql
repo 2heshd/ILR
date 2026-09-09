@@ -55,6 +55,7 @@ alter table public.learning_classes add column if not exists data_retention_days
 alter table public.learning_class_members add column if not exists participant_code text;
 alter table public.learning_class_members add column if not exists consented_at timestamptz;
 alter table public.learning_class_members add column if not exists withdrawn_at timestamptz;
+update public.learning_class_members set participant_code='P-'||upper(substr(replace(gen_random_uuid()::text,'-',''),1,10)) where participant_code is null;
 create unique index if not exists learning_class_participant_code_idx on public.learning_class_members(class_id,participant_code) where participant_code is not null;
 drop policy if exists "Learners leave their own class" on public.learning_class_members;
 revoke delete on public.learning_class_members from authenticated;
@@ -97,7 +98,7 @@ begin
   select id into target from public.learning_classes where join_code=code;
   if target is null then raise exception 'Invalid class code'; end if;
   insert into public.learning_class_members(class_id,user_id,display_name,participant_code,consented_at,withdrawn_at)
-    values(target,auth.uid(),trim(learner_name),'P-'||upper(substr(replace(auth.uid()::text,'-',''),1,10)),now(),null)
+    values(target,auth.uid(),trim(learner_name),'P-'||upper(substr(replace(gen_random_uuid()::text,'-',''),1,10)),now(),null)
   on conflict(class_id,user_id) do update set
     display_name=excluded.display_name,
     consented_at=case when learning_class_members.withdrawn_at is not null then now() else coalesce(learning_class_members.consented_at,now()) end,
