@@ -154,6 +154,11 @@ English title, English questions and English reference answers; only textFa is P
         text: { format: isPractice ? practiceResponseFormat : { type: "json_object" }, verbosity: "low" },
       }, { signal }), isPractice ? 6000 : 2200));
     if (isPractice) prompt += '\nFINAL CHECK: Prefer a short natural description over a forced story. No filler or unrelated plans. Use normal Persian collocations rather than mechanically combining dictionary nouns and verbs. Use explicit ezafe after final ه where appropriate (خانهٔ دوستم).';
+    // Produce an independent backup draft concurrently. If the first candidate
+    // fails either deterministic or editorial QA, using the already-running
+    // candidate is both faster and less likely to preserve the same defect than
+    // asking it to REPAIR THE PREVIOUS DRAFT in place.
+    const backupResponse = isPractice ? generate(`${prompt}\nINDEPENDENT CANDIDATE: Choose a different compatible subset and situation. Do not imitate or revise another draft.`, true) : null;
     let response = await generate(prompt);
     let data = parseJson(response.output_text);
 
@@ -190,7 +195,7 @@ English title, English questions and English reference answers; only textFa is P
         if (!rejectionIssues.length) rejectionIssues.push('The language reviewer did not approve this exact exercise.');
         }
         if(attempt<1){
-          response=await generate(`${prompt}\n\nREPAIR THE PREVIOUS DRAFT. Rewrite the passage AND its questions to resolve every issue, using at most ${SUPPORTING_VOCABULARY_LIMIT} supporting words outside the selected bank. Prefer simpler idiomatic sentences to forced combinations. Additional words (reduce to ${SUPPORTING_VOCABULARY_LIMIT} or fewer): ${JSON.stringify(outsideBank)}. Editorial issues: ${JSON.stringify(rejectionIssues)}\nDraft: ${JSON.stringify(data)}`, true);
+          response=await backupResponse!;
           data=parseJson(response.output_text);
         }
       }
