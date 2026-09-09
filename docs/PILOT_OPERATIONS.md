@@ -42,3 +42,4 @@ Use “observed,” “associated with,” and “post-intervention performance.
 - Before release: all unit/integration tests, build, migration inspection, preview generation matrix, authenticated sync checks, owner/non-owner access checks, and route smoke checks.
 - After release: verify the release SHA and schema/content versions, then run health and primary-flow checks.
 - During the pilot: review failure rate and p50/p95 generation latency daily; investigate repeated sync/generation failures rather than requiring learners to retry indefinitely.
+- Reproduce the cross-product health soak with `npm run pilot:soak -- <cursos-url> <synaptx-url> <asl-url> <cycles> <pause-ms>`; any non-200, invalid health payload, missing release identifier, or timeout fails the gate.
