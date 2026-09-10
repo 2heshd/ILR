@@ -17,6 +17,7 @@ import InferenceReadingText, { persianSentences } from "@/components/InferenceRe
 import InteractivePersianText from "@/components/InteractivePersianText";
 import Onboarding from "@/components/Onboarding";
 import RapidCaptions from "@/components/RapidCaptions";
+import RsvpReader from "@/components/RsvpReader";
 import SpeakingLab from "@/components/SpeakingLab";
 import { adaptiveAllocation, currentTrainingPhase, dominantBottleneck, selectContextWords } from "@/lib/adaptive";
 import type { AnkiReviewRow, AnkiVocabularyRow } from "@/lib/anki";
@@ -373,7 +374,7 @@ export default function Home() {
   const [readingStartedAt, setReadingStartedAt] = useState<number | null>(null);
   const [readingDurationMs, setReadingDurationMs] = useState(0);
   const [readingQuestionsOpen, setReadingQuestionsOpen] = useState(false);
-  const [readingMode, setReadingMode] = useState<"full" | "inference">("full");
+  const [readingMode, setReadingMode] = useState<"full" | "inference" | "rsvp">("full");
   const [sentenceGists, setSentenceGists] = useState<string[]>([]);
   const [readingUnknown, setReadingUnknown] = useState(0);
   const [readingRereads, setReadingRereads] = useState(0);
@@ -1178,7 +1179,7 @@ export default function Home() {
   function submitPatternAnswer() {
     if (!current || !patternInput.trim()) return;
     setResponseMs(Date.now() - startRef.current);
-    setPatternMatched(answerMatchesDefinition(patternInput, patternHints(current.displayForm)[0]?.rule??current.definition));
+    setPatternMatched(answerMatchesDefinition(patternInput, current.definition));
     setPatternPhase("result");
   }
 
@@ -2003,7 +2004,7 @@ export default function Home() {
     setTab("listening");
   }
 
-  function changeReadingMode(mode:"full"|"inference") {
+  function changeReadingMode(mode:"full"|"inference"|"rsvp") {
     setReadingMode(mode);
     setSentenceGists([]);
   }
@@ -2121,7 +2122,7 @@ export default function Home() {
               <div className="pattern-flash-meter" aria-hidden="true"><i /></div>
             </div>}
             {patternPhase === "answer" && <form className="pattern-answer" onSubmit={(event) => { event.preventDefault(); submitPatternAnswer(); }}>
-              <label htmlFor="pattern-answer">{patternHints(current.displayForm)[0]?<>In <span lang="fa">{current.displayForm}</span>, what does <span lang="fa">{patternHints(current.displayForm)[0].form}</span> contribute?</>:"The phrase is hidden. Type its English meaning."}</label>
+              <label htmlFor="pattern-answer">The word is hidden. Type its English meaning.</label>
               <input ref={patternInputRef} id="pattern-answer" value={patternInput} onChange={(event) => setPatternInput(event.target.value)} placeholder="Type the meaning…" autoComplete="off" />
               <button className="primary" type="submit" disabled={!patternInput.trim()}>Check answer</button>
             </form>}
@@ -2129,7 +2130,7 @@ export default function Home() {
               <span className={patternMatched ? "pattern-signal match" : "pattern-signal"}>{patternMatched ? "Likely match" : "Check your meaning"}</span>
               <div className="answer-block">
                 <span className="muted">You typed</span><strong>{patternInput}</strong>
-                <span className="muted">Expected</span><strong>{patternHints(current.displayForm)[0]?.rule??current.definition??"Definition missing"}</strong>
+                <span className="muted">Expected</span><strong>{current.definition??"Definition missing"}</strong>
                 {current.romanization && <span className="muted">{current.romanization}</span>}
                 <span className="muted">Answer time {(responseMs / 1000).toFixed(1)}s</span>
               </div>
@@ -2166,11 +2167,11 @@ export default function Home() {
       <label className="difficulty-control span-12">Sentence difficulty <select aria-label="Reading sentence difficulty" value={state.skillLevels.reading} onChange={event=>setSkillLevel('reading',Number(event.target.value) as IlrLevel)}>{['Simple','Everyday','Complex','Advanced'].map((label,index)=><option key={label} value={index+1}>{label}</option>)}</select><small>Applies to your next generated passage.</small></label>
       <label className="difficulty-control span-12">Language style <select aria-label="reading language style" value={practiceRegister.reading} onChange={event=>setPracticeRegister(current=>({...current,reading:event.target.value as 'formal'|'colloquial'}))}><option value="formal">Formal</option><option value="colloquial">Colloquial</option></select><small>Applies to the next generated item.</small></label>
       {practiceSource.reading === "selected" && planPicker("reading")}
-      <div className="card span-12 lab-header"><div><h2>Reading</h2><span className="muted">Practice your selected words, or generate freely from a vocabulary and news topic.</span></div><div className="row"><button disabled={Boolean(generationBusy || (practiceSource.reading === "topic" && !courseCatalog.length))} onClick={()=>{if((readingStartedAt||readingQuestionsOpen)&&!window.confirm("Generate a new passage? Unsaved answers for this passage will be replaced."))return;void generatePractice("reading");}}>{generationBusy==="reading"?"Generating…":practiceSource.reading === "topic" && !courseCatalog.length?"Loading topic bank…":"Generate new"}</button><label className="lab-select"><span>Generation source</span><select aria-label="reading generation source" value={practiceSource.reading} disabled={Boolean(generationBusy)} onChange={event=>setPracticeSource(current=>({...current,reading:event.target.value as PracticeSource}))}><option value="selected">Selected words</option><option value="topic">Topic bank + news</option></select></label><label className="lab-select"><span>Topic</span><select aria-label="reading topic" value={practiceTopic.reading} disabled={Boolean(generationBusy)} onChange={event=>setPracticeTopic(current=>({...current,reading:event.target.value}))}>{PRACTICE_TOPICS.map(topic=><option key={topic}>{topic}</option>)}</select></label><details className="lab-select"><summary>Exercise history</summary><label className="lab-select"><span>Open a previous exercise</span><select aria-label="Choose reading report" value={latestPassage?.id ?? ""} disabled={Boolean(readingStartedAt || readingQuestionsOpen)} onChange={(event) => resetReadingLab(event.target.value)}>{state.passages.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label></details><label className="lab-select"><span>Practice mode</span><select aria-label="Reading practice mode" value={readingMode} disabled={Boolean(readingStartedAt || readingQuestionsOpen)} onChange={event=>changeReadingMode(event.target.value as "full"|"inference")}><option value="full">Full text</option><option value="inference">Inference</option></select></label>{latestPassage && <><a className="secondary button-link" href={`/print/reading/${latestPassage.id}`} target="_blank" rel="noreferrer">Print report</a></>}</div></div>
+      <div className="card span-12 lab-header"><div><h2>Reading</h2><span className="muted">Practice your selected words, or generate freely from a vocabulary and news topic.</span></div><div className="row"><button disabled={Boolean(generationBusy || (practiceSource.reading === "topic" && !courseCatalog.length))} onClick={()=>{if((readingStartedAt||readingQuestionsOpen)&&!window.confirm("Generate a new passage? Unsaved answers for this passage will be replaced."))return;void generatePractice("reading");}}>{generationBusy==="reading"?"Generating…":practiceSource.reading === "topic" && !courseCatalog.length?"Loading topic bank…":"Generate new"}</button><label className="lab-select"><span>Generation source</span><select aria-label="reading generation source" value={practiceSource.reading} disabled={Boolean(generationBusy)} onChange={event=>setPracticeSource(current=>({...current,reading:event.target.value as PracticeSource}))}><option value="selected">Selected words</option><option value="topic">Topic bank + news</option></select></label><label className="lab-select"><span>Topic</span><select aria-label="reading topic" value={practiceTopic.reading} disabled={Boolean(generationBusy)} onChange={event=>setPracticeTopic(current=>({...current,reading:event.target.value}))}>{PRACTICE_TOPICS.map(topic=><option key={topic}>{topic}</option>)}</select></label><details className="lab-select"><summary>Exercise history</summary><label className="lab-select"><span>Open a previous exercise</span><select aria-label="Choose reading report" value={latestPassage?.id ?? ""} disabled={Boolean(readingStartedAt || readingQuestionsOpen)} onChange={(event) => resetReadingLab(event.target.value)}>{state.passages.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label></details><label className="lab-select"><span>Practice mode</span><select aria-label="Reading practice mode" value={readingMode} disabled={Boolean(readingStartedAt || readingQuestionsOpen)} onChange={event=>changeReadingMode(event.target.value as "full"|"inference"|"rsvp")}><option value="full">Full text</option><option value="inference">Inference</option><option value="rsvp">Rapid words (RSVP)</option></select></label>{latestPassage && <><a className="secondary button-link" href={`/print/reading/${latestPassage.id}`} target="_blank" rel="noreferrer">Print report</a></>}</div></div>
       {latestPassage ? <>
         <div className="card span-7">
           <div className="row spread"><div><div className="muted">Internal difficulty ~{latestPassage.ilrEstimate} · ILR-oriented, not an official rating · {latestPassage.topic} · {latestPassage.genre} · {latestPassage.register}</div><h2>{latestPassage.title}</h2><SourceLine item={latestPassage} />{!!latestPassage.supportingWords?.length && <p className="muted">Includes {latestPassage.supportingWords.length} supporting words beyond the generation bank.</p>}</div>{!readingStartedAt && !readingQuestionsOpen && <button className="primary" onClick={() => { setReadingStartedAt(Date.now()); setReadingDurationMs(0); }}>1 · Start reading</button>}</div>
-          {!readingQuestionsOpen && (readingMode === "inference" ? <InferenceReadingText text={latestPassage.textFa} words={state.words} targetWords={latestPassage.targetWords} gists={sentenceGists} onGistsChange={setSentenceGists} disabled={!readingStartedAt} /> : <InteractivePersianText text={latestPassage.textFa} words={state.words} onStatus={setWordKnowledge} disabled={!readingStartedAt} className={readingStartedAt ? "fa passage" : "fa passage blurred"} />)}
+          {!readingQuestionsOpen && (readingMode === "inference" ? <InferenceReadingText text={latestPassage.textFa} words={state.words} targetWords={latestPassage.targetWords} gists={sentenceGists} onGistsChange={setSentenceGists} disabled={!readingStartedAt} /> : readingMode === "rsvp" ? <RsvpReader text={latestPassage.textFa} disabled={!readingStartedAt} /> : <InteractivePersianText text={latestPassage.textFa} words={state.words} onStatus={setWordKnowledge} disabled={!readingStartedAt} className={readingStartedAt ? "fa passage" : "fa passage blurred"} />)}
           {readingMode === "full" && !!latestPassage.targetWords.length && <div className="target-strip"><span className="muted">Extracted targets</span>{latestPassage.targetWords.map((word) => <span className="pill fa-inline" key={word}>{word}</span>)}</div>}
           {readingStartedAt && !readingQuestionsOpen && <div className="row"><button className="primary" disabled={!inferenceReady} onClick={finishReading}>2 · Answer questions →</button>{readingMode === "inference" && !inferenceReady && <span className="muted">Capture the gist of each sentence first.</span>}<label>Unknown words <input className="small-input" type="number" min="0" value={readingUnknown} onChange={(event) => setReadingUnknown(Number(event.target.value))}/></label><label>Rereads <input className="small-input" type="number" min="0" value={readingRereads} onChange={(event) => setReadingRereads(Number(event.target.value))}/></label></div>}
           {readingQuestionsOpen && <div className="locked-source"><strong>{readingMode === "inference" ? "Sentence gists saved. Passage locked for recall." : "Passage locked for recall."}</strong><span className="muted">Reading time: {(readingDurationMs / 1000).toFixed(0)}s · unknown words: {readingUnknown} · rereads: {readingRereads}</span></div>}

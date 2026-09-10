@@ -147,7 +147,7 @@ export type PassageAttempt = {
   gradingMode?: "ai" | "self";
   firstPass: boolean;
   errorCategories?: ErrorCategory[];
-  readingMode?: "full" | "inference";
+  readingMode?: "full" | "inference" | "rsvp";
   maskedPercent?: number;
   sentenceGists?: string[];
 };
