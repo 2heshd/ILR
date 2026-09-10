@@ -3137,6 +3137,18 @@ main>.listening-workspace>.span-7{background:transparent;padding-top:12px}
 .font-preferences label{display:flex;align-items:center;gap:16px}
 .font-preferences select{width:auto}
 .font-preferences .fa{font-size:32px;margin:24px 0}
+
+/* Persian glyphs can extend beyond their measured text box. Keep the review
+   word fully visible instead of clipping those overhangs at the stage edge. */
+.today-grid .dashboard-primary .hero-fa{
+  box-sizing:border-box;
+  width:100%;
+  max-width:100%;
+  padding:.2em .34em .3em;
+  overflow:visible;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
 .font-preferences small{color:var(--dim)}
 
 /* One central task; questions enter only when they are available. */
