@@ -12,16 +12,23 @@ test("RSVP gives each Persian word one stable focus character", () => {
   assert.match(parts.focus, /[\p{L}\p{N}]/u);
 });
 
+test("RSVP keeps a focal letter and its combining marks in one grapheme", () => {
+  const parts = rsvpWordParts("مُهم");
+  assert.equal(`${parts.before}${parts.focus}${parts.after}`, "مُهم");
+  assert.ok(parts.focusEnd > parts.focusStart);
+});
+
 test("RSVP locks every focus character to the fixed stage center", async () => {
   const source = await import("node:fs/promises").then(({ readFile }) => readFile(new URL("../components/RsvpReader.tsx", import.meta.url), "utf8"));
   assert.match(source, /stageBounds\.left \+ stageBounds\.width \/ 2/);
+  assert.match(source, /range\.setStart\(textNode, parts\.focusStart\)/);
   assert.match(source, /focusBounds\.left \+ focusBounds\.width \/ 2/);
+  assert.match(source, /overlay\.style\.clipPath/);
   assert.match(source, /wordElement\.style\.transform = `translateX\(\$\{offset\}px\)`/);
-  assert.doesNotMatch(source, /clipPath/);
 });
 
 test("RSVP supports the intended training speeds and pauses at sentence endings", () => {
-  assert.deepEqual(RSVP_SPEEDS, [250, 360, 500]);
+  assert.deepEqual(RSVP_SPEEDS, [150, 250, 360, 500]);
   assert.ok(rsvpDelayMs(250, "است.") > rsvpDelayMs(250, "است"));
 });
 
