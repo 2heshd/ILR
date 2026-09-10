@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { RSVP_SPEEDS, rsvpDelayMs, rsvpWordParts, rsvpWords } from "@/lib/rsvp";
 
 export default function RsvpReader({ text, disabled = false }: { text: string; disabled?: boolean }) {
@@ -8,6 +8,9 @@ export default function RsvpReader({ text, disabled = false }: { text: string; d
   const [index, setIndex] = useState(0);
   const [wpm, setWpm] = useState<number>(RSVP_SPEEDS[0]);
   const [playing, setPlaying] = useState(false);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const wordRef = useRef<HTMLDivElement>(null);
+  const focusRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     setIndex(0);
@@ -28,8 +31,25 @@ export default function RsvpReader({ text, disabled = false }: { text: string; d
 
   const word = words[index] ?? "";
   const parts = rsvpWordParts(word);
-  const rightClip = parts.length ? (parts.focusIndex / parts.length) * 100 : 0;
-  const leftClip = parts.length ? ((parts.length - parts.focusIndex - 1) / parts.length) * 100 : 0;
+
+  useLayoutEffect(() => {
+    const alignFocus = () => {
+      const stage = stageRef.current;
+      const wordElement = wordRef.current;
+      const focus = focusRef.current;
+      if (!stage || !wordElement || !focus) return;
+
+      wordElement.style.transform = "translateX(0)";
+      const stageBounds = stage.getBoundingClientRect();
+      const focusBounds = focus.getBoundingClientRect();
+      const offset = stageBounds.left + stageBounds.width / 2 - (focusBounds.left + focusBounds.width / 2);
+      wordElement.style.transform = `translateX(${offset}px)`;
+    };
+
+    alignFocus();
+    window.addEventListener("resize", alignFocus);
+    return () => window.removeEventListener("resize", alignFocus);
+  }, [disabled, word]);
 
   function restart() {
     setIndex(0);
@@ -47,11 +67,10 @@ export default function RsvpReader({ text, disabled = false }: { text: string; d
         onClick={() => setWpm(speed)}
       >{speed} WPM</button>)}
     </div>
-    <div className="rsvp-stage" aria-live="off">
+    <div ref={stageRef} className="rsvp-stage" aria-live="off">
       {disabled ? <span className="rsvp-ready">Start reading to begin the word stream.</span> : <>
-        <div className="rsvp-word fa" lang="fa" dir="rtl" aria-label={word}>
-          <span>{word}</span>
-          <b aria-hidden="true" style={{ clipPath: `inset(0 ${rightClip}% 0 ${leftClip}%)` }}>{word}</b>
+        <div ref={wordRef} className="rsvp-word fa" lang="fa" dir="rtl" aria-label={word}>
+          <span>{parts.before}</span><b ref={focusRef} aria-hidden="true">{parts.focus}</b><span>{parts.after}</span>
         </div>
       </>}
     </div>
