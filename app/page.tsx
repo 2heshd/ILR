@@ -63,7 +63,7 @@ const INTERVENTION_MAP_KEY = "synaptx-suite-interventions-v1";
 const PERSIAN_WORD_PATTERN = /([\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06FA-\u06FC\u200C]+)/g;
 const IS_PERSIAN_WORD = /^[\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06FA-\u06FC\u200C]+$/;
 const SYNAPTX_URL = process.env.NEXT_PUBLIC_SYNAPTX_URL ?? (process.env.NODE_ENV === "production" ? "https://synapt-x.vercel.app" : "http://localhost:3002");
-const ASL_URL = process.env.NEXT_PUBLIC_ASL_URL ?? (process.env.NODE_ENV === "production" ? "https://cognis.vercel.app" : "http://localhost:3000");
+const ASL_URL = process.env.NEXT_PUBLIC_ASL_URL ?? (process.env.NODE_ENV === "production" ? "https://getcognis.vercel.app" : "http://localhost:3000");
 const NEWS_CATALOG = newsVocabulary();
 
 function syntaxUrl(sentence: string) {
