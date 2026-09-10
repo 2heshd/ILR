@@ -43,12 +43,23 @@ export default function RsvpReader({ text, disabled = false }: { text: string; d
       if (!stage || !wordElement || !baseWord || !overlay || !textNode) return;
 
       wordElement.style.transform = "translateX(0)";
+      wordElement.style.removeProperty("font-size");
       const range = document.createRange();
       range.setStart(textNode, parts.focusStart);
       range.setEnd(textNode, parts.focusEnd);
       const stageBounds = stage.getBoundingClientRect();
-      const wordBounds = wordElement.getBoundingClientRect();
-      const focusBounds = range.getBoundingClientRect();
+      let wordBounds = wordElement.getBoundingClientRect();
+      let focusBounds = range.getBoundingClientRect();
+      const focalCenter = focusBounds.left + focusBounds.width / 2;
+      const safeHalfWidth = Math.max(1, stageBounds.width / 2 - 28);
+      const requiredHalfWidth = Math.max(focalCenter - wordBounds.left, wordBounds.right - focalCenter, 1);
+      const fitScale = Math.min(1, safeHalfWidth / requiredHalfWidth);
+      if (fitScale < 1) {
+        const baseSize = Number.parseFloat(getComputedStyle(wordElement).fontSize);
+        wordElement.style.fontSize = `${Math.max(30, baseSize * fitScale)}px`;
+        wordBounds = wordElement.getBoundingClientRect();
+        focusBounds = range.getBoundingClientRect();
+      }
       const offset = stageBounds.left + stageBounds.width / 2 - (focusBounds.left + focusBounds.width / 2);
       overlay.style.clipPath = `inset(0 ${Math.max(0, wordBounds.right - focusBounds.right)}px 0 ${Math.max(0, focusBounds.left - wordBounds.left)}px)`;
       wordElement.style.transform = `translateX(${offset}px)`;
