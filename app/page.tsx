@@ -63,7 +63,7 @@ const INTERVENTION_MAP_KEY = "synaptx-suite-interventions-v1";
 const PERSIAN_WORD_PATTERN = /([\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06FA-\u06FC\u200C]+)/g;
 const IS_PERSIAN_WORD = /^[\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06FA-\u06FC\u200C]+$/;
 const SYNAPTX_URL = process.env.NEXT_PUBLIC_SYNAPTX_URL ?? (process.env.NODE_ENV === "production" ? "https://synapt-x.vercel.app" : "http://localhost:3002");
-const ASL_URL = process.env.NEXT_PUBLIC_ASL_URL ?? (process.env.NODE_ENV === "production" ? "https://get-asl.vercel.app" : "http://localhost:3000");
+const ASL_URL = process.env.NEXT_PUBLIC_ASL_URL ?? (process.env.NODE_ENV === "production" ? "https://cognis.vercel.app" : "http://localhost:3000");
 const NEWS_CATALOG = newsVocabulary();
 
 function syntaxUrl(sentence: string) {
@@ -766,7 +766,7 @@ export default function Home() {
       const word: LexicalItem = {
         id: id(), displayForm, normalizedForm, definition, romanization,
         sourceType: "user", sourceWeek: currentState.weekNumber, tier: "B",
-        knowledgeState: "learning", topic: "Asl derivation",
+        knowledgeState: "learning", topic: "Cognis derivation",
         introducedAt: now.toISOString(), reviews: 0, correct: 0, lapses: 0,
         dueAt: fsrsCard.due, fsrsCard,
         modalityCards: { visual: fsrsCard, audio: createSerializedCard(), cloze: createSerializedCard() },
@@ -2063,7 +2063,7 @@ export default function Home() {
         {(["vocabulary","analytics"] as Tab[]).map((name)=><button key={name} className={tab===name?'tab active':'tab'} onClick={()=>setTab(name)}><span className="nav-bullet">{tab===name?'●':'·'}</span>{name==='vocabulary'?'Words':TAB_LABELS[name]}</button>)}
       </div>
       <div className="nav-course">
-        <div className="platform-switcher"><a href={ASL_URL}>Asl</a><a href={SYNAPTX_URL}>Synaptx</a></div>
+        <div className="platform-switcher"><a href={ASL_URL}>Cognis</a><a href={SYNAPTX_URL}>Synaptx</a></div>
         {canManageClasses(cloudUser)&&<a href="/classroom">Classroom ↗</a>}
         <span>{state.words.length} saved words</span>
       </div>
@@ -2250,7 +2250,7 @@ export default function Home() {
         {courseCatalog.length > 0 && !visibleCatalogEntries.length && <div className="empty">No words match this search.</div>}
       </div>
       <div className="card span-12 news-catalog"><h2>News Vocabulary · {NEWS_META.entries.toLocaleString()}</h2><p className="muted">Optional vocabulary for building current-events reading and listening. Filter by topic, then add only what you want.</p><div className="news-catalog-controls"><label className="catalog-search"><span>Topic</span><select value={newsTopic} onChange={(event) => { setNewsTopic(event.target.value as NewsTopic); setSelectedNewsEntries(new Set()); }}>{NEWS_TOPICS.map((topic) => <option key={topic}>{topic}</option>)}</select></label><label className="catalog-search"><span>Find a news word</span><input value={newsQuery} onChange={(event) => setNewsQuery(event.target.value)} placeholder="Persian, English, or transliteration" /></label></div><div className="catalog-selection row spread"><span>{visibleNewsEntries.length} shown · {selectedNewsEntries.size} selected</span><div className="row"><button className="text-button" onClick={() => setSelectedNewsEntries(new Set(visibleNewsEntries.map((word) => word.id)))}>Select shown</button><button className="text-button" onClick={() => setSelectedNewsEntries(new Set())}>Deselect all</button><button className="primary" disabled={!selectedNewsEntries.size} onClick={addSelectedNewsWords}>Add to {planLabels[planMode]}</button><button className="secondary" disabled={!selectedNewsEntries.size} onClick={removeSelectedNewsWords}>Remove selected</button></div></div><div className="catalog-list news-list">{visibleNewsEntries.map((word) => { const alreadyAdded = allBankKeys.has(courseWordKey(word.displayForm)); return <label className={`catalog-word${alreadyAdded ? " added" : ""}`} key={word.id}><input type="checkbox" checked={selectedNewsEntries.has(word.id)} onChange={() => setSelectedNewsEntries((current) => { const next = new Set(current); if (next.has(word.id)) next.delete(word.id); else next.add(word.id); return next; })} /><strong>{word.displayForm}</strong><WordPatternHint word={word.displayForm}/><span>{word.romanization ? `${word.romanization} · ` : ""}{word.definition}</span><small>{alreadyAdded ? "In your bank" : newsTopicFor(word)}</small></label>; })}</div></div>
-      <div className="card span-12"><h2>My words · {state.words.filter((word) => word.sourceType === "user").length}</h2><div className="word-list single">{state.words.filter((word) => word.sourceType === "user").map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><WordPatternHint word={word.displayForm}/><span>{word.romanization ? `${word.romanization} · ` : ""}{word.definition}</span><span>{word.topic || "Personal vocabulary"}</span><div className="word-actions"><a className="inspect-word" href={morphologyUrl(word.displayForm, word.definition, word.romanization)} target="_blank" rel="noreferrer">Inspect morphology in Synaptx ↗</a><button className="text-button remove-word" onClick={() => removeWord(word.normalizedForm)}>Remove</button></div></div>)}</div>{!state.words.some((word) => word.sourceType === "user") && <div className="empty">Words researched in Asl will appear here after you choose them.</div>}</div>
+      <div className="card span-12"><h2>My words · {state.words.filter((word) => word.sourceType === "user").length}</h2><div className="word-list single">{state.words.filter((word) => word.sourceType === "user").map((word) => <div className="word" key={word.id}><strong>{word.displayForm}</strong><WordPatternHint word={word.displayForm}/><span>{word.romanization ? `${word.romanization} · ` : ""}{word.definition}</span><span>{word.topic || "Personal vocabulary"}</span><div className="word-actions"><a className="inspect-word" href={morphologyUrl(word.displayForm, word.definition, word.romanization)} target="_blank" rel="noreferrer">Inspect morphology in Synaptx ↗</a><button className="text-button remove-word" onClick={() => removeWord(word.normalizedForm)}>Remove</button></div></div>)}</div>{!state.words.some((word) => word.sourceType === "user") && <div className="empty">Words researched in Cognis will appear here after you choose them.</div>}</div>
     </section>}
 
     {tab === "analytics" && <><div className="progress-navigation"><a href="#progress-overview">Overview</a><a href="#progress-practice">Practice priorities</a><a href="#progress-skills">Skills</a><a href="#progress-coverage">Coverage</a><button onClick={openAccount}>Account →</button></div><section id="progress-overview" className="grid analytics-grid">

@@ -87,7 +87,7 @@ export default function AccountWorkspace({ user, username: savedUsername, cloudR
   return <section className="account-workspace" id="account">
     <div className="account-overview">
       <h2>{user ? 'Your account' : mode==='signup'?'Create account':mode==='reset'?'Reset password':'Sign in'}</h2>
-      <p>{user?`Signed in as ${displayName}.`:'Use your account across Cursos, Synaptx, and Asl.'}</p>
+      <p>{user?`Signed in as ${displayName}.`:'Use your account across Cursos, Synaptx, and Cognis.'}</p>
 
 
       {user ? <><div className="account-action"><span className={`service-state ${cloudReady ? "ready" : "waiting"}`}>{cloudReady ? `Cloud sync active · ${accountLabel}` : "Connecting…"}</span><div className="row"><button className="secondary" onClick={() => { setManageOpen((value) => !value); setNewUsername(usernameValue); }}>{manageOpen ? "Close settings" : "Manage account"}</button><button className="secondary" onClick={() => void onSignOut()}>Sign out</button></div></div>

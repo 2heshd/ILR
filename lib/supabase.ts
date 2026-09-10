@@ -120,7 +120,7 @@ export async function syncPlatformVocabulary(client: SupabaseClient, user: User,
     normalized_form: word.normalizedForm,
     definition: word.definition ?? null,
     romanization: word.romanization ?? null,
-    source_platform: word.topic === "Asl derivation" ? "asl" : "cursos",
+    source_platform: ["Asl derivation", "Cognis derivation"].includes(word.topic ?? "") ? "asl" : "cursos",
     source_context: word.topic ?? "Personal vocabulary",
     source_week: Math.max(1, Number(word.sourceWeek) || 1),
   }));
