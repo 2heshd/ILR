@@ -10,7 +10,8 @@ export default function RsvpReader({ text, disabled = false }: { text: string; d
   const [playing, setPlaying] = useState(false);
   const stageRef = useRef<HTMLDivElement>(null);
   const wordRef = useRef<HTMLDivElement>(null);
-  const focusRef = useRef<HTMLElement>(null);
+  const baseWordRef = useRef<HTMLSpanElement>(null);
+  const focusOverlayRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     setIndex(0);
@@ -36,13 +37,20 @@ export default function RsvpReader({ text, disabled = false }: { text: string; d
     const alignFocus = () => {
       const stage = stageRef.current;
       const wordElement = wordRef.current;
-      const focus = focusRef.current;
-      if (!stage || !wordElement || !focus) return;
+      const baseWord = baseWordRef.current;
+      const overlay = focusOverlayRef.current;
+      const textNode = baseWord?.firstChild;
+      if (!stage || !wordElement || !baseWord || !overlay || !textNode) return;
 
       wordElement.style.transform = "translateX(0)";
+      const range = document.createRange();
+      range.setStart(textNode, parts.focusStart);
+      range.setEnd(textNode, parts.focusEnd);
       const stageBounds = stage.getBoundingClientRect();
-      const focusBounds = focus.getBoundingClientRect();
+      const wordBounds = wordElement.getBoundingClientRect();
+      const focusBounds = range.getBoundingClientRect();
       const offset = stageBounds.left + stageBounds.width / 2 - (focusBounds.left + focusBounds.width / 2);
+      overlay.style.clipPath = `inset(0 ${Math.max(0, wordBounds.right - focusBounds.right)}px 0 ${Math.max(0, focusBounds.left - wordBounds.left)}px)`;
       wordElement.style.transform = `translateX(${offset}px)`;
     };
 
@@ -70,7 +78,7 @@ export default function RsvpReader({ text, disabled = false }: { text: string; d
     <div ref={stageRef} className="rsvp-stage" aria-live="off">
       {disabled ? <span className="rsvp-ready">Start reading to begin the word stream.</span> : <>
         <div ref={wordRef} className="rsvp-word fa" lang="fa" dir="rtl" aria-label={word}>
-          <span>{parts.before}</span><b ref={focusRef} aria-hidden="true">{parts.focus}</b><span>{parts.after}</span>
+          <span ref={baseWordRef}>{word}</span><b ref={focusOverlayRef} aria-hidden="true">{word}</b>
         </div>
       </>}
     </div>
