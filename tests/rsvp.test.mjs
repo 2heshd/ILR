@@ -23,7 +23,8 @@ test("RSVP locks every focus character to the fixed stage center", async () => {
   assert.match(source, /stageBounds\.left \+ stageBounds\.width \/ 2/);
   assert.match(source, /range\.setStart\(textNode, parts\.focusStart\)/);
   assert.match(source, /focusBounds\.left \+ focusBounds\.width \/ 2/);
-  assert.match(source, /overlay\.style\.clipPath/);
+  assert.match(source, /className="rsvp-focus-marker"/);
+  assert.doesNotMatch(source, /clipPath/);
   assert.match(source, /const fitScale = Math\.min\(1, safeHalfWidth \/ requiredHalfWidth\)/);
   assert.match(source, /wordElement\.style\.fontSize/);
   assert.match(source, /wordElement\.style\.transform = `translateX\(\$\{offset\}px\)`/);
