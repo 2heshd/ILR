@@ -36,6 +36,7 @@ import { focusedSelectedPracticeWords, topicPracticeWords, type PracticeSource }
 import { appendLearningEvents, makeLearningEvent, type LearningEvent } from "@/lib/learning-events";
 import { compactStudyState, readStudyState, writeStudyState } from "@/lib/storage";
 import { appendCloudReview, deletePlatformVocabulary, getSupabaseClient, loadCloudState, loadPlatformVocabulary, loadUsername, mergePlatformVocabulary, mergeStudyStates, saveCloudState, syncPlatformVocabulary, updateUsername } from "@/lib/supabase";
+import { actionableCloudSyncNotice, type CloudSyncFailure } from "@/lib/cloud-sync-status";
 import { dedupeLexicalWords, restoreCourseDefinitions } from "@/lib/word-merge";
 import type {
   ComprehensionGrade,
@@ -711,14 +712,15 @@ export default function Home() {
     if (!client) return;
     const timer = window.setTimeout(() => {
       void Promise.allSettled([saveCloudState(client, cloudUser, compactStudyState(state)), syncPlatformVocabulary(client, cloudUser, state.words)]).then((results) => {
-        const failures = results.flatMap((result, index) => {
+        const failures = results.flatMap<CloudSyncFailure>((result, index) => {
           if (result.status === 'fulfilled') return [];
           const code = String(result.reason?.code || 'network');
           console.error('Cloud sync failed', {area:index === 0 ? 'history' : 'vocabulary',code});
-          return [`${index === 0 ? 'History' : 'Shared vocabulary'} sync failed (${code}).`];
+          return [{area:index === 0 ? 'history' : 'vocabulary',reason:result.reason}];
         });
-        if (failures.length) setStatus(`${failures.join(' ')} This session is unchanged; cloud sync will retry on your next change.`);
-        else setStatus(current => /^(History|Shared vocabulary) sync failed/.test(current) ? '' : current);
+        const notice=actionableCloudSyncNotice(failures);
+        if (notice) setStatus(notice);
+        else setStatus(current => /^(History|Shared vocabulary) (sync failed|cloud sync needs attention)/.test(current) ? '' : current);
       });
     }, 700);
     return () => window.clearTimeout(timer);
