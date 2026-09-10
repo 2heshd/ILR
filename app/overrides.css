@@ -3176,8 +3176,8 @@ main>.listening-workspace>.span-7{background:transparent;padding-top:12px}
 .rsvp-speed button.active{border-color:var(--accent);color:var(--accent)}
 .rsvp-stage{position:relative;display:grid;place-items:center;width:100%;min-height:260px;overflow:hidden;border-block:1px solid #343934}
 .rsvp-word{position:relative;display:inline-block;font-size:clamp(56px,9vw,118px);line-height:1.5;white-space:pre;direction:rtl;will-change:transform}
-.rsvp-word>span{display:inline}
-.rsvp-word>b{color:var(--accent);font:inherit;pointer-events:none}
+.rsvp-word>span{display:block}
+.rsvp-word>b{position:absolute;inset:0;color:var(--accent);font:inherit;direction:rtl;pointer-events:none}
 .rsvp-ready{color:var(--dim);font-size:16px}
 .rsvp-controls button{min-width:44px}
 .rsvp-progress{width:min(100%,520px);height:2px;background:#343934;overflow:hidden}
