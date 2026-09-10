@@ -11,7 +11,6 @@ export default function RsvpReader({ text, disabled = false }: { text: string; d
   const stageRef = useRef<HTMLDivElement>(null);
   const wordRef = useRef<HTMLDivElement>(null);
   const baseWordRef = useRef<HTMLSpanElement>(null);
-  const focusOverlayRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     setIndex(0);
@@ -38,9 +37,8 @@ export default function RsvpReader({ text, disabled = false }: { text: string; d
       const stage = stageRef.current;
       const wordElement = wordRef.current;
       const baseWord = baseWordRef.current;
-      const overlay = focusOverlayRef.current;
       const textNode = baseWord?.firstChild;
-      if (!stage || !wordElement || !baseWord || !overlay || !textNode) return;
+      if (!stage || !wordElement || !baseWord || !textNode) return;
 
       wordElement.style.transform = "translateX(0)";
       wordElement.style.removeProperty("font-size");
@@ -56,12 +54,11 @@ export default function RsvpReader({ text, disabled = false }: { text: string; d
       const fitScale = Math.min(1, safeHalfWidth / requiredHalfWidth);
       if (fitScale < 1) {
         const baseSize = Number.parseFloat(getComputedStyle(wordElement).fontSize);
-        wordElement.style.fontSize = `${Math.max(30, baseSize * fitScale)}px`;
+        wordElement.style.fontSize = `${Math.max(18, baseSize * fitScale)}px`;
         wordBounds = wordElement.getBoundingClientRect();
         focusBounds = range.getBoundingClientRect();
       }
       const offset = stageBounds.left + stageBounds.width / 2 - (focusBounds.left + focusBounds.width / 2);
-      overlay.style.clipPath = `inset(0 ${Math.max(0, wordBounds.right - focusBounds.right)}px 0 ${Math.max(0, focusBounds.left - wordBounds.left)}px)`;
       wordElement.style.transform = `translateX(${offset}px)`;
     };
 
@@ -88,8 +85,9 @@ export default function RsvpReader({ text, disabled = false }: { text: string; d
     </div>
     <div ref={stageRef} className="rsvp-stage" aria-live="off">
       {disabled ? <span className="rsvp-ready">Start reading to begin the word stream.</span> : <>
+        <i className="rsvp-focus-marker" aria-hidden="true" />
         <div ref={wordRef} className="rsvp-word fa" lang="fa" dir="rtl" aria-label={word}>
-          <span ref={baseWordRef}>{word}</span><b ref={focusOverlayRef} aria-hidden="true">{word}</b>
+          <span ref={baseWordRef}>{word}</span>
         </div>
       </>}
     </div>
