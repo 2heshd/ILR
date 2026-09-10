@@ -12,6 +12,14 @@ test("RSVP gives each Persian word one stable focus character", () => {
   assert.match(parts.focus, /[\p{L}\p{N}]/u);
 });
 
+test("RSVP locks every focus character to the fixed stage center", async () => {
+  const source = await import("node:fs/promises").then(({ readFile }) => readFile(new URL("../components/RsvpReader.tsx", import.meta.url), "utf8"));
+  assert.match(source, /stageBounds\.left \+ stageBounds\.width \/ 2/);
+  assert.match(source, /focusBounds\.left \+ focusBounds\.width \/ 2/);
+  assert.match(source, /wordElement\.style\.transform = `translateX\(\$\{offset\}px\)`/);
+  assert.doesNotMatch(source, /clipPath/);
+});
+
 test("RSVP supports the intended training speeds and pauses at sentence endings", () => {
   assert.deepEqual(RSVP_SPEEDS, [250, 360, 500]);
   assert.ok(rsvpDelayMs(250, "است.") > rsvpDelayMs(250, "است"));
