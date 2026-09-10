@@ -62,6 +62,16 @@ test('production database smoke is transactional and exercises isolation',()=>{
  for(const phrase of ['begin;','Cross-user event insert unexpectedly succeeded','Oversized generation review payload unexpectedly succeeded','Review queue crossed the consent boundary','Generation reliability report crossed the consent boundary','Non-owner report access unexpectedly succeeded','Direct membership deletion unexpectedly succeeded','Withdrawal retained class-linked evidence','Withdrawal retained class assessment data','Withdrawal retained membership identity','Post-withdrawal event was attached to a class','Rejoining exposed evidence from an earlier consent period','Rejoined event was not attached to its class','Pilot identity deletion failed','Retention purge did not remove all class-scoped records','Retention purge kept participant identity','Retention purge deleted learner-owned evidence','rollback;','pilot-db-smoke-passed'])assert.match(databaseSmoke,new RegExp(phrase,'i'));
 });
 
+test('production generation smoke is synthetic, release-pinned, and bounded',()=>{
+  const source=readFileSync(new URL('../scripts/production-generation-smoke.mjs',import.meta.url),'utf8');
+  assert.match(source,/https:\/\/getcursos\.vercel\.app/);
+  assert.match(source,/health\?\.release!==expectedRelease/);
+  assert.match(source,/AbortSignal\.timeout\(30000\)/);
+  assert.match(source,/practiceAnswerIssues/);
+  assert.match(source,/captionsCoverText/);
+  assert.doesNotMatch(source,/cookie|authorization/iu);
+});
+
 test('browser responses use the pilot security header baseline',()=>{
  for(const header of ['X-Content-Type-Options','Referrer-Policy','Permissions-Policy','X-Frame-Options'])assert.match(nextConfig,new RegExp(header));
 });
