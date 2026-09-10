@@ -6,6 +6,7 @@ const migration=readFileSync(new URL('../db/014_pilot_instrumentation.sql',impor
 const operations=readFileSync(new URL('../docs/PILOT_OPERATIONS.md',import.meta.url),'utf8');
 const soak=readFileSync(new URL('../scripts/suite-soak.mjs',import.meta.url),'utf8');
 const databaseSmoke=readFileSync(new URL('../scripts/pilot-db-smoke.sql',import.meta.url),'utf8');
+const rlsPerformance=readFileSync(new URL('../db/015_rls_auth_initplan.sql',import.meta.url),'utf8');
 const nextConfig=readFileSync(new URL('../next.config.mjs',import.meta.url),'utf8');
 const mainPage=readFileSync(new URL('../app/page.tsx',import.meta.url),'utf8');
 const printPage=readFileSync(new URL('../app/print/[kind]/[id]/page.tsx',import.meta.url),'utf8');
@@ -60,6 +61,13 @@ test('pilot storage and review access fail closed at the database boundary',()=>
 
 test('production database smoke is transactional and exercises isolation',()=>{
  for(const phrase of ['begin;','Cross-user event insert unexpectedly succeeded','Oversized generation review payload unexpectedly succeeded','Review queue crossed the consent boundary','Generation reliability report crossed the consent boundary','Non-owner report access unexpectedly succeeded','Direct membership deletion unexpectedly succeeded','Withdrawal retained class-linked evidence','Withdrawal retained class assessment data','Withdrawal retained membership identity','Post-withdrawal event was attached to a class','Rejoining exposed evidence from an earlier consent period','Rejoined event was not attached to its class','Pilot identity deletion failed','Retention purge did not remove all class-scoped records','Retention purge kept participant identity','Retention purge deleted learner-owned evidence','rollback;','pilot-db-smoke-passed'])assert.match(databaseSmoke,new RegExp(phrase,'i'));
+});
+
+test('row security evaluates authenticated identity once per statement',()=>{
+  assert.match(rlsPerformance,/begin;[\s\S]*commit;/u);
+  assert.equal((rlsPerformance.match(/alter policy/g)??[]).length,22);
+  assert.doesNotMatch(rlsPerformance,/(?<!select )auth\.uid\(\)/u);
+  for(const table of ['study_snapshots','review_events','profiles','platform_vocabulary','learning_notes','learning_classes','learning_class_members','learning_events','learning_event_classes','pilot_assessments','generation_quality_runs'])assert.match(rlsPerformance,new RegExp(`public\\.${table}`));
 });
 
 test('production generation smoke is synthetic, release-pinned, and bounded',()=>{
