@@ -29,6 +29,12 @@
 3. Preserve relevant deployment and aggregate quality logs, rotate exposed secrets, revoke affected sessions, and notify the pilot owner.
 4. Verify containment with an owner/non-owner access test, deploy a versioned fix, and document impact and deletion actions before resuming.
 
+## Authentication security exceptions
+
+- Email confirmation and secure password-change protection are enabled for the pilot. Keep both enabled and recheck them before each enrollment window.
+- Supabase leaked-password detection is unavailable on the project's current Free plan. Upgrade to Pro and enable it before a broader rollout, or record explicit institutional risk acceptance if the pilot remains on Free.
+- The database security advisor flags authenticated `SECURITY DEFINER` reporting and lifecycle functions. These are intentional: public and anonymous execution is revoked, every user-facing function performs an owner/self authorization check, and owner, non-owner, anonymous, and cross-user denial paths are covered by the transactional database smoke. Re-audit grants and authorization predicates whenever one of these functions changes.
+
 ## Content review
 
 Automated checks gate schema, vocabulary constraints, grammar/register review, question evidence, answers, duplicates, provenance, and latency. “Learner visible” means the automated gate passed; it does not mean a native speaker certified the exercise. The protected review queue lets an instructor, native speaker, or linguist record an independent verdict. Blocking reviews stay visible to the pilot owner for follow-up.

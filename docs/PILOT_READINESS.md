@@ -38,19 +38,27 @@ Learners may read/export/delete their own events. Classroom owners receive aggre
 
 ## Pilot-ready definition
 
-- [ ] SynaptX exposes only analysis/reference/account surfaces.
-- [ ] Stable shared identity and vocabulary work across all three products.
-- [ ] Problem → intervention → later evidence is attributable.
-- [ ] Aṣl novel-family inference and lexical leverage are measurable.
-- [ ] Cursos reports real learner and class bottlenecks with evidence-based actions.
-- [ ] Generated Persian has a documented and observable QA pipeline.
-- [ ] Production errors and latency are measured.
-- [ ] Releases are reproducible and versioned.
-- [ ] Security, privacy, retention, deletion, and incident handling are documented and tested.
-- [ ] Pilot cohort administration, consent, withdrawal, and exports work.
-- [ ] Research-quality raw events can be anonymized and exported.
-- [ ] Baseline, midpoint, and endline reports exist.
-- [ ] Native-speaker and instructor review workflows exist.
-- [ ] No causal or official-ILR claim is made without supporting design.
-- [ ] Soak tests demonstrate operation without manual babysitting.
+- [x] SynaptX exposes only analysis/reference/account surfaces.
+- [x] Stable shared identity and vocabulary work across all three products.
+- [x] Problem → intervention → later evidence is attributable.
+- [x] Aṣl novel-family inference and lexical leverage are measurable.
+- [x] Cursos reports real learner and class bottlenecks with evidence-based actions.
+- [x] Generated Persian has a documented and observable QA pipeline.
+- [x] Production errors and latency are measured.
+- [x] Releases are reproducible and versioned.
+- [x] Security, privacy, retention, deletion, and incident handling are documented and tested.
+- [x] Pilot cohort administration, consent, withdrawal, and exports work.
+- [x] Research-quality raw events can be anonymized and exported.
+- [x] Baseline, midpoint, and endline reports exist.
+- [x] Native-speaker and instructor review workflows exist.
+- [x] No causal or official-ILR claim is made without supporting design.
+- [x] Soak tests demonstrate operation without manual babysitting.
 
+## Pilot release evidence — 2026-09-09
+
+- Clean release worktrees passed 110 Cursos tests and its production build, 157 SynaptX tests, and 27 Aṣl tests and its production build. Fresh installs reported no package vulnerabilities.
+- The production database is at schema `015`. Its transactional owner/non-owner, consent, withdrawal, deletion, export, assessment, review, release-registry, and cross-user isolation smoke returned `pilot-db-smoke-passed`. The database performance advisor reported no remaining issues.
+- Final Cursos preview generation covered both selected-vocabulary and topic modes for reading and listening. Exercises passed schema, vocabulary, answer-evidence, naturalness, and latency checks; preview timings were 5.635–8.553 seconds, with audio completion at 13.355–13.907 seconds.
+- Production Cursos generation completed reading in 5.530 seconds and listening in 7.345 seconds; speech and captioned speech completed in 11.874 and 13.797 seconds. All checks passed the 20-second learner-facing target.
+- A 60-cycle production soak made 720 route and health checks across Cursos, SynaptX, and Aṣl with zero failures. Observed p95 response times were 145 ms, 178 ms, and 139 ms respectively.
+- Exact release identifiers, schema/content versions, URLs, automated checks, and smoke status are recorded in `deployment_releases`. This evidence demonstrates readiness against this pilot contract; it is not a promise of zero defects, linguistic certification, causal impact, or an official ILR score.
