@@ -45,3 +45,10 @@ test("selected-word retrieval returns fewer references instead of unrelated fill
   const examples=naturalPersianExamples([...corpus,...openCorpus],{topic:"specialist",words:["ژغکثپو"],level:3,mode:"reading",register:"formal",priority:"selected"});
   assert.deepEqual(examples,[]);
 });
+
+test("selected-word generation gets two additional parallel quality candidates",async()=>{
+  const source=await import("node:fs/promises").then(fs=>fs.readFile(new URL("../app/api/generate/route.ts",import.meta.url),"utf8"));
+  assert.match(source,/practiceSource === "selected"/u);
+  assert.match(source,/INDEPENDENT CANDIDATE C/u);
+  assert.match(source,/INDEPENDENT CANDIDATE D/u);
+});

@@ -210,6 +210,10 @@ English title, English questions and English reference answers; only textFa is P
       prompt,
       `${prompt}\nINDEPENDENT CANDIDATE A: Choose a different compatible subset and situation. Do not imitate or revise another draft.`,
       `${prompt}\nINDEPENDENT CANDIDATE B: Prefer the simplest idiomatic description the bank supports. Use copular sentences when natural, avoid unnecessary reporting verbs and time adverbs, and verify the five-item supporting allowance token by token.`,
+      ...(practiceSource === "selected" ? [
+        `${prompt}\nINDEPENDENT CANDIDATE C: Build around the strongest attested collocations for the selected words. Use fewer selected items if that produces one clearly natural situation.`,
+        `${prompt}\nINDEPENDENT CANDIDATE D: Write the most native-like version first, then verify that every selected item used fits its ordinary Persian argument structure and that ordinary glue vocabulary stays within the bounded allowance.`,
+      ] : []),
     ];
     type CandidateResult = {data: Record<string, any>; issues: string[]; rejectedWords: string[]; score: number};
     const evaluateCandidate = async (candidatePrompt: string, index: number): Promise<CandidateResult> => {
