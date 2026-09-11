@@ -115,7 +115,7 @@ test("reading and listening generation are constrained to learner-selected vocab
   const route = await readFile(new URL("../app/api/generate/route.ts", import.meta.url), "utf8");
   assert.match(route, /AT MOST FIVE additional supporting/u);
   assert.match(route, /data.newWordsIntroduced=supporting.words/u);
-  assert.match(route, /rejectionIssues=\[\.\.\.supporting.issues,\.\.\.practiceAnswerIssues\(data.questions\),\.\.\.persianCoherenceIssues\(data.textFa\)\]/u);
+  assert.match(route, /rejectionIssues=\[\.\.\.supporting.issues,\.\.\.practiceAnswerIssues\(data.questions\),\.\.\.persianCoherenceIssues\(data.textFa\),\.\.\.\(sentenceCount/u);
   assert.doesNotMatch(route, /data\s*=\s*verdict.exercise/u);
   assert.match(route, /if \(rejectionIssues.length === 0\)/u);
   assert.match(route, /naturalnessScore/u);

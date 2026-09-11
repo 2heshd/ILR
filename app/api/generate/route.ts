@@ -54,7 +54,7 @@ const practiceResponseFormat = {
     properties: {
       title: { type: "string", description: "A concise English title." },
       newWordsIntroduced: { type: "array", maxItems: 5, description: "Supporting dictionary entries used beyond the supplied generation bank. In selected-word mode, plan these before writing and keep every content word inside the selected bank or this allowance.", items: { type: "string" } },
-      textFa: { type: "string" },
+      textFa: { type: "string", description: "A coherent Persian passage containing four or five complete sentences and approximately 45–60 Persian words." },
       topic: { type: "string" },
       register: { type: "string" },
       knownWordsUsed: { type: "array", items: { type: "string" } },
@@ -193,7 +193,7 @@ English title, English questions and English reference answers; only textFa is P
         reasoning: { effort: isPractice ? practiceEffort : "none" },
         text: { format: isPractice ? practiceResponseFormat : { type: "json_object" }, verbosity: "low" },
       }, { signal }), isPractice ? 6000 : 2200));
-    if (isPractice) prompt += '\nFINAL CHECK: Prefer a short natural description over a forced story. No filler or unrelated plans. Use normal Persian collocations rather than mechanically combining dictionary nouns and verbs. Use explicit ezafe after final ه where appropriate (خانهٔ دوستم).';
+    if (isPractice) prompt += '\nFINAL CHECK: Prefer a short natural description over a forced story. No filler or unrelated plans. Use normal Persian collocations rather than mechanically combining dictionary nouns and verbs. Use explicit ezafe after final ه where appropriate (خانهٔ دوستم). Count the final passage sentences: textFa must contain four or five complete sentences, not three long compound sentences.';
     // Produce an independent backup draft concurrently. If the first candidate
     // fails either deterministic or editorial QA, using the already-running
     // candidate is both faster and less likely to preserve the same defect than
@@ -226,7 +226,8 @@ English title, English questions and English reference answers; only textFa is P
           : {words:Array.isArray(data.newWordsIntroduced)?data.newWordsIntroduced.filter((word:unknown):word is string=>typeof word==='string'&&Boolean(word.trim())).slice(0,SUPPORTING_VOCABULARY_LIMIT):[],unknown:[] as string[],issues:[] as string[]};
         const rejectedWords=supporting.unknown;
         data.newWordsIntroduced=supporting.words;
-        let rejectionIssues=[...supporting.issues,...practiceAnswerIssues(data.questions),...persianCoherenceIssues(data.textFa)];
+        const sentenceCount=String(data.textFa??'').split(/[.!؟]+/u).filter(part=>part.trim()).length;
+        let rejectionIssues=[...supporting.issues,...practiceAnswerIssues(data.questions),...persianCoherenceIssues(data.textFa),...(sentenceCount<4||sentenceCount>5?[`Passage must contain 4–5 complete sentences; received ${sentenceCount}.`]:[])];
         // Don't pay for a language review of a draft already rejected locally.
         // Every returned exercise still receives an exact, read-only review.
         if (rejectionIssues.length === 0) {
