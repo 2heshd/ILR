@@ -32,3 +32,16 @@ test("large corpus is clean, deduplicated, and available without enlarging promp
   assert.equal(examples.length,3);
   assert.ok(naturalPersianPrompt(examples).length<1200);
 });
+
+test("selected-word retrieval grounds several chosen words in natural usage",()=>{
+  const examples=naturalPersianExamples([...corpus,...openCorpus],{topic:"daily life",words:["خریدن","بازار","غذا","دوست"],level:2,mode:"listening",register:"colloquial",priority:"selected"});
+  assert.equal(examples.length,3);
+  assert.ok(examples.every(text=>/(?:خرید|بازار|غذا|دوست)/u.test(text)));
+  assert.ok(new Set(examples).size===examples.length);
+  assert.ok(examples.every(text=>!/تام|توسط/u.test(text)));
+});
+
+test("selected-word retrieval returns fewer references instead of unrelated filler",()=>{
+  const examples=naturalPersianExamples([...corpus,...openCorpus],{topic:"specialist",words:["ژغکثپو"],level:3,mode:"reading",register:"formal",priority:"selected"});
+  assert.deepEqual(examples,[]);
+});
