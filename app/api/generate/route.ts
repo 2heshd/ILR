@@ -8,7 +8,8 @@ import { practiceBank } from "@/lib/practice-bank";
 import { grammarProfileForIlr, grammarPromptForExercise } from "@/lib/grammar-levels";
 import persianGrammar from "@/data/persian-grammar-rules.json";
 import { persianCoherenceIssues } from "@/lib/persian-coherence";
-import naturalPersianCorpus from "@/data/persian-natural-exemplars.json";
+import editorialPersianExamples from "@/data/persian-natural-exemplars.json";
+import openPersianCorpus from "@/data/persian-natural-corpus.json";
 import { naturalPersianExamples, naturalPersianPrompt } from "@/lib/natural-persian";
 
 export const runtime = "nodejs";
@@ -120,13 +121,15 @@ export async function POST(request: Request) {
     const grammarProfile = grammarProfileForIlr(persianGrammar.rules, level);
     const grammarSeed = `${body.topic ?? "Daily life"}|${mode}|${level}|${(body.targetWords ?? []).slice(0, 12).join("|")}`;
     grammarScaffold = grammarPromptForExercise(grammarProfile, mode, grammarSeed);
-    const naturalStyleReferences = naturalPersianPrompt(naturalPersianExamples(naturalPersianCorpus, {
+    const naturalStyleReferences = naturalPersianPrompt(naturalPersianExamples(
+      [...editorialPersianExamples, ...openPersianCorpus], {
       topic: body.topic ?? "Daily life",
       words: body.targetWords ?? [],
       level,
       mode,
       register: body.register === "colloquial" ? "colloquial" : "formal",
-    }));
+      },
+    ));
     practiceSource = body.practiceSource === "topic" ? "topic" : "selected";
     selectedVocabulary = [...new Set((body.targetWords ?? []).map((word) => word.trim()).filter(Boolean))];
     if (!selectedVocabulary.length) {
@@ -194,8 +197,6 @@ English title, English questions and English reference answers; only textFa is P
       prompt,
       `${prompt}\nINDEPENDENT CANDIDATE A: Choose a different compatible subset and situation. Do not imitate or revise another draft.`,
       `${prompt}\nINDEPENDENT CANDIDATE B: Prefer the simplest idiomatic description the bank supports. Use copular sentences when natural, avoid unnecessary reporting verbs and time adverbs, and verify the five-item supporting allowance token by token.`,
-      `${prompt}\nINDEPENDENT CANDIDATE C: Use one clearly named participant or the speaker throughout. Before returning, compare every English question subject word-for-word with the participant stated in textFa. Prefer three plain declarative facts over narrative transitions.`,
-      `${prompt}\nINDEPENDENT CANDIDATE D: Start by selecting the smallest idiomatic cluster in the bank. Write a compact factual description with conventional Persian roles and collocations; never treat the name of an institution, service, or field as a person. Recount every supporting content lemma before returning.`,
     ];
     type CandidateResult = {data: Record<string, any>; issues: string[]; rejectedWords: string[]; score: number};
     const evaluateCandidate = async (candidatePrompt: string, index: number): Promise<CandidateResult> => {

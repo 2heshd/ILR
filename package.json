@@ -10,7 +10,8 @@
     "pilot:production-smoke": "node scripts/production-generation-smoke.mjs",
     "pilot:soak": "node scripts/suite-soak.mjs",
     "start": "next start",
-    "test": "node --test tests/*.test.mjs"
+    "test": "node --test tests/*.test.mjs",
+    "audit:natural": "node scripts/natural-generation-audit.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "latest",

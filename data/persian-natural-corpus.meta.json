@@ -1,0 +1,17 @@
+{
+  "name": "Natural Persian retrieval corpus",
+  "generatedAt": "2026-09-11",
+  "source": {
+    "name": "Tatoeba Challenge English–Persian dev/test data",
+    "repository": "https://github.com/Helsinki-NLP/Tatoeba-Challenge",
+    "upstreamLanguagePair": "eng-pes",
+    "licenseNote": "Corpus sentences originate from Tatoeba. Retain upstream attribution and license notices."
+  },
+  "counts": {
+    "inputRows": 4885,
+    "accepted": 4488,
+    "rejected": 397
+  },
+  "policy": "Runtime retrieval uses at most three level/topic/register-matched examples. Source names are not included in learner-facing prompts or output."
+}
+
