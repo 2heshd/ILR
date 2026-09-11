@@ -1,0 +1,6735 @@
+[
+  {
+    "id": "tatoeba-eng-562",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "انسان دارای روح و جسم است."
+  },
+  {
+    "id": "tatoeba-eng-563",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "خیلی از دانشمندان بزرگ راجع به مسائل عجیب و غیر معمول فکر کرده بودند."
+  },
+  {
+    "id": "tatoeba-eng-564",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "یک دست صدا ندارد."
+  },
+  {
+    "id": "tatoeba-eng-565",
+    "topic": "work",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "بسیاری از شرکت‌های آنلاین برای بقا نیازمند داشتن رویکردی جدید در کسب و کار هستند."
+  },
+  {
+    "id": "tatoeba-eng-566",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "ازدواج و طلاق وضعیت تأهل را تغییر می‌دهند."
+  },
+  {
+    "id": "tatoeba-eng-567",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "مری نتوانست جلوی عصبانیتش را بگیرد."
+  },
+  {
+    "id": "tatoeba-eng-568",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "مری امروز یک پرواز دارد."
+  },
+  {
+    "id": "tatoeba-eng-569",
+    "topic": "travel",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "مری دارد با تاکسی به هتل می‌رود."
+  },
+  {
+    "id": "tatoeba-eng-570",
+    "topic": "family",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "ماری مثل خواهر کوچکتر می ماند برای من."
+  },
+  {
+    "id": "tatoeba-eng-571",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "مری در حال مطالعه در اتاق خود است."
+  },
+  {
+    "id": "tatoeba-eng-572",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "دوستان ماری یک دسته مفتخور آزار دهنده هستند."
+  },
+  {
+    "id": "tatoeba-eng-573",
+    "topic": "health",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 3,
+    "ilrMax": 5,
+    "text": "ریاضیات بخشی از علم است که اگر فردا از خواب بیدار شوید و متوجه شوید که دنیا از بین رفته است می‌توانید کماکان ادامه دهید."
+  },
+  {
+    "id": "tatoeba-eng-574",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "می‌توانم بپرسم چرا نمی‌خواهی درباره‌اش حرف بزنی؟"
+  },
+  {
+    "id": "tatoeba-eng-575",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "گوشت یا ماهی؟"
+  },
+  {
+    "id": "tatoeba-eng-576",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "مگ هم قد کن است."
+  },
+  {
+    "id": "tatoeba-eng-577",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "میکائل سینگر نویسندهٔ روح افسار گسیخته است."
+  },
+  {
+    "id": "tatoeba-eng-578",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "میلی گربه دارد."
+  },
+  {
+    "id": "tatoeba-eng-579",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "میلی چسمانِ آبی دارد."
+  },
+  {
+    "id": "tatoeba-eng-580",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "میلی چسم‌های آبی دارد."
+  },
+  {
+    "id": "tatoeba-eng-581",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "پول بسیاری را فاسد می کند."
+  },
+  {
+    "id": "tatoeba-eng-582",
+    "topic": "work",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "پول کارها را راست و ریس می کند."
+  },
+  {
+    "id": "tatoeba-eng-583",
+    "topic": "work",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "بیشتر شرکت ها اتحادیه های کارگری خود را دارند."
+  },
+  {
+    "id": "tatoeba-eng-584",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "اغلب دختران مهربان هستند."
+  },
+  {
+    "id": "tatoeba-eng-585",
+    "topic": "family",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "مادر به خرید رفته است."
+  },
+  {
+    "id": "tatoeba-eng-586",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "آقای جانسون در میان سه نفر از بقیه تندتر می‌دوید."
+  },
+  {
+    "id": "tatoeba-eng-587",
+    "topic": "family",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "در تاریخ فرانسه، آقای یُشیدا در خانه است."
+  },
+  {
+    "id": "tatoeba-eng-588",
+    "topic": "nature",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "حیات من یک پله پایین تر از زمینه."
+  },
+  {
+    "id": "tatoeba-eng-589",
+    "topic": "family",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "برادر من میخواهد که روزی به ماه برود."
+  },
+  {
+    "id": "tatoeba-eng-590",
+    "topic": "education",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "ماشین من الآن درست شد."
+  },
+  {
+    "id": "tatoeba-eng-591",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "بجّه‌هایم من را دوست دارند."
+  },
+  {
+    "id": "tatoeba-eng-592",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "دختر خاله من به حرف هیچ کس گوش نمیدهد."
+  },
+  {
+    "id": "tatoeba-eng-593",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "گوشم بعضی وقتها زنگ می زنه."
+  },
+  {
+    "id": "tatoeba-eng-594",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "چشمانم آسیب دیدند."
+  },
+  {
+    "id": "tatoeba-eng-595",
+    "topic": "work",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "خانواده ی من همه ورزشکارند."
+  },
+  {
+    "id": "tatoeba-eng-596",
+    "topic": "work",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "پدرم برنج می کارد."
+  },
+  {
+    "id": "tatoeba-eng-597",
+    "topic": "food",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "پدرم عادت دارند قبل از صبحانه روزنامه بخوانند."
+  },
+  {
+    "id": "tatoeba-eng-598",
+    "topic": "education",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "پدر من بسیار کتاب دارد."
+  },
+  {
+    "id": "tatoeba-eng-599",
+    "topic": "family",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "مادر بزرگم نمی تواند خیلی خوب ببیند."
+  },
+  {
+    "id": "tatoeba-eng-600",
+    "topic": "family",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "مادربزرگ من هیچ گاه مدل زندگی اش را عوض نکرد."
+  },
+  {
+    "id": "tatoeba-eng-601",
+    "topic": "family",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "مادرم همیشه در خانه کیمونو می پوشد."
+  },
+  {
+    "id": "tatoeba-eng-602",
+    "topic": "family",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "مادرم با احتیاط در را باز کرد."
+  },
+  {
+    "id": "tatoeba-eng-603",
+    "topic": "health",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "مادرم تا چندی پیش در بیمارستان بوده است."
+  },
+  {
+    "id": "tatoeba-eng-604",
+    "topic": "family",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "مادرم انسان مهربانی است."
+  },
+  {
+    "id": "tatoeba-eng-605",
+    "topic": "family",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "مادرم اغلب برای ما پای سیب می پزد."
+  },
+  {
+    "id": "tatoeba-eng-606",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "اسم من لودویگ است."
+  },
+  {
+    "id": "tatoeba-eng-607",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "نام من لودویگ است."
+  },
+  {
+    "id": "tatoeba-eng-608",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "نام من مری است."
+  },
+  {
+    "id": "tatoeba-eng-609",
+    "topic": "technology",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "شماره تلفن من دوباره تغییر کرده است."
+  },
+  {
+    "id": "tatoeba-eng-610",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "اسم واقعیم مری است."
+  },
+  {
+    "id": "tatoeba-eng-611",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "پسر من به ایران رفت."
+  },
+  {
+    "id": "tatoeba-eng-612",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "تی شرتم آب رفت چون شستمش."
+  },
+  {
+    "id": "tatoeba-eng-613",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "نیازی به گفتن نیست که او دیگر هرگز باز نگشت."
+  },
+  {
+    "id": "tatoeba-eng-614",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "نه متعلمین نه متعلمان نباید هیچگاه یادگیری را متوقف کنند."
+  },
+  {
+    "id": "tatoeba-eng-615",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "هرگز فرصت خفه شدن را از دست ندهید."
+  },
+  {
+    "id": "tatoeba-eng-616",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 3,
+    "ilrMax": 5,
+    "text": "هیچ گاه تصور نکن که جنگ هر چند که ضروری یا موجه باشد، جنایت محسوب نمی گردد."
+  },
+  {
+    "id": "tatoeba-eng-617",
+    "topic": "society",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "نیویورک شلوغ ترین شهر دنیاست"
+  },
+  {
+    "id": "tatoeba-eng-618",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "نیک به من ده دلار را برگرداند."
+  },
+  {
+    "id": "tatoeba-eng-619",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "پیش از آنکه بفهمیم، شب کاملاً از راه رسیده بود."
+  },
+  {
+    "id": "tatoeba-eng-620",
+    "topic": "nature",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "در آسمان ابری نبود."
+  },
+  {
+    "id": "tatoeba-eng-621",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "نا برده رنج، گنج میسر نمی‌شود."
+  },
+  {
+    "id": "tatoeba-eng-622",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "نه، او دوست‌پسر جدید من نیست."
+  },
+  {
+    "id": "tatoeba-eng-623",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "هیچ‌کس همّه چیز را نمی‌داند."
+  },
+  {
+    "id": "tatoeba-eng-624",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "کسی نخواهد فهمید."
+  },
+  {
+    "id": "tatoeba-eng-625",
+    "topic": "society",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "تا نباشد چیزکی، مردم نگویند چیزها."
+  },
+  {
+    "id": "tatoeba-eng-626",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "اسبها همه برابر زاده نشدند. معدودی از آنها برای بردن زاده شدند."
+  },
+  {
+    "id": "tatoeba-eng-627",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "همه آنها خوشحال نیستند."
+  },
+  {
+    "id": "tatoeba-eng-628",
+    "topic": "food",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "هیچ چیزی به اندازه ی غذایی که درست می کنی خوشمزه نیست."
+  },
+  {
+    "id": "tatoeba-eng-629",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "علاوه بر پسرش، دخترش نیز مشهور است."
+  },
+  {
+    "id": "tatoeba-eng-630",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "تا همین دیروز از حقیقت خبر نداشتم."
+  },
+  {
+    "id": "tatoeba-eng-631",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "هیچ حرفی نتوانست او را برانگیزد."
+  },
+  {
+    "id": "tatoeba-eng-632",
+    "topic": "work",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "NTT کارت‌های تلفن دارای بیش از 300 واحد را لغو کرد."
+  },
+  {
+    "id": "tatoeba-eng-633",
+    "topic": "society",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "شمار زیادی از مردم از سرتاسر کشور آمده اند."
+  },
+  {
+    "id": "tatoeba-eng-634",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "البتّه که می‌فهمم."
+  },
+  {
+    "id": "tatoeba-eng-635",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "زمانی که یک عادت شکل گرفت خلاص شدن از آن سخت است."
+  },
+  {
+    "id": "tatoeba-eng-636",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "یک روز کریس دختر زیبای رؤیاهایش را پیدا کرد."
+  },
+  {
+    "id": "tatoeba-eng-637",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "دندان های اسب پیشکشی را نمی شمارند."
+  },
+  {
+    "id": "tatoeba-eng-638",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "یکی از درها باز است."
+  },
+  {
+    "id": "tatoeba-eng-639",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "یکی از نوجوان ها فریاد کشید."
+  },
+  {
+    "id": "tatoeba-eng-640",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 3,
+    "ilrMax": 5,
+    "text": "تنها دو چیز در مقدار بی نهایت اند، هستی و بلاهت بشر، و من در مورد آخری مطمئن نیستم."
+  },
+  {
+    "id": "tatoeba-eng-641",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "در سمت راست قفسه را باز کن.بطری ها در آنجا قرار دارند"
+  },
+  {
+    "id": "tatoeba-eng-642",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "سیارهٔ ما زیباست."
+  },
+  {
+    "id": "tatoeba-eng-643",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "کاغذ سنگ صبور است."
+  },
+  {
+    "id": "tatoeba-eng-644",
+    "topic": "travel",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "توجه کنید، حفره ای در خیابان است."
+  },
+  {
+    "id": "tatoeba-eng-645",
+    "topic": "food",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "هلو ها شیرین هستند."
+  },
+  {
+    "id": "tatoeba-eng-646",
+    "topic": "society",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "مردم می توانستند صدای اسب ها را بشنوند."
+  },
+  {
+    "id": "tatoeba-eng-647",
+    "topic": "family",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "مردم وقتی در خانه هستند، بیشترین احساس راحتی را می‌کنند."
+  },
+  {
+    "id": "tatoeba-eng-648",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "کسانی که از اشتباه کردن می ترسند،نمی توانند در مکالمه انگلیسی پیشرفت کنند"
+  },
+  {
+    "id": "tatoeba-eng-649",
+    "topic": "culture",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "فارسی زبان دشواری نیست."
+  },
+  {
+    "id": "tatoeba-eng-650",
+    "topic": "health",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "لطفا چند نوع دارو به من بدهید تا دردم را تسکین دهد."
+  },
+  {
+    "id": "tatoeba-eng-651",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "لطفا این نامه را برای من پست کن."
+  },
+  {
+    "id": "tatoeba-eng-652",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "لطفا از طرف من به او سلام برسان."
+  },
+  {
+    "id": "tatoeba-eng-653",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "قیمت ها به تدریج در طی سالهای اخیر افزایش یافته اند."
+  },
+  {
+    "id": "tatoeba-eng-654",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "ضرب المثل‌ها پر از حکمت هستند."
+  },
+  {
+    "id": "tatoeba-eng-655",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "پوتین را نمی توان حذف کرد"
+  },
+  {
+    "id": "tatoeba-eng-656",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "کتت را بپوش مبادا سرما بخوری."
+  },
+  {
+    "id": "tatoeba-eng-657",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "پیژامه ات را بپوش."
+  },
+  {
+    "id": "tatoeba-eng-658",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "آنرا بگذارید همان جائی، که بود."
+  },
+  {
+    "id": "tatoeba-eng-659",
+    "topic": "family",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "سلام مرا به مادرت برسان."
+  },
+  {
+    "id": "tatoeba-eng-660",
+    "topic": "work",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "آستین‌هایتان را بالا بزنید و شروع کنید به کار کردن."
+  },
+  {
+    "id": "tatoeba-eng-661",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "سامی و‌لیلا با هم نسبتی نداشتند."
+  },
+  {
+    "id": "tatoeba-eng-662",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "سامی عینکش را برداشت."
+  },
+  {
+    "id": "tatoeba-eng-663",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "سامی معمولا غایب بود."
+  },
+  {
+    "id": "tatoeba-eng-664",
+    "topic": "society",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "سارتر یک جامعه‌شناس مهم بود."
+  },
+  {
+    "id": "tatoeba-eng-665",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "قدرتت را حفظ کن."
+  },
+  {
+    "id": "tatoeba-eng-666",
+    "topic": "society",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "اسکاتلند به خاطر منسوجات پشمی‌اش شهرت دارد."
+  },
+  {
+    "id": "tatoeba-eng-667",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "اسکات نخستین انسانی بود که به قطب رسید."
+  },
+  {
+    "id": "tatoeba-eng-668",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "دوباره جیب هایت را بگرد تا مطمئن شوی."
+  },
+  {
+    "id": "tatoeba-eng-669",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "او تکلیف را از طریق ارادهٔ محض به سرانجام رساند."
+  },
+  {
+    "id": "tatoeba-eng-670",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "او برای شوهرش پای سیب پخت."
+  },
+  {
+    "id": "tatoeba-eng-671",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "او از توکیو به من زنگ زد."
+  },
+  {
+    "id": "tatoeba-eng-672",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "او می تواند به خوبی پیانو بنوازد."
+  },
+  {
+    "id": "tatoeba-eng-673",
+    "topic": "food",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "او یک فنجان چای را با یک بطری ودکا اشتباه گرفته بود."
+  },
+  {
+    "id": "tatoeba-eng-674",
+    "topic": "work",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "او با ذوق و شوق در بحث شرکت کرد."
+  },
+  {
+    "id": "tatoeba-eng-675",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "او مقدار زیادی خوردنی به ما داد."
+  },
+  {
+    "id": "tatoeba-eng-676",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "او از ما دور ماند، چون آهسته قدم می زد."
+  },
+  {
+    "id": "tatoeba-eng-677",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "او در ریاضیات نمرات خوبی گرفت."
+  },
+  {
+    "id": "tatoeba-eng-678",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "او نگاه متفکرانه ای بر چهره اش داشت."
+  },
+  {
+    "id": "tatoeba-eng-679",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "او یک توله سگ سیاه دارد."
+  },
+  {
+    "id": "tatoeba-eng-680",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "او یک سگ کوچک سیاه دارد."
+  },
+  {
+    "id": "tatoeba-eng-681",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "او به مدت هفت سال در آنجا زندگی کرده است."
+  },
+  {
+    "id": "tatoeba-eng-682",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "او نگران گربه ها است."
+  },
+  {
+    "id": "tatoeba-eng-683",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "او آموزگار بسیار خوبی است"
+  },
+  {
+    "id": "tatoeba-eng-684",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "او حامله است."
+  },
+  {
+    "id": "tatoeba-eng-685",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "او به دنبال یک آپارتمان بزرگ است."
+  },
+  {
+    "id": "tatoeba-eng-686",
+    "topic": "family",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "او خواهر بزرگتر تام است."
+  },
+  {
+    "id": "tatoeba-eng-687",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "او بخش مجله را رهبری می کند."
+  },
+  {
+    "id": "tatoeba-eng-688",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "او جاز دوست دارد و من هم همینطور."
+  },
+  {
+    "id": "tatoeba-eng-689",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "او در سن پایین ازدواج کرد."
+  },
+  {
+    "id": "tatoeba-eng-690",
+    "topic": "education",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "احتمالا فرانسه درس خوانده است که این طور روان فرانسه حرف می زند."
+  },
+  {
+    "id": "tatoeba-eng-691",
+    "topic": "food",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "او مشتش را بالا آورد چنانکه گویی مرا می خواست بزند."
+  },
+  {
+    "id": "tatoeba-eng-692",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "او فاشیست است."
+  },
+  {
+    "id": "tatoeba-eng-693",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "گفت که نمی یاد. خیلی ضد حاله."
+  },
+  {
+    "id": "tatoeba-eng-694",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "به نظر می رسید خیلی شگفت زده شده است."
+  },
+  {
+    "id": "tatoeba-eng-695",
+    "topic": "travel",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "او الآن دارد به هتل می‌رود."
+  },
+  {
+    "id": "tatoeba-eng-696",
+    "topic": "family",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "او خواهر کوچکتر من است، اما اصلا شبیه من نیست."
+  },
+  {
+    "id": "tatoeba-eng-697",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "او فقط المانی حرف میزد."
+  },
+  {
+    "id": "tatoeba-eng-698",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "او کلاه زیبایی پوشیده است."
+  },
+  {
+    "id": "tatoeba-eng-699",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "او کاملاً بیدار است."
+  },
+  {
+    "id": "tatoeba-eng-700",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "او تصور می کرد که به قدر کافی جذاب است."
+  },
+  {
+    "id": "tatoeba-eng-701",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "آن زن یک بار برای همیشه به او گفت که با او به سینما نخواهد رفت."
+  },
+  {
+    "id": "tatoeba-eng-702",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "او راه می رود."
+  },
+  {
+    "id": "tatoeba-eng-703",
+    "topic": "general",
+    "register": "colloquial",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "یک طوری رفتار می کرد انگار که مسئولیتش با اون بود."
+  },
+  {
+    "id": "tatoeba-eng-704",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "او توسط پلیس دستگیر شد."
+  },
+  {
+    "id": "tatoeba-eng-705",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "او شجاع بود."
+  },
+  {
+    "id": "tatoeba-eng-706",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "او در شرایط ترحم انگیزی است."
+  },
+  {
+    "id": "tatoeba-eng-707",
+    "topic": "society",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "او اینقدر مهربان بود که شهر را به من نشان دهد."
+  },
+  {
+    "id": "tatoeba-eng-708",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "در صورتی که دیر کردم، منتظر من نمان."
+  },
+  {
+    "id": "tatoeba-eng-709",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "کشیدن سیگار اینحا مجاز نیست."
+  },
+  {
+    "id": "tatoeba-eng-710",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "بعظی اوقات نمی توانم جلوی احساساتم را بگیرم."
+  },
+  {
+    "id": "tatoeba-eng-711",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "برخی مواقع به شانس بستگی دارد"
+  },
+  {
+    "id": "tatoeba-eng-712",
+    "topic": "work",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 3,
+    "ilrMax": 5,
+    "text": "گاهی اوقات تا محل کارم قدم می زنم، و گاهی اوقات تا آنجا دوچرخه سواری می کنم، زیرا خیلی نزدیک به محل کارم زندگی می کنم."
+  },
+  {
+    "id": "tatoeba-eng-713",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "گاهی وقت‌ها، زندگی خیلی نا‌عادلانه است."
+  },
+  {
+    "id": "tatoeba-eng-714",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "ببخشید که زودتر به شما ایمیل نزدم."
+  },
+  {
+    "id": "tatoeba-eng-715",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "اسپارتاکوس یک بردهٔ رومی بود."
+  },
+  {
+    "id": "tatoeba-eng-716",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "خر خونی بسته دیگه!"
+  },
+  {
+    "id": "tatoeba-eng-717",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "ناگهان پرنده‌ی زیبائی را دیدم."
+  },
+  {
+    "id": "tatoeba-eng-718",
+    "topic": "family",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "سو با خانواده برون ملاقات خواهد کرد."
+  },
+  {
+    "id": "tatoeba-eng-719",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "او را برای عمل جراحی ببر."
+  },
+  {
+    "id": "tatoeba-eng-720",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "به من بگو، من سرتاپا گوشم."
+  },
+  {
+    "id": "tatoeba-eng-721",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "متشکرم که مرا به سینما دعوت کردی."
+  },
+  {
+    "id": "tatoeba-eng-722",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "با تشکر از شما از ته دلم."
+  },
+  {
+    "id": "tatoeba-eng-723",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "این کالسکه مال ماست."
+  },
+  {
+    "id": "tatoeba-eng-724",
+    "topic": "family",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "آن کودک از آب ترسی ندارد."
+  },
+  {
+    "id": "tatoeba-eng-725",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "این لغت نامه ی من است."
+  },
+  {
+    "id": "tatoeba-eng-726",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "آن باورکردنی نیست."
+  },
+  {
+    "id": "tatoeba-eng-727",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "آن چیز باورکردنی نیست."
+  },
+  {
+    "id": "tatoeba-eng-728",
+    "topic": "travel",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "آن سریع ترین قطار دنیاست"
+  },
+  {
+    "id": "tatoeba-eng-729",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "آن مرد، مردی است که از سرنوشت خویش راضی است."
+  },
+  {
+    "id": "tatoeba-eng-730",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "این یک سوال جالب است"
+  },
+  {
+    "id": "tatoeba-eng-731",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "این به خاطر دختر بودن تو است."
+  },
+  {
+    "id": "tatoeba-eng-732",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "این قابل بحث است"
+  },
+  {
+    "id": "tatoeba-eng-733",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "آن قطعا یک قایق است."
+  },
+  {
+    "id": "tatoeba-eng-734",
+    "topic": "education",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "این جمله درست اما به نوعی محاوره ای است."
+  },
+  {
+    "id": "tatoeba-eng-735",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "آن ممکن نیست."
+  },
+  {
+    "id": "tatoeba-eng-736",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "این طور دو پرنده را با یک سنگ می‌زنم."
+  },
+  {
+    "id": "tatoeba-eng-737",
+    "topic": "health",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "هواپیما به سلامت فرود آمد."
+  },
+  {
+    "id": "tatoeba-eng-738",
+    "topic": "work",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "بهترین جنبهٔ کار تیمی اینست که اگر چیزی خراب شد، همیشه می‌توانید دیگری را مقصر بدانید."
+  },
+  {
+    "id": "tatoeba-eng-739",
+    "topic": "education",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "کتاب بهترین دوست من است."
+  },
+  {
+    "id": "tatoeba-eng-740",
+    "topic": "education",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "کتاب آن بالاست."
+  },
+  {
+    "id": "tatoeba-eng-741",
+    "topic": "work",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "کارگاه کاردان مأموریت یافته تا علت تراژدی را تحقیق کند."
+  },
+  {
+    "id": "tatoeba-eng-742",
+    "topic": "family",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "قلعه آن طرف رودخانه است."
+  },
+  {
+    "id": "tatoeba-eng-743",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "گربه به دنبال موش می دوید."
+  },
+  {
+    "id": "tatoeba-eng-744",
+    "topic": "family",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "بچه ها در ساحل قلعه شنی ساختند."
+  },
+  {
+    "id": "tatoeba-eng-745",
+    "topic": "family",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "احتمالا بچه غرق شده بود"
+  },
+  {
+    "id": "tatoeba-eng-746",
+    "topic": "nature",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "شهر زیر برف پوشیده شده بود."
+  },
+  {
+    "id": "tatoeba-eng-747",
+    "topic": "family",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "دلقک سیرک بچه های مرا شاد کرد."
+  },
+  {
+    "id": "tatoeba-eng-748",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "سکه‌های پول فلزی‌اند."
+  },
+  {
+    "id": "tatoeba-eng-749",
+    "topic": "society",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "کشورهای ذیربط، اختلاف را از طریق ابزارهای مسالمت آمیز حل و فصل نمودند."
+  },
+  {
+    "id": "tatoeba-eng-750",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "اعتبار اش همه برای اوست."
+  },
+  {
+    "id": "tatoeba-eng-751",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "مشتری همیشه حق دارد، حتّی زمانی‌که حق ندارد."
+  },
+  {
+    "id": "tatoeba-eng-752",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "خرش از پل گذشت."
+  },
+  {
+    "id": "tatoeba-eng-753",
+    "topic": "work",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "تاریخ و زمان جلسه ثابت و معین شده است."
+  },
+  {
+    "id": "tatoeba-eng-754",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "پشت صلیب اغلب شیطان کمین کرده است."
+  },
+  {
+    "id": "tatoeba-eng-755",
+    "topic": "health",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "دکتر‌ها نوزاد را معاینه کردند."
+  },
+  {
+    "id": "tatoeba-eng-756",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "سگ به سختی نفس کشید."
+  },
+  {
+    "id": "tatoeba-eng-757",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "این سگ مرده است."
+  },
+  {
+    "id": "tatoeba-eng-758",
+    "topic": "nature",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "کره زمین یکی از سیارات است."
+  },
+  {
+    "id": "tatoeba-eng-759",
+    "topic": "nature",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "زمین گرد است"
+  },
+  {
+    "id": "tatoeba-eng-760",
+    "topic": "work",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "بدون سوخت موتور کار نمی‌کند."
+  },
+  {
+    "id": "tatoeba-eng-761",
+    "topic": "society",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "انگلیسی‌ها مردم مؤدبی هستند."
+  },
+  {
+    "id": "tatoeba-eng-762",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "دمای دقیق، 22.68 درجه سلسیوس است."
+  },
+  {
+    "id": "tatoeba-eng-763",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "هر چه زودتر، بهتر ."
+  },
+  {
+    "id": "tatoeba-eng-764",
+    "topic": "food",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "غذا سرد شد."
+  },
+  {
+    "id": "tatoeba-eng-765",
+    "topic": "food",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "غذا حاضر است."
+  },
+  {
+    "id": "tatoeba-eng-766",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "بازی جالب ترش کرد"
+  },
+  {
+    "id": "tatoeba-eng-767",
+    "topic": "culture",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "شاعر بزرگی که یک سبک جدید شعر را پایه گذاری کرد، نیما یوشیج بود."
+  },
+  {
+    "id": "tatoeba-eng-768",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "آن مرغ تقریبا هر روز روی یک تخم می نشیند."
+  },
+  {
+    "id": "tatoeba-eng-769",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "یخ نازک است طوری که وزنت تحمل نخواهد کرد."
+  },
+  {
+    "id": "tatoeba-eng-770",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "سرور آنها ناقوس قدیمی را دوباره به صدا در آورد."
+  },
+  {
+    "id": "tatoeba-eng-771",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "زمانشان هنوز نرسیده است."
+  },
+  {
+    "id": "tatoeba-eng-772",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "آن مرد قد بلندی است."
+  },
+  {
+    "id": "tatoeba-eng-773",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "آن مرد قد بلندی دارد."
+  },
+  {
+    "id": "tatoeba-eng-774",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "وقتی سگ توهین می‌کند، ماه گوش فرا نمی‌دهد."
+  },
+  {
+    "id": "tatoeba-eng-775",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "آهنگ ناگهانی متوقف شد."
+  },
+  {
+    "id": "tatoeba-eng-776",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "مبنای لگاریتم طبیعی گاهی عدد اویلر هم نامیده می‌شود."
+  },
+  {
+    "id": "tatoeba-eng-777",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "شب سرد بود."
+  },
+  {
+    "id": "tatoeba-eng-778",
+    "topic": "work",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "رمان نویس مستندات را برای کارش جمع آوری می کند."
+  },
+  {
+    "id": "tatoeba-eng-779",
+    "topic": "health",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "آن پیرزن آنقدر ضعیف است که نمی تواند از رختخواب برخیزد."
+  },
+  {
+    "id": "tatoeba-eng-780",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "صلحی که ما امروز داریم، نتیجه مذاکرات طولانی صلح است."
+  },
+  {
+    "id": "tatoeba-eng-781",
+    "topic": "food",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "درخت گلابی باغ میوه‌های زیادی دارد."
+  },
+  {
+    "id": "tatoeba-eng-782",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "افرادی که اینجا بودند، همه رفته‌اند."
+  },
+  {
+    "id": "tatoeba-eng-783",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "شاهزاده، انگلیسی را، از آن زن آمریکایی یاد گرفت."
+  },
+  {
+    "id": "tatoeba-eng-784",
+    "topic": "nature",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "باران ما را مجبور کرد که گردهمایی را لغو کنیم."
+  },
+  {
+    "id": "tatoeba-eng-785",
+    "topic": "nature",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "باران به پنجره تازیانه می زد."
+  },
+  {
+    "id": "tatoeba-eng-786",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "آنجا هم،گربه های روی مریخ هستند."
+  },
+  {
+    "id": "tatoeba-eng-787",
+    "topic": "family",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "اینجا در پارک بچه های زیادی هستند."
+  },
+  {
+    "id": "tatoeba-eng-788",
+    "topic": "nature",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "در آن کوهستان میمون زیاد است."
+  },
+  {
+    "id": "tatoeba-eng-789",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "اینجا طول موجی از نور است که چشم انسان قادر به دیدنش نسیت."
+  },
+  {
+    "id": "tatoeba-eng-790",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "خطایی در این جمله هست."
+  },
+  {
+    "id": "tatoeba-eng-791",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "یک روزنامه در اتاق من است."
+  },
+  {
+    "id": "tatoeba-eng-792",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "تونل دیگری آنجا هست."
+  },
+  {
+    "id": "tatoeba-eng-793",
+    "topic": "food",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "نان و نمک روی میز است."
+  },
+  {
+    "id": "tatoeba-eng-794",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "امید کمی به بهبود او هست."
+  },
+  {
+    "id": "tatoeba-eng-795",
+    "topic": "nature",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "در شهر ما آلودگی هوا نیست."
+  },
+  {
+    "id": "tatoeba-eng-796",
+    "topic": "family",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "هیچ جواب قانع کننده ای نبود که یک پدر و مادر بخواهند بدهند."
+  },
+  {
+    "id": "tatoeba-eng-797",
+    "topic": "nature",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "بر زیر خورشید هیچ چیز جدیدی نیست."
+  },
+  {
+    "id": "tatoeba-eng-798",
+    "topic": "nature",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "در پوچی دریا آرامشی است، نه گذشته ای، نه آینده ای."
+  },
+  {
+    "id": "tatoeba-eng-799",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "حماقت درمان ندارد."
+  },
+  {
+    "id": "tatoeba-eng-800",
+    "topic": "work",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "این حقیقت که او دغل کار است، بر کسی پنهان نیست."
+  },
+  {
+    "id": "tatoeba-eng-801",
+    "topic": "food",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "الان اینجا هیچ غذایی نیست."
+  },
+  {
+    "id": "tatoeba-eng-802",
+    "topic": "food",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "هیچ چیزی برای خوردن در آشپزخانه نیست."
+  },
+  {
+    "id": "tatoeba-eng-803",
+    "topic": "technology",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "امروز در تلویزیون برنامه ای که ارزش دیدن داشته باشد، نیست."
+  },
+  {
+    "id": "tatoeba-eng-804",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "فقط نتیجه مهم است."
+  },
+  {
+    "id": "tatoeba-eng-805",
+    "topic": "work",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "زمانی که حقوق یک انسان مورد تهدید قرار گیرد؛ حقوق همه انسان ها نقصان خواهد یافت."
+  },
+  {
+    "id": "tatoeba-eng-806",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "پیوستن ستارهٔ راک به تالار مشاهیر توسط همگان پیشبینی شد."
+  },
+  {
+    "id": "tatoeba-eng-807",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "گفته‌های کنفوسیوس مشهور است."
+  },
+  {
+    "id": "tatoeba-eng-808",
+    "topic": "health",
+    "register": "colloquial",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "اینها دردناک ترین خاطراتی هستند که من از دوران کودکیم دارم."
+  },
+  {
+    "id": "tatoeba-eng-809",
+    "topic": "food",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "این جوانان سرباز وظیفه هستند."
+  },
+  {
+    "id": "tatoeba-eng-810",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "مغازه، مقابل بانک است."
+  },
+  {
+    "id": "tatoeba-eng-811",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "سرباز به این نتیجه رسید که نمی تواند تقاضا را رد کند."
+  },
+  {
+    "id": "tatoeba-eng-812",
+    "topic": "family",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "سرباز با یک مرخصی به خانه بازگشت."
+  },
+  {
+    "id": "tatoeba-eng-813",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "سنجاب ها به بالای درخت دویدند."
+  },
+  {
+    "id": "tatoeba-eng-814",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "این فروشگاه در تمام طول سال باز است."
+  },
+  {
+    "id": "tatoeba-eng-815",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "باد شدید شب قطع شد."
+  },
+  {
+    "id": "tatoeba-eng-816",
+    "topic": "nature",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "خورشید همین حالا به زیر افق کشیده شد."
+  },
+  {
+    "id": "tatoeba-eng-817",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "عنوان این نمایشنامه، اوتللو است."
+  },
+  {
+    "id": "tatoeba-eng-818",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "درخت ها به سرعت رشد کردند و سایه آنها، همه جا را پوشاند."
+  },
+  {
+    "id": "tatoeba-eng-819",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "حقیقت به واژه های زیادی نیاز ندارد."
+  },
+  {
+    "id": "tatoeba-eng-820",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "حقیقت تلخ است."
+  },
+  {
+    "id": "tatoeba-eng-821",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "اتحاد اسکاتلند و انگلستان در سال 1706 اتفاق افتاد."
+  },
+  {
+    "id": "tatoeba-eng-822",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "این آب با کیفیت است."
+  },
+  {
+    "id": "tatoeba-eng-823",
+    "topic": "nature",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "هوای اینجا در حال سرد شدن است و من واقعاً آن را دوست ندارم."
+  },
+  {
+    "id": "tatoeba-eng-824",
+    "topic": "nature",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "هوا به خوبی هست که باید باشه"
+  },
+  {
+    "id": "tatoeba-eng-825",
+    "topic": "education",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "زن جلوی کتابخانه ایستاد."
+  },
+  {
+    "id": "tatoeba-eng-826",
+    "topic": "work",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "کارگران می خواهند که با صاحب کار صحبت کنند."
+  },
+  {
+    "id": "tatoeba-eng-827",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "آفتابه خرج لحیم کردن."
+  },
+  {
+    "id": "tatoeba-eng-828",
+    "topic": "work",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "این کار به ده نفر برای ده روز نیاز دارد."
+  },
+  {
+    "id": "tatoeba-eng-829",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "جهان آن چیزی نیست که بشود به آن عادت کرد."
+  },
+  {
+    "id": "tatoeba-eng-830",
+    "topic": "culture",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "آنها تاریخ عروسی را در روزنامه اعلام کردند."
+  },
+  {
+    "id": "tatoeba-eng-831",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "آنها می خواهند برای سام مهمانی بگیرند."
+  },
+  {
+    "id": "tatoeba-eng-832",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "آنها تنها کسانی هستند که حقیقت را می دانند."
+  },
+  {
+    "id": "tatoeba-eng-833",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "آنها با اشاره با هم ارتباط برقرار می‌کنند."
+  },
+  {
+    "id": "tatoeba-eng-834",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "آنها به خوبی می توانستنند هم برانند وهم تیر اندازی کنند."
+  },
+  {
+    "id": "tatoeba-eng-835",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "آنها از مرز عبور کرده و داخل اسپانیا شدند."
+  },
+  {
+    "id": "tatoeba-eng-836",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "ایشان می‌خواستند پول نقد بپردازند."
+  },
+  {
+    "id": "tatoeba-eng-837",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "ایشان می‌خواهند پول نقد بپردازند."
+  },
+  {
+    "id": "tatoeba-eng-838",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "ایشان می‌خواستند نقدی بپردازند."
+  },
+  {
+    "id": "tatoeba-eng-839",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "ایشان می‌خواهند نقدی بپردازند."
+  },
+  {
+    "id": "tatoeba-eng-840",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "آنها تازه آمده اند."
+  },
+  {
+    "id": "tatoeba-eng-841",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "آنها صدایش را شنیدند که از پلکان داشت پایین می رفت."
+  },
+  {
+    "id": "tatoeba-eng-842",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "آنها همین نزدیکی ها زندگی می کنند."
+  },
+  {
+    "id": "tatoeba-eng-843",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "انها شطرنج بازی می کنند."
+  },
+  {
+    "id": "tatoeba-eng-844",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "آنها فقط لغاتند."
+  },
+  {
+    "id": "tatoeba-eng-845",
+    "topic": "family",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "آنها می گویند بر طبق استانداردهای غربی خانه ما بسیار کوچک است."
+  },
+  {
+    "id": "tatoeba-eng-846",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "برن به جهنم!"
+  },
+  {
+    "id": "tatoeba-eng-847",
+    "topic": "family",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "آنها به ما گفتند که به خاطر برف می توانیم به خانه هایمان برویم."
+  },
+  {
+    "id": "tatoeba-eng-848",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "آنها، بیشتر از هر چیز دیگری، زندگی کردن در صلح را می خواهند."
+  },
+  {
+    "id": "tatoeba-eng-849",
+    "topic": "education",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "این کتاب ایمانم به انسانیت را بازیابی کرده است."
+  },
+  {
+    "id": "tatoeba-eng-850",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "این قضیه مختومه است."
+  },
+  {
+    "id": "tatoeba-eng-851",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "این رسم مختص ژاپن است."
+  },
+  {
+    "id": "tatoeba-eng-852",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "این پایگاه داده ها حاوی اشتباهات بسیاری است."
+  },
+  {
+    "id": "tatoeba-eng-853",
+    "topic": "work",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "طبق گزارش،اسلحه خیلی قدرتمند است."
+  },
+  {
+    "id": "tatoeba-eng-854",
+    "topic": "family",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "این خانه راحت اجاره داده خواهد شد."
+  },
+  {
+    "id": "tatoeba-eng-855",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "این موسسه بعد از جنگ ایجاد شد."
+  },
+  {
+    "id": "tatoeba-eng-856",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "این غیر ممکن!"
+  },
+  {
+    "id": "tatoeba-eng-857",
+    "topic": "daily-life",
+    "register": "colloquial",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "این تنها آهنگیه که تو کل این دیسک دوست دارم."
+  },
+  {
+    "id": "tatoeba-eng-858",
+    "topic": "food",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "این آشپزخانه من است."
+  },
+  {
+    "id": "tatoeba-eng-859",
+    "topic": "food",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 3,
+    "ilrMax": 5,
+    "text": "این خواهر کوچکم ساکیکو است. او همان سالی متولد شده که من به دنیا آمده‌ام و الآن برای امتحاناتش درس می‌خواند."
+  },
+  {
+    "id": "tatoeba-eng-860",
+    "topic": "society",
+    "register": "colloquial",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "این یکی از شلوغ‌ترین پل‌های توی شهر است."
+  },
+  {
+    "id": "tatoeba-eng-861",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "این آغاز عصری جدید است."
+  },
+  {
+    "id": "tatoeba-eng-862",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "این همان ساعتی است که من گم کرده‌ام."
+  },
+  {
+    "id": "tatoeba-eng-863",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "این خسارت بار ترین زلزله جهان است."
+  },
+  {
+    "id": "tatoeba-eng-864",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "این قارچ خوراکی نیست."
+  },
+  {
+    "id": "tatoeba-eng-865",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "این داستان هم سرگرم کننده است و هم آموزنده."
+  },
+  {
+    "id": "tatoeba-eng-866",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "این یکی یا آن یکی؟"
+  },
+  {
+    "id": "tatoeba-eng-867",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "این گیاه خوراکی است."
+  },
+  {
+    "id": "tatoeba-eng-868",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "این اتاق زیاد نورگیر نیست."
+  },
+  {
+    "id": "tatoeba-eng-869",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "این طناب به اندازهٔ کافی قوی نیست."
+  },
+  {
+    "id": "tatoeba-eng-870",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "این گونه جانوری رکورد مهاجرت طولانی را در دست دارد."
+  },
+  {
+    "id": "tatoeba-eng-871",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "این اعلام سبب تندبادی از انتقاد شد."
+  },
+  {
+    "id": "tatoeba-eng-872",
+    "topic": "food",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "این چای بسیار خوب است."
+  },
+  {
+    "id": "tatoeba-eng-873",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "این تلویزیون ضمانت دوساله دارد."
+  },
+  {
+    "id": "tatoeba-eng-874",
+    "topic": "food",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "این کلمه از زبان یونانی گرفته شده است."
+  },
+  {
+    "id": "tatoeba-eng-875",
+    "topic": "work",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "انجام این کار برای من خیلی ساده است."
+  },
+  {
+    "id": "tatoeba-eng-876",
+    "topic": "family",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "آن خانه ها پانصد سال قدمت دارند."
+  },
+  {
+    "id": "tatoeba-eng-877",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 3,
+    "ilrMax": 5,
+    "text": "آنها که می‌دانند و می‌توانند عمل می‌کنند. آنها که می‌دانند ولی نمی‌توانند تدریس می‌کنند. آنها که نه می‌دانند و نه می‌توانند رهبری می‌کنند."
+  },
+  {
+    "id": "tatoeba-eng-878",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "زمان مثل برق می‌گذرد."
+  },
+  {
+    "id": "tatoeba-eng-879",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "این به آن در!"
+  },
+  {
+    "id": "tatoeba-eng-880",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "بودن، عمل کردن است."
+  },
+  {
+    "id": "tatoeba-eng-881",
+    "topic": "education",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "من امروز به مدرسه می روم."
+  },
+  {
+    "id": "tatoeba-eng-882",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "امروز آخرین روز ژانویه است."
+  },
+  {
+    "id": "tatoeba-eng-883",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "روزنامه امروز می گوید طوفان می آید."
+  },
+  {
+    "id": "tatoeba-eng-884",
+    "topic": "work",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "امروز، رئیس جمهور ایران تقافق نامه حقوق بشهر بین المللی را امضاء کرد."
+  },
+  {
+    "id": "tatoeba-eng-885",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "تام او را به دزدیدن دوچرخه متّهم کرد."
+  },
+  {
+    "id": "tatoeba-eng-886",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "تام پذیرفت که با ماری جلوی لاندرومات ملاقات کند."
+  },
+  {
+    "id": "tatoeba-eng-887",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "تام و ماری پانزده سال با شادمانی در عقد یکدیگر بوده اند."
+  },
+  {
+    "id": "tatoeba-eng-888",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "تام در ساعت 2:30 رسید و ماری مدّک کوتاهی بعد از آن رسید."
+  },
+  {
+    "id": "tatoeba-eng-889",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "تام در ابتدای روز بیدار شد."
+  },
+  {
+    "id": "tatoeba-eng-890",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "تام تنها آمد."
+  },
+  {
+    "id": "tatoeba-eng-891",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "تام نمی‌تواند به ما کمک کند."
+  },
+  {
+    "id": "tatoeba-eng-892",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "تام به آیینه بغلش نگاهی کرد قبل از آنکه از پارکینگ وارد ترافیک شود ."
+  },
+  {
+    "id": "tatoeba-eng-893",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "تام به دنبال جایی برای پارک دور بلوک چرخید."
+  },
+  {
+    "id": "tatoeba-eng-894",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "تام تصمیم گرفت به تدریج نقل مکان کند به اقامتگاه ماری."
+  },
+  {
+    "id": "tatoeba-eng-895",
+    "topic": "food",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "تام شام نخورد."
+  },
+  {
+    "id": "tatoeba-eng-896",
+    "topic": "food",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "تام برای ناهار خوردن وقت نداشت."
+  },
+  {
+    "id": "tatoeba-eng-897",
+    "topic": "education",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "به نظر نمی رسید تام چندان علاقه مند به آموزش فرانسه باشد."
+  },
+  {
+    "id": "tatoeba-eng-898",
+    "topic": "work",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "تام نمی داند الان چه کار کند."
+  },
+  {
+    "id": "tatoeba-eng-899",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "نیازی نیست که تام از آن مطلع شود."
+  },
+  {
+    "id": "tatoeba-eng-900",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "تام چهره ی شادمانی روی جلد دفترش نقاشی کرد."
+  },
+  {
+    "id": "tatoeba-eng-901",
+    "topic": "food",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "تام چایش را با شیر و بدون شکر می‌نوشد."
+  },
+  {
+    "id": "tatoeba-eng-902",
+    "topic": "work",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "تام شغل معلمی را رها کرد تا به طور تمام وقت در استودیو نوازنده شود."
+  },
+  {
+    "id": "tatoeba-eng-903",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "تام امروز یک پرواز دارد."
+  },
+  {
+    "id": "tatoeba-eng-904",
+    "topic": "family",
+    "register": "colloquial",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "تام یک خواهر هم سن تو داره."
+  },
+  {
+    "id": "tatoeba-eng-905",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "تام هیچگاه رقص مری را ندیده است."
+  },
+  {
+    "id": "tatoeba-eng-906",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "تام تمایلی برای رفتن به بوستون ندارد."
+  },
+  {
+    "id": "tatoeba-eng-907",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "تام چند روز است که انلاین نبوده‌است."
+  },
+  {
+    "id": "tatoeba-eng-908",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "تام الگوی اخلاص است."
+  },
+  {
+    "id": "tatoeba-eng-909",
+    "topic": "education",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "تام با یک دانشجوی تبادلی چینی دوست است."
+  },
+  {
+    "id": "tatoeba-eng-910",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "تام جودو یاد می‌گیرد."
+  },
+  {
+    "id": "tatoeba-eng-911",
+    "topic": "family",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "تام مثل برادر بزرگتر است برای من."
+  },
+  {
+    "id": "tatoeba-eng-912",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "تام دارد برای ما خورش می‌پزد."
+  },
+  {
+    "id": "tatoeba-eng-913",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "تام یک ضد سامی نیست!"
+  },
+  {
+    "id": "tatoeba-eng-914",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "تام شخصِ موفقی نیست."
+  },
+  {
+    "id": "tatoeba-eng-915",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "تام اکنون ویولن می نوازد."
+  },
+  {
+    "id": "tatoeba-eng-916",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "تام در موارد حرفه‌ای مو را از ماست می‌کشد."
+  },
+  {
+    "id": "tatoeba-eng-917",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "تام کسی است که به من گفت مری دوستم ندارد."
+  },
+  {
+    "id": "tatoeba-eng-918",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "تام کسی است که به من گفت چرا باید به بوستون بروم."
+  },
+  {
+    "id": "tatoeba-eng-919",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "توم بسیار جوان است."
+  },
+  {
+    "id": "tatoeba-eng-920",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "تام دارد سگِ خود را می‌شوید."
+  },
+  {
+    "id": "tatoeba-eng-921",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "تام دارد سگش را می‌شوید."
+  },
+  {
+    "id": "tatoeba-eng-922",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "تام سگِ خود را می‌شوید."
+  },
+  {
+    "id": "tatoeba-eng-923",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "تام سگش را می‌شوید."
+  },
+  {
+    "id": "tatoeba-eng-924",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "تام لاک خوردن لاک پشت ها را دوست دارد."
+  },
+  {
+    "id": "tatoeba-eng-925",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "تام لحظه‌ای مَکث کَرد تا گوش دهد و سپس به خوردن ادامه داد."
+  },
+  {
+    "id": "tatoeba-eng-926",
+    "topic": "food",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "تام گفت اینقدر سرش شلوغه که نمیتونه غذا بخوره."
+  },
+  {
+    "id": "tatoeba-eng-927",
+    "topic": "general",
+    "register": "colloquial",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "تام روی تختش نشست و لپ تاپش رو باز کرد."
+  },
+  {
+    "id": "tatoeba-eng-928",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "تام به من گفت که براش مشکلی پیش اومده."
+  },
+  {
+    "id": "tatoeba-eng-929",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "تام به من گفت که مسئله‌ای برایش پیش آمده است."
+  },
+  {
+    "id": "tatoeba-eng-930",
+    "topic": "education",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "تام می خواست معلم فرانسه باشد."
+  },
+  {
+    "id": "tatoeba-eng-931",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "تام در یک همایش زلزله بود وقتی مری با او تماس گرفت."
+  },
+  {
+    "id": "tatoeba-eng-932",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "تام دربارهٔ اینکه به چه کسی در انتخابات رأی دهد در سردرگمی بود."
+  },
+  {
+    "id": "tatoeba-eng-933",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "برای موفق شدن در زندگی دو چیز لازم است: نادانی و اعتماد به نفس."
+  },
+  {
+    "id": "tatoeba-eng-934",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "دوستان حقیقی حتی از الماس هم نایاب‌تر هستند."
+  },
+  {
+    "id": "tatoeba-eng-935",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "حقیقت وجود دارد؛ این دروغ‌ها هستند که اختراع می‌شوند."
+  },
+  {
+    "id": "tatoeba-eng-936",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "تلویزیون را خاموش کن."
+  },
+  {
+    "id": "tatoeba-eng-937",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "به هنگام پاییز طوفان بسیار می آید."
+  },
+  {
+    "id": "tatoeba-eng-938",
+    "topic": "food",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "برعکس ارسطو، افلاطون زنان را منطبق با بالاترین موقعیت ها در جمهوری اش می دید."
+  },
+  {
+    "id": "tatoeba-eng-939",
+    "topic": "health",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "پیاده‌روی بهترین دارو برای انسان است."
+  },
+  {
+    "id": "tatoeba-eng-940",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "دیوار موش دارد."
+  },
+  {
+    "id": "tatoeba-eng-941",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "لطفا دستهایت را بشور."
+  },
+  {
+    "id": "tatoeba-eng-942",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "به دزدیدن دوچرخه متّهمش کردیم."
+  },
+  {
+    "id": "tatoeba-eng-943",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "ما همگی با تو موافقیم."
+  },
+  {
+    "id": "tatoeba-eng-944",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "ما به شدت خواهان صلح جهانی هستیم."
+  },
+  {
+    "id": "tatoeba-eng-945",
+    "topic": "travel",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "ما می خواهیم این تابستان به خارج سفر کنیم."
+  },
+  {
+    "id": "tatoeba-eng-946",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "ما به این نتیجه رسیدیم که باید به او کمک کنیم."
+  },
+  {
+    "id": "tatoeba-eng-947",
+    "topic": "health",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "ما باید به پزشک زنگ بزنیم"
+  },
+  {
+    "id": "tatoeba-eng-948",
+    "topic": "nature",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "ما از باران خوشمان نمی آید."
+  },
+  {
+    "id": "tatoeba-eng-949",
+    "topic": "nature",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "ما باران را دوست نداریم."
+  },
+  {
+    "id": "tatoeba-eng-950",
+    "topic": "education",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "ما ارزانترین قیمت را برای یک مدرسه فرانسوی زبان در کبک کانادا تضمین می کنیم."
+  },
+  {
+    "id": "tatoeba-eng-951",
+    "topic": "education",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "ما از موفقیتت در امتحان شنیده ایم."
+  },
+  {
+    "id": "tatoeba-eng-952",
+    "topic": "nature",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "باید قبل از اینکه هوا تاریک شود، تام را پیدا کنیم."
+  },
+  {
+    "id": "tatoeba-eng-953",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "ما به ضدیت آنها خندیدیم."
+  },
+  {
+    "id": "tatoeba-eng-954",
+    "topic": "education",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "ما در حومه ی مدرسه زندگی می کنیم."
+  },
+  {
+    "id": "tatoeba-eng-955",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "خیلی خوب بیا بریم."
+  },
+  {
+    "id": "tatoeba-eng-956",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "در عرضِ یک ماه باز خواهیم گشت."
+  },
+  {
+    "id": "tatoeba-eng-957",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "ما باید این مشکل را حل کنیم."
+  },
+  {
+    "id": "tatoeba-eng-958",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "باید پیدایش کنیم."
+  },
+  {
+    "id": "tatoeba-eng-959",
+    "topic": "family",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "ما همه مادر هستیم."
+  },
+  {
+    "id": "tatoeba-eng-960",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "برای سفارش دادن هنوز آماده نیستیم."
+  },
+  {
+    "id": "tatoeba-eng-961",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "بدجوری دلمان برایت تنگ خواهد شد."
+  },
+  {
+    "id": "tatoeba-eng-962",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 3,
+    "ilrMax": 5,
+    "text": "«چه مژده ی خوبی.» تام این را هنگامی گفت که در را باز کرد و دید ماری آنجا ایستاده است."
+  },
+  {
+    "id": "tatoeba-eng-963",
+    "topic": "food",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "امشب شام چی داریم؟"
+  },
+  {
+    "id": "tatoeba-eng-964",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "معمولاً عصر‌ها چه تماشا می‌کنی؟"
+  },
+  {
+    "id": "tatoeba-eng-965",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "امروز چه پیش آمد؟"
+  },
+  {
+    "id": "tatoeba-eng-966",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "آلان کن چه می کند؟"
+  },
+  {
+    "id": "tatoeba-eng-967",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "حق مثبت و حق منفی چیست؟"
+  },
+  {
+    "id": "tatoeba-eng-968",
+    "topic": "culture",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "امروز چه تاریخی است؟"
+  },
+  {
+    "id": "tatoeba-eng-969",
+    "topic": "nature",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "عمق دریاچه چقدر است؟"
+  },
+  {
+    "id": "tatoeba-eng-970",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "فرق میان حقیقت و واقعیت چیست؟"
+  },
+  {
+    "id": "tatoeba-eng-971",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "نام شما چیست؟"
+  },
+  {
+    "id": "tatoeba-eng-972",
+    "topic": "work",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "اینجا داری چی کار می کنی؟"
+  },
+  {
+    "id": "tatoeba-eng-973",
+    "topic": "work",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "تا ساعت هشت چه کار کنم؟!"
+  },
+  {
+    "id": "tatoeba-eng-974",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "این جمله چه معنایی دارد"
+  },
+  {
+    "id": "tatoeba-eng-975",
+    "topic": "work",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "خواهرت الان چه کار می کند؟"
+  },
+  {
+    "id": "tatoeba-eng-976",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "اوّلین کانال خصوصی در ترکیه چی بود؟"
+  },
+  {
+    "id": "tatoeba-eng-977",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "وقتی عصبانی هستی تا چهار بشمار. وقتی خیلی عصبانی هستی فرار کن."
+  },
+  {
+    "id": "tatoeba-eng-978",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "کی خطا رخ داده است؟"
+  },
+  {
+    "id": "tatoeba-eng-979",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 3,
+    "ilrMax": 5,
+    "text": "هر زمان که خود را در طرف اکثریت یافتید، زمان آن است که مکث کنید و بیاندیشید."
+  },
+  {
+    "id": "tatoeba-eng-980",
+    "topic": "travel",
+    "register": "colloquial",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 3,
+    "ilrMax": 5,
+    "text": "وقت مرگ، دوست دارم مانند پدربزرگم که در خواب با آرامش مرد، بمیرم، نه جیغ زنان مانند همه مسافران ماشینش."
+  },
+  {
+    "id": "tatoeba-eng-981",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "بیدار که شدم غمگین بودم."
+  },
+  {
+    "id": "tatoeba-eng-982",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "امروز کی میرسی؟"
+  },
+  {
+    "id": "tatoeba-eng-983",
+    "topic": "work",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "کی کارت را تمام خواهی کرد؟"
+  },
+  {
+    "id": "tatoeba-eng-984",
+    "topic": "family",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "هنگامی که با بچه ها هستید، مانند بچه ها حرف بزنید!"
+  },
+  {
+    "id": "tatoeba-eng-985",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "هنگامی که می‌خواهید دنیا را به اشتباه بیاندازید، راست بگویید."
+  },
+  {
+    "id": "tatoeba-eng-986",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "کجا می روی؟"
+  },
+  {
+    "id": "tatoeba-eng-987",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "تام کجا به دنیا آمده است؟"
+  },
+  {
+    "id": "tatoeba-eng-988",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "تو دیروز کجا بودی؟"
+  },
+  {
+    "id": "tatoeba-eng-989",
+    "topic": "technology",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "تام کدام ماشین را انتخاب کرد؟"
+  },
+  {
+    "id": "tatoeba-eng-990",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "کدام رنگ را انتخاب کردی؟"
+  },
+  {
+    "id": "tatoeba-eng-991",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "تو چه رنگی دوست داری؟"
+  },
+  {
+    "id": "tatoeba-eng-992",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "کیست که نفهمید؟"
+  },
+  {
+    "id": "tatoeba-eng-993",
+    "topic": "education",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "این کتاب مال کیه؟"
+  },
+  {
+    "id": "tatoeba-eng-994",
+    "topic": "education",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "معلم شما کیست؟"
+  },
+  {
+    "id": "tatoeba-eng-995",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "چه کسی به تو رقص آموخت؟"
+  },
+  {
+    "id": "tatoeba-eng-996",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "چه کسی قربانی بعدی خواهد بود؟"
+  },
+  {
+    "id": "tatoeba-eng-997",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "چرا دروغ میگی؟"
+  },
+  {
+    "id": "tatoeba-eng-998",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "چرا زیری در تیندر است؟"
+  },
+  {
+    "id": "tatoeba-eng-999",
+    "topic": "health",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "چرا دکتر ندیدت؟"
+  },
+  {
+    "id": "tatoeba-eng-1000",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "آیا هرگز او آن را انجام خواهد داد؟"
+  },
+  {
+    "id": "tatoeba-eng-1001",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "آیا لیوانها را روی میز خواهید گذاشت؟"
+  },
+  {
+    "id": "tatoeba-eng-1002",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "آیا همانند یک مرد برخواهی خواست در میهن ات و از دموکراسی جانبداری خواهی نمود؟"
+  },
+  {
+    "id": "tatoeba-eng-1003",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "بردن مهم نیست بلکه مشارکت مهم است."
+  },
+  {
+    "id": "tatoeba-eng-1004",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "با دوستی مثل تام کسی احتیاج به دشمن ندارد."
+  },
+  {
+    "id": "tatoeba-eng-1005",
+    "topic": "food",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "زنانی که می خواهند با مردان برابر شوند، بلند همت نیستند."
+  },
+  {
+    "id": "tatoeba-eng-1006",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "شگفت‌انگیزه! خارق العاده است!"
+  },
+  {
+    "id": "tatoeba-eng-1007",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "چوب می سوزد."
+  },
+  {
+    "id": "tatoeba-eng-1008",
+    "topic": "work",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "کار و بازی کلماتی هستند که برای توصیف یک چیز در شرایط متفاوت استفاده می‌شوند."
+  },
+  {
+    "id": "tatoeba-eng-1009",
+    "topic": "work",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "به آرامی کار کن."
+  },
+  {
+    "id": "tatoeba-eng-1010",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "شما دوست نداشتید با ما بیاید؟"
+  },
+  {
+    "id": "tatoeba-eng-1011",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "دوست داری با من برقصی؟"
+  },
+  {
+    "id": "tatoeba-eng-1012",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "می‌شود یکی از پنجره‌ها را باز کنید؟"
+  },
+  {
+    "id": "tatoeba-eng-1013",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "وای! چه جالب!"
+  },
+  {
+    "id": "tatoeba-eng-1014",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "بله، قطعاً موافقم."
+  },
+  {
+    "id": "tatoeba-eng-1015",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "با تام موافقی، نه؟"
+  },
+  {
+    "id": "tatoeba-eng-1016",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "تو یک دختر هستی."
+  },
+  {
+    "id": "tatoeba-eng-1017",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "تو یک مرد هستی."
+  },
+  {
+    "id": "tatoeba-eng-1018",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "شما شجاع هستید."
+  },
+  {
+    "id": "tatoeba-eng-1019",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "تو که واقعا نمی خواهی تراکتور کهنه ی تام را بخری، می خواهی؟"
+  },
+  {
+    "id": "tatoeba-eng-1020",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "تو که واقعا با تام نمی روی اردو. می روی؟"
+  },
+  {
+    "id": "tatoeba-eng-1021",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "تو که واقعا نمی خواهی به سپاه بپیوندی. می خواهی؟"
+  },
+  {
+    "id": "tatoeba-eng-1022",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "تو آنقدر بزرگ شده ای که بدانی بهتر از آن باید رفتار کنی."
+  },
+  {
+    "id": "tatoeba-eng-1023",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "حق با تو است، او اشتباه می‌کند."
+  },
+  {
+    "id": "tatoeba-eng-1024",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "شما نمی‌توانید یک خرچنگ را مجبور کنید راست راه برود."
+  },
+  {
+    "id": "tatoeba-eng-1025",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "تو می‌توانی پول نقد بپردازی."
+  },
+  {
+    "id": "tatoeba-eng-1026",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "شما می‌توانید پول نقد بپردازید."
+  },
+  {
+    "id": "tatoeba-eng-1027",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "نمی‌توانی آن را با خود ببری."
+  },
+  {
+    "id": "tatoeba-eng-1028",
+    "topic": "work",
+    "register": "colloquial",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "از قصد این کار رو کردی."
+  },
+  {
+    "id": "tatoeba-eng-1029",
+    "topic": "travel",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "تو یک رزرو در یک هتل داری."
+  },
+  {
+    "id": "tatoeba-eng-1030",
+    "topic": "travel",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "شما یک رزرو در یک هتل دارید."
+  },
+  {
+    "id": "tatoeba-eng-1031",
+    "topic": "food",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "تو روی این مسئله تمام صبح فکر کرده ای. استراحتی کن و ناهار بخور."
+  },
+  {
+    "id": "tatoeba-eng-1032",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "تو فقط باید دکمه را لمس کنی."
+  },
+  {
+    "id": "tatoeba-eng-1033",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "شما فقط باید دکمه را لمس کنید."
+  },
+  {
+    "id": "tatoeba-eng-1034",
+    "topic": "technology",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "شما جریمه خواهید شد اگر ماشین را جلوی آتش نشانی پارک کنید."
+  },
+  {
+    "id": "tatoeba-eng-1035",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "اگر شکست بخورید ممکن است مأیوس شوید، اما اگر تلاش نکنید محکوم به شکست می‌شوید."
+  },
+  {
+    "id": "tatoeba-eng-1036",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "بهتر است نگاهی به این بیندازی."
+  },
+  {
+    "id": "tatoeba-eng-1037",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "ای پسر شیطون!"
+  },
+  {
+    "id": "tatoeba-eng-1038",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "شما هرگز پی به ارزش چیزی نمی‌برید مگر اینکه آن را از دست بدهید."
+  },
+  {
+    "id": "tatoeba-eng-1039",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "شما مخاصمه طلب هستید."
+  },
+  {
+    "id": "tatoeba-eng-1040",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "شما بد موقع می آیید."
+  },
+  {
+    "id": "tatoeba-eng-1041",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "تو به طور مکرر اشتباه می کنی."
+  },
+  {
+    "id": "tatoeba-eng-1042",
+    "topic": "travel",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "تو داری با تاکسی به هتل می‌روی."
+  },
+  {
+    "id": "tatoeba-eng-1043",
+    "topic": "travel",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "شما دارید با تاکسی به هتل می‌روید."
+  },
+  {
+    "id": "tatoeba-eng-1044",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "شما بی‌صبر هستید."
+  },
+  {
+    "id": "tatoeba-eng-1045",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "تو به اندازه کافی بزرگ هستی، که بیشتر بدانی."
+  },
+  {
+    "id": "tatoeba-eng-1046",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "داری دیر می کنی."
+  },
+  {
+    "id": "tatoeba-eng-1047",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "شما بسیار گیرا هستید."
+  },
+  {
+    "id": "tatoeba-eng-1048",
+    "topic": "nature",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "پیام دریافت شد"
+  },
+  {
+    "id": "tatoeba-eng-1049",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "باید زود تر در مورد مشکل به من می گفتی."
+  },
+  {
+    "id": "tatoeba-eng-1050",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "باید آن را محرمانه نگه می‌داشتید."
+  },
+  {
+    "id": "tatoeba-eng-1051",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "تو انگلیسی و فارسی صحبت می‌کنی."
+  },
+  {
+    "id": "tatoeba-eng-1052",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "تو تلاشت را کرده ای."
+  },
+  {
+    "id": "tatoeba-eng-1053",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 3,
+    "ilrMax": 5,
+    "text": "شما بین جنگ و ننگ باید یکی را انتخاب می‌کردید. شما ننگ را انتخاب کردید و مجبور به جنگ شدید."
+  },
+  {
+    "id": "tatoeba-eng-1054",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "بهت گفته شد که تو کشتی بمونی."
+  },
+  {
+    "id": "tatoeba-eng-1055",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "زیری ریما را در تیندر مسدود کرد."
+  },
+  {
+    "id": "tatoeba-eng-1056",
+    "topic": "family",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "زیری سرانجام به خانه آمد."
+  },
+  {
+    "id": "tatoeba-eng-1057",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "زیری تنها بود."
+  },
+  {
+    "id": "tatoeba-eng-1058",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "زیری در تیندر بود."
+  },
+  {
+    "id": "tatoeba-eng-1059",
+    "topic": "work",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 3,
+    "ilrMax": 5,
+    "text": "خودکار سرتوپی دار تبدیل به یک ابزار دست نویسی جهانی شده، جای خودکار افشانه ای را گرفت."
+  },
+  {
+    "id": "tatoeba-eng-1060",
+    "topic": "work",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "خودکار سرتوپی دار جایگزین خودکار فواره ای شده به یک ابزار دست نویسی جهانی تبدیل گشت."
+  },
+  {
+    "id": "tatoeba-eng-1061",
+    "topic": "general",
+    "register": "colloquial",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "اینقدر که یک ماهی پرنده محسوب میشه خفاش پرنده محسوب نمیشه"
+  },
+  {
+    "id": "tatoeba-eng-1062",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "یک تشکر بزرگ برای کمک شما."
+  },
+  {
+    "id": "tatoeba-eng-1063",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "سیلی نقد به از حلوای نسیه."
+  },
+  {
+    "id": "tatoeba-eng-1064",
+    "topic": "culture",
+    "register": "colloquial",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "یک چک سفید‌امضا؟ چنین چیزی را فقط توی فیلم‌ها می‌توانی ببینی."
+  },
+  {
+    "id": "tatoeba-eng-1065",
+    "topic": "health",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "یک زن بلوند با روانپزشکش صحبت می‌کند."
+  },
+  {
+    "id": "tatoeba-eng-1066",
+    "topic": "travel",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "کرایه‌ی تاکسی از اینجا تقریباً چقدر می‌شود؟"
+  },
+  {
+    "id": "tatoeba-eng-1067",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "بالاتر از هر چیز این است که صبور باشی."
+  },
+  {
+    "id": "tatoeba-eng-1068",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "دوری باعث علاقمندی می شود."
+  },
+  {
+    "id": "tatoeba-eng-1069",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "دوری و دوستی."
+  },
+  {
+    "id": "tatoeba-eng-1070",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "مار گزیده از ریسمان سیاه و سفید می‌ترسد."
+  },
+  {
+    "id": "tatoeba-eng-1071",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "یک کاپیتان مسئول کشتی و خدمه آن است."
+  },
+  {
+    "id": "tatoeba-eng-1072",
+    "topic": "general",
+    "register": "colloquial",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "یه گربه از زیر میز اومد بیرون."
+  },
+  {
+    "id": "tatoeba-eng-1073",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "به اسب شاه گفته یابو."
+  },
+  {
+    "id": "tatoeba-eng-1074",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "اگر وقت داری، مرا همراهی کن."
+  },
+  {
+    "id": "tatoeba-eng-1075",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "طبق شایعات داستان بلند جدید او براساس تجارب شخصی خود اوست."
+  },
+  {
+    "id": "tatoeba-eng-1076",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "زنجیر از ضعیف ترین حلقه اش قویتر نیست."
+  },
+  {
+    "id": "tatoeba-eng-1077",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "باد سردی می وزد."
+  },
+  {
+    "id": "tatoeba-eng-1078",
+    "topic": "technology",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "اکنون کامپیوتر یک ضرورت مسلم است."
+  },
+  {
+    "id": "tatoeba-eng-1079",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "حیاط بدون زن مانند باغ بدون گل است."
+  },
+  {
+    "id": "tatoeba-eng-1080",
+    "topic": "family",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "ترس برادر مرگ است."
+  },
+  {
+    "id": "tatoeba-eng-1081",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "ترسو هزاربار پیش از مرگ می‌میرد. آدم نترس فقط یکبار مزه مرگ را می‌چشد."
+  },
+  {
+    "id": "tatoeba-eng-1082",
+    "topic": "health",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "اجل گشته میرد نه بیمار سخت."
+  },
+  {
+    "id": "tatoeba-eng-1083",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "دری که غژغژ می‌کند عمرش بیشتر است."
+  },
+  {
+    "id": "tatoeba-eng-1084",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "جمعیت حدود 500 نفر تو تیاتر بود."
+  },
+  {
+    "id": "tatoeba-eng-1085",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "دو صد گفته چون نیم کردار نیست."
+  },
+  {
+    "id": "tatoeba-eng-1086",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "صدای عمل رساتر از حرف است."
+  },
+  {
+    "id": "tatoeba-eng-1087",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "عمل پرصداتر از سخن است."
+  },
+  {
+    "id": "tatoeba-eng-1088",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "در واقع، می خواستم از شما یک چیزی را بپرسم."
+  },
+  {
+    "id": "tatoeba-eng-1089",
+    "topic": "food",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "یک فنجان قهوه سردردم را تسکین می دهد."
+  },
+  {
+    "id": "tatoeba-eng-1090",
+    "topic": "food",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "اعتیاد یکی از مشکلات جوانان دوران معاصر است."
+  },
+  {
+    "id": "tatoeba-eng-1091",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "این را به صورت‌حسابم اضافه کن."
+  },
+  {
+    "id": "tatoeba-eng-1092",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "الماسی که برش نخرده نمی‌درخشد."
+  },
+  {
+    "id": "tatoeba-eng-1093",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "نادان همه را به کیش خود پندارد."
+  },
+  {
+    "id": "tatoeba-eng-1094",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "احمق و پولش به راحتی از هم جداشدنی هستن."
+  },
+  {
+    "id": "tatoeba-eng-1095",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "تا ابله در جهانه، مفلس در نمیمانه"
+  },
+  {
+    "id": "tatoeba-eng-1096",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "عاقل از یک سوراخ دوبار گزیده نمی‌شود."
+  },
+  {
+    "id": "tatoeba-eng-1097",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "یک روباه دوبار در یک دام نمی افتد."
+  },
+  {
+    "id": "tatoeba-eng-1098",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "چوب را که بلند کنی، گربه دزده فرار می‌کند."
+  },
+  {
+    "id": "tatoeba-eng-1099",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "روباه بوی گندش را زودتر از دیگران استشمام می‌کند."
+  },
+  {
+    "id": "tatoeba-eng-1100",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "ادبیات بومی آفریقا بسیار جالب است."
+  },
+  {
+    "id": "tatoeba-eng-1101",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "به هنگام نیاز، دوست واقعی شناخته می‌شود."
+  },
+  {
+    "id": "tatoeba-eng-1102",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "دوست آن باشد که گیرد دست دوست، در پریشان‌حالی و درماندگی."
+  },
+  {
+    "id": "tatoeba-eng-1103",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "دوست همه کس، دوست هیچ کس."
+  },
+  {
+    "id": "tatoeba-eng-1104",
+    "topic": "health",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "بعد از چند نوشیدنی، دیگر آن مرد دردی احساس نمی کرد."
+  },
+  {
+    "id": "tatoeba-eng-1105",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "پس از گذراندن تمام روز در آفتاب، بینی تام آفتاب سوخته شده بود."
+  },
+  {
+    "id": "tatoeba-eng-1106",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "بعد از هر سربالایی یک سرازیری است."
+  },
+  {
+    "id": "tatoeba-eng-1107",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "پس از طوفان، آرامش گسترده می‌گردد."
+  },
+  {
+    "id": "tatoeba-eng-1108",
+    "topic": "food",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "بعد از نهار کمی استراحت کنید، بعد از شام یک کیلومتر راه بروید."
+  },
+  {
+    "id": "tatoeba-eng-1109",
+    "topic": "work",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 3,
+    "ilrMax": 5,
+    "text": "بعد از اینکه چنین حرفی به رئیسم گفتم مطمئن شدم که کارم را از دست می دهم."
+  },
+  {
+    "id": "tatoeba-eng-1110",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "سیلاب به دنبال ما."
+  },
+  {
+    "id": "tatoeba-eng-1111",
+    "topic": "daily-life",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "برخلاف انتظارهمه ما دو تا دوست خوب شدیم."
+  },
+  {
+    "id": "tatoeba-eng-1112",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "یک توپ جمع کن خوب باید بتواند بطور کامل تمرکز کند و به سرعت بدود."
+  },
+  {
+    "id": "tatoeba-eng-1113",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "خشت اول چون نهد معمار کج، تا ثریا می رود دیوار کج."
+  },
+  {
+    "id": "tatoeba-eng-1114",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "خوبی هرگز بدون تاوان نمی‌ماند."
+  },
+  {
+    "id": "tatoeba-eng-1115",
+    "topic": "work",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "اسب خوب سوارکار خود را می شناسد."
+  },
+  {
+    "id": "tatoeba-eng-1116",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "ایده ی خوبی به ذهنم رسید."
+  },
+  {
+    "id": "tatoeba-eng-1117",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "انسان نیک در جمع اشرار، شریرترین آن‌ها به نظر می‌رسد."
+  },
+  {
+    "id": "tatoeba-eng-1118",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "خیلی ها به من پیشنهاد رفتن به تعطیلات را داده اند."
+  },
+  {
+    "id": "tatoeba-eng-1119",
+    "topic": "food",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 2,
+    "ilrMax": 4,
+    "text": "یک جراح خوب دارای چشمی همانند عقاب، دلی مثل شیر و دستی زنانه است."
+  },
+  {
+    "id": "tatoeba-eng-1120",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "هیئت منصفه‌ی عالی او را از هر جرمی بی‌گناه دانست."
+  },
+  {
+    "id": "tatoeba-eng-1121",
+    "topic": "general",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 1,
+    "ilrMax": 3,
+    "text": "یک ملخ و مورچه‌های زیادی در یک مزرعه زندگی می‌کردند."
+  },
+  {
+    "id": "tatoeba-eng-1122",
+    "topic": "work",
+    "register": "neutral",
+    "modes": [
+      "reading",
+      "listening"
+    ],
+    "ilrMin": 0,
+    "ilrMax": 2,
+    "text": "همه‌کاره و هیچ‌کاره."
+  }
+]
+

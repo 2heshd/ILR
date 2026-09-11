@@ -9,8 +9,20 @@ import { grammarProfileForIlr, grammarPromptForExercise } from "@/lib/grammar-le
 import persianGrammar from "@/data/persian-grammar-rules.json";
 import { persianCoherenceIssues } from "@/lib/persian-coherence";
 import editorialPersianExamples from "@/data/persian-natural-exemplars.json";
-import openPersianCorpus from "@/data/persian-natural-corpus.json";
+import openPersianCorpus1 from "@/data/persian-natural-corpus-1.json";
+import openPersianCorpus2 from "@/data/persian-natural-corpus-2.json";
+import openPersianCorpus3 from "@/data/persian-natural-corpus-3.json";
+import openPersianCorpus4 from "@/data/persian-natural-corpus-4.json";
+import openPersianCorpus5 from "@/data/persian-natural-corpus-5.json";
+import openPersianCorpus6 from "@/data/persian-natural-corpus-6.json";
+import openPersianCorpus7 from "@/data/persian-natural-corpus-7.json";
+import openPersianCorpus8 from "@/data/persian-natural-corpus-8.json";
 import { naturalPersianExamples, naturalPersianPrompt } from "@/lib/natural-persian";
+
+const openPersianCorpus = [
+  ...openPersianCorpus1, ...openPersianCorpus2, ...openPersianCorpus3, ...openPersianCorpus4,
+  ...openPersianCorpus5, ...openPersianCorpus6, ...openPersianCorpus7, ...openPersianCorpus8,
+];
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
