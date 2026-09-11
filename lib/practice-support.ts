@@ -1,6 +1,9 @@
 import {unselectedContentWords} from './practice-vocabulary.ts';
 
-export const SUPPORTING_VOCABULARY_LIMIT = 12;
+// A 45–60 word passage needs enough ordinary glue vocabulary to remain
+// idiomatic. Eighteen is still bounded, but avoids rejecting good ILR 3–4
+// passages merely because the learner selected mostly specialist nouns.
+export const SUPPORTING_VOCABULARY_LIMIT = 18;
 
 const COMMON_PAST_TO_INFINITIVE: Record<string,string> = {
   'آمد':'آمدن','آورد':'آوردن','برد':'بردن','بود':'بودن','خورد':'خوردن','خواست':'خواستن','خواند':'خواندن','خرید':'خریدن',

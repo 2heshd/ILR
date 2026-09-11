@@ -36,7 +36,7 @@ that every future request will succeed.
 The five independent candidates now run through deterministic and read-only
 editorial validation in parallel; the first fully approved result wins. Topic
 mode passed **44/44** live cases. After adapting narrow selected banks to use a
-smaller compatible focus and a bounded twelve-entry validator allowance,
+smaller compatible focus and a bounded eighteen-entry validator allowance,
 selected-word mode passed **24/24** live cases. Every returned case completed
 within 20 seconds; selected-word median was 5.99 seconds and p95 was 8.53
 seconds. The static catalog check covered all 8,060 entries with zero empty or
