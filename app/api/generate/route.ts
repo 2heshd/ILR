@@ -8,6 +8,8 @@ import { practiceBank } from "@/lib/practice-bank";
 import { grammarProfileForIlr, grammarPromptForExercise } from "@/lib/grammar-levels";
 import persianGrammar from "@/data/persian-grammar-rules.json";
 import { persianCoherenceIssues } from "@/lib/persian-coherence";
+import naturalPersianCorpus from "@/data/persian-natural-exemplars.json";
+import { naturalPersianExamples, naturalPersianPrompt } from "@/lib/natural-persian";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -118,6 +120,13 @@ export async function POST(request: Request) {
     const grammarProfile = grammarProfileForIlr(persianGrammar.rules, level);
     const grammarSeed = `${body.topic ?? "Daily life"}|${mode}|${level}|${(body.targetWords ?? []).slice(0, 12).join("|")}`;
     grammarScaffold = grammarPromptForExercise(grammarProfile, mode, grammarSeed);
+    const naturalStyleReferences = naturalPersianPrompt(naturalPersianExamples(naturalPersianCorpus, {
+      topic: body.topic ?? "Daily life",
+      words: body.targetWords ?? [],
+      level,
+      mode,
+      register: body.register === "colloquial" ? "colloquial" : "formal",
+    }));
     practiceSource = body.practiceSource === "topic" ? "topic" : "selected";
     selectedVocabulary = [...new Set((body.targetWords ?? []).map((word) => word.trim()).filter(Boolean))];
     if (!selectedVocabulary.length) {
@@ -137,6 +146,8 @@ ${vocabularyInstructions}
 Avoid these previous titles: ${JSON.stringify((body.previousTitles??[]).slice(-10))}
 
 ${grammarScaffold}
+
+${naturalStyleReferences}
 
 Write ONE coherent description, explanation, or event. Do not stitch unrelated example sentences together. A story is NOT required: for a noun-heavy or specialist bank prefer an idiomatic description using copulas over a contrived visit/dialogue that requires many extra verbs.
 Every person and action must contribute clearly to that one situation. Do not insert a family member or helper merely to connect vocabulary. If somebody helps the speaker, state what they help the speaker do. In a first-person passage, use an explicit possessive form for the speaker's relative, such as مادربزرگم rather than bare مادربزرگ. Write با هم as two words. For "when it is time to go to work," use a natural pattern such as وقتی وقتِ رفتن به سرِ کار می‌شود; never write *وقت سر کار رفتن می‌رسد.
