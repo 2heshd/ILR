@@ -7,6 +7,7 @@ import { checkSupportingVocabulary, SUPPORTING_VOCABULARY_LIMIT } from "@/lib/pr
 import { practiceBank } from "@/lib/practice-bank";
 import { grammarProfileForIlr, grammarPromptForExercise } from "@/lib/grammar-levels";
 import persianGrammar from "@/data/persian-grammar-rules.json";
+import { persianCoherenceIssues } from "@/lib/persian-coherence";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -138,6 +139,7 @@ Avoid these previous titles: ${JSON.stringify((body.previousTitles??[]).slice(-1
 ${grammarScaffold}
 
 Write ONE coherent description, explanation, or event. Do not stitch unrelated example sentences together. A story is NOT required: for a noun-heavy or specialist bank prefer an idiomatic description using copulas over a contrived visit/dialogue that requires many extra verbs.
+Every person and action must contribute clearly to that one situation. Do not insert a family member or helper merely to connect vocabulary. If somebody helps the speaker, state what they help the speaker do. In a first-person passage, use an explicit possessive form for the speaker's relative, such as مادربزرگم rather than bare مادربزرگ. Write با هم as two words. For "when it is time to go to work," use a natural pattern such as وقتی وقتِ رفتن به سرِ کار می‌شود; never write *وقت سر کار رفتن می‌رسد.
 Treat every bank item according to its dictionary meaning and part of speech. Never manufacture a Persian compound verb by attaching کردن, شدن, دادن, or another light verb to a noun merely to include it. Use only an established collocation that fits the intended sense; if uncertain, omit that item. For example, express recovery with بهبود یافتن or بهتر شدن, not *بهبود شدن.
 Write four or five connected sentences, around 45-60 Persian words total, with at least three concrete details that support distinct questions. Match sentence complexity to the requested level through structure and meaning rather than filler. Conjugate dictionary forms normally; do not copy stem annotations or vowel marks. Keep tense, viewpoint and register consistent.
 ${body.register === 'colloquial'
@@ -195,7 +197,7 @@ English title, English questions and English reference answers; only textFa is P
           : {words:Array.isArray(data.newWordsIntroduced)?data.newWordsIntroduced.filter((word:unknown):word is string=>typeof word==='string'&&Boolean(word.trim())).slice(0,SUPPORTING_VOCABULARY_LIMIT):[],unknown:[] as string[],issues:[] as string[]};
         const rejectedWords=supporting.unknown;
         data.newWordsIntroduced=supporting.words;
-        let rejectionIssues=[...supporting.issues,...practiceAnswerIssues(data.questions)];
+        let rejectionIssues=[...supporting.issues,...practiceAnswerIssues(data.questions),...persianCoherenceIssues(data.textFa)];
         // Don't pay for a language review of a draft already rejected locally.
         // Every returned exercise still receives an exact, read-only review.
         if (rejectionIssues.length === 0) {
