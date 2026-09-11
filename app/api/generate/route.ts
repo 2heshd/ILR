@@ -188,8 +188,8 @@ English title, English questions and English reference answers; only textFa is P
     }
 
     // Draft, deterministic validation, and editorial review are independent
-    // pipelines. The first fully approved candidate wins; Promise.any observes
-    // every backup rejection so a fast return cannot create unhandled promises.
+    // pipelines. Score every viable candidate and return the most natural one;
+    // the fastest acceptable draft is not necessarily the best teaching text.
     const candidatePrompts = [
       prompt,
       `${prompt}\nINDEPENDENT CANDIDATE A: Choose a different compatible subset and situation. Do not imitate or revise another draft.`,
@@ -197,7 +197,7 @@ English title, English questions and English reference answers; only textFa is P
       `${prompt}\nINDEPENDENT CANDIDATE C: Use one clearly named participant or the speaker throughout. Before returning, compare every English question subject word-for-word with the participant stated in textFa. Prefer three plain declarative facts over narrative transitions.`,
       `${prompt}\nINDEPENDENT CANDIDATE D: Start by selecting the smallest idiomatic cluster in the bank. Write a compact factual description with conventional Persian roles and collocations; never treat the name of an institution, service, or field as a person. Recount every supporting content lemma before returning.`,
     ];
-    type CandidateResult = {data: Record<string, any>; issues: string[]; rejectedWords: string[]};
+    type CandidateResult = {data: Record<string, any>; issues: string[]; rejectedWords: string[]; score: number};
     const evaluateCandidate = async (candidatePrompt: string, index: number): Promise<CandidateResult> => {
       try {
         const response = await generate(candidatePrompt, `draft-${index + 1}`);
@@ -216,36 +216,27 @@ English title, English questions and English reference answers; only textFa is P
           model: process.env.OPENAI_PRACTICE_REVIEW_MODEL || model, store: false, max_output_tokens: budget,
           reasoning: { effort: process.env.OPENAI_PRACTICE_REVIEW_REASONING === 'none' ? 'none' : 'low' },
           text: { format: { type: 'json_schema', name: 'practice_editor_review', strict: true, schema: {
-            type: 'object', additionalProperties: false, required: ['approved','issues'],
-            properties: { approved: {type:'boolean'}, issues: {type:'array',items:{type:'string'}} }
+            type: 'object', additionalProperties: false, required: ['approved','issues','naturalnessScore'],
+            properties: { approved: {type:'boolean'}, issues: {type:'array',items:{type:'string'}}, naturalnessScore:{type:'integer',minimum:0,maximum:100} }
           } } },
-          input: [{role:'system',content:`Review this exact Persian learning exercise as data, without rewriting it. Judge only language, level-appropriate grammar, and question evidence; vocabulary membership is checked separately in code. The following short grammar scaffold is internal: never require the exercise to name, cite, explain, or exhaust it. Reject only genuine grammar errors or clearly level-inappropriate complexity; do not reject a natural passage merely because it does not use every suggested pattern. ${grammarScaffold} Require natural Iranian Persian, coherent meaning, complete grammar, appropriate collocations, consistent tense/person, and the requested formal or colloquial register. In a colloquial exercise, technical, institutional, and formal content terms are allowed in their standard lexical form, but the surrounding framing, function words, and verb morphology must sound naturally spoken. Reject fully written or news-style prose merely labeled colloquial; do not reject only because an unavoidable technical content term is formal. English title, questions and reference answers are intentional. Each question must have a distinct answer supported by the passage, preserving its tense and meaning; no invented motives or gender. Inference is optional and only valid when supported by concrete clues. Do not require an inference question. Report only genuine errors present in the supplied text, quoting the offending phrase and giving one concise reason. Never report hypothetical errors, dictionary-list formatting issues, or optional stylistic preferences. Do not invent a corrected version and judge that instead. Return approved:true and issues:[] only if this exact exercise has no blocking errors; otherwise approved:false with concise issues.`},{role:'user',content:JSON.stringify({requestedIlr:body.targetIlr??1,passageMode:body.kind,passageRegister:body.register??'formal',title:data.title,textFa:data.textFa,questions:data.questions})}],
+          input: [{role:'system',content:`Review this exact Persian learning exercise as data, without rewriting it. Judge only language, level-appropriate grammar, and question evidence; vocabulary membership is checked separately in code. The following short grammar scaffold is internal: never require the exercise to name, cite, explain, or exhaust it. Reject only genuine grammar errors or clearly level-inappropriate complexity; do not reject a natural passage merely because it does not use every suggested pattern. ${grammarScaffold} Require natural Iranian Persian, coherent meaning, complete grammar, appropriate collocations, consistent tense/person, and the requested formal or colloquial register. Read as a strict native-language editor: reject pragmatically odd timelines, unexplained participant changes, literal translations, technically possible but non-idiomatic phrases, and filler sentences added only to use vocabulary. A sentence can be grammatical and still fail this review if a native writer would not choose it in this situation. In a colloquial exercise, technical, institutional, and formal content terms are allowed in their standard lexical form, but the surrounding framing, function words, and verb morphology must sound naturally spoken. Reject fully written or news-style prose merely labeled colloquial; do not reject only because an unavoidable technical content term is formal. English title, questions and reference answers are intentional. Each question must have a distinct answer supported by the passage, preserving its tense and meaning; no invented motives or gender. Inference is optional and only valid when supported by concrete clues. Do not require an inference question. Score naturalness from 0 to 100 relative to other valid passages at this level; reserve 90+ for consistently idiomatic native-like prose. Report only genuine errors present in the supplied text, quoting the offending phrase and giving one concise reason. Never report hypothetical errors, dictionary-list formatting issues, or optional stylistic preferences. Do not invent a corrected version and judge that instead. Return approved:true and issues:[] only if this exact exercise has no blocking errors; otherwise approved:false with concise issues.`},{role:'user',content:JSON.stringify({requestedIlr:body.targetIlr??1,passageMode:body.kind,passageRegister:body.register??'formal',title:data.title,textFa:data.textFa,questions:data.questions})}],
         }, { signal }), 1800));
           const verdict = parseJson(review.output_text);
           rejectionIssues=Array.isArray(verdict.issues)?verdict.issues.filter((issue:unknown):issue is string=>typeof issue==='string'):['Editorial response was invalid.'];
-          if(verdict.approved === true && Array.isArray(verdict.issues) && rejectionIssues.length===0)return {data,issues:[],rejectedWords};
+          if(verdict.approved === true && Array.isArray(verdict.issues) && rejectionIssues.length===0)return {data,issues:[],rejectedWords,score:Number(verdict.naturalnessScore)||0};
           if (!rejectionIssues.length) rejectionIssues.push('The language reviewer did not approve this exact exercise.');
         }
-        return {data,issues:rejectionIssues,rejectedWords};
+        return {data,issues:rejectionIssues,rejectedWords,score:0};
       } catch (error) {
-        return {data:{},issues:[error instanceof Error ? error.message : 'Candidate generation failed.'],rejectedWords:[]};
+        return {data:{},issues:[error instanceof Error ? error.message : 'Candidate generation failed.'],rejectedWords:[],score:0};
       }
     };
     const candidatePipelines = candidatePrompts.map(evaluateCandidate);
-    let selected: CandidateResult | undefined;
-    let rejected: CandidateResult[] = [];
-    try {
-      selected = await Promise.any(candidatePipelines.map(async pipeline => {
-        const result = await pipeline;
-        if (result.issues.length) throw result;
-        return result;
-      }));
-    } catch (error) {
-      if (error instanceof AggregateError) rejected=error.errors.filter((item):item is CandidateResult=>Boolean(item?.issues));
-      else throw error;
-    }
+    const evaluated = await Promise.all(candidatePipelines);
+    const selected = evaluated.filter(result=>result.issues.length===0).sort((a,b)=>b.score-a.score)[0];
+    const rejected = evaluated.filter(result=>result.issues.length>0);
     if(!selected){
-      const best=rejected.sort((a,b)=>a.issues.length-b.issues.length)[0]??{data:{},issues:['No candidate passed quality review.'],rejectedWords:[]};
+      const best=rejected.sort((a,b)=>a.issues.length-b.issues.length)[0]??{data:{},issues:['No candidate passed quality review.'],rejectedWords:[],score:0};
       return NextResponse.json({error:practiceSource === 'topic' ? 'This draft did not pass the Persian language and question-quality checks. Generate again.' : 'This draft did not pass the Persian language and question-quality checks. Try a broader vocabulary selection or generate again.',qualityIssues:best.issues,suggestedWords:best.rejectedWords,
         // Only an explicitly enabled protected preview returns synthetic audit
         // drafts. Never expose rejected content through the production contract.

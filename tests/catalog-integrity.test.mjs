@@ -118,6 +118,9 @@ test("reading and listening generation are constrained to learner-selected vocab
   assert.match(route, /rejectionIssues=\[\.\.\.supporting.issues,\.\.\.practiceAnswerIssues\(data.questions\),\.\.\.persianCoherenceIssues\(data.textFa\)\]/u);
   assert.doesNotMatch(route, /data\s*=\s*verdict.exercise/u);
   assert.match(route, /if \(rejectionIssues.length === 0\)/u);
+  assert.match(route, /naturalnessScore/u);
+  assert.match(route, /sort\(\(a,b\)=>b\.score-a\.score\)/u);
+  assert.doesNotMatch(route, /Promise\.any/u);
   assert.match(route, /newWordsIntroduced: \{ type: "array", maxItems: 5/u);
   assert.match(route, /No inference question is required/u);
   assert.doesNotMatch(route, /one main idea, two detail, one inference/u);
