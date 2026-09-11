@@ -54,7 +54,7 @@ const practiceResponseFormat = {
     properties: {
       title: { type: "string", description: "A concise English title." },
       newWordsIntroduced: { type: "array", maxItems: 5, description: "Supporting dictionary entries used beyond the supplied generation bank. In selected-word mode, plan these before writing and keep every content word inside the selected bank or this allowance.", items: { type: "string" } },
-      textFa: { type: "string", description: "A coherent Persian passage containing four or five complete sentences and approximately 45–60 Persian words." },
+      textFa: { type: "string", description: "A coherent Persian passage containing four or five complete sentences and 60–80 Persian words; never fewer than 60 words." },
       topic: { type: "string" },
       register: { type: "string" },
       knownWordsUsed: { type: "array", items: { type: "string" } },
@@ -80,6 +80,10 @@ const practiceResponseFormat = {
 function parseJson(text: string) {
   const cleaned = text.trim().replace(/^```json\s*/i, "").replace(/```$/i, "").trim();
   return JSON.parse(cleaned);
+}
+
+function persianWordCount(value: unknown) {
+  return String(value ?? "").match(/[\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06FA-\u06FC\u200C]+/gu)?.length ?? 0;
 }
 
 class IncompleteGeneration extends Error {}
@@ -168,7 +172,7 @@ ${naturalStyleReferences}
 Write ONE coherent description, explanation, or event. Do not stitch unrelated example sentences together. A story is NOT required: for a noun-heavy or specialist bank prefer an idiomatic description using copulas over a contrived visit/dialogue that requires many extra verbs.
 Every person and action must contribute clearly to that one situation. Do not insert a family member or helper merely to connect vocabulary. If somebody helps the speaker, state what they help the speaker do. In a first-person passage, use an explicit possessive form for the speaker's relative, such as مادربزرگم rather than bare مادربزرگ. Write با هم as two words. For "when it is time to go to work," use a natural pattern such as وقتی وقتِ رفتن به سرِ کار می‌شود; never write *وقت سر کار رفتن می‌رسد.
 Treat every bank item according to its dictionary meaning and part of speech. Never manufacture a Persian compound verb by attaching کردن, شدن, دادن, or another light verb to a noun merely to include it. Use only an established collocation that fits the intended sense; if uncertain, omit that item. For example, express recovery with بهبود یافتن or بهتر شدن, not *بهبود شدن.
-Write four or five connected sentences, around 45-60 Persian words total, with at least three concrete details that support distinct questions. Match sentence complexity to the requested level through structure and meaning rather than filler. Conjugate dictionary forms normally; do not copy stem annotations or vowel marks. Keep tense, viewpoint and register consistent.
+Write four or five connected sentences containing 60-80 Persian words total, never fewer than 60 words, with at least three concrete details that support distinct questions. Match sentence complexity to the requested level through structure and meaning rather than filler. Conjugate dictionary forms normally; do not copy stem annotations or vowel marks. Keep tense, viewpoint and register consistent.
 ${body.register === 'colloquial'
   ? 'Write as a person naturally explaining or retelling the topic aloud. Use genuinely spoken framing and morphology where appropriate (for example توی, رو, یه, or spoken plural verb endings); do not return formal news prose with a colloquial label. Required technical, institutional, or formal content terms from the selected bank may remain in their standard lexical form; do not distort those terms into fake colloquialisms.'
   : 'Keep the entire passage in standard written Persian. Do not use colloquial forms such as توی, رو as an object marker, یه, اینا, اونا, می‌خوام, or spoken plural verb endings.'}
@@ -193,7 +197,7 @@ English title, English questions and English reference answers; only textFa is P
         reasoning: { effort: isPractice ? practiceEffort : "none" },
         text: { format: isPractice ? practiceResponseFormat : { type: "json_object" }, verbosity: "low" },
       }, { signal }), isPractice ? 6000 : 2200));
-    if (isPractice) prompt += '\nFINAL CHECK: Prefer a short natural description over a forced story. No filler or unrelated plans. Use normal Persian collocations rather than mechanically combining dictionary nouns and verbs. Use explicit ezafe after final ه where appropriate (خانهٔ دوستم). Count the final passage sentences: textFa must contain four or five complete sentences, not three long compound sentences.';
+    if (isPractice) prompt += '\nFINAL CHECK: Prefer a concise natural description over a forced story. No filler or unrelated plans. Use normal Persian collocations rather than mechanically combining dictionary nouns and verbs. Use explicit ezafe after final ه where appropriate (خانهٔ دوستم). Count the final passage: textFa must contain four or five complete sentences and at least 60 Persian words, not three long compound sentences.';
     // Produce an independent backup draft concurrently. If the first candidate
     // fails either deterministic or editorial QA, using the already-running
     // candidate is both faster and less likely to preserve the same defect than
@@ -227,7 +231,8 @@ English title, English questions and English reference answers; only textFa is P
         const rejectedWords=supporting.unknown;
         data.newWordsIntroduced=supporting.words;
         const sentenceCount=String(data.textFa??'').split(/[.!؟]+/u).filter(part=>part.trim()).length;
-        let rejectionIssues=[...supporting.issues,...practiceAnswerIssues(data.questions),...persianCoherenceIssues(data.textFa),...(sentenceCount<4||sentenceCount>5?[`Passage must contain 4–5 complete sentences; received ${sentenceCount}.`]:[])];
+        const wordCount=persianWordCount(data.textFa);
+        let rejectionIssues=[...supporting.issues,...practiceAnswerIssues(data.questions),...persianCoherenceIssues(data.textFa),...(sentenceCount<4||sentenceCount>5?[`Passage must contain 4–5 complete sentences; received ${sentenceCount}.`]:[]),...(wordCount<60?[`Passage must contain at least 60 Persian words; received ${wordCount}.`]:[])];
         // Don't pay for a language review of a draft already rejected locally.
         // Every returned exercise still receives an exact, read-only review.
         if (rejectionIssues.length === 0) {

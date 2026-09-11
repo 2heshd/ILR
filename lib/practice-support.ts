@@ -1,6 +1,6 @@
 import {unselectedContentWords} from './practice-vocabulary.ts';
 
-// A 45–60 word passage needs enough ordinary glue vocabulary to remain
+// A 60–80 word passage needs enough ordinary glue vocabulary to remain
 // idiomatic. Eighteen is still bounded, but avoids rejecting good ILR 3–4
 // passages merely because the learner selected mostly specialist nouns.
 export const SUPPORTING_VOCABULARY_LIMIT = 18;

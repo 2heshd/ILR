@@ -26,6 +26,8 @@ async function run(body){
       checks.push(...persianCoherenceIssues(data.textFa),...practiceAnswerIssues(data.questions));
       const sentences=String(data.textFa||"").split(/[.!؟]+/u).filter(part=>part.trim());
       if(sentences.length<4||sentences.length>5)checks.push(`Expected 4-5 sentences; received ${sentences.length}`);
+      const words=String(data.textFa||"").match(/[\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06FA-\u06FC\u200C]+/gu)??[];
+      if(words.length<60)checks.push(`Expected at least 60 Persian words; received ${words.length}`);
       if(body.register==="formal"&&/\b(?:یه|توی|رو|اینا|اونا)\b/u.test(data.textFa))checks.push("Colloquial marker in formal passage");
       if(body.register==="colloquial"&&!/(?:یه|توی|رو|اومد|می‌(?:رم|ریم|گم|کنم|کنیم)|ـ?ه\b)/u.test(data.textFa))checks.push("No clear spoken-register evidence");
       if(body.practiceSource==="selected"&&(!Array.isArray(data.knownWordsUsed)||data.knownWordsUsed.length<3))checks.push("Fewer than three selected words were used");
