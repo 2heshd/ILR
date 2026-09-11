@@ -46,15 +46,32 @@ export function grammarProfileForIlr(rules: GrammarRule[], requestedLevel: numbe
 }
 
 export function grammarPromptForProfile(profile: GrammarProfile, mode: "reading" | "listening") {
+  return grammarPromptForExercise(profile, mode, "");
+}
+
+function stableRuleSample(rules: string[], count: number, seed: string) {
+  if (rules.length <= count) return rules;
+  let hash = 2166136261;
+  for (const character of seed) {
+    hash ^= character.codePointAt(0) ?? 0;
+    hash = Math.imul(hash, 16777619);
+  }
+  const start = Math.abs(hash) % rules.length;
+  const step = rules.length > 2 ? 3 : 1;
+  return Array.from({ length: Math.min(count, rules.length) }, (_, index) => rules[(start + index * step) % rules.length]);
+}
+
+export function grammarPromptForExercise(profile: GrammarProfile, mode: "reading" | "listening", seed: string) {
   const modality = mode === "listening"
     ? "For listening, grammar must remain understandable in one pass: use audible discourse cues, controlled reference chains, and natural spoken or broadcast phrasing for the requested register."
     : "For reading, grammar may use punctuation and paragraph structure as comprehension cues, but must stay within the same level ceiling.";
+  const target = stableRuleSample(profile.target, 2, `${seed}:target`);
+  const foundation = stableRuleSample(profile.foundation, 2, `${seed}:foundation`);
   return [
     "INTERNAL GRAMMAR SCAFFOLD (never mention this framework, its levels, or its source in learner-visible content):",
-    `Target grammar for this exercise: ${JSON.stringify(profile.target)}`,
-    `Previously learned grammar that may recur naturally: ${JSON.stringify(profile.foundation)}`,
-    "Build the passage around two to four target-band grammar patterns when they fit naturally. Previously learned grammar may support them.",
-    "Do not make comprehension depend on grammar above this ceiling. Natural fixed expressions are allowed, but avoid introducing a new advanced construction merely to make the passage seem difficult.",
+    `A few level-appropriate rules available for this exercise: ${JSON.stringify([...target, ...foundation])}`,
+    "Use one or two of these rules only when they fit the passage naturally. Do not force every listed rule and do not turn the passage into a grammar demonstration.",
+    "Keep the remaining grammar broadly appropriate for the requested level. Natural fixed expressions are allowed.",
     profile.guidance,
     modality,
   ].join("\n");
