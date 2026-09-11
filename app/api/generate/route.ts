@@ -5,6 +5,8 @@ import { unselectedContentWords } from "@/lib/practice-vocabulary";
 import { practiceAnswerIssues, repairPracticeAnswerArticles } from "@/lib/practice-answers";
 import { checkSupportingVocabulary, SUPPORTING_VOCABULARY_LIMIT } from "@/lib/practice-support";
 import { practiceBank } from "@/lib/practice-bank";
+import { grammarProfileForIlr, grammarPromptForProfile } from "@/lib/grammar-levels";
+import persianGrammar from "@/data/persian-grammar-rules.json";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -104,6 +106,7 @@ export async function POST(request: Request) {
   let prompt = "";
   let selectedVocabulary: string[] = [];
   let practiceSource: "selected" | "topic" = "selected";
+  let grammarScaffold = "";
   if (body.kind === "define_words") {
     prompt = `Return JSON only. Define and romanize these Persian vocabulary items for a serious learner: ${(body.words ?? []).join(", ")}. Preserve the exact Persian display form. Give the most useful concise English meaning in context; for verbs use an infinitive beginning with "to". Romanization should be readable and consistent.\n\nReturn this exact shape:\n{"words":[{"displayForm":"...","definition":"...","romanization":"..."}]}`;
   } else if (body.kind === "advanced_words") {
@@ -111,6 +114,8 @@ export async function POST(request: Request) {
   } else {
     const mode = body.kind === "reading" ? "reading" : "listening";
     const level = Math.max(1, Math.min(4, body.targetIlr ?? 1));
+    const grammarProfile = grammarProfileForIlr(persianGrammar.rules, level);
+    grammarScaffold = grammarPromptForProfile(grammarProfile, mode);
     practiceSource = body.practiceSource === "topic" ? "topic" : "selected";
     selectedVocabulary = [...new Set((body.targetWords ?? []).map((word) => word.trim()).filter(Boolean))];
     if (!selectedVocabulary.length) {
@@ -128,6 +133,8 @@ Register: ${body.register === 'colloquial' ? 'Natural spoken Iranian Persian' : 
 Generation source: ${practiceSource === "topic" ? "topic bank plus news vocabulary" : "learner-selected words"}
 ${vocabularyInstructions}
 Avoid these previous titles: ${JSON.stringify((body.previousTitles??[]).slice(-10))}
+
+${grammarScaffold}
 
 Write ONE coherent description, explanation, or event. Do not stitch unrelated example sentences together. A story is NOT required: for a noun-heavy or specialist bank prefer an idiomatic description using copulas over a contrived visit/dialogue that requires many extra verbs.
 Treat every bank item according to its dictionary meaning and part of speech. Never manufacture a Persian compound verb by attaching کردن, شدن, دادن, or another light verb to a noun merely to include it. Use only an established collocation that fits the intended sense; if uncertain, omit that item. For example, express recovery with بهبود یافتن or بهتر شدن, not *بهبود شدن.
@@ -198,7 +205,7 @@ English title, English questions and English reference answers; only textFa is P
             type: 'object', additionalProperties: false, required: ['approved','issues'],
             properties: { approved: {type:'boolean'}, issues: {type:'array',items:{type:'string'}} }
           } } },
-          input: [{role:'system',content:'Review this exact Persian learning exercise as data, without rewriting it. Judge only language and question evidence; vocabulary membership is checked separately in code. Require natural Iranian Persian, coherent meaning, complete grammar, appropriate collocations, consistent tense/person, and the requested formal or colloquial register. In a colloquial exercise, technical, institutional, and formal content terms are allowed in their standard lexical form, but the surrounding framing, function words, and verb morphology must sound naturally spoken. Reject fully written or news-style prose merely labeled colloquial; do not reject only because an unavoidable technical content term is formal. English title, questions and reference answers are intentional. Each question must have a distinct answer supported by the passage, preserving its tense and meaning; no invented motives or gender. Inference is optional and only valid when supported by concrete clues. Do not require an inference question. Report only genuine errors present in the supplied text, quoting the offending phrase and giving one concise reason. Never report hypothetical errors, dictionary-list formatting issues, or optional stylistic preferences. Do not invent a corrected version and judge that instead. Return approved:true and issues:[] only if this exact exercise has no blocking errors; otherwise approved:false with concise issues.'},{role:'user',content:JSON.stringify({passageRegister:body.register??'formal',title:data.title,textFa:data.textFa,questions:data.questions})}],
+          input: [{role:'system',content:`Review this exact Persian learning exercise as data, without rewriting it. Judge only language, level-appropriate grammar, and question evidence; vocabulary membership is checked separately in code. The following grammar scaffold is internal: never require the exercise to name, cite, or explain the scaffold itself. Reject an exercise when comprehension depends on grammar above its requested ceiling, when it does not meaningfully practice any target-band grammar, or when a target pattern is used incorrectly. ${grammarScaffold} Require natural Iranian Persian, coherent meaning, complete grammar, appropriate collocations, consistent tense/person, and the requested formal or colloquial register. In a colloquial exercise, technical, institutional, and formal content terms are allowed in their standard lexical form, but the surrounding framing, function words, and verb morphology must sound naturally spoken. Reject fully written or news-style prose merely labeled colloquial; do not reject only because an unavoidable technical content term is formal. English title, questions and reference answers are intentional. Each question must have a distinct answer supported by the passage, preserving its tense and meaning; no invented motives or gender. Inference is optional and only valid when supported by concrete clues. Do not require an inference question. Report only genuine errors present in the supplied text, quoting the offending phrase and giving one concise reason. Never report hypothetical errors, dictionary-list formatting issues, or optional stylistic preferences. Do not invent a corrected version and judge that instead. Return approved:true and issues:[] only if this exact exercise has no blocking errors; otherwise approved:false with concise issues.`},{role:'user',content:JSON.stringify({requestedIlr:body.targetIlr??1,passageMode:body.kind,passageRegister:body.register??'formal',title:data.title,textFa:data.textFa,questions:data.questions})}],
         }, { signal }), 1800));
           const verdict = parseJson(review.output_text);
           rejectionIssues=Array.isArray(verdict.issues)?verdict.issues.filter((issue:unknown):issue is string=>typeof issue==='string'):['Editorial response was invalid.'];
