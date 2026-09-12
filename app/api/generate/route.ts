@@ -54,7 +54,7 @@ const practiceResponseFormat = {
     properties: {
       title: { type: "string", description: "A concise English title." },
       newWordsIntroduced: { type: "array", maxItems: 5, description: "Supporting dictionary entries used beyond the supplied generation bank. In selected-word mode, plan these before writing and keep every content word inside the selected bank or this allowance.", items: { type: "string" } },
-      textFa: { type: "string", description: "A coherent Persian passage containing four or five complete sentences and 85–100 Persian words, leaving a safe margin above the enforced 60-word minimum." },
+      textFa: { type: "string", description: "A coherent Persian passage that follows the source-specific sentence and word range in the prompt." },
       topic: { type: "string" },
       register: { type: "string" },
       knownWordsUsed: { type: "array", items: { type: "string" } },
@@ -125,6 +125,7 @@ export async function POST(request: Request) {
   let prompt = "";
   let selectedVocabulary: string[] = [];
   let practiceSource: "selected" | "topic" = "selected";
+  let passageLength = { sentenceMin: 3, sentenceMax: 4, target: "32–44", minimum: 28 };
   let grammarScaffold = "";
   if (body.kind === "define_words") {
     prompt = `Return JSON only. Define and romanize these Persian vocabulary items for a serious learner: ${(body.words ?? []).join(", ")}. Preserve the exact Persian display form. Give the most useful concise English meaning in context; for verbs use an infinitive beginning with "to". Romanization should be readable and consistent.\n\nReturn this exact shape:\n{"words":[{"displayForm":"...","definition":"...","romanization":"..."}]}`;
@@ -147,6 +148,9 @@ export async function POST(request: Request) {
       },
     ));
     practiceSource = body.practiceSource === "topic" ? "topic" : "selected";
+    passageLength = practiceSource === "topic"
+      ? { sentenceMin: 4, sentenceMax: 5, target: "85–100", minimum: 60 }
+      : { sentenceMin: 3, sentenceMax: 4, target: "32–44", minimum: 28 };
     selectedVocabulary = [...new Set((body.targetWords ?? []).map((word) => word.trim()).filter(Boolean))];
     if (!selectedVocabulary.length) {
       return NextResponse.json({ error: practiceSource === "topic" ? "No verified vocabulary is available for that topic." : "Choose vocabulary before generating practice." }, { status: 400 });
@@ -172,7 +176,7 @@ Write ONE coherent description, explanation, or event. Do not stitch unrelated e
 Before drafting, silently choose one believable setting, one timeline, and only the participants needed for it. Every sentence must advance or explain that same situation. Avoid translated-English transitions, redundant restatements, and vague movement such as آمدن when the destination or point of view does not make it natural.
 Every person and action must contribute clearly to that one situation. Do not insert a family member or helper merely to connect vocabulary. If somebody helps the speaker, state what they help the speaker do. In a first-person passage, use an explicit possessive form for the speaker's relative, such as مادربزرگم rather than bare مادربزرگ. Write با هم as two words. For "when it is time to go to work," use a natural pattern such as وقتی وقتِ رفتن به سرِ کار می‌شود; never write *وقت سر کار رفتن می‌رسد.
 Treat every bank item according to its dictionary meaning and part of speech. Never manufacture a Persian compound verb by attaching کردن, شدن, دادن, or another light verb to a noun merely to include it. Use only an established collocation that fits the intended sense; if uncertain, omit that item. For example, express recovery with بهبود یافتن or بهتر شدن, not *بهبود شدن.
-Write four or five connected sentences containing 85-100 Persian words total, leaving a safe margin above the enforced 60-word minimum, with at least three concrete details that support distinct questions. Match sentence complexity to the requested level through structure and meaning rather than filler. Conjugate dictionary forms normally; do not copy stem annotations or vowel marks. Keep tense, viewpoint and register consistent.
+Write ${passageLength.sentenceMin}–${passageLength.sentenceMax} connected sentences containing ${passageLength.target} Persian words total, leaving a safe margin above the enforced ${passageLength.minimum}-word minimum, with at least three concrete details that support distinct questions. Match sentence complexity to the requested level through structure and meaning rather than filler. Conjugate dictionary forms normally; do not copy stem annotations or vowel marks. Keep tense, viewpoint and register consistent.
 ${body.register === 'colloquial'
   ? 'Write as an Iranian speaker naturally explaining or retelling the topic aloud. Use consistent spoken morphology and function words where appropriate (for example خونه, توی, رو, یه, رفتم, می‌خوام); do not mix forms such as توی خانه‌ام with otherwise conversational speech, and do not return formal news prose with a colloquial label. Required technical, institutional, or formal content terms from the selected bank may remain in their standard lexical form; do not distort those terms into fake colloquialisms.'
   : 'Keep the entire passage in standard written Persian. Do not use colloquial forms such as توی, رو as an object marker, یه, اینا, اونا, می‌خوام, or spoken plural verb endings.'}
@@ -196,7 +200,7 @@ English title, English questions and English reference answers; only textFa is P
         max_output_tokens: budget,
         text: { format: isPractice ? practiceResponseFormat : { type: "json_object" } },
       }, { signal }), isPractice ? 2400 : 2200));
-    if (isPractice) prompt += '\nFINAL CHECK: Prefer a concise natural description over a forced story. No filler or unrelated plans. Use normal Persian collocations rather than mechanically combining dictionary nouns and verbs. Use explicit ezafe after final ه where appropriate (خانهٔ دوستم). Count the final passage: textFa must contain four or five complete sentences and at least 60 Persian words, not three long compound sentences.';
+    if (isPractice) prompt += `\nFINAL CHECK: Prefer a concise natural description over a forced story. No filler or unrelated plans. Use normal Persian collocations rather than mechanically combining dictionary nouns and verbs. Use explicit ezafe after final ه where appropriate (خانهٔ دوستم). Count the final passage: textFa must contain ${passageLength.sentenceMin}–${passageLength.sentenceMax} complete sentences and at least ${passageLength.minimum} Persian words.`;
     if (!isPractice) {
       const response = await generate(prompt);
       return NextResponse.json(parseJson(response.output_text), {headers:{'Server-Timing':timings.join(', ')}});
@@ -204,7 +208,7 @@ English title, English questions and English reference answers; only textFa is P
 
     // A single, self-edited structured generation replaces the old five-draft
     // plus five-review fan-out. Deterministic validation remains a hard gate.
-    const response = await generate(`${prompt}\nSILENT NATIVE EDIT: Read textFa once as a native Iranian editor before returning JSON. Remove literal translations, mixed register, filler, odd timelines, and unnatural motion viewpoint. Aim for 85–100 Persian words so the result remains above 60 after deterministic token counting, and keep 4–5 complete sentences.${body.register === 'colloquial' ? ' Include at least three unmistakably spoken forms naturally, such as خونه، یه، رو، توی، می‌خوام، می‌رم, without converting technical content words.' : ''}`, 'draft');
+    const response = await generate(`${prompt}\nSILENT NATIVE EDIT: Read textFa once as a native Iranian editor before returning JSON. Remove literal translations, mixed register, filler, odd timelines, and unnatural motion viewpoint. Aim for ${passageLength.target} Persian words so the result remains above ${passageLength.minimum} after deterministic token counting, and keep ${passageLength.sentenceMin}–${passageLength.sentenceMax} complete sentences.${body.register === 'colloquial' ? ' Include at least three unmistakably spoken forms naturally, such as خونه، یه، رو، توی، می‌خوام، می‌رم, without converting technical content words.' : ''}`, 'draft');
     const data = parseJson(response.output_text);
         data.questions=repairPracticeAnswerArticles(data.questions);
         const supporting=practiceSource === 'selected'
@@ -214,7 +218,7 @@ English title, English questions and English reference answers; only textFa is P
         data.newWordsIntroduced=supporting.words;
         const sentenceCount=String(data.textFa??'').split(/[.!؟]+/u).filter(part=>part.trim()).length;
         const wordCount=persianWordCount(data.textFa);
-        const rejectionIssues=[...supporting.issues,...practiceAnswerIssues(data.questions),...persianCoherenceIssues(data.textFa),...persianRegisterIssues(data.textFa,body.register??'formal'),...(sentenceCount<4||sentenceCount>5?[`Passage must contain 4–5 complete sentences; received ${sentenceCount}.`]:[]),...(wordCount<60?[`Passage must contain at least 60 Persian words; received ${wordCount}.`]:[])];
+        const rejectionIssues=[...supporting.issues,...practiceAnswerIssues(data.questions),...persianCoherenceIssues(data.textFa),...persianRegisterIssues(data.textFa,body.register??'formal'),...(sentenceCount<passageLength.sentenceMin||sentenceCount>passageLength.sentenceMax?[`Passage must contain ${passageLength.sentenceMin}–${passageLength.sentenceMax} complete sentences; received ${sentenceCount}.`]:[]),...(wordCount<passageLength.minimum?[`Passage must contain at least ${passageLength.minimum} Persian words; received ${wordCount}.`]:[])];
     if(rejectionIssues.length){
       return NextResponse.json({error:practiceSource === 'topic' ? 'This draft did not pass the Persian language and question-quality checks. Generate again.' : 'This draft did not pass the Persian language and question-quality checks. Try a broader vocabulary selection or generate again.',qualityIssues:rejectionIssues,suggestedWords:rejectedWords,
         // Only an explicitly enabled protected preview returns synthetic audit

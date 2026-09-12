@@ -1460,7 +1460,7 @@ export default function Home() {
       const cache = practicePrefetchRef.current[kind];
       let prepared = cache.take(context.key);
       if (!prepared) prepared = await cache.waitAndTake(context.key);
-      if (!prepared) prepared = await fetchPreparedPractice(context);
+      if (!prepared) prepared = await fetchBackgroundPractice(context);
       activatePreparedPractice(kind, prepared);
       prepareNextPractice(context, prepared.data.title);
       setStatus(`${source === "topic" ? "Topic" : "Selected-word"} ${kind} ready.`);

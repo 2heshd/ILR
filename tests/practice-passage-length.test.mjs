@@ -2,14 +2,19 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { readFile } from "node:fs/promises";
 
-test("generated practice passages request the longer RSVP-friendly range", async () => {
+test("topic and selected-word practice use compatible passage lengths", async () => {
   const source = await readFile(new URL("../app/api/generate/route.ts", import.meta.url), "utf8");
-  assert.match(source, /four or five connected sentences containing 85-100 Persian words total, leaving a safe margin above the enforced 60-word minimum/);
-  assert.match(source, /textFa must contain four or five complete sentences and at least 60 Persian words/);
-  assert.match(source, /Passage must contain 4–5 complete sentences/);
-  assert.match(source, /Passage must contain at least 60 Persian words/);
+  assert.match(source, /sentenceMin: 4, sentenceMax: 5, target: "85–100", minimum: 60/);
+  assert.match(source, /sentenceMin: 3, sentenceMax: 4, target: "32–44", minimum: 28/);
+  assert.match(source, /sentenceCount<passageLength\.sentenceMin/);
+  assert.match(source, /wordCount<passageLength\.minimum/);
   assert.doesNotMatch(source, /around 24-36 Persian words total/);
-  assert.doesNotMatch(source, /45-60 Persian words/);
+});
+
+test("a foreground generation gets the same retries as background preparation", async () => {
+  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  assert.match(source, /if \(!prepared\) prepared = await fetchBackgroundPractice\(context\)/);
+  assert.doesNotMatch(source, /if \(!prepared\) prepared = await fetchPreparedPractice\(context\)/);
 });
 
 test("practice generation uses one fast model call rather than a candidate-review fan-out", async () => {
