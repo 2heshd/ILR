@@ -45,9 +45,19 @@ export function courseSectionLabel(lesson: string) {
   return lesson.replace(/ - Lesson \d+$/u, "");
 }
 
+export function correctCourseCatalogEntries(entries: CourseVocabularyEntry[]) {
+  return entries.map((entry) => entry.id === 855
+    ? { ...entry, fa: "کارت خوان" }
+    : entry);
+}
+
 export async function loadCourseCatalog() {
   const module = await import("@/data/course-vocabulary.json");
-  return module.default as CourseCatalog;
+  const catalog = module.default as CourseCatalog;
+  return {
+    ...catalog,
+    entries: correctCourseCatalogEntries(catalog.entries),
+  };
 }
 
 export async function loadCourseWeek(week: number) {

@@ -2,9 +2,9 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { selectContextWords } from "../lib/adaptive.ts";
-import { courseSectionLabel } from "../lib/course.ts";
+import { correctCourseCatalogEntries, courseSectionLabel } from "../lib/course.ts";
 import { unselectedContentWords } from "../lib/practice-vocabulary.ts";
-import { dedupeLexicalWords, removeDeletedSharedWord } from "../lib/word-merge.js";
+import { dedupeLexicalWords, removeDeletedSharedWord, restoreCourseDefinitions } from "../lib/word-merge.js";
 import { compactStudyState, readStudyState, writeStudyState } from "../lib/storage.ts";
 import { NEWS_TOPICS, newsTopicFor } from "../lib/news-topics.ts";
 
@@ -29,6 +29,23 @@ test("ChiMishe catalog is complete and internally consistent", () => {
 
   const weekCounts = Array.from({ length: 36 }, (_, index) => course.entries.filter((entry) => entry.week === index + 1).length);
   assert.deepEqual(weekCounts, course.meta.weekCounts);
+});
+
+test("corrected course spellings reach new and already-saved cards", () => {
+  const entries = correctCourseCatalogEntries(course.entries);
+  const cardReader = entries.find((entry) => entry.id === 855);
+  assert.equal(cardReader?.fa, "کارت خوان");
+
+  const [restored] = restoreCourseDefinitions([{
+    id: "course-855",
+    courseEntryId: 855,
+    displayForm: "کارت\u00adخوان",
+    normalizedForm: "کارت\u00adخوان",
+    definition: "card reader",
+  }], entries);
+  assert.equal(restored.displayForm, "کارت خوان");
+  assert.equal(restored.normalizedForm, "کارتخوان");
+  assert.equal(restored.definition, "card reader");
 });
 
 test("ChiMishe vocabulary can be selected in complete chapters and modules", () => {
