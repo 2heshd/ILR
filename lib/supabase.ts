@@ -1,7 +1,8 @@
 "use client";
 
 import { createClient, type SupabaseClient, type User } from "@supabase/supabase-js";
-import type { LexicalItem, StudyState } from "./types";
+import type { LexicalItem, StudyState, SuiteLearningSignal } from "./types";
+import { mergeSuiteEvidence } from "./suite-evidence.ts";
 
 let singleton: SupabaseClient | null | undefined;
 
@@ -76,6 +77,24 @@ export async function loadPlatformVocabulary(client: SupabaseClient, user: User)
   if (missingPlatformTable(error)) return [];
   if (error) throw error;
   return ((data ?? []) as PlatformVocabularyRow[]).map(rowToLexicalItem);
+}
+
+export async function loadSuiteLearningSignals(client: SupabaseClient, user: User): Promise<SuiteLearningSignal[]> {
+  const cutoff = new Date(Date.now() - 30 * 86_400_000).toISOString();
+  const { data, error } = await client.from("learning_events")
+    .select("id,occurred_at,product,event_type,skill,linguistic_concept,source_item_id,correctness,response_ms")
+    .eq("user_id", user.id).eq("target_language", "fa").in("product", ["synaptx", "asl"])
+    .gte("occurred_at", cutoff).order("occurred_at", { ascending: false }).limit(500);
+  // Suite evidence is optional personalization. A missing table or temporary
+  // read-policy/network problem must never block the learner's core cloud state.
+  if (error) return [];
+  return (data ?? []).map((row) => ({
+    id: String(row.id), occurredAt: String(row.occurred_at), product: row.product as "synaptx" | "asl",
+    eventType: String(row.event_type), skill: row.skill || undefined,
+    linguisticConcept: row.linguistic_concept || undefined, sourceItemId: row.source_item_id || undefined,
+    correctness: typeof row.correctness === "boolean" ? row.correctness : undefined,
+    responseMs: Number.isFinite(row.response_ms) ? Number(row.response_ms) : undefined,
+  }));
 }
 
 export function mergePlatformVocabulary(state: StudyState, sharedWords: LexicalItem[]): StudyState {
@@ -169,6 +188,7 @@ export function mergeStudyStates(cloud: StudyState, local: StudyState): StudySta
     schedulingVersion: 1,
     studyPlans: { ...cloud.studyPlans, ...local.studyPlans },
     dailyNewLimit: local.dailyNewLimit ?? cloud.dailyNewLimit ?? 40,
+    suiteEvidence: mergeSuiteEvidence(cloud.suiteEvidence, local.suiteEvidence),
     weekNumber: Math.max(cloud.weekNumber, local.weekNumber),
     currentIlr: local.currentIlr ?? cloud.currentIlr,
     skillLevels: { ...cloud.skillLevels, ...local.skillLevels },

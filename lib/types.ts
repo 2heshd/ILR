@@ -67,6 +67,18 @@ export type LexicalItem = {
   modalityCards?: Partial<Record<ReviewModality, SerializedFsrsCard>>;
 };
 
+export type SuiteLearningSignal = {
+  id: string;
+  occurredAt: string;
+  product: "synaptx" | "asl";
+  eventType: string;
+  skill?: "vocabulary" | "morphology" | "syntax" | "verb" | "lexical_structure";
+  linguisticConcept?: string;
+  sourceItemId?: string;
+  correctness?: boolean;
+  responseMs?: number;
+};
+
 export type ReviewEvent = {
   id: string;
   lexicalItemId: string;
@@ -245,6 +257,7 @@ export type SpeakingAttempt = {
 export type StudyState = {
   schedulingVersion?: number;
   dailyNewLimit?: number;
+  suiteEvidence?: SuiteLearningSignal[];
   studyPlans?: Partial<Record<import('./study-plans').PlanMode,import('./study-plans').StudyPlan>>;
   weekNumber: number;
   currentIlr: IlrLevel;

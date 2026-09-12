@@ -1,5 +1,6 @@
 import { getRetrievability } from "./fsrs.ts";
 import type { LexicalItem, ReviewEvent, ReviewModality, StudyState } from "./types.ts";
+import { suitePracticeFocus, suiteSupportScore } from "./suite-evidence.ts";
 
 export const DAILY_NEW_MIN = 30;
 export const DAILY_NEW_DEFAULT = 35;
@@ -93,7 +94,8 @@ export function dailyNewWordIds(state: StudyState, candidates = state.words, now
   const weakness = contextualWeakness(state);
   const unseen = candidates
     .filter((word) => !admittedSet.has(word.id) && CORE_MODALITIES.every((mode) => isNewCard(word, mode)))
-    .sort((a, b) => importance(b) - importance(a)
+    .sort((a, b) => suiteSupportScore(state, b, now) - suiteSupportScore(state, a, now)
+      || importance(b) - importance(a)
       || (weakness.get(b.normalizedForm) ?? 0) - (weakness.get(a.normalizedForm) ?? 0)
       || a.sourceWeek - b.sourceWeek
       || Date.parse(a.introducedAt) - Date.parse(b.introducedAt)
@@ -131,6 +133,7 @@ export function adaptiveContextWords(state: StudyState, candidates: LexicalItem[
   const weakness = contextualWeakness(state);
   const historical = candidates.filter((word) => !todayIds.has(word.id)).sort((a, b) =>
     weakestEvidence(a) - weakestEvidence(b)
+    || suiteSupportScore(state, b, now) - suiteSupportScore(state, a, now)
     || (weakness.get(b.normalizedForm) ?? 0) - (weakness.get(a.normalizedForm) ?? 0)
     || b.lapses - a.lapses);
   const historicalTarget = Math.min(historical.length, Math.round(count * 0.2));
@@ -169,6 +172,7 @@ export function dailyAdaptivePlan(state: StudyState, now = new Date(), candidate
     batchSize,
     estimatedMinutes: Math.ceil((overdue * 8 + newWordIds.length * (support === "intensive" ? 55 : support === "light" ? 38 : 46)) / 60),
     contextMix: { today: 0.7, weakHistorical: 0.2, stableTransfer: 0.1 },
+    suiteFocus: suitePracticeFocus(state, now),
   } as const;
 }
 

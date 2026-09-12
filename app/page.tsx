@@ -37,7 +37,8 @@ import { LatestPracticePrefetch, loadPracticeWithRetries, practicePrefetchKey } 
 import { focusedSelectedPracticeWords, topicPracticeWords, type PracticeSource } from "@/lib/practice-sources";
 import { appendLearningEvents, makeLearningEvent, type LearningEvent } from "@/lib/learning-events";
 import { compactStudyState, readStudyState, writeStudyState } from "@/lib/storage";
-import { appendCloudReview, deletePlatformVocabulary, getSupabaseClient, loadCloudState, loadPlatformVocabulary, loadUsername, mergePlatformVocabulary, mergeStudyStates, saveCloudState, syncPlatformVocabulary, updateUsername } from "@/lib/supabase";
+import { appendCloudReview, deletePlatformVocabulary, getSupabaseClient, loadCloudState, loadPlatformVocabulary, loadSuiteLearningSignals, loadUsername, mergePlatformVocabulary, mergeStudyStates, saveCloudState, syncPlatformVocabulary, updateUsername } from "@/lib/supabase";
+import { mergeSuiteEvidence, suitePracticeFocus } from "@/lib/suite-evidence";
 import { actionableCloudSyncNotice, type CloudSyncFailure } from "@/lib/cloud-sync-status";
 import { dedupeLexicalWords, restoreCourseDefinitions } from "@/lib/word-merge";
 import type {
@@ -613,7 +614,7 @@ export default function Home() {
       try {
         const cloud = await loadCloudState(supabase!, user);
         if (!active || version !== connectionVersion) return;
-        const sharedWords = await loadPlatformVocabulary(supabase!, user);
+        const [sharedWords, suiteEvidence] = await Promise.all([loadPlatformVocabulary(supabase!, user), loadSuiteLearningSignals(supabase!, user)]);
         if (!active || version !== connectionVersion) return;
         const userKey = `${STORAGE_KEY}:user:${user.id}`;
         const previousOwner=localStorage.getItem(`${STORAGE_KEY}:owner`);
@@ -625,10 +626,12 @@ export default function Home() {
         localStorage.setItem(`${STORAGE_KEY}:owner`,user.id);
         if (cloud) {
           const merged = hydrateState(mergePlatformVocabulary(mergeStudyStates(hydrateState(cloud), currentLocal), sharedWords));
+          merged.suiteEvidence = mergeSuiteEvidence(merged.suiteEvidence, suiteEvidence);
           setState(merged);
           await saveCloudState(supabase!, user, merged);
         } else {
           const merged = hydrateState(mergePlatformVocabulary(currentLocal, sharedWords));
+          merged.suiteEvidence = mergeSuiteEvidence(merged.suiteEvidence, suiteEvidence);
           setState(merged);
           await saveCloudState(supabase!, user, merged);
         }
@@ -699,6 +702,16 @@ export default function Home() {
             return merged===current?current:hydrateState(merged);
           }))
           .catch((error) => console.error("Shared vocabulary refresh failed", error));
+      })
+      .on("postgres_changes", {
+        event: "INSERT",
+        schema: "public",
+        table: "learning_events",
+        filter: `user_id=eq.${cloudUser.id}`,
+      }, () => {
+        void loadSuiteLearningSignals(client, cloudUser)
+          .then((signals) => setState((current) => ({ ...current, suiteEvidence: mergeSuiteEvidence(current.suiteEvidence, signals) })))
+          .catch((error) => console.error("Suite learning evidence refresh failed", error));
       })
       .subscribe();
     return () => { void client.removeChannel(channel); };
@@ -1301,6 +1314,7 @@ export default function Home() {
       .map((word) => normalizePersian(word.displayForm)));
     const knownWords = words.filter((word) => knownKeys.has(normalizePersian(word)));
     const practiceMode: PracticeMode = source === "selected" ? "controlled" : "transfer";
+    const practiceFocus = suitePracticeFocus(currentState, new Date());
     const fingerprint = {
       kind,
       topic: source === "topic" ? practiceTopic[kind] : "Selected vocabulary",
@@ -1312,6 +1326,7 @@ export default function Home() {
       targetWords: words,
       wordDefinitions: bank,
       knownWords,
+      practiceFocus,
     };
     return {
       key: practicePrefetchKey(fingerprint),
@@ -2108,7 +2123,7 @@ export default function Home() {
 
     {tab === "today" && !showIntake && <section className="grid today-grid">
       {planPicker(reviewModality)}
-      <div className="card span-12 today-controls"><div className="row spread"><span>Today · {dailyPlan.newLimit} new words · {dailyPlan.support} support</span><button className="secondary" onClick={refreshTodayQueue}>Refresh Today</button></div><p className="muted">All overdue reviews come first. Your new-word cohort stays fixed today, then Text, Audio, Patterns, Reading, and Listening adapt from your results.</p></div>
+      <div className="card span-12 today-controls"><div className="row spread"><span>Today · {dailyPlan.newLimit} new words · {dailyPlan.support} support</span><button className="secondary" onClick={refreshTodayQueue}>Refresh Today</button></div><p className="muted">All overdue reviews come first. Your new-word cohort stays fixed today, then Text, Audio, Patterns, Reading, and Listening adapt from your results.{dailyPlan.suiteFocus.length ? ` Recent Cognis/Synaptx focus: ${dailyPlan.suiteFocus.join(", ")}.` : ""}</p></div>
       <Metric label="Due now" value={String(due.length)} />
       <Metric label="New today" value={`${dailyPlan.newWordIds.length}/${dailyPlan.newLimit}`} />
       <Metric label="Cold retention" value={dailyPlan.retentionSamples ? `${Math.round(dailyPlan.observedRetention*100)}%` : "Baseline"} />

@@ -41,6 +41,7 @@ type GenerateBody = {
   practiceMode?: "controlled" | "transfer";
   practiceSource?: "selected" | "topic";
   register?: "formal" | "colloquial";
+  practiceFocus?: string[];
 };
 
 const practiceResponseFormat = {
@@ -174,6 +175,9 @@ ${vocabularyInstructions}
 Avoid these previous titles: ${JSON.stringify((body.previousTitles??[]).slice(-10))}
 
 ${grammarScaffold}
+
+Recent Cognis/Synaptx support areas (privacy-safe labels, not learner text): ${JSON.stringify((body.practiceFocus ?? []).slice(0, 3))}
+When natural for this passage, include one clear example that exercises one of these areas. Never force an awkward construction, mention the tools, or treat this list as evidence that the learner has mastered anything.
 
 ${naturalStyleReferences}
 
