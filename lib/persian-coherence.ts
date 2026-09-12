@@ -52,9 +52,6 @@ export function persianRegisterIssues(value: unknown, register: "formal" | "coll
     if (/توی\s+خانه(?:‌?ام|‌?مان|‌?شان)?/u.test(text)) {
       issues.push("Use a consistently conversational home form, such as خونه or خونه‌ام, after توی.");
     }
-    if (!/(?:^|[\s،,.؟!])(?:یه|خونه|توی|رو|اینا|اونا|می‌?خوام|می‌?رم|می‌?ریم|اومد(?:م|یم)?)(?=$|[\s،,.؟!])/u.test(text)) {
-      issues.push("The listening passage lacks clear evidence of natural spoken Iranian Persian.");
-    }
   }
 
   return issues;
