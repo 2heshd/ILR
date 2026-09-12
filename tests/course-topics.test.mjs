@@ -11,9 +11,12 @@ test('topics cover every course entry with an explicit fallback',()=>{
  assert.equal(PRACTICE_TOPICS.length,44);
  assert(!PRACTICE_TOPICS.includes('All topics'));
 });
-test('both practice modes send topic and keep history',()=>{
+test('topic controls appear only for topic-bank practice and both modes keep history',()=>{
  const page=readFileSync(new URL('../app/page.tsx',import.meta.url),'utf8');
- assert.match(page,/topic:\s*practiceTopic\[kind\]/u);
- for(const kind of ['reading','listening']) assert(page.includes(`aria-label="${kind} topic"`));
+ assert.match(page,/topic:\s*source === "topic" \? practiceTopic\[kind\] : "Selected vocabulary"/u);
+ for(const kind of ['reading','listening']) {
+  assert(page.includes(`practiceSource.${kind} === "topic" && <label`));
+  assert(page.includes(`aria-label="${kind} topic"`));
+ }
  assert.equal((page.match(/<summary>Exercise history<\/summary>/g)||[]).length,2);
 });
