@@ -125,7 +125,7 @@ export async function POST(request: Request) {
   let prompt = "";
   let selectedVocabulary: string[] = [];
   let practiceSource: "selected" | "topic" = "selected";
-  let passageLength = { sentenceMin: 3, sentenceMax: 4, target: "32–44", minimum: 28 };
+  let passageLength = { sentenceMin: 3, sentenceMax: 4, target: "28–38", minimum: 24 };
   let grammarScaffold = "";
   if (body.kind === "define_words") {
     prompt = `Return JSON only. Define and romanize these Persian vocabulary items for a serious learner: ${(body.words ?? []).join(", ")}. Preserve the exact Persian display form. Give the most useful concise English meaning in context; for verbs use an infinitive beginning with "to". Romanization should be readable and consistent.\n\nReturn this exact shape:\n{"words":[{"displayForm":"...","definition":"...","romanization":"..."}]}`;
@@ -149,8 +149,8 @@ export async function POST(request: Request) {
     ));
     practiceSource = body.practiceSource === "topic" ? "topic" : "selected";
     passageLength = practiceSource === "topic"
-      ? { sentenceMin: 4, sentenceMax: 5, target: "85–100", minimum: 60 }
-      : { sentenceMin: 3, sentenceMax: 4, target: "32–44", minimum: 28 };
+      ? { sentenceMin: 4, sentenceMax: 5, target: "85–100", minimum: 55 }
+      : { sentenceMin: 3, sentenceMax: 4, target: "28–38", minimum: 24 };
     selectedVocabulary = [...new Set((body.targetWords ?? []).map((word) => word.trim()).filter(Boolean))];
     if (!selectedVocabulary.length) {
       return NextResponse.json({ error: practiceSource === "topic" ? "No verified vocabulary is available for that topic." : "Choose vocabulary before generating practice." }, { status: 400 });
