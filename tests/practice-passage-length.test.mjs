@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 
 test("generated practice passages request the longer RSVP-friendly range", async () => {
   const source = await readFile(new URL("../app/api/generate/route.ts", import.meta.url), "utf8");
-  assert.match(source, /four or five connected sentences containing 60-80 Persian words total, never fewer than 60 words/);
+  assert.match(source, /four or five connected sentences containing 70-85 Persian words total, leaving a safe margin above the enforced 60-word minimum/);
   assert.match(source, /textFa must contain four or five complete sentences and at least 60 Persian words/);
   assert.match(source, /Passage must contain 4–5 complete sentences/);
   assert.match(source, /Passage must contain at least 60 Persian words/);
