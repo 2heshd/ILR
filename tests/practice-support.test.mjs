@@ -8,10 +8,10 @@ test('omitted labels are repaired only within the supporting-entry allowance',()
   const result=checkSupportingVocabulary('کتاب خریدم',[],['کتاب']);
   assert.deepEqual(result.issues,[]);
   assert.deepEqual(result.words,['کتاب','خریدم']);
-  assert.ok(checkSupportingVocabulary('کتاب خانه شهر مدرسه معلم دانشجو دانشگاه کلاس خودکار دفتر میز صندلی فردا امروز بازار خرید غذا دوست خریدم',[],[]).issues.length);
+  assert.ok(checkSupportingVocabulary('کتاب خانه شهر مدرسه معلم دانشجو دانشگاه کلاس خودکار دفتر میز صندلی فردا امروز بازار خرید غذا دوست خیابان دکان خریدم',[],[]).issues.length);
 });
-test('nineteen entries and passage-sized declarations fail',()=>{
-  assert.ok(checkSupportingVocabulary('',[],['کتاب','خانه','مدرسه','معلم','درس','شهر','دانشجو','دانشگاه','کلاس','خودکار','دفتر','میز','صندلی','فردا','امروز','بازار','خرید','غذا','دوست']).issues.length);
+test('twenty-one entries and passage-sized declarations fail',()=>{
+  assert.ok(checkSupportingVocabulary('',[],['کتاب','خانه','مدرسه','معلم','درس','شهر','دانشجو','دانشگاه','کلاس','خودکار','دفتر','میز','صندلی','فردا','امروز','بازار','خرید','غذا','دوست','خیابان','دکان']).issues.length);
   assert.ok(checkSupportingVocabulary('',[],['من امروز به مدرسه رفتم و درس خواندم']).issues.length);
 });
 test('selected words mistakenly declared as new do not consume the allowance',()=>{
