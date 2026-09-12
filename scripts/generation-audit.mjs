@@ -54,8 +54,9 @@ function saveCheckpoint(){
 }
 async function run(item){
   return new Promise(resolve=>{
-    const args=['--yes','vercel','curl','/api/generate','--deployment',deployment,'--','--silent','--show-error','--max-time','100','--write-out','\nAUDIT %{http_code} %{time_total}\nSTAGES %header{server-timing}\n','--header','Content-Type: application/json','--request','POST','--data',JSON.stringify(item.body)];
-    const child=spawn('npx',args,{stdio:['ignore','pipe','pipe']});let stdout='',stderr='';
+    const vercelCli=process.env.VERCEL_CLI;
+    const args=['curl','/api/generate','--deployment',deployment,'--','--silent','--show-error','--max-time','100','--write-out','\nAUDIT %{http_code} %{time_total}\nSTAGES %header{server-timing}\n','--header','Content-Type: application/json','--request','POST','--data',JSON.stringify(item.body)];
+    const child=spawn(vercelCli||'npx',vercelCli?args:['--yes','vercel',...args],{stdio:['ignore','pipe','pipe']});let stdout='',stderr='';
     child.stdout.on('data',b=>stdout+=b);child.stderr.on('data',b=>stderr+=b);
     child.on('error',error=>resolve({...item,error:error.message}));
     child.on('close',code=>{
