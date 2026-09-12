@@ -194,7 +194,7 @@ English title, English questions and English reference answers; only textFa is P
         store: false,
         input,
         max_output_tokens: budget,
-        text: { format: isPractice ? practiceResponseFormat : { type: "json_object" }, verbosity: "low" },
+        text: { format: isPractice ? practiceResponseFormat : { type: "json_object" } },
       }, { signal }), isPractice ? 2400 : 2200));
     if (isPractice) prompt += '\nFINAL CHECK: Prefer a concise natural description over a forced story. No filler or unrelated plans. Use normal Persian collocations rather than mechanically combining dictionary nouns and verbs. Use explicit ezafe after final ه where appropriate (خانهٔ دوستم). Count the final passage: textFa must contain four or five complete sentences and at least 60 Persian words, not three long compound sentences.';
     if (!isPractice) {
