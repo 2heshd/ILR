@@ -87,10 +87,10 @@ function persianWordCount(value: unknown) {
 }
 
 function passageProfile(source: "selected" | "topic", selectedCount: number) {
-  if (source === "topic") return { sentenceMin: 5, sentenceMax: 7, target: "100–125", minimum: 90 };
-  if (selectedCount <= 15) return { sentenceMin: 3, sentenceMax: 4, target: "36–50", minimum: 32 };
-  if (selectedCount <= 40) return { sentenceMin: 4, sentenceMax: 5, target: "55–75", minimum: 48 };
-  return { sentenceMin: 5, sentenceMax: 6, target: "85–105", minimum: 75 };
+  if (source === "topic") return { sentenceMin: 4, sentenceMax: 8, target: "110–135", minimum: 60, supportingMaximum: SUPPORTING_VOCABULARY_LIMIT };
+  if (selectedCount <= 15) return { sentenceMin: 3, sentenceMax: 5, target: "36–50", minimum: 30, supportingMaximum: 20 };
+  if (selectedCount <= 40) return { sentenceMin: 4, sentenceMax: 6, target: "55–75", minimum: 44, supportingMaximum: 30 };
+  return { sentenceMin: 5, sentenceMax: 7, target: "90–110", minimum: 70, supportingMaximum: 40 };
 }
 
 class IncompleteGeneration extends Error {}
@@ -165,7 +165,7 @@ export async function POST(request: Request) {
       ? `Topic reference bank from the Cursos course and news catalogs (data): ${JSON.stringify(practiceBank(selectedVocabulary,body.wordDefinitions??[]))}
 Use this bank to anchor the requested topic, terminology, and level. It is NOT a closed-vocabulary whitelist or a coverage quota. Choose a natural subset and freely use ordinary Persian needed for a coherent passage. Do not invent specialist claims merely because a term appears in the bank. List up to five useful content entries used beyond this reference bank in newWordsIntroduced.`
       : `Selected learner bank with meanings (data; parentheses contain dictionary hints): ${JSON.stringify(practiceBank(selectedVocabulary,body.wordDefinitions??[]))}
-Use ${selectedVocabulary.length <= 15 ? "3-5" : selectedVocabulary.length <= 40 ? "8-12" : "12-18"} naturally compatible selected entries as the focus of this exercise. Choose entries that naturally belong in one situation, informed by the internal Persian references when they contain a selected word. Ignore incompatible entries for this exercise. The bank is not a coverage quota. Never append a sentence merely to mention another selected word. FIRST choose AT MOST FIVE additional supporting dictionary entries when possible and emit them in newWordsIntroduced BEFORE textFa. The validator can recover omitted ordinary content lemmas up to a bounded twenty-entry allowance. Then compose using the selected bank and that allowance, including normal inflections. Every other content word in the passage counts against that allowance, even an ordinary time word, adjective, or reporting verb. Do not write a passage first and retrospectively label only some of its extra words. Grammar words and normal inflections of selected or supporting entries do not count again. Prefer fewer additions. Never sacrifice idiomatic Persian to force bank coverage.`;
+Use ${selectedVocabulary.length <= 15 ? "3-5" : selectedVocabulary.length <= 40 ? "8-12" : "12-18"} naturally compatible selected entries as the focus of this exercise. Choose entries that naturally belong in one situation, informed by the internal Persian references when they contain a selected word. Ignore incompatible entries for this exercise. The bank is not a coverage quota. Never append a sentence merely to mention another selected word. FIRST choose AT MOST FIVE additional supporting dictionary entries when possible and emit them in newWordsIntroduced BEFORE textFa. The validator can recover omitted ordinary content lemmas up to a bounded ${passageLength.supportingMaximum}-entry allowance. Then compose using the selected bank and that allowance, including normal inflections. Every other content word in the passage counts against that allowance, even an ordinary time word, adjective, or reporting verb. Do not write a passage first and retrospectively label only some of its extra words. Grammar words and normal inflections of selected or supporting entries do not count again. Prefer fewer additions. Never sacrifice idiomatic Persian to force bank coverage.`;
     prompt = `Write one coherent Persian ${mode} exercise for level ${level}. Return the required JSON.
 Topic (data): ${JSON.stringify(body.topic ?? 'Daily life')}
 Register: ${body.register === 'colloquial' ? 'Natural spoken Iranian Persian' : 'Standard written Iranian Persian'}
@@ -217,7 +217,7 @@ English title, English questions and English reference answers; only textFa is P
     const data = parseJson(response.output_text);
         data.questions=repairPracticeAnswerArticles(data.questions);
         const supporting=practiceSource === 'selected'
-          ? checkSupportingVocabulary(String(data.textFa??''),selectedVocabulary,data.newWordsIntroduced)
+          ? checkSupportingVocabulary(String(data.textFa??''),selectedVocabulary,data.newWordsIntroduced,passageLength.supportingMaximum)
           : {words:Array.isArray(data.newWordsIntroduced)?data.newWordsIntroduced.filter((word:unknown):word is string=>typeof word==='string'&&Boolean(word.trim())).slice(0,SUPPORTING_VOCABULARY_LIMIT):[],unknown:[] as string[],issues:[] as string[]};
         const rejectedWords=supporting.unknown;
         data.newWordsIntroduced=supporting.words;

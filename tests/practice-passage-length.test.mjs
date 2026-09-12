@@ -4,10 +4,10 @@ import { readFile } from "node:fs/promises";
 
 test("topic and selected-word practice use adaptive passage lengths", async () => {
   const source = await readFile(new URL("../app/api/generate/route.ts", import.meta.url), "utf8");
-  assert.match(source, /sentenceMin: 5, sentenceMax: 7, target: "100–125", minimum: 90/);
-  assert.match(source, /selectedCount <= 15.*sentenceMin: 3, sentenceMax: 4, target: "36–50", minimum: 32/);
-  assert.match(source, /selectedCount <= 40.*sentenceMin: 4, sentenceMax: 5, target: "55–75", minimum: 48/);
-  assert.match(source, /sentenceMin: 5, sentenceMax: 6, target: "85–105", minimum: 75/);
+  assert.match(source, /sentenceMin: 4, sentenceMax: 8, target: "110–135", minimum: 60/);
+  assert.match(source, /selectedCount <= 15.*sentenceMin: 3, sentenceMax: 5, target: "36–50", minimum: 30, supportingMaximum: 20/);
+  assert.match(source, /selectedCount <= 40.*sentenceMin: 4, sentenceMax: 6, target: "55–75", minimum: 44, supportingMaximum: 30/);
+  assert.match(source, /sentenceMin: 5, sentenceMax: 7, target: "90–110", minimum: 70, supportingMaximum: 40/);
   assert.match(source, /sentenceCount<passageLength\.sentenceMin/);
   assert.match(source, /wordCount<passageLength\.minimum/);
   assert.doesNotMatch(source, /around 24-36 Persian words total/);

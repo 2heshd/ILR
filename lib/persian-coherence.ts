@@ -53,14 +53,13 @@ export function persianRegisterIssues(value: unknown, register: "formal" | "coll
       issues.push("Use a consistently conversational home form, such as خونه or خونه‌ام, after توی.");
     }
     const conversationalPatterns = [
-      /(?:^|[\s،,.؟!])(?:یه|رو|توی|اون|اینا|اونا)(?=$|[\s،,.؟!])/gu,
-      /(?:^|[\s،,.؟!])(?:خونه|می‌?خوام|می‌?رم|می‌?ریم|می‌?شه|نمی‌?شه|اومد(?:م|ی|یم|ن|ند)?)(?=$|[\s،,.؟!])/gu,
-      /(?:خرید|کار|دوست|کتاب|غذا|ماشین|بچه|دانشجو)(?:شون|مون|تون)(?=$|[\s،,.؟!])/gu,
+      /(?:^|[\s،,.؟!])(?:یه|رو|توی|اون|اینا|اونا|اونجا|بعدش)(?=$|[\s،,.؟!])/gu,
+      /(?:^|[\s،,.؟!])(?:خونه|نون|می‌?خوام|می‌?رم|می‌?ریم|می‌?شه|نمی‌?شه|مهمه|باشه|اومد(?:م|ی|یم|ن|ند)?|دارن|هستن|می‌?(?:کنن|دن|شن|گن)|ب(?:خرن|رن|شن|گن)|بتونن)(?=$|[\s،,.؟!])/gu,
+      /[\u0600-\u06ff‌]+(?:شون|مون|تون|هامو|هاشون)(?=$|[\s،,.؟!])/gu,
     ];
-    const categoryCount = conversationalPatterns.filter(pattern => (text.match(pattern) ?? []).length > 0).length;
     const markerCount = conversationalPatterns.reduce((total, pattern) => total + (text.match(pattern) ?? []).length, 0);
-    if (categoryCount < 2 || markerCount < 4) {
-      issues.push("The colloquial passage must use consistent spoken Persian throughout, with at least four conversational forms from two spoken-pattern categories.");
+    if (markerCount < 4) {
+      issues.push("The colloquial passage must use consistent spoken Persian throughout, with at least four conversational forms.");
     }
   }
 

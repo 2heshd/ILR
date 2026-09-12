@@ -18,7 +18,7 @@ function dictionarySupportingForm(value:string) {
 }
 
 /** Limit additional lexical entries, while allowing their normal inflections. */
-export function checkSupportingVocabulary(text: string, selected: string[], declared: unknown) {
+export function checkSupportingVocabulary(text: string, selected: string[], declared: unknown, limit = SUPPORTING_VOCABULARY_LIMIT) {
   const issues: string[] = [];
   if (!Array.isArray(declared)) {
     return {words: [] as string[], unknown: [] as string[], issues: ['List supporting vocabulary as short Persian dictionary entries.']};
@@ -29,7 +29,7 @@ export function checkSupportingVocabulary(text: string, selected: string[], decl
   const validLabels=declared.filter((word):word is string=>typeof word==='string'&&Boolean(word.trim())&&word.length<=60&&word.trim().split(/\s+/u).length<=3&&/[\u0600-\u06ff]/u.test(word));
   if(validLabels.length!==declared.length&&!text.trim())issues.push('List supporting vocabulary as short Persian dictionary entries.');
   const candidates = [...new Set(validLabels.map(dictionarySupportingForm))];
-  if (candidates.length > SUPPORTING_VOCABULARY_LIMIT) issues.push(`Use at most ${SUPPORTING_VOCABULARY_LIMIT} supporting dictionary entries.`);
+  if (candidates.length > limit) issues.push(`Use at most ${limit} supporting dictionary entries.`);
   const words: string[] = [];
   let unknown = unselectedContentWords(text, selected);
   for (const word of candidates) {
@@ -42,7 +42,7 @@ export function checkSupportingVocabulary(text: string, selected: string[], decl
   }
   // Repair omitted labels mechanically when still within the same small
   // allowance; never spend another AI round-trip just to name an observed word.
-  if (unknown.length && words.length + unknown.length <= SUPPORTING_VOCABULARY_LIMIT) {
+  if (unknown.length && words.length + unknown.length <= limit) {
     words.push(...unknown);
     unknown = unselectedContentWords(text, [...selected, ...words]);
   }
