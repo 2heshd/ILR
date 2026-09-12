@@ -21,9 +21,9 @@ test('a correct text answer does not hide audio or pattern reviews',()=>{
   assert.equal(dueWords(state,'cloze',now).length,1);
   assert.equal(dueWords(state,'visual',new Date(text.due)).length,1,'learning steps return when due');
 });
-test('all selected due words remain available even with a legacy daily cap',()=>{
+test('all reviewed due words remain available while new intake is capped',()=>{
   const words=Array.from({length:110},(_,i)=>({...word,id:String(i),modalityCards:{visual:{...card,reps:i<60?3:0}}}));
-  assert.equal(dueWords({words,reviews:[],dailyNewLimit:40},'visual',now).length,110);
+  assert.equal(dueWords({words,reviews:[],dailyNewLimit:40},'visual',now).length,95);
 });
 test('vocabulary sessions stay active until replaced and cannot resurrect deleted words',()=>{
   const state={words:[word],studyPlans:{reading:{enabled:true,wordIds:['one','deleted'],period:'day',startsOn:'2026-09-03'}}};

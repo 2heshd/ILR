@@ -20,6 +20,7 @@ import RapidCaptions from "@/components/RapidCaptions";
 import RsvpReader from "@/components/RsvpReader";
 import SpeakingLab from "@/components/SpeakingLab";
 import { adaptiveAllocation, currentTrainingPhase, dominantBottleneck, selectContextWords } from "@/lib/adaptive";
+import { adaptiveContextWords, dailyAdaptivePlan, ratingFromRecall } from "@/lib/daily-adaptive";
 import type { AnkiReviewRow, AnkiVocabularyRow } from "@/lib/anki";
 import { COURSE_META, courseSectionLabel, loadCourseCatalog, loadCourseWeek, type CourseVocabularyEntry } from "@/lib/course";
 import { curatedListeningItems, curatedPassages, curatedSpeakingPrompts } from "@/lib/curated-cycle";
@@ -790,6 +791,8 @@ export default function Home() {
   function planPicker(mode:PlanMode){const plan=state.studyPlans?.[mode];return <div className="plan-shortcut span-12"><span>{planLabels[mode]} · {plan?.enabled?`${plannedWords(state,mode).length} active words`:(mode==='reading'||mode==='listening'?'Choose vocabulary':'All due words')}</span><button onClick={()=>{setPlanMode(mode);setTab('vocabulary');window.scrollTo({top:0,behavior:'smooth'});}}>Edit plan in Vocabulary →</button></div>;}
   const current = reviewWord(state.words,due,lockedReviewForm);
   const allocation = useMemo(() => adaptiveAllocation(state), [state]);
+  const dailyPlanCandidates = useMemo(() => state.studyPlans?.visual?.enabled ? plannedWords(state, "visual", new Date(clockNow)) : state.words, [state, clockNow]);
+  const dailyPlan = useMemo(() => dailyAdaptivePlan(state, new Date(clockNow), dailyPlanCandidates), [state, clockNow, dailyPlanCandidates]);
   const trainingPhase = useMemo(() => currentTrainingPhase(state.weekNumber), [state.weekNumber]);
   const bottleneck = useMemo(() => dominantBottleneck(state), [state]);
   const mature = state.words.filter(word=>(["visual","audio","cloze"] as const).every(mode=>{const skill=word.modalityMastery?.[mode];return skill&&skill.reviews>=4&&skill.correct/skill.reviews>=0.9;})).length;
@@ -1217,7 +1220,7 @@ export default function Home() {
     // A learner's explicit correctness judgment should determine the schedule.
     // Response time remains useful analytics, but must not turn a correct answer
     // into a short-term "hard" card that reappears during the same session.
-    const rating: ReviewRating = correct ? "good" : "again";
+    const rating: ReviewRating = ratingFromRecall(correct, measured, current.modalityCards?.[reviewModality]?.reps ?? 0);
     const { before, after } = reviewFsrs(current.modalityCards?.[reviewModality], rating, new Date());
     const event: ReviewEvent = {
       id: id(),
@@ -1251,7 +1254,7 @@ export default function Home() {
         },
         modalityCards: { ...word.modalityCards, [reviewModality]: after },
         knowledgeState: !correct
-          ? "new"
+          ? (word.reviews > 0 ? "learning" : "new")
           : (["visual","audio","cloze"] as const).every(mode=>{const attempts=[...currentState.reviews,event].filter(item=>item.lexicalItemId===word.id&&item.modality===mode).slice(-5);return attempts.length===5&&attempts.every(item=>item.correct&&item.responseMs<=3000);})
             ? "automatic"
             : (["visual","audio","cloze"] as const).every(mode=>{const attempts=[...currentState.reviews,event].filter(item=>item.lexicalItemId===word.id&&item.modality===mode).slice(-1);return attempts.length===1&&attempts.every(item=>item.correct&&item.responseMs<15000);})
@@ -1289,7 +1292,7 @@ export default function Home() {
   function practiceGenerationContext(kind: "reading" | "listening", source: PracticeSource, currentState = latestState.current): PracticeGenerationContext {
     const planned = plannedWords(currentState, kind);
     const bank = source === "selected"
-      ? focusedSelectedPracticeWords(planned)
+      ? focusedSelectedPracticeWords(adaptiveContextWords(currentState, planned, new Date(), 80))
       : topicPracticeWords(practiceTopic[kind], courseCatalog, NEWS_CATALOG);
     const words = bank.map((entry) => entry.word);
     const targetIlr = currentState.skillLevels[kind];
@@ -2105,11 +2108,11 @@ export default function Home() {
 
     {tab === "today" && !showIntake && <section className="grid today-grid">
       {planPicker(reviewModality)}
-      <div className="card span-12 today-controls"><div className="row spread"><span>Study at your pace · All selected due words are available</span><button className="secondary" onClick={refreshTodayQueue}>Refresh Today</button></div><p className="muted">Due reviews come first. Text, audio, and patterns advance independently.</p></div>
+      <div className="card span-12 today-controls"><div className="row spread"><span>Today · {dailyPlan.newLimit} new words · {dailyPlan.support} support</span><button className="secondary" onClick={refreshTodayQueue}>Refresh Today</button></div><p className="muted">All overdue reviews come first. Your new-word cohort stays fixed today, then Text, Audio, Patterns, Reading, and Listening adapt from your results.</p></div>
       <Metric label="Due now" value={String(due.length)} />
-      <Metric label="Total words" value={String(state.words.length)} />
-      <Metric label="Review accuracy" value={`${retention}%`} />
-      <Metric label="Median recall" value={medianRecall ? `${(medianRecall / 1000).toFixed(1)}s` : "—"} />
+      <Metric label="New today" value={`${dailyPlan.newWordIds.length}/${dailyPlan.newLimit}`} />
+      <Metric label="Cold retention" value={dailyPlan.retentionSamples ? `${Math.round(dailyPlan.observedRetention*100)}%` : "Baseline"} />
+      <Metric label="Study forecast" value={`${dailyPlan.estimatedMinutes} min`} />
 
       <div className="card span-7 dashboard-primary">
         <div className="row spread"><h2>{state.words.length ? "Review" : "Start here"}</h2>{state.words.length > 0 && <div className="row"><button className={reviewModality === "visual" ? "mode-button active" : "mode-button"} onClick={() => changeReviewModality("visual")}>Text</button><button className={reviewModality === "audio" ? "mode-button active" : "mode-button"} onClick={() => changeReviewModality("audio")}>Audio</button><button className={reviewModality === "cloze" ? "mode-button active" : "mode-button"} onClick={() => changeReviewModality("cloze")}>Patterns</button><span className="pill">{reviewModality === "cloze" ? "1s flash · type" : "3s · 8s · 15s"}</span></div>}</div>

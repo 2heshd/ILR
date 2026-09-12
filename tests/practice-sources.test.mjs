@@ -35,7 +35,7 @@ test("reading and listening expose the same two generation sources", () => {
   }
   assert.match(page, /<option value="selected">Selected words<\/option>/u);
   assert.match(page, /<option value="topic">Topic bank \+ news<\/option>/u);
-  assert.match(page, /focusedSelectedPracticeWords\(planned\)/u);
+  assert.match(page, /focusedSelectedPracticeWords\(adaptiveContextWords\(currentState, planned, new Date\(\), 80\)\)/u);
   assert.match(page, /topicPracticeWords\(practiceTopic\[kind\], courseCatalog, NEWS_CATALOG\)/u);
 });
 
