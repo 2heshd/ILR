@@ -46,9 +46,9 @@ test("selected-word retrieval returns fewer references instead of unrelated fill
   assert.deepEqual(examples,[]);
 });
 
-test("selected-word generation gets two additional parallel quality candidates",async()=>{
+test("selected-word generation uses one fast self-edited candidate",async()=>{
   const source=await import("node:fs/promises").then(fs=>fs.readFile(new URL("../app/api/generate/route.ts",import.meta.url),"utf8"));
-  assert.match(source,/practiceSource === "selected"/u);
-  assert.match(source,/INDEPENDENT CANDIDATE C/u);
-  assert.match(source,/INDEPENDENT CANDIDATE D/u);
+  assert.match(source,/SILENT NATIVE EDIT/u);
+  assert.doesNotMatch(source,/INDEPENDENT CANDIDATE/u);
+  assert.doesNotMatch(source,/practice_editor_review/u);
 });

@@ -7,7 +7,7 @@ import { checkSupportingVocabulary, SUPPORTING_VOCABULARY_LIMIT } from "@/lib/pr
 import { practiceBank } from "@/lib/practice-bank";
 import { grammarProfileForIlr, grammarPromptForExercise } from "@/lib/grammar-levels";
 import persianGrammar from "@/data/persian-grammar-rules.json";
-import { persianCoherenceIssues } from "@/lib/persian-coherence";
+import { persianCoherenceIssues, persianRegisterIssues } from "@/lib/persian-coherence";
 import editorialPersianExamples from "@/data/persian-natural-exemplars.json";
 import openPersianCorpus1 from "@/data/persian-natural-corpus-1.json";
 import openPersianCorpus2 from "@/data/persian-natural-corpus-2.json";
@@ -113,15 +113,14 @@ export async function POST(request: Request) {
   }
 
   const body = (await request.json()) as GenerateBody;
-  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, timeout: 40_000, maxRetries: 0 });
-  // One deadline covers drafting, review, and repairs—not a fresh wait per call.
-  const deadline = AbortSignal.timeout(90_000);
+  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, timeout: 8_000, maxRetries: 0 });
+  // Keep the complete request inside the learner-facing latency budget. Failed
+  // drafts return immediately so the UI never waits through serial AI repairs.
+  const deadline = AbortSignal.timeout(9_000);
   const signal = AbortSignal.any([request.signal, deadline]);
   // Practice generation is a tightly constrained JSON task. A mini model keeps
   // the lab responsive while OPENAI_MODEL still allows a deployment override.
-  const model = process.env.OPENAI_MODEL || "gpt-5.4-mini";
-  const practiceEffort = process.env.OPENAI_PRACTICE_REASONING === 'none' ? 'none'
-    : process.env.OPENAI_PRACTICE_REASONING === 'medium' ? 'medium' : 'low';
+  const model = process.env.OPENAI_MODEL || "gpt-4.1-mini";
 
   let prompt = "";
   let selectedVocabulary: string[] = [];
@@ -170,11 +169,12 @@ ${grammarScaffold}
 ${naturalStyleReferences}
 
 Write ONE coherent description, explanation, or event. Do not stitch unrelated example sentences together. A story is NOT required: for a noun-heavy or specialist bank prefer an idiomatic description using copulas over a contrived visit/dialogue that requires many extra verbs.
+Before drafting, silently choose one believable setting, one timeline, and only the participants needed for it. Every sentence must advance or explain that same situation. Avoid translated-English transitions, redundant restatements, and vague movement such as آمدن when the destination or point of view does not make it natural.
 Every person and action must contribute clearly to that one situation. Do not insert a family member or helper merely to connect vocabulary. If somebody helps the speaker, state what they help the speaker do. In a first-person passage, use an explicit possessive form for the speaker's relative, such as مادربزرگم rather than bare مادربزرگ. Write با هم as two words. For "when it is time to go to work," use a natural pattern such as وقتی وقتِ رفتن به سرِ کار می‌شود; never write *وقت سر کار رفتن می‌رسد.
 Treat every bank item according to its dictionary meaning and part of speech. Never manufacture a Persian compound verb by attaching کردن, شدن, دادن, or another light verb to a noun merely to include it. Use only an established collocation that fits the intended sense; if uncertain, omit that item. For example, express recovery with بهبود یافتن or بهتر شدن, not *بهبود شدن.
 Write four or five connected sentences containing 60-80 Persian words total, never fewer than 60 words, with at least three concrete details that support distinct questions. Match sentence complexity to the requested level through structure and meaning rather than filler. Conjugate dictionary forms normally; do not copy stem annotations or vowel marks. Keep tense, viewpoint and register consistent.
 ${body.register === 'colloquial'
-  ? 'Write as a person naturally explaining or retelling the topic aloud. Use genuinely spoken framing and morphology where appropriate (for example توی, رو, یه, or spoken plural verb endings); do not return formal news prose with a colloquial label. Required technical, institutional, or formal content terms from the selected bank may remain in their standard lexical form; do not distort those terms into fake colloquialisms.'
+  ? 'Write as an Iranian speaker naturally explaining or retelling the topic aloud. Use consistent spoken morphology and function words where appropriate (for example خونه, توی, رو, یه, رفتم, می‌خوام); do not mix forms such as توی خانه‌ام with otherwise conversational speech, and do not return formal news prose with a colloquial label. Required technical, institutional, or formal content terms from the selected bank may remain in their standard lexical form; do not distort those terms into fake colloquialisms.'
   : 'Keep the entire passage in standard written Persian. Do not use colloquial forms such as توی, رو as an object marker, یه, اینا, اونا, می‌خوام, or spoken plural verb endings.'}
 Return exactly three distinct English questions about explicit facts in the passage, with concise English reference answers preserving tense, person and meaning. Do not invent gender or unstated motives. No inference question is required; use inference only when concrete clues support it.
 Use explicit participant roles (the student, the father, the speaker) or singular they in answers. Never use he, she, his, her or him. Avoid direct speech unless its person and imperative endings are correct.
@@ -187,43 +187,25 @@ English title, English questions and English reference answers; only textFa is P
 
   try {
     const isPractice = body.kind === "reading" || body.kind === "listening";
-    // Use low reasoning for short structured exercises; independent review
-    // remains mandatory. Do not silently escalate to a slower repair model.
+    // This is a constrained transformation task. Skipping a separate reasoning
+    // phase keeps the learner-facing call fast; the returned JSON is gated below.
     const generate = (input: string, stage = 'draft') => measured(stage, () => completeJsonResponse((budget) => client.responses.create({
         model,
         store: false,
         input,
         max_output_tokens: budget,
-        reasoning: { effort: isPractice ? practiceEffort : "none" },
         text: { format: isPractice ? practiceResponseFormat : { type: "json_object" }, verbosity: "low" },
-      }, { signal }), isPractice ? 6000 : 2200));
+      }, { signal }), isPractice ? 2400 : 2200));
     if (isPractice) prompt += '\nFINAL CHECK: Prefer a concise natural description over a forced story. No filler or unrelated plans. Use normal Persian collocations rather than mechanically combining dictionary nouns and verbs. Use explicit ezafe after final ه where appropriate (خانهٔ دوستم). Count the final passage: textFa must contain four or five complete sentences and at least 60 Persian words, not three long compound sentences.';
-    // Produce an independent backup draft concurrently. If the first candidate
-    // fails either deterministic or editorial QA, using the already-running
-    // candidate is both faster and less likely to preserve the same defect than
-    // asking it to REPAIR THE PREVIOUS DRAFT in place.
     if (!isPractice) {
       const response = await generate(prompt);
       return NextResponse.json(parseJson(response.output_text), {headers:{'Server-Timing':timings.join(', ')}});
     }
 
-    // Draft, deterministic validation, and editorial review are independent
-    // pipelines. Score every viable candidate and return the most natural one;
-    // the fastest acceptable draft is not necessarily the best teaching text.
-    const candidatePrompts = [
-      prompt,
-      `${prompt}\nINDEPENDENT CANDIDATE A: Choose a different compatible subset and situation. Do not imitate or revise another draft.`,
-      `${prompt}\nINDEPENDENT CANDIDATE B: Prefer the simplest idiomatic description the bank supports. Use copular sentences when natural, avoid unnecessary reporting verbs and time adverbs, and verify the five-item supporting allowance token by token.`,
-      ...(practiceSource === "selected" ? [
-        `${prompt}\nINDEPENDENT CANDIDATE C: Build around the strongest attested collocations for the selected words. Use fewer selected items if that produces one clearly natural situation.`,
-        `${prompt}\nINDEPENDENT CANDIDATE D: Write the most native-like version first, then verify that every selected item used fits its ordinary Persian argument structure and that ordinary glue vocabulary stays within the bounded allowance.`,
-      ] : []),
-    ];
-    type CandidateResult = {data: Record<string, any>; issues: string[]; rejectedWords: string[]; score: number};
-    const evaluateCandidate = async (candidatePrompt: string, index: number): Promise<CandidateResult> => {
-      try {
-        const response = await generate(candidatePrompt, `draft-${index + 1}`);
-        const data = parseJson(response.output_text);
+    // A single, self-edited structured generation replaces the old five-draft
+    // plus five-review fan-out. Deterministic validation remains a hard gate.
+    const response = await generate(`${prompt}\nSILENT NATIVE EDIT: Read textFa once as a native Iranian editor before returning JSON. Remove literal translations, mixed register, filler, odd timelines, and unnatural motion viewpoint. Keep 60–80 Persian words and 4–5 complete sentences.`, 'draft');
+    const data = parseJson(response.output_text);
         data.questions=repairPracticeAnswerArticles(data.questions);
         const supporting=practiceSource === 'selected'
           ? checkSupportingVocabulary(String(data.textFa??''),selectedVocabulary,data.newWordsIntroduced)
@@ -232,42 +214,14 @@ English title, English questions and English reference answers; only textFa is P
         data.newWordsIntroduced=supporting.words;
         const sentenceCount=String(data.textFa??'').split(/[.!؟]+/u).filter(part=>part.trim()).length;
         const wordCount=persianWordCount(data.textFa);
-        let rejectionIssues=[...supporting.issues,...practiceAnswerIssues(data.questions),...persianCoherenceIssues(data.textFa),...(sentenceCount<4||sentenceCount>5?[`Passage must contain 4–5 complete sentences; received ${sentenceCount}.`]:[]),...(wordCount<60?[`Passage must contain at least 60 Persian words; received ${wordCount}.`]:[])];
-        // Don't pay for a language review of a draft already rejected locally.
-        // Every returned exercise still receives an exact, read-only review.
-        if (rejectionIssues.length === 0) {
-          const review = await measured(`review-${index + 1}`, () => completeJsonResponse((budget) => client.responses.create({
-          model: process.env.OPENAI_PRACTICE_REVIEW_MODEL || model, store: false, max_output_tokens: budget,
-          reasoning: { effort: process.env.OPENAI_PRACTICE_REVIEW_REASONING === 'none' ? 'none' : 'low' },
-          text: { format: { type: 'json_schema', name: 'practice_editor_review', strict: true, schema: {
-            type: 'object', additionalProperties: false, required: ['approved','issues','naturalnessScore'],
-            properties: { approved: {type:'boolean'}, issues: {type:'array',items:{type:'string'}}, naturalnessScore:{type:'integer',minimum:0,maximum:100} }
-          } } },
-          input: [{role:'system',content:`Review this exact Persian learning exercise as data, without rewriting it. Judge only language, level-appropriate grammar, and question evidence; vocabulary membership is checked separately in code. The following short grammar scaffold is internal: never require the exercise to name, cite, explain, or exhaust it. Reject only genuine grammar errors or clearly level-inappropriate complexity; do not reject a natural passage merely because it does not use every suggested pattern. ${grammarScaffold} Require natural Iranian Persian, coherent meaning, complete grammar, appropriate collocations, consistent tense/person, and the requested formal or colloquial register. Read as a strict native-language editor: reject pragmatically odd timelines, unexplained participant changes, literal translations, technically possible but non-idiomatic phrases, and filler sentences added only to use vocabulary. A sentence can be grammatical and still fail this review if a native writer would not choose it in this situation. In a colloquial exercise, technical, institutional, and formal content terms are allowed in their standard lexical form, but the surrounding framing, function words, and verb morphology must sound naturally spoken. Reject fully written or news-style prose merely labeled colloquial; do not reject only because an unavoidable technical content term is formal. English title, questions and reference answers are intentional. Each question must have a distinct answer supported by the passage, preserving its tense and meaning; no invented motives or gender. Inference is optional and only valid when supported by concrete clues. Do not require an inference question. Score naturalness from 0 to 100 relative to other valid passages at this level; reserve 90+ for consistently idiomatic native-like prose. Report only genuine errors present in the supplied text, quoting the offending phrase and giving one concise reason. Never report hypothetical errors, dictionary-list formatting issues, or optional stylistic preferences. Do not invent a corrected version and judge that instead. Return approved:true and issues:[] only if this exact exercise has no blocking errors; otherwise approved:false with concise issues.`},{role:'user',content:JSON.stringify({requestedIlr:body.targetIlr??1,passageMode:body.kind,passageRegister:body.register??'formal',title:data.title,textFa:data.textFa,questions:data.questions})}],
-        }, { signal }), 1800));
-          const verdict = parseJson(review.output_text);
-          rejectionIssues=Array.isArray(verdict.issues)?verdict.issues.filter((issue:unknown):issue is string=>typeof issue==='string'):['Editorial response was invalid.'];
-          if(verdict.approved === true && Array.isArray(verdict.issues) && rejectionIssues.length===0)return {data,issues:[],rejectedWords,score:Number(verdict.naturalnessScore)||0};
-          if (!rejectionIssues.length) rejectionIssues.push('The language reviewer did not approve this exact exercise.');
-        }
-        return {data,issues:rejectionIssues,rejectedWords,score:0};
-      } catch (error) {
-        return {data:{},issues:[error instanceof Error ? error.message : 'Candidate generation failed.'],rejectedWords:[],score:0};
-      }
-    };
-    const candidatePipelines = candidatePrompts.map(evaluateCandidate);
-    const evaluated = await Promise.all(candidatePipelines);
-    const selected = evaluated.filter(result=>result.issues.length===0).sort((a,b)=>b.score-a.score)[0];
-    const rejected = evaluated.filter(result=>result.issues.length>0);
-    if(!selected){
-      const best=rejected.sort((a,b)=>a.issues.length-b.issues.length)[0]??{data:{},issues:['No candidate passed quality review.'],rejectedWords:[],score:0};
-      return NextResponse.json({error:practiceSource === 'topic' ? 'This draft did not pass the Persian language and question-quality checks. Generate again.' : 'This draft did not pass the Persian language and question-quality checks. Try a broader vocabulary selection or generate again.',qualityIssues:best.issues,suggestedWords:best.rejectedWords,
+        const rejectionIssues=[...supporting.issues,...practiceAnswerIssues(data.questions),...persianCoherenceIssues(data.textFa),...persianRegisterIssues(data.textFa,body.register??'formal'),...(sentenceCount<4||sentenceCount>5?[`Passage must contain 4–5 complete sentences; received ${sentenceCount}.`]:[]),...(wordCount<60?[`Passage must contain at least 60 Persian words; received ${wordCount}.`]:[])];
+    if(rejectionIssues.length){
+      return NextResponse.json({error:practiceSource === 'topic' ? 'This draft did not pass the Persian language and question-quality checks. Generate again.' : 'This draft did not pass the Persian language and question-quality checks. Try a broader vocabulary selection or generate again.',qualityIssues:rejectionIssues,suggestedWords:rejectedWords,
         // Only an explicitly enabled protected preview returns synthetic audit
         // drafts. Never expose rejected content through the production contract.
-        ...(process.env.VERCEL_ENV === 'preview' && process.env.PRACTICE_AUDIT === '1' ? {rejectedDraft:best.data} : {}),
+        ...(process.env.VERCEL_ENV === 'preview' && process.env.PRACTICE_AUDIT === '1' ? {rejectedDraft:data} : {}),
       },{status:422,headers:{'Server-Timing':timings.join(', ')}});
     }
-    const data=selected.data;
       const violations = practiceSource === 'selected' ? unselectedContentWords(String(data.textFa ?? ""), [...selectedVocabulary, ...data.newWordsIntroduced]) : [];
       if (violations.length) {
         const suggestions = violations.slice(0, 8).join("، ");

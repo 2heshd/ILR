@@ -26,3 +26,28 @@ export function persianCoherenceIssues(value: unknown) {
 
   return issues;
 }
+
+export function persianRegisterIssues(value: unknown, register: "formal" | "colloquial") {
+  const text = normalize(String(value ?? "").trim());
+  const issues: string[] = [];
+
+  if (register === "formal") {
+    if (/(?:^|[\s،,.؟!])(?:یه|خونه|توی|اینا|اونا|می‌?خوام|می‌?رم)(?=$|[\s،,.؟!])/u.test(text)) {
+      issues.push("The formal passage contains conversational Persian morphology or function words.");
+    }
+    if (/(?:^|[\s،,.؟!])رو(?=$|[\s،,.؟!])/u.test(text)) {
+      issues.push("Use را rather than colloquial رو in a formal passage.");
+    }
+  } else {
+    // This catches the exact kind of half-converted register that produced
+    // phrases such as «توی خانه‌ام» inside otherwise conversational narration.
+    if (/توی\s+خانه(?:‌?ام|‌?مان|‌?شان)?/u.test(text)) {
+      issues.push("Use a consistently conversational home form, such as خونه or خونه‌ام, after توی.");
+    }
+    if (!/(?:^|[\s،,.؟!])(?:یه|خونه|توی|رو|اینا|اونا|می‌?خوام|می‌?رم|می‌?ریم|اومد(?:م|یم)?)(?=$|[\s،,.؟!])/u.test(text)) {
+      issues.push("The listening passage lacks clear evidence of natural spoken Iranian Persian.");
+    }
+  }
+
+  return issues;
+}
