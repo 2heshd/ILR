@@ -24,6 +24,14 @@ export function persianCoherenceIssues(value: unknown) {
     issues.push("State what the person helps the speaker do; به من کمک می‌کند cannot end as a vague event in a controlled passage.");
   }
 
+  for (const sentence of text.split(/[.؟!]+/u)) {
+    if (/(?:^|[\s،])من(?:[\s،])/u.test(sentence)
+      && !/(?:^|[\s،])من\s+و\s+/u.test(sentence)
+      && /(?:کردیم|خریدیم|رفتیم|آمدیم|بودیم|داشتیم|شدیم|گفتیم|دیدیم|خوردیم|خواندیم|نوشتیم|گرفتیم)(?=$|[\s،])/u.test(sentence)) {
+      issues.push("An explicit singular من subject cannot take a first-person plural verb ending unless it is coordinated with another participant.");
+    }
+  }
+
   return issues;
 }
 

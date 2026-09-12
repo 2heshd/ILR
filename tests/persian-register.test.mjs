@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { persianRegisterIssues } from "../lib/persian-coherence.ts";
+import { persianCoherenceIssues, persianRegisterIssues } from "../lib/persian-coherence.ts";
 
 test("formal passages reject conversational markers", () => {
   assert.ok(persianRegisterIssues("من یه کتاب رو خریدم.", "formal").length > 0);
@@ -10,4 +10,10 @@ test("formal passages reject conversational markers", () => {
 test("listening passages require consistent spoken Persian", () => {
   assert.ok(persianRegisterIssues("الان توی خانه‌ام و کتاب می‌خوانم.", "colloquial").length > 0);
   assert.deepEqual(persianRegisterIssues("الان توی خونه‌ام و کتاب می‌خونم.", "colloquial"), []);
+});
+
+test("first-person singular subjects reject plural verb endings", () => {
+  assert.ok(persianCoherenceIssues("من غذا را با دوستانم خریدیم.").length > 0);
+  assert.deepEqual(persianCoherenceIssues("من و دوستانم غذا را خریدیم."), []);
+  assert.deepEqual(persianCoherenceIssues("من غذا را با دوستانم خریدم."), []);
 });
