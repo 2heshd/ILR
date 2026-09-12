@@ -43,6 +43,6 @@ test("only selected-word generation uses the closed-vocabulary gate", () => {
   assert.match(route, /practiceSource === 'selected'\s*\? checkSupportingVocabulary/u);
   assert.match(route, /practiceSource === 'selected' \? unselectedContentWords/u);
   assert.match(route, /It is NOT a closed-vocabulary whitelist/u);
-  assert.match(route, /Use only 6-10 naturally compatible selected entries/u);
+  assert.match(route, /selectedVocabulary\.length <= 15 \? "3-5" : selectedVocabulary\.length <= 40 \? "8-12" : "12-18"/u);
   assert.match(route, /Never append a sentence merely to mention another selected word/u);
 });

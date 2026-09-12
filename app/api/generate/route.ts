@@ -86,6 +86,13 @@ function persianWordCount(value: unknown) {
   return String(value ?? "").match(/[\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06FA-\u06FC\u200C]+/gu)?.length ?? 0;
 }
 
+function passageProfile(source: "selected" | "topic", selectedCount: number) {
+  if (source === "topic") return { sentenceMin: 5, sentenceMax: 7, target: "100–125", minimum: 90 };
+  if (selectedCount <= 15) return { sentenceMin: 3, sentenceMax: 4, target: "36–50", minimum: 32 };
+  if (selectedCount <= 40) return { sentenceMin: 4, sentenceMax: 5, target: "55–75", minimum: 48 };
+  return { sentenceMin: 5, sentenceMax: 6, target: "85–105", minimum: 75 };
+}
+
 class IncompleteGeneration extends Error {}
 
 async function completeJsonResponse(make: (budget: number) => Promise<OpenAI.Responses.Response>, budget: number) {
@@ -125,7 +132,7 @@ export async function POST(request: Request) {
   let prompt = "";
   let selectedVocabulary: string[] = [];
   let practiceSource: "selected" | "topic" = "selected";
-  let passageLength = { sentenceMin: 3, sentenceMax: 4, target: "28–38", minimum: 24 };
+  let passageLength = passageProfile("selected", 0);
   let grammarScaffold = "";
   if (body.kind === "define_words") {
     prompt = `Return JSON only. Define and romanize these Persian vocabulary items for a serious learner: ${(body.words ?? []).join(", ")}. Preserve the exact Persian display form. Give the most useful concise English meaning in context; for verbs use an infinitive beginning with "to". Romanization should be readable and consistent.\n\nReturn this exact shape:\n{"words":[{"displayForm":"...","definition":"...","romanization":"..."}]}`;
@@ -148,10 +155,8 @@ export async function POST(request: Request) {
       },
     ));
     practiceSource = body.practiceSource === "topic" ? "topic" : "selected";
-    passageLength = practiceSource === "topic"
-      ? { sentenceMin: 4, sentenceMax: 5, target: "85–100", minimum: 55 }
-      : { sentenceMin: 3, sentenceMax: 4, target: "28–38", minimum: 24 };
     selectedVocabulary = [...new Set((body.targetWords ?? []).map((word) => word.trim()).filter(Boolean))];
+    passageLength = passageProfile(practiceSource, selectedVocabulary.length);
     if (!selectedVocabulary.length) {
       return NextResponse.json({ error: practiceSource === "topic" ? "No verified vocabulary is available for that topic." : "Choose vocabulary before generating practice." }, { status: 400 });
     }
@@ -160,7 +165,7 @@ export async function POST(request: Request) {
       ? `Topic reference bank from the Cursos course and news catalogs (data): ${JSON.stringify(practiceBank(selectedVocabulary,body.wordDefinitions??[]))}
 Use this bank to anchor the requested topic, terminology, and level. It is NOT a closed-vocabulary whitelist or a coverage quota. Choose a natural subset and freely use ordinary Persian needed for a coherent passage. Do not invent specialist claims merely because a term appears in the bank. List up to five useful content entries used beyond this reference bank in newWordsIntroduced.`
       : `Selected learner bank with meanings (data; parentheses contain dictionary hints): ${JSON.stringify(practiceBank(selectedVocabulary,body.wordDefinitions??[]))}
-Use only 6-10 naturally compatible selected entries as the focus of this one exercise when the bank has 16 or more entries; for smaller banks, use only 3-5. Choose entries that naturally belong in one situation, informed by the internal Persian references when they contain a selected word. Ignore incompatible entries for this exercise. The bank is not a coverage quota. Never append a sentence merely to mention another selected word. FIRST choose AT MOST FIVE additional supporting dictionary entries when possible and emit them in newWordsIntroduced BEFORE textFa. The validator can recover omitted ordinary content lemmas up to a bounded twenty-entry allowance. Then compose using the selected bank and that allowance, including normal inflections. Every other content word in the passage counts against that allowance, even an ordinary time word, adjective, or reporting verb. Do not write a passage first and retrospectively label only some of its extra words. Grammar words and normal inflections of selected or supporting entries do not count again. Prefer fewer additions. Never sacrifice idiomatic Persian to force bank coverage.`;
+Use ${selectedVocabulary.length <= 15 ? "3-5" : selectedVocabulary.length <= 40 ? "8-12" : "12-18"} naturally compatible selected entries as the focus of this exercise. Choose entries that naturally belong in one situation, informed by the internal Persian references when they contain a selected word. Ignore incompatible entries for this exercise. The bank is not a coverage quota. Never append a sentence merely to mention another selected word. FIRST choose AT MOST FIVE additional supporting dictionary entries when possible and emit them in newWordsIntroduced BEFORE textFa. The validator can recover omitted ordinary content lemmas up to a bounded twenty-entry allowance. Then compose using the selected bank and that allowance, including normal inflections. Every other content word in the passage counts against that allowance, even an ordinary time word, adjective, or reporting verb. Do not write a passage first and retrospectively label only some of its extra words. Grammar words and normal inflections of selected or supporting entries do not count again. Prefer fewer additions. Never sacrifice idiomatic Persian to force bank coverage.`;
     prompt = `Write one coherent Persian ${mode} exercise for level ${level}. Return the required JSON.
 Topic (data): ${JSON.stringify(body.topic ?? 'Daily life')}
 Register: ${body.register === 'colloquial' ? 'Natural spoken Iranian Persian' : 'Standard written Iranian Persian'}
@@ -178,7 +183,7 @@ Every person and action must contribute clearly to that one situation. Do not in
 Treat every bank item according to its dictionary meaning and part of speech. Never manufacture a Persian compound verb by attaching کردن, شدن, دادن, or another light verb to a noun merely to include it. Use only an established collocation that fits the intended sense; if uncertain, omit that item. For example, express recovery with بهبود یافتن or بهتر شدن, not *بهبود شدن.
 Write ${passageLength.sentenceMin}–${passageLength.sentenceMax} connected sentences containing ${passageLength.target} Persian words total, leaving a safe margin above the enforced ${passageLength.minimum}-word minimum, with at least three concrete details that support distinct questions. Match sentence complexity to the requested level through structure and meaning rather than filler. Conjugate dictionary forms normally; do not copy stem annotations or vowel marks. Keep tense, viewpoint and register consistent.
 ${body.register === 'colloquial'
-  ? 'Write as an Iranian speaker naturally explaining or retelling the topic aloud. Use consistent spoken morphology and function words where appropriate (for example خونه, توی, رو, یه, رفتم, می‌خوام); do not mix forms such as توی خانه‌ام with otherwise conversational speech, and do not return formal news prose with a colloquial label. Required technical, institutional, or formal content terms from the selected bank may remain in their standard lexical form; do not distort those terms into fake colloquialisms.'
+  ? 'Write as an Iranian speaker naturally explaining or retelling the topic aloud. Make the spoken register unmistakable throughout, using at least four natural conversational forms across at least two different patterns: spoken function words such as یه، رو، توی، اون، اینا; spoken vocabulary such as خونه; and spoken verb or possessive forms such as می‌خوام، می‌رم، می‌شه، خریدشون. Do not merely insert one casual word into otherwise formal prose. Do not mix forms such as توی خانه‌ام with conversational speech, and do not return formal news prose with a colloquial label. Required technical, institutional, or formal content terms from the selected bank may remain standard; do not distort those terms into fake colloquialisms.'
   : 'Keep the entire passage in standard written Persian. Do not use colloquial forms such as توی, رو as an object marker, یه, اینا, اونا, می‌خوام, or spoken plural verb endings.'}
 Return exactly three distinct English questions about explicit facts in the passage, with concise English reference answers preserving tense, person and meaning. Do not invent gender or unstated motives. No inference question is required; use inference only when concrete clues support it.
 Use explicit participant roles (the student, the father, the speaker) or singular they in answers. Never use he, she, his, her or him. Avoid direct speech unless its person and imperative endings are correct.
@@ -208,7 +213,7 @@ English title, English questions and English reference answers; only textFa is P
 
     // A single, self-edited structured generation replaces the old five-draft
     // plus five-review fan-out. Deterministic validation remains a hard gate.
-    const response = await generate(`${prompt}\nSILENT NATIVE EDIT: Read textFa once as a native Iranian editor before returning JSON. Remove literal translations, mixed register, filler, odd timelines, and unnatural motion viewpoint. Aim for ${passageLength.target} Persian words so the result remains above ${passageLength.minimum} after deterministic token counting, and keep ${passageLength.sentenceMin}–${passageLength.sentenceMax} complete sentences.${body.register === 'colloquial' ? ' Include at least three unmistakably spoken forms naturally, such as خونه، یه، رو، توی، می‌خوام، می‌رم, without converting technical content words.' : ''}`, 'draft');
+    const response = await generate(`${prompt}\nSILENT NATIVE EDIT: Read textFa once as a native Iranian editor before returning JSON. Remove literal translations, mixed register, filler, odd timelines, and unnatural motion viewpoint. Aim for ${passageLength.target} Persian words so the result remains above ${passageLength.minimum} after deterministic token counting, and keep ${passageLength.sentenceMin}–${passageLength.sentenceMax} complete sentences.${body.register === 'colloquial' ? ' Confirm the whole passage sounds spoken and contains at least four conversational forms drawn from at least two different spoken-pattern categories, without distorting technical content words.' : ''}`, 'draft');
     const data = parseJson(response.output_text);
         data.questions=repairPracticeAnswerArticles(data.questions);
         const supporting=practiceSource === 'selected'

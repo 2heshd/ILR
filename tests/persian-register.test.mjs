@@ -9,8 +9,8 @@ test("formal passages reject conversational markers", () => {
 
 test("listening passages require consistent spoken Persian", () => {
   assert.ok(persianRegisterIssues("الان توی خانه‌ام و کتاب می‌خوانم.", "colloquial").length > 0);
-  assert.deepEqual(persianRegisterIssues("الان توی خونه‌ام و کتاب می‌خونم.", "colloquial"), []);
-  assert.deepEqual(persianRegisterIssues("امروز به دانشگاه رفتم و با استادم صحبت کردم.", "colloquial"), []);
+  assert.deepEqual(persianRegisterIssues("الان توی خونه‌ام و می‌خوام یه کتاب رو بخونم.", "colloquial"), []);
+  assert.ok(persianRegisterIssues("امروز به دانشگاه رفتم و با استادم صحبت کردم.", "colloquial").length > 0);
 });
 
 test("first-person singular subjects reject plural verb endings", () => {
