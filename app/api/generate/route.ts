@@ -113,10 +113,10 @@ export async function POST(request: Request) {
   }
 
   const body = (await request.json()) as GenerateBody;
-  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, timeout: 8_000, maxRetries: 0 });
+  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, timeout: 9_500, maxRetries: 0 });
   // Keep the complete request inside the learner-facing latency budget. Failed
   // drafts return immediately so the UI never waits through serial AI repairs.
-  const deadline = AbortSignal.timeout(9_000);
+  const deadline = AbortSignal.timeout(9_800);
   const signal = AbortSignal.any([request.signal, deadline]);
   // Practice generation is a tightly constrained JSON task. A mini model keeps
   // the lab responsive while OPENAI_MODEL still allows a deployment override.
@@ -236,7 +236,7 @@ English title, English questions and English reference answers; only textFa is P
       }
     return NextResponse.json(data, {headers:{'Server-Timing':timings.join(', ')}});
   } catch (error) {
-    if (signal.aborted || error instanceof OpenAI.APIConnectionTimeoutError) {
+    if (signal.aborted || error instanceof OpenAI.APIConnectionTimeoutError || error instanceof OpenAI.APIUserAbortError) {
       return NextResponse.json({error:'Generation took too long. Your current practice is unchanged. Please try again.'},{status:504});
     }
     if (error instanceof IncompleteGeneration) return NextResponse.json({error:error.message},{status:502});

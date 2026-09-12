@@ -14,7 +14,8 @@ test("generated practice passages request the longer RSVP-friendly range", async
 
 test("practice generation uses one fast model call rather than a candidate-review fan-out", async () => {
   const source = await readFile(new URL("../app/api/generate/route.ts", import.meta.url), "utf8");
-  assert.match(source, /AbortSignal\.timeout\(9_000\)/);
+  assert.match(source, /AbortSignal\.timeout\(9_800\)/);
+  assert.match(source, /timeout: 9_500/);
   assert.match(source, /"gpt-4\.1-mini"/);
   assert.doesNotMatch(source, /candidatePrompts/);
   assert.doesNotMatch(source, /practice_editor_review/);
