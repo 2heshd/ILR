@@ -127,3 +127,21 @@ test("daily plan counts new words only from the learner's active deck", () => {
   assert.equal(plan.newWordIds.length, 12);
   assert(plan.newWordIds.every((id) => candidates.some((item) => item.id === id)));
 });
+
+test("a newly selected 30–40 word DLI lesson is admitted intact", () => {
+  const lesson = Array.from({ length: 38 }, (_, index) => word(String(index)));
+  const current = state(lesson);
+  const plan = dailyAdaptivePlan(current, now, lesson);
+  assert.equal(plan.newLimit, 38);
+  assert.equal(plan.newWordIds.length, 38);
+
+  const firstExposures = plan.newWordIds.slice(0, 10).map((id, index) => ({
+    id: `first-${index}`, lexicalItemId: id, modality: "visual", correct: index % 2 === 0,
+    hintUsed: false, responseMs: 5000, rating: index % 2 === 0 ? "good" : "again",
+    reviewedAt: now.toISOString(), schedulerBefore: { ...newCard, reps: 0 },
+  }));
+  const afterStart = dailyAdaptivePlan(state(lesson, firstExposures), now, lesson);
+  assert.equal(afterStart.newLimit, 38);
+  assert.equal(afterStart.newWordIds.length, 38);
+  assert.deepEqual(observedColdRetention({ reviews: firstExposures }, now), { retention: 0.85, samples: 0 });
+});

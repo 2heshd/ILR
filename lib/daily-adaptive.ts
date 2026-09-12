@@ -64,6 +64,16 @@ function admittedToday(state: Pick<StudyState, "reviews">, now: Date) {
     .map((review) => review.lexicalItemId));
 }
 
+function effectiveDailyNewLimit(state: StudyState, candidates: LexicalItem[], now: Date) {
+  const adaptive = adaptiveDailyNewLimit(state, now);
+  const admitted = admittedToday(state, now);
+  const lessonCohort = candidates.filter((word) => admitted.has(word.id) || CORE_MODALITIES.every((mode) => isNewCard(word, mode))).length;
+  // A learner-selected DLI lesson is the daily assignment. If it contains a
+  // normal 30–40-word lesson load, admit it intact instead of cutting it at the
+  // cold-recall-derived default. First exposure still contributes no retention.
+  return lessonCohort >= DAILY_NEW_MIN && lessonCohort <= DAILY_NEW_MAX ? lessonCohort : adaptive;
+}
+
 function contextualWeakness(state: StudyState) {
   const scores = new Map<string, number>();
   const passages = new Map((state.passages ?? []).map((item) => [item.id, item]));
@@ -87,7 +97,7 @@ function importance(word: LexicalItem) {
 }
 
 export function dailyNewWordIds(state: StudyState, candidates = state.words, now = new Date()) {
-  const limit = adaptiveDailyNewLimit(state, now);
+  const limit = effectiveDailyNewLimit(state, candidates, now);
   const candidateIds = new Set(candidates.map((word) => word.id));
   const admitted = [...admittedToday(state, now)].filter((id) => candidateIds.has(id));
   const admittedSet = new Set(admitted);
@@ -156,7 +166,7 @@ function weakestEvidence(word: LexicalItem) {
 
 export function dailyAdaptivePlan(state: StudyState, now = new Date(), candidates = state.words) {
   const cold = observedColdRetention(state, now);
-  const newLimit = adaptiveDailyNewLimit(state, now);
+  const newLimit = effectiveDailyNewLimit(state, candidates, now);
   const newWordIds = dailyNewWordIds(state, candidates, now);
   const overdue = overdueReviewedCount(state, now);
   const support = cold.samples >= 20 && cold.retention < RETENTION_FLOOR ? "intensive" : cold.retention > RETENTION_CEILING ? "light" : "standard";
