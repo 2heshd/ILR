@@ -88,9 +88,9 @@ function persianWordCount(value: unknown) {
 
 function passageProfile(source: "selected" | "topic", selectedCount: number) {
   if (source === "topic") return { sentenceMin: 4, sentenceMax: 8, target: "110–135", minimum: 60, supportingMaximum: SUPPORTING_VOCABULARY_LIMIT };
-  if (selectedCount <= 15) return { sentenceMin: 3, sentenceMax: 5, target: "36–50", minimum: 30, supportingMaximum: 20 };
-  if (selectedCount <= 40) return { sentenceMin: 4, sentenceMax: 6, target: "55–75", minimum: 44, supportingMaximum: 30 };
-  return { sentenceMin: 5, sentenceMax: 7, target: "90–110", minimum: 70, supportingMaximum: 40 };
+  if (selectedCount <= 15) return { sentenceMin: 3, sentenceMax: 5, target: "36–50", minimum: 30, supportingMaximum: 30 };
+  if (selectedCount <= 40) return { sentenceMin: 4, sentenceMax: 6, target: "55–75", minimum: 44, supportingMaximum: 40 };
+  return { sentenceMin: 4, sentenceMax: 7, target: "90–110", minimum: 65, supportingMaximum: 55 };
 }
 
 class IncompleteGeneration extends Error {}
@@ -183,7 +183,7 @@ Every person and action must contribute clearly to that one situation. Do not in
 Treat every bank item according to its dictionary meaning and part of speech. Never manufacture a Persian compound verb by attaching کردن, شدن, دادن, or another light verb to a noun merely to include it. Use only an established collocation that fits the intended sense; if uncertain, omit that item. For example, express recovery with بهبود یافتن or بهتر شدن, not *بهبود شدن.
 Write ${passageLength.sentenceMin}–${passageLength.sentenceMax} connected sentences containing ${passageLength.target} Persian words total, leaving a safe margin above the enforced ${passageLength.minimum}-word minimum, with at least three concrete details that support distinct questions. Match sentence complexity to the requested level through structure and meaning rather than filler. Conjugate dictionary forms normally; do not copy stem annotations or vowel marks. Keep tense, viewpoint and register consistent.
 ${body.register === 'colloquial'
-  ? 'Write as an Iranian speaker naturally explaining or retelling the topic aloud. Make the spoken register unmistakable throughout, using at least four natural conversational forms across at least two different patterns: spoken function words such as یه، رو، توی، اون، اینا; spoken vocabulary such as خونه; and spoken verb or possessive forms such as می‌خوام، می‌رم، می‌شه، خریدشون. Do not merely insert one casual word into otherwise formal prose. Do not mix forms such as توی خانه‌ام with conversational speech, and do not return formal news prose with a colloquial label. Required technical, institutional, or formal content terms from the selected bank may remain standard; do not distort those terms into fake colloquialisms.'
+  ? 'Write as an Iranian speaker naturally explaining or retelling the topic to a friend aloud, using a first- or second-person frame when that helps technical subject matter sound conversational. Make the spoken register unmistakable throughout, using at least four natural conversational forms: spoken function words such as یه، رو، توی، اون، اینا; spoken vocabulary such as خونه; and spoken verb or possessive forms such as می‌خوام، می‌رم، می‌شه، خریدشون. Do not merely insert one casual word into otherwise formal prose. Do not mix forms such as توی خانه‌ام with conversational speech, and do not return formal news prose with a colloquial label. Required technical, institutional, or formal content terms from the selected bank may remain standard; do not distort those terms into fake colloquialisms.'
   : 'Keep the entire passage in standard written Persian. Do not use colloquial forms such as توی, رو as an object marker, یه, اینا, اونا, می‌خوام, or spoken plural verb endings.'}
 Return exactly three distinct English questions about explicit facts in the passage, with concise English reference answers preserving tense, person and meaning. Do not invent gender or unstated motives. No inference question is required; use inference only when concrete clues support it.
 Use explicit participant roles (the student, the father, the speaker) or singular they in answers. Never use he, she, his, her or him. Avoid direct speech unless its person and imperative endings are correct.

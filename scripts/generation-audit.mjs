@@ -74,7 +74,10 @@ async function worker(){
       result=await run(item);
       result.checks=result.http===200 ? practiceAnswerIssues(result.data?.questions) : ['Request did not return an exercise'];
       if(result.http===200){
-        if(item.body.practiceSource==='selected')result.checks.push(...checkSupportingVocabulary(String(result.data?.textFa??''),item.body.targetWords,result.data?.newWordsIntroduced).issues);
+        if(item.body.practiceSource==='selected'){
+          const supportingLimit=item.body.targetWords.length<=15?30:item.body.targetWords.length<=40?40:55;
+          result.checks.push(...checkSupportingVocabulary(String(result.data?.textFa??''),item.body.targetWords,result.data?.newWordsIntroduced,supportingLimit).issues);
+        }
         if(!/[\u0600-\u06ff]/u.test(result.data?.textFa??''))result.checks.push('Missing Persian text');
       }
       attemptHistory.push({attempt,http:result.http,seconds:result.seconds,checks:result.checks,error:result.data?.error,issues:result.data?.qualityIssues});
