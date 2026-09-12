@@ -121,9 +121,9 @@ export async function POST(request: Request) {
 
   const body = (await request.json()) as GenerateBody;
   const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, timeout: 9_500, maxRetries: 0 });
-  // Keep the complete request inside the learner-facing latency budget. Failed
-  // drafts return immediately so the UI never waits through serial AI repairs.
-  const deadline = AbortSignal.timeout(9_800);
+  // Keep the complete request inside the learner-facing latency budget while
+  // leaving room for one targeted repair when the deterministic gate rejects it.
+  const deadline = AbortSignal.timeout(19_500);
   const signal = AbortSignal.any([request.signal, deadline]);
   // Practice generation is a tightly constrained JSON task. A mini model keeps
   // the lab responsive while OPENAI_MODEL still allows a deployment override.
@@ -213,8 +213,9 @@ English title, English questions and English reference answers; only textFa is P
 
     // A single, self-edited structured generation replaces the old five-draft
     // plus five-review fan-out. Deterministic validation remains a hard gate.
-    const response = await generate(`${prompt}\nSILENT NATIVE EDIT: Read textFa once as a native Iranian editor before returning JSON. Remove literal translations, mixed register, filler, odd timelines, and unnatural motion viewpoint. Aim for ${passageLength.target} Persian words so the result remains above ${passageLength.minimum} after deterministic token counting, and keep ${passageLength.sentenceMin}–${passageLength.sentenceMax} complete sentences.${body.register === 'colloquial' ? ' Confirm the whole passage sounds spoken and contains at least four conversational forms drawn from at least two different spoken-pattern categories, without distorting technical content words.' : ''}`, 'draft');
-    const data = parseJson(response.output_text);
+    let response = await generate(`${prompt}\nSILENT NATIVE EDIT: Read textFa once as a native Iranian editor before returning JSON. Remove literal translations, mixed register, filler, odd timelines, and unnatural motion viewpoint. Aim for ${passageLength.target} Persian words so the result remains above ${passageLength.minimum} after deterministic token counting, and keep ${passageLength.sentenceMin}–${passageLength.sentenceMax} complete sentences.${body.register === 'colloquial' ? ' Confirm the whole passage sounds spoken and contains at least four conversational forms drawn from at least two different spoken-pattern categories, without distorting technical content words.' : ''}`, 'draft');
+    let data = parseJson(response.output_text);
+    const preparePractice = () => {
         data.questions=repairPracticeAnswerArticles(data.questions);
         const supporting=practiceSource === 'selected'
           ? checkSupportingVocabulary(String(data.textFa??''),selectedVocabulary,data.newWordsIntroduced,passageLength.supportingMaximum)
@@ -224,6 +225,14 @@ English title, English questions and English reference answers; only textFa is P
         const sentenceCount=String(data.textFa??'').split(/[.!؟]+/u).filter(part=>part.trim()).length;
         const wordCount=persianWordCount(data.textFa);
         const rejectionIssues=[...supporting.issues,...practiceAnswerIssues(data.questions),...persianCoherenceIssues(data.textFa),...persianRegisterIssues(data.textFa,body.register??'formal'),...(sentenceCount<passageLength.sentenceMin||sentenceCount>passageLength.sentenceMax?[`Passage must contain ${passageLength.sentenceMin}–${passageLength.sentenceMax} complete sentences; received ${sentenceCount}.`]:[]),...(wordCount<passageLength.minimum?[`Passage must contain at least ${passageLength.minimum} Persian words; received ${wordCount}.`]:[])];
+        return { rejectionIssues, rejectedWords };
+    };
+    let { rejectionIssues, rejectedWords } = preparePractice();
+    if (rejectionIssues.length && !signal.aborted) {
+      response = await generate(`${prompt}\nREPAIR THE REJECTED DRAFT BELOW. Return a complete replacement JSON object, not commentary. Fix every listed issue while preserving one natural, coherent situation and factual English answers. Do not copy malformed wording.\nIssues: ${JSON.stringify(rejectionIssues)}\nRejected draft: ${JSON.stringify(data)}\n${body.register === 'colloquial' ? 'For colloquial Persian, rewrite the narration itself in consistently spoken Iranian Persian. Use at least four genuine spoken forms across the passage, for example یه، رو، توی، اون، خونه، می‌خوام، می‌شه، هستن, while keeping formal bank terms unchanged.' : ''}`, 'repair');
+      data = parseJson(response.output_text);
+      ({ rejectionIssues, rejectedWords } = preparePractice());
+    }
     if(rejectionIssues.length){
       return NextResponse.json({error:practiceSource === 'topic' ? 'This draft did not pass the Persian language and question-quality checks. Generate again.' : 'This draft did not pass the Persian language and question-quality checks. Try a broader vocabulary selection or generate again.',qualityIssues:rejectionIssues,suggestedWords:rejectedWords,
         // Only an explicitly enabled protected preview returns synthetic audit

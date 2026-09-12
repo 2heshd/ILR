@@ -19,11 +19,12 @@ test("a foreground generation gets the same retries as background preparation", 
   assert.doesNotMatch(source, /if \(!prepared\) prepared = await fetchPreparedPractice\(context\)/);
 });
 
-test("practice generation uses one fast model call rather than a candidate-review fan-out", async () => {
+test("practice generation uses one fast draft with at most one targeted repair", async () => {
   const source = await readFile(new URL("../app/api/generate/route.ts", import.meta.url), "utf8");
-  assert.match(source, /AbortSignal\.timeout\(9_800\)/);
+  assert.match(source, /AbortSignal\.timeout\(19_500\)/);
   assert.match(source, /timeout: 9_500/);
   assert.match(source, /"gpt-4\.1-mini"/);
+  assert.match(source, /REPAIR THE REJECTED DRAFT BELOW/);
   assert.doesNotMatch(source, /candidatePrompts/);
   assert.doesNotMatch(source, /practice_editor_review/);
 });
