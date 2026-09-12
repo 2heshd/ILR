@@ -58,8 +58,8 @@ export function persianRegisterIssues(value: unknown, register: "formal" | "coll
       /[\u0600-\u06ff‌]+(?:شون|مون|تون|هامو|هاشون)(?=$|[\s،,.؟!])/gu,
     ];
     const markerCount = conversationalPatterns.reduce((total, pattern) => total + (text.match(pattern) ?? []).length, 0);
-    if (markerCount < 4) {
-      issues.push("The colloquial passage must use consistent spoken Persian throughout, with at least four conversational forms.");
+    if (markerCount < 3) {
+      issues.push("The colloquial passage must use consistent spoken Persian throughout, with at least three conversational forms.");
     }
   }
 

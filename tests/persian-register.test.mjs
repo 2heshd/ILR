@@ -10,6 +10,7 @@ test("formal passages reject conversational markers", () => {
 test("listening passages require consistent spoken Persian", () => {
   assert.ok(persianRegisterIssues("الان توی خانه‌ام و کتاب می‌خوانم.", "colloquial").length > 0);
   assert.deepEqual(persianRegisterIssues("الان توی خونه‌ام و می‌خوام یه کتاب رو بخونم.", "colloquial"), []);
+  assert.ok(persianRegisterIssues("امروز توی خونه ماندم.", "colloquial").length > 0);
   assert.ok(persianRegisterIssues("امروز به دانشگاه رفتم و با استادم صحبت کردم.", "colloquial").length > 0);
 });
 
