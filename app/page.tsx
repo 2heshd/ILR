@@ -467,7 +467,7 @@ export default function Home() {
     const memory = speechCacheRef.current.get(cacheKey);
     if (memory) return memory;
     if (!("caches" in window)) return null;
-    const stored = await caches.open("persian-audio-v2").then((cache) => cache.match(speechCacheRequest(`v2-${cacheKey}`)));
+    const stored = await caches.open("persian-audio-eleven-v1").then((cache) => cache.match(speechCacheRequest(`eleven-v1-${cacheKey}`)));
     if (!stored) return null;
     const blob = await stored.blob();
     if (blob.size < 500) return null;
@@ -484,7 +484,7 @@ export default function Home() {
     const request = (async () => {
       const response = await fetch("/api/speech", {
         method: "POST",
-        signal: AbortSignal.timeout(25_000),
+        signal: AbortSignal.timeout(30_000),
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: sanitizePersianSpeechText(text) }),
       });
@@ -497,8 +497,8 @@ export default function Home() {
       if (blob.size < 500) throw new Error("The generated audio file was empty.");
       speechCacheRef.current.set(cacheKey, blob);
       if ("caches" in window) {
-        const cache = await caches.open("persian-audio-v2");
-        await cache.put(speechCacheRequest(`v2-${cacheKey}`), new Response(blob, { headers: { "Content-Type": "audio/mpeg" } }));
+        const cache = await caches.open("persian-audio-eleven-v1");
+        await cache.put(speechCacheRequest(`eleven-v1-${cacheKey}`), new Response(blob, { headers: { "Content-Type": "audio/mpeg" } }));
       }
       return blob;
     })().finally(() => speechRequestsRef.current.delete(cacheKey));
@@ -515,7 +515,7 @@ export default function Home() {
     const memory = speechTimingsRef.current.get(cacheKey);
     if (memory) return memory;
     if (!("caches" in window)) return null;
-    const stored = await caches.open("persian-speech-timings-v1").then((cache) => cache.match(speechTimingCacheRequest(cacheKey)));
+    const stored = await caches.open("persian-speech-timings-eleven-v1").then((cache) => cache.match(speechTimingCacheRequest(cacheKey)));
     if (!stored) return null;
     const data = (await stored.json()) as { words?: TimedCaption[] };
     if (!data.words?.length) return null;
@@ -532,7 +532,7 @@ export default function Home() {
     const request = (async () => {
       const response = await fetch("/api/speech-timings", {
         method: "POST",
-        signal: AbortSignal.timeout(25_000),
+        signal: AbortSignal.timeout(30_000),
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text }),
       });
@@ -554,8 +554,8 @@ export default function Home() {
       speechTimingsRef.current.set(cacheKey, metadata.words);
       if ("caches" in window) {
         const [audioCache, timingCache] = await Promise.all([
-          caches.open("persian-audio-v2"),
-          caches.open("persian-speech-timings-v1"),
+          caches.open("persian-audio-eleven-v1"),
+          caches.open("persian-speech-timings-eleven-v1"),
         ]);
         await Promise.all([
           audioCache.put(speechCacheRequest(`v2-${cacheKey}`), new Response(audio, { headers: { "Content-Type": audio.type } })),
@@ -841,9 +841,16 @@ export default function Home() {
   }, [current?.id, reviewModality, lockedReviewForm]);
 
   useEffect(() => {
+    if (reviewModality !== "audio" || !current) return;
+    void prepareSpeech(current.displayForm, `word-${current.id}`).catch(() => {
+      // The device voice remains available if native audio cannot be prepared.
+    });
+  }, [current?.id, reviewModality]);
+
+  useEffect(() => {
     if (!latestListening || !isMeaningfulPersianText(latestListening.transcriptFa)) return;
     const speechText = sanitizePersianSpeechText(latestListening.transcriptFa);
-    const alignedKey = `aligned-${latestListening.id}`;
+    const alignedKey = `aligned-eleven-v1-${latestListening.id}-${speechText}`;
     const listeningKey = `listening-${latestListening.id}`;
 
     // Start exact alignment as soon as the lesson exists, not when the learner
@@ -851,8 +858,8 @@ export default function Home() {
     void prepareAlignedSpeech(speechText, alignedKey).then(async ({ audio }) => {
       speechCacheRef.current.set(listeningKey, audio);
       if ("caches" in window) {
-        const cache = await caches.open("persian-audio-v2");
-        await cache.put(speechCacheRequest(`v2-${listeningKey}`), new Response(audio, { headers: { "Content-Type": audio.type } }));
+        const cache = await caches.open("persian-audio-eleven-v1");
+        await cache.put(speechCacheRequest(`eleven-v1-${listeningKey}`), new Response(audio, { headers: { "Content-Type": audio.type } }));
       }
     }).catch(() => {
       if (!latestListening.mediaUrl) {
@@ -1204,11 +1211,6 @@ export default function Home() {
     try {
       const cacheKey = `word-${current.id}`;
       const cached = await readCachedSpeech(cacheKey);
-      if (!cached && playWithDeviceVoice(current.displayForm)) {
-        setPlayedReviewWord(current.id);
-        setStatus("Playing with the device’s Persian voice.");
-        return;
-      }
       const blob = cached ?? await prepareSpeech(current.displayForm, cacheKey);
       await playAudioBlob(blob);
       setPlayedReviewWord(current.id);
@@ -1574,11 +1576,6 @@ export default function Home() {
       }
       const cacheKey = `listening-${latestListening.id}`;
       const cached = await readCachedSpeech(cacheKey);
-      if (!cached && playWithDeviceVoice(speechText)) {
-        setListensCount((count) => count + 1);
-        setStatus("Playing with the device’s Persian voice. Studio audio is caching in the background.");
-        return;
-      }
       const blob = cached ?? await prepareSpeech(speechText, cacheKey);
       await playAudioBlob(blob);
       setListensCount((count) => count + 1);
@@ -1600,19 +1597,13 @@ export default function Home() {
     const sentence = persianSentences(latestListening.transcriptFa)[index];
     if (!sentence) return;
     const speechText = sanitizePersianSpeechText(sentence);
-    const cacheKey = `gist-${latestListening.id}-${index}`;
-    setAudioBusy(true);
-    setStatus(`Starting sentence ${index + 1}…`);
+      const cacheKey = `gist-${latestListening.id}-${index}`;
+      setAudioBusy(true);
+      setStatus(`Starting sentence ${index + 1}…`);
     try {
       const cached = await readCachedSpeech(cacheKey);
       if (cached) await playAudioBlob(cached);
-      else if (playWithDeviceVoice(speechText)) {
-        void prepareSpeech(speechText, cacheKey).catch(() => {
-          // The device voice keeps the first play immediate if studio audio is slow.
-        });
-      } else {
-        await playAudioBlob(await prepareSpeech(speechText, cacheKey));
-      }
+      else await playAudioBlob(await prepareSpeech(speechText, cacheKey));
       setGistSentenceListenCounts((current) => Array.from(
         { length: persianSentences(latestListening.transcriptFa).length },
         (_, sentenceIndex) => sentenceIndex === index ? (current[sentenceIndex] ?? 0) + 1 : (current[sentenceIndex] ?? 0),
@@ -1682,7 +1673,7 @@ export default function Home() {
   async function playRapidListening() {
     if (!latestListening || audioBusy || rapidPlaying) return;
     const speechText = sanitizePersianSpeechText(latestListening.transcriptFa);
-    const cacheKey = `aligned-v2-${latestListening.id}-${speechText}`;
+    const cacheKey = `aligned-eleven-v1-${latestListening.id}-${speechText}`;
     setAudioBusy(true);
     setStatus("Aligning every word to the audio…");
     try {

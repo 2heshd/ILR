@@ -93,9 +93,12 @@ Set:
 ```text
 OPENAI_API_KEY=...
 OPENAI_MODEL=gpt-5.6
+ELEVENLABS_API_KEY=...
+ELEVENLABS_VOICE_ID=...
+ELEVENLABS_MODEL_ID=eleven_v3
 ```
 
-The API key is used only in server routes; never expose it with a `NEXT_PUBLIC_` prefix.
+The API keys are used only in server routes; never expose either one with a `NEXT_PUBLIC_` prefix. Choose an Iranian Persian voice in ElevenLabs and copy its voice ID. Persian requires the `eleven_v3` model; Eleven Multilingual v2 does not support Persian. If the ElevenLabs values are absent, the existing OpenAI speech path remains available as a deployment-safe fallback.
 
 AI enables:
 
@@ -103,7 +106,7 @@ AI enables:
 - dynamic non-repeating advanced-domain terms
 - adaptive reading passages
 - adaptive listening scripts
-- Persian TTS through the configured speech route
+- ElevenLabs Eleven v3 Persian TTS for audio flashcards and Listening, including exact Rapid Caption timing
 - reading/listening answer grading
 - ILR-2 speaking prompt generation
 - transcript-based speaking feedback
@@ -239,7 +242,7 @@ Next priorities:
 - Next.js App Router + TypeScript
 - `ts-fsrs`
 - Supabase / PostgreSQL
-- OpenAI Responses API + text-to-speech (optional)
+- OpenAI Responses API + ElevenLabs Eleven v3 Persian text-to-speech (optional)
 - responsive PWA-ready UI
 
 See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the technical blueprint.

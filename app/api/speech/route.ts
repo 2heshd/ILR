@@ -1,12 +1,13 @@
 import OpenAI from "openai";
+import { createElevenLabsSpeech, elevenLabsErrorResponse, elevenLabsSpeechConfigured } from "@/lib/elevenlabs-speech";
 import { openAiErrorResponse } from "@/lib/openai-error";
 import { isPlayablePersianText, sanitizePersianSpeechText } from "@/lib/persian-speech";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
-  if (!process.env.OPENAI_API_KEY) {
-    return Response.json({ error: "OPENAI_API_KEY is not configured." }, { status: 503 });
+  if (!elevenLabsSpeechConfigured() && !process.env.OPENAI_API_KEY) {
+    return Response.json({ error: "Persian speech is not configured." }, { status: 503 });
   }
 
   const { text } = (await request.json()) as { text?: string };
@@ -14,9 +15,15 @@ export async function POST(request: Request) {
     return Response.json({ error: "A valid Persian transcript is required." }, { status: 400 });
   }
   const speechText = sanitizePersianSpeechText(text);
-  const signal = AbortSignal.any([request.signal, AbortSignal.timeout(20_000)]);
+  const signal = AbortSignal.any([request.signal, AbortSignal.timeout(25_000)]);
 
   try {
+    if (elevenLabsSpeechConfigured()) {
+      const audio = await createElevenLabsSpeech(speechText, signal);
+      return new Response(Uint8Array.from(audio), {
+        headers: { "Content-Type": "audio/mpeg", "Cache-Control": "private, max-age=604800", "X-Speech-Provider": "elevenlabs" },
+      });
+    }
     const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, timeout: 20_000, maxRetries: 0 });
     const audio = await client.audio.speech.create({
       model: process.env.OPENAI_TTS_MODEL || "gpt-4o-mini-tts",
@@ -34,6 +41,7 @@ export async function POST(request: Request) {
       return Response.json({ error: "Audio took too long. Your practice is unchanged; please try again." }, { status: 504 });
     }
     console.error(error);
+    if (elevenLabsSpeechConfigured()) return elevenLabsErrorResponse(error, "Speech generation failed.");
     return openAiErrorResponse(error, "Speech generation failed.");
   }
 }
