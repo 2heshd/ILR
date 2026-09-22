@@ -101,6 +101,7 @@ export default function SpeakingLab({ level, prompts, onAttempt, makeId, voice }
     setStatus("Requesting microphone access…");
     setTurns([]);
     transcriptRef.current = [];
+    startedAtRef.current = 0;
     setElapsed(0);
     setMuted(false);
 
@@ -170,6 +171,7 @@ export default function SpeakingLab({ level, prompts, onAttempt, makeId, voice }
 
   function endSession(save = true) {
     const durationMs = startedAtRef.current ? Date.now() - startedAtRef.current : 0;
+    startedAtRef.current = 0;
     releaseConnection();
     setPhase("idle");
     setMuted(false);
