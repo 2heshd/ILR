@@ -580,6 +580,50 @@
   font-weight: 400;
 }
 
+.live-speaking-workspace { display:grid; gap:0; margin-top:2vh; }
+.live-speaking-header { display:flex; align-items:end; justify-content:space-between; gap:32px; padding:24px 0 30px; border-bottom:1px solid var(--rule); }
+.live-speaking-header h1 { margin:10px 0 12px; font-size:clamp(36px,5vw,72px); font-weight:400; letter-spacing:-.045em; }
+.live-speaking-header p { max-width:720px; margin:0; color:var(--dim); line-height:1.7; }
+.live-indicator { display:flex; align-items:center; gap:10px; min-width:110px; color:var(--dim); font-variant-numeric:tabular-nums; }
+.live-indicator i { width:9px; height:9px; background:#777; border-radius:50% !important; }
+.live-indicator.live i { background:#57d887; }
+.live-indicator.connecting i { background:#e7b857; }
+.live-speaking-controls { display:grid; grid-template-columns:minmax(280px,1.6fr) 1fr 1fr; border-bottom:1px solid var(--rule); }
+.live-speaking-controls label { display:grid; gap:9px; padding:18px 22px 18px 0; border-right:1px solid var(--rule); }
+.live-speaking-controls label + label { padding-left:22px; }
+.live-speaking-controls label:last-child { border-right:0; }
+.live-speaking-controls span { color:var(--dim); font-size:11px; text-transform:uppercase; letter-spacing:.08em; }
+.live-speaking-controls select { width:100%; }
+.live-speaking-controls strong { font-weight:400; }
+.live-chat { min-height:390px; max-height:54vh; overflow-y:auto; padding:34px 0; scroll-behavior:smooth; }
+.live-chat-empty { max-width:600px; margin:7vh auto; text-align:center; }
+.live-chat-empty strong { font-size:18px; font-weight:400; }
+.live-chat-empty p { color:var(--dim); line-height:1.8; }
+.live-chat-empty small { color:var(--dim); }
+.live-turn { width:min(76%,760px); margin-bottom:24px; padding:18px 22px; border:1px solid var(--rule); }
+.live-turn.learner { margin-left:auto; border-color:rgba(255,255,255,.28); }
+.live-turn.coach { margin-right:auto; background:rgba(255,255,255,.035); }
+.live-turn>span { color:var(--dim); font-size:10px; letter-spacing:.1em; text-transform:uppercase; }
+.live-turn p { margin:10px 0 0; font-size:19px; line-height:1.9; }
+.live-call-bar { display:flex; align-items:center; gap:14px; min-height:92px; padding:18px 0; border-top:1px solid var(--rule); }
+.live-call-bar .speaking-status { margin-left:auto; text-align:right; }
+.live-start { min-width:230px; }
+.live-start::first-letter { color:#e35d5d; }
+.danger-button { border-color:#9b4d4d; color:#ffb0b0; }
+.remote-coach-audio { display:none; }
+.live-speaking-note { margin:14px 0 0; }
+
+@media(max-width:760px){
+ .live-speaking-header{display:grid;align-items:start}
+ .live-speaking-controls{grid-template-columns:1fr}
+ .live-speaking-controls label,.live-speaking-controls label+label{padding:16px 0;border-right:0;border-bottom:1px solid var(--rule)}
+ .live-speaking-controls label:last-child{border-bottom:0}
+ .live-chat{min-height:330px;max-height:50vh}
+ .live-turn{width:90%}
+ .live-call-bar{align-items:stretch;flex-direction:column}
+ .live-call-bar .speaking-status{margin-left:0;text-align:left}
+}
+
 @media (max-width: 760px) {
   .skill-level-row,
   .speaking-header {

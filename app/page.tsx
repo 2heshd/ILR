@@ -2262,6 +2262,7 @@ export default function Home() {
       prompts={state.speakingPrompts}
       onAttempt={addSpeakingAttempt}
       makeId={id}
+      voice={persianVoice}
     />}
 
     {tab === "vocabulary" && <section className="grid">

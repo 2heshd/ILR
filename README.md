@@ -93,6 +93,7 @@ Set:
 ```text
 OPENAI_API_KEY=...
 OPENAI_MODEL=gpt-5.6
+OPENAI_REALTIME_MODEL=gpt-realtime-2.1
 ELEVENLABS_API_KEY=...
 ELEVENLABS_VOICE_ID=...
 ELEVENLABS_FEMALE_VOICE_ID=...
@@ -108,6 +109,7 @@ AI enables:
 - adaptive reading passages
 - adaptive listening scripts
 - ElevenLabs Eleven v3 Persian TTS for audio flashcards and Listening, including exact Rapid Caption timing
+- live Persian speaking practice through the OpenAI Realtime API, with conversational grammar and pronunciation coaching
 - reading/listening answer grading
 - ILR-2 speaking prompt generation
 - transcript-based speaking feedback

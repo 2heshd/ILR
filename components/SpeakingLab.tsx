@@ -1,233 +1,226 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import type { IlrLevel, SpeakingAttempt, SpeakingGrade, SpeakingPrompt } from "@/lib/types";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { IlrLevel, SpeakingAttempt, SpeakingPrompt } from "@/lib/types";
+
+type PersianVoice = "male" | "female";
+type ChatTurn = { id: string; role: "learner" | "coach"; text: string };
+type RealtimeEvent = { type?: string; transcript?: string; error?: { message?: string } };
 
 type Props = {
   level: IlrLevel;
   prompts: SpeakingPrompt[];
   onAttempt: (attempt: SpeakingAttempt) => void;
   makeId: () => string;
+  voice: PersianVoice;
 };
 
-const TARGET_SECONDS: Record<IlrLevel, number> = { 1: 45, 2: 90, 3: 150, 4: 240 };
-
-function writeString(view: DataView, offset: number, value: string) {
-  for (let i = 0; i < value.length; i += 1) view.setUint8(offset + i, value.charCodeAt(i));
+function clientId() {
+  const key = "cursos-realtime-user";
+  const saved = window.localStorage.getItem(key);
+  if (saved) return saved;
+  const id = typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
+  window.localStorage.setItem(key, id);
+  return id;
 }
 
-async function convertToWav(blob: Blob) {
-  const AudioContextClass = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-  if (!AudioContextClass) throw new Error("Audio conversion is not supported in this browser.");
-  const context = new AudioContextClass();
-  try {
-    const decoded = await context.decodeAudioData(await blob.arrayBuffer());
-    const samples = new Float32Array(decoded.length);
-    for (let channel = 0; channel < decoded.numberOfChannels; channel += 1) {
-      const input = decoded.getChannelData(channel);
-      for (let i = 0; i < input.length; i += 1) samples[i] += input[i] / decoded.numberOfChannels;
-    }
-    const buffer = new ArrayBuffer(44 + samples.length * 2);
-    const view = new DataView(buffer);
-    writeString(view, 0, "RIFF");
-    view.setUint32(4, 36 + samples.length * 2, true);
-    writeString(view, 8, "WAVE");
-    writeString(view, 12, "fmt ");
-    view.setUint32(16, 16, true);
-    view.setUint16(20, 1, true);
-    view.setUint16(22, 1, true);
-    view.setUint32(24, decoded.sampleRate, true);
-    view.setUint32(28, decoded.sampleRate * 2, true);
-    view.setUint16(32, 2, true);
-    view.setUint16(34, 16, true);
-    writeString(view, 36, "data");
-    view.setUint32(40, samples.length * 2, true);
-    let offset = 44;
-    for (const sample of samples) {
-      const value = Math.max(-1, Math.min(1, sample));
-      view.setInt16(offset, value < 0 ? value * 0x8000 : value * 0x7fff, true);
-      offset += 2;
-    }
-    return new Blob([buffer], { type: "audio/wav" });
-  } finally {
-    void context.close();
-  }
-}
-
-export default function SpeakingLab({ level, prompts, onAttempt, makeId }: Props) {
+export default function SpeakingLab({ level, prompts, onAttempt, makeId, voice }: Props) {
   const [promptIndex, setPromptIndex] = useState(0);
-  const [generated,setGenerated]=useState<SpeakingPrompt|null>(null);
-  const [promptBusy,setPromptBusy]=useState(false);
-  const [promptHistory,setPromptHistory]=useState<string[]>([]);
-  const latestPrompt = generated ?? prompts[promptIndex] ?? prompts[0];
-  const [recording, setRecording] = useState(false);
-  const [busy, setBusy] = useState(false);
+  const [phase, setPhase] = useState<"idle" | "connecting" | "live">("idle");
+  const [status, setStatus] = useState("Choose a topic, then start a live conversation.");
+  const [muted, setMuted] = useState(false);
   const [elapsed, setElapsed] = useState(0);
-  const [status, setStatus] = useState("");
-  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
-  const [audioUrl, setAudioUrl] = useState("");
-  const [grade, setGrade] = useState<SpeakingGrade | null>(null);
-  const recorderRef = useRef<MediaRecorder | null>(null);
+  const [turns, setTurns] = useState<ChatTurn[]>([]);
+  const peerRef = useRef<RTCPeerConnection | null>(null);
+  const channelRef = useRef<RTCDataChannel | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
+  const remoteAudioRef = useRef<HTMLAudioElement | null>(null);
   const startedAtRef = useRef(0);
+  const transcriptRef = useRef<ChatTurn[]>([]);
+  const transcriptEndRef = useRef<HTMLDivElement | null>(null);
+  const currentPrompt = prompts[promptIndex] ?? prompts[0];
+  const topics = useMemo(() => prompts.map((prompt) => prompt.topic), [prompts]);
+
+  function addTurn(role: ChatTurn["role"], text: unknown) {
+    const clean = String(text || "").trim();
+    if (!clean) return;
+    const turn = { id: makeId(), role, text: clean };
+    transcriptRef.current = [...transcriptRef.current, turn];
+    setTurns(transcriptRef.current);
+  }
+
+  function releaseConnection() {
+    channelRef.current?.close();
+    channelRef.current = null;
+    peerRef.current?.close();
+    peerRef.current = null;
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+    streamRef.current = null;
+    if (remoteAudioRef.current) remoteAudioRef.current.srcObject = null;
+  }
+
+  useEffect(() => () => releaseConnection(), []);
 
   useEffect(() => {
-    if (!recording) return;
+    if (phase !== "live") return;
     const timer = window.setInterval(() => setElapsed(Math.floor((Date.now() - startedAtRef.current) / 1000)), 250);
     return () => window.clearInterval(timer);
-  }, [recording]);
+  }, [phase]);
 
-  useEffect(() => () => {
-    recorderRef.current?.stop();
-    streamRef.current?.getTracks().forEach((track) => track.stop());
-    if (audioUrl) URL.revokeObjectURL(audioUrl);
-  }, [audioUrl]);
+  useEffect(() => {
+    transcriptEndRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [turns]);
 
-  function nextPrompt() {
-    setGenerated(null);
-    setAudioUrl(old=>{if(old)URL.revokeObjectURL(old);return '';});
-    const next = (promptIndex + 1) % prompts.length;
-    setPromptIndex(next);
-    setAudioBlob(null);
-    setGrade(null);
+  function handleEvent(event: RealtimeEvent) {
+    switch (event.type) {
+      case "conversation.item.input_audio_transcription.completed":
+        addTurn("learner", event.transcript);
+        break;
+      case "response.output_audio_transcript.done":
+        addTurn("coach", event.transcript);
+        setStatus("Your turn — answer naturally in Persian.");
+        break;
+      case "input_audio_buffer.speech_started":
+        setStatus("Listening…");
+        break;
+      case "input_audio_buffer.speech_stopped":
+        setStatus("Coach is thinking…");
+        break;
+      case "response.created":
+        setStatus("Coach is responding…");
+        break;
+      case "error":
+        setStatus(event.error?.message || "The live coach hit an error. End the call and try again.");
+        break;
+    }
+  }
+
+  async function startSession() {
+    if (!currentPrompt || phase !== "idle" || !navigator.mediaDevices?.getUserMedia) return;
+    setPhase("connecting");
+    setStatus("Requesting microphone access…");
+    setTurns([]);
+    transcriptRef.current = [];
     setElapsed(0);
-    setStatus("");
-  }
+    setMuted(false);
 
-  async function startRecording() {
-    if (!latestPrompt || !navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
-      setStatus("Microphone recording is not supported in this browser.");
-      return;
-    }
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
-      chunksRef.current = [];
-      recorder.ondataavailable = (event) => { if (event.data.size) chunksRef.current.push(event.data); };
-      recorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: recorder.mimeType || "audio/webm" });
-        setAudioBlob(blob);
-        setAudioUrl((oldUrl) => {
-          if (oldUrl) URL.revokeObjectURL(oldUrl);
-          return URL.createObjectURL(blob);
-        });
-        stream.getTracks().forEach((track) => track.stop());
-        streamRef.current = null;
-        setStatus("Recording ready. Listen back or send it for feedback.");
-      };
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+      });
       streamRef.current = stream;
-      recorderRef.current = recorder;
-      startedAtRef.current = Date.now();
-      setElapsed(0);
-      setAudioBlob(null);
-      setGrade(null);
-      setStatus("Recording… speak naturally in Persian.");
-      recorder.start();
-      setRecording(true);
+      const peer = new RTCPeerConnection();
+      peerRef.current = peer;
+      for (const track of stream.getTracks()) peer.addTrack(track, stream);
+      peer.ontrack = (event) => {
+        if (remoteAudioRef.current) remoteAudioRef.current.srcObject = event.streams[0];
+      };
+      peer.onconnectionstatechange = () => {
+        if (["failed", "disconnected"].includes(peer.connectionState)) {
+          setStatus("The live connection ended. Start a new conversation to continue.");
+          setPhase("idle");
+          releaseConnection();
+        }
+      };
+
+      const channel = peer.createDataChannel("oai-events");
+      channelRef.current = channel;
+      channel.addEventListener("message", (message) => {
+        try { handleEvent(JSON.parse(message.data)); } catch { /* Ignore malformed service events. */ }
+      });
+      channel.addEventListener("open", () => {
+        startedAtRef.current = Date.now();
+        setPhase("live");
+        setStatus("Coach is joining…");
+        channel.send(JSON.stringify({
+          type: "response.create",
+          response: { instructions: "Begin the Persian practice now with a brief natural greeting and one question about the selected topic." },
+        }));
+      });
+
+      const offer = await peer.createOffer();
+      await peer.setLocalDescription(offer);
+      const params = new URLSearchParams({ level: String(level), topic: currentPrompt.topic, voice });
+      const response = await fetch(`/api/realtime-session?${params}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/sdp", "X-Cursos-User": clientId() },
+        body: offer.sdp,
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || "The live coach could not connect.");
+      }
+      await peer.setRemoteDescription({ type: "answer", sdp: await response.text() });
     } catch (error) {
+      releaseConnection();
+      setPhase("idle");
       const name = error instanceof DOMException ? error.name : "";
-      if (name === "NotFoundError") setStatus("No microphone was found. Connect a microphone and try again.");
-      else if (name === "NotReadableError" || name === "AbortError") setStatus("The microphone is busy in another app. Close the other app and try again.");
-      else setStatus("Microphone is blocked for this site. Allow it in the browser’s site settings, then reload and try again.");
+      if (name === "NotAllowedError") setStatus("Microphone access is blocked. Allow it for this site, then try again.");
+      else if (name === "NotFoundError") setStatus("No microphone was found. Connect one and try again.");
+      else setStatus(error instanceof Error ? error.message : "The live coach could not connect.");
     }
   }
 
-  function stopRecording() {
-    recorderRef.current?.stop();
-    recorderRef.current = null;
-    setRecording(false);
+  function toggleMute() {
+    const next = !muted;
+    streamRef.current?.getAudioTracks().forEach((track) => { track.enabled = !next; });
+    setMuted(next);
+    setStatus(next ? "Microphone muted." : "Microphone live — continue in Persian.");
   }
 
-  async function gradeRecording() {
-    if (!audioBlob || !latestPrompt) return;
-    setBusy(true);
-    setStatus("Listening to your response…");
-    try {
-      const wav = await convertToWav(audioBlob);
-      const form = new FormData();
-      form.append("audio", wav, "speaking.wav");
-      form.append("prompt", latestPrompt.promptEn);
-      form.append("ilrTarget", String(level));
-      form.append("durationMs", String(elapsed * 1000));
-      form.append("targetWords", JSON.stringify(latestPrompt.targetWords));
-      const response = await fetch("/api/speaking-grade", { method: "POST", body: form });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Speaking feedback failed.");
-      const result = data as SpeakingGrade;
-      setGrade(result);
+  function endSession(save = true) {
+    const durationMs = startedAtRef.current ? Date.now() - startedAtRef.current : 0;
+    releaseConnection();
+    setPhase("idle");
+    setMuted(false);
+    setStatus(save ? "Conversation saved. Start another whenever you are ready." : "Conversation ended.");
+    if (save && currentPrompt && durationMs >= 5_000) {
       onAttempt({
         id: makeId(),
-        speakingPromptId: latestPrompt.id,
+        speakingPromptId: currentPrompt.id,
         attemptedAt: new Date().toISOString(),
-        durationMs: elapsed * 1000,
-        transcript: result.transcript,
-        usedSpeechRecognition: false,
+        durationMs,
+        transcript: transcriptRef.current.map((turn) => `${turn.role === "learner" ? "Learner" : "Coach"}: ${turn.text}`).join("\n"),
+        usedSpeechRecognition: true,
         audioEvaluated: true,
-        grade: result,
-        gradingMode: "ai",
+        gradingMode: "self",
       });
-      setStatus("Feedback saved to your progress.");
-    } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Speaking feedback is unavailable right now.");
-    } finally {
-      setBusy(false);
     }
   }
 
   const minutes = Math.floor(elapsed / 60);
   const seconds = String(elapsed % 60).padStart(2, "0");
-  const target = TARGET_SECONDS[level];
+  const active = phase !== "idle";
 
-  async function generatePrompt(){
-    if(!latestPrompt||recording||busy||promptBusy)return;
-    if(audioBlob&&!window.confirm('Replace this prompt and recording? Saved feedback stays in your history.'))return;
-    setPromptBusy(true);setStatus('Creating another prompt on this topic…');
-    try{
-      const response=await fetch('/api/speaking-prompt',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({topic:latestPrompt.topic,level,previous:[...prompts.filter(p=>p.topic===latestPrompt.topic).map(p=>p.promptEn),...promptHistory]})});
-      const data=await response.json();if(!response.ok)throw new Error(data.error||'Prompt generation failed.');
-      setGenerated({...data,id:makeId(),targetWords:latestPrompt.targetWords,createdAt:new Date().toISOString()});
-      setPromptHistory(history=>[...history,data.promptEn].slice(-20));setAudioBlob(null);setAudioUrl(old=>{if(old)URL.revokeObjectURL(old);return '';});setGrade(null);setElapsed(0);setStatus('New prompt ready.');
-    }catch(error){setStatus(error instanceof Error?error.message:'Prompt generation failed.');}finally{setPromptBusy(false);}
-  }
-
-  return <section className="speaking-workspace">
-    <p className="muted">Speaking beta · Optional practice. AI feedback is experimental, not a validated proficiency score.</p>
-    <button onClick={()=>void generatePrompt()} disabled={recording||busy||promptBusy||!latestPrompt}>{promptBusy?'Generating…':'New prompt · same topic'}</button>
-    {latestPrompt && <>
-      <div className="speaking-prompt">
-        <div className="row spread"><span className="muted">{generated ? 'New prompt' : 'Practice prompt'} · {latestPrompt.topic}</span><div className="row"><select disabled={recording||busy||promptBusy} aria-label="Choose speaking topic" value={promptIndex} onChange={(event) => { setGenerated(null); setAudioUrl(old=>{if(old)URL.revokeObjectURL(old);return '';}); setPromptIndex(Number(event.target.value)); setAudioBlob(null); setGrade(null); setElapsed(0); setStatus(""); }}>{prompts.map((prompt, index) => <option key={prompt.id} value={index}>{String(index + 1).padStart(2, "0")} · {prompt.topic}</option>)}</select><button className="text-button" disabled={recording||busy||promptBusy} onClick={nextPrompt}>Next topic</button></div></div>
-        <h1>{latestPrompt.promptEn}</h1>
-        {latestPrompt.promptFa && <p className="fa" dir="rtl">{latestPrompt.promptFa}</p>}
-        <p>{latestPrompt.functions.join(" · ")}</p>
+  return <section className="speaking-workspace live-speaking-workspace">
+    <header className="live-speaking-header">
+      <div>
+        <span className="eyebrow">Realtime Persian · GPT Realtime 2.1</span>
+        <h1>Live conversation coach</h1>
+        <p>Speak naturally. The coach answers in Iranian Persian and selectively corrects grammar, word choice, rhythm, and pronunciation.</p>
       </div>
+      <div className={`live-indicator ${phase}`}><i />{phase === "live" ? `${minutes}:${seconds}` : phase === "connecting" ? "Connecting" : "Ready"}</div>
+    </header>
 
-      <div className="speaking-recorder">
-        <button className={`mic-button ${recording ? "recording" : ""}`} onClick={recording ? stopRecording : startRecording} disabled={busy} aria-label={recording ? "Stop recording" : "Start recording"}>
-          <span aria-hidden="true">{recording ? "■" : "●"}</span>
-          {recording ? "Stop" : audioBlob ? "Record again" : "Record"}
-        </button>
-        <strong className="recording-time">{minutes}:{seconds}</strong>
-        <span className="muted">Suggested: {Math.floor(target / 60)}:{String(target % 60).padStart(2, "0")}</span>
-      </div>
+    <div className="live-speaking-controls">
+      <label><span>Conversation topic</span><select disabled={active} aria-label="Choose conversation topic" value={promptIndex} onChange={(event) => { setPromptIndex(Number(event.target.value)); setTurns([]); transcriptRef.current = []; setStatus("Topic changed. Start when you are ready."); }}>{topics.map((topic, index) => <option key={`${topic}-${index}`} value={index}>{String(index + 1).padStart(2, "0")} · {topic}</option>)}</select></label>
+      <label><span>Target</span><strong>ILR {level}</strong></label>
+      <label><span>Coach voice</span><strong>{voice === "female" ? "Female" : "Male"}</strong></label>
+    </div>
 
-      {audioUrl && !recording && <div className="speaking-audio"><audio controls src={audioUrl}/><button className="primary" onClick={gradeRecording} disabled={busy}>{busy ? "Reviewing…" : "Get feedback"}</button></div>}
-      {status && <p className="speaking-status">{status}</p>}
-      {status.startsWith("Microphone is blocked") && <p className="muted permission-help">On Mac, also open System Settings → Privacy &amp; Security → Microphone and allow access for the browser or app you are using.</p>}
+    <div className="live-chat" aria-live="polite">
+      {turns.length === 0 ? <div className="live-chat-empty"><strong>How it works</strong><p>The coach starts the conversation. Answer aloud in Persian. Important corrections appear naturally inside the conversation instead of waiting for a final recording grade.</p><small>Use headphones for the clearest pronunciation feedback.</small></div> : turns.map((turn) => <article key={turn.id} className={`live-turn ${turn.role}`}><span>{turn.role === "learner" ? "You" : "Coach"}</span><p className="fa" dir="rtl">{turn.text}</p></article>)}
+      <div ref={transcriptEndRef} />
+    </div>
 
-      {grade && <section className="speaking-feedback">
-        <div className="row spread"><div><span className="eyebrow">Audio coaching estimate</span><h2>{grade.overallScore}%</h2></div><p>{grade.feedback}</p></div>
-        <div className="speaking-metrics">
-          <span><small>Task</small><strong>{grade.taskCompletion}</strong></span>
-          <span><small>Grammar</small><strong>{grade.grammaticalControl}</strong></span>
-          <span><small>Fluency</small><strong>{grade.fluencyEstimate}</strong></span>
-          <span><small>Rhythm</small><strong>{grade.rhythmPacing}</strong></span>
-          <span><small>Tone</small><strong>{grade.toneDelivery}</strong></span>
-          <span><small>Clarity</small><strong>{grade.pronunciationClarity}</strong></span>
-        </div>
-        {grade.transcript && <details><summary>Transcript</summary><p className="fa" dir="rtl">{grade.transcript}</p></details>}
-        {grade.priorities.length > 0 && <p><strong>Next:</strong> {grade.priorities.join(" · ")}</p>}
-      </section>}
-    </>}
+    <div className="live-call-bar">
+      {phase === "idle" ? <button className="primary live-start" onClick={() => void startSession()} disabled={!currentPrompt}>● Start live conversation</button> : <>
+        <button onClick={toggleMute} disabled={phase === "connecting"}>{muted ? "Unmute microphone" : "Mute microphone"}</button>
+        <button className="danger-button" onClick={() => endSession(true)}>End &amp; save</button>
+      </>}
+      <p className="speaking-status">{status}</p>
+    </div>
+    <audio ref={remoteAudioRef} autoPlay className="remote-coach-audio" />
+    <p className="muted live-speaking-note">AI coaching is experimental and not an official ILR score. The microphone is streamed only while the live session is active.</p>
   </section>;
 }
