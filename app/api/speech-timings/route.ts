@@ -1,17 +1,18 @@
 import OpenAI, { toFile } from "openai";
 import { captionsCoverText, reconcileCaptionSpellings } from '@/lib/caption-integrity';
-import { characterAlignmentToWords, createElevenLabsSpeechWithTimestamps, elevenLabsErrorResponse, elevenLabsSpeechConfigured } from '@/lib/elevenlabs-speech';
+import { characterAlignmentToWords, createElevenLabsSpeechWithTimestamps, elevenLabsErrorResponse, elevenLabsSpeechConfigured, normalizeElevenLabsVoice } from '@/lib/elevenlabs-speech';
 import { openAiErrorResponse } from "@/lib/openai-error";
 import { isPlayablePersianText, sanitizePersianSpeechText } from "@/lib/persian-speech";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
-  if (!elevenLabsSpeechConfigured() && !process.env.OPENAI_API_KEY) {
+  const { text, voice: requestedVoice } = (await request.json()) as { text?: string; voice?: unknown };
+  const voice = normalizeElevenLabsVoice(requestedVoice);
+  if (!elevenLabsSpeechConfigured(voice) && !process.env.OPENAI_API_KEY) {
     return Response.json({ error: "Persian speech is not configured." }, { status: 503 });
   }
 
-  const { text } = (await request.json()) as { text?: string };
   if (!isPlayablePersianText(text)) {
     return Response.json({ error: "A valid Persian transcript is required." }, { status: 400 });
   }
@@ -23,8 +24,8 @@ export async function POST(request: Request) {
     let audioBuffer: Buffer;
     let words: {word:string;start:number;end:number}[];
     let duration: number | undefined;
-    if (elevenLabsSpeechConfigured()) {
-      const speech = await createElevenLabsSpeechWithTimestamps(speechText, signal);
+    if (elevenLabsSpeechConfigured(voice)) {
+      const speech = await createElevenLabsSpeechWithTimestamps(speechText, signal, voice);
       audioBuffer = speech.audio;
       words = characterAlignmentToWords(speech.alignment);
       duration = words.at(-1)?.end;
@@ -77,6 +78,7 @@ export async function POST(request: Request) {
         "Content-Type": "application/octet-stream",
         "Content-Length": String(payload.length),
         "Cache-Control": "private, max-age=604800",
+        "X-Speech-Voice": voice,
       },
     });
   } catch (error) {
@@ -84,7 +86,7 @@ export async function POST(request: Request) {
       return Response.json({ error: "Audio alignment took too long. Your practice is unchanged; retry or use Full audio." }, { status: 504 });
     }
     console.error(error);
-    if (elevenLabsSpeechConfigured()) return elevenLabsErrorResponse(error, "Word alignment failed.");
+    if (elevenLabsSpeechConfigured(voice)) return elevenLabsErrorResponse(error, "Word alignment failed.");
     return openAiErrorResponse(error, "Word alignment failed.");
   }
 }

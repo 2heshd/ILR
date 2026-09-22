@@ -3133,10 +3133,13 @@ main>.listening-workspace>.span-7{background:transparent;padding-top:12px}
 .listening-workspace .transcript-hidden{min-height:0;padding:16px 0}
 .reading-workspace.answering .grader .answer-list{gap:28px}
 .reading-workspace .passage,.listening-workspace .passage,.reading-workspace .inference-sentence{font-size:clamp(28px,2.5vw,40px);line-height:2.15}
-.font-preferences{padding:24px 0;margin-bottom:32px}
+.font-preferences{display:grid;gap:14px;padding:24px 0;margin-bottom:32px}
 .font-preferences label{display:flex;align-items:center;gap:16px}
 .font-preferences select{width:auto}
-.font-preferences .fa{font-size:32px;margin:24px 0}
+.font-preferences .preference-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.font-preferences .voice-preference{padding-top:14px;border-top:1px solid var(--rule)}
+.font-preferences .voice-preference button{min-height:40px}
+.font-preferences .fa{font-size:32px;margin:10px 0}
 
 /* Persian glyphs can extend beyond their measured text box. Keep the review
    word fully visible instead of clipping those overhangs at the stage edge. */

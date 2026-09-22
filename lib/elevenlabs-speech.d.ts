@@ -5,15 +5,18 @@ export type ElevenLabsCharacterAlignment = {
 };
 
 export type TimedWord = { word: string; start: number; end: number };
+export type ElevenLabsVoice = "male" | "female";
 
 export class ElevenLabsSpeechError extends Error {
   status: number;
   constructor(message: string, status?: number);
 }
 
-export function elevenLabsSpeechConfigured(): boolean;
-export function createElevenLabsSpeech(text: string, signal: AbortSignal): Promise<Buffer>;
-export function createElevenLabsSpeechWithTimestamps(text: string, signal: AbortSignal): Promise<{
+export function normalizeElevenLabsVoice(voice: unknown): ElevenLabsVoice;
+export function elevenLabsVoiceId(voice?: ElevenLabsVoice): string | undefined;
+export function elevenLabsSpeechConfigured(voice?: ElevenLabsVoice): boolean;
+export function createElevenLabsSpeech(text: string, signal: AbortSignal, voice?: ElevenLabsVoice): Promise<Buffer>;
+export function createElevenLabsSpeechWithTimestamps(text: string, signal: AbortSignal, voice?: ElevenLabsVoice): Promise<{
   audio: Buffer;
   alignment: ElevenLabsCharacterAlignment;
 }>;

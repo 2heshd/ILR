@@ -69,6 +69,7 @@ const IS_PERSIAN_WORD = /^[\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06FA-\u06FC\
 const SYNAPTX_URL = process.env.NEXT_PUBLIC_SYNAPTX_URL ?? (process.env.NODE_ENV === "production" ? "https://synapt-x.vercel.app" : "http://localhost:3002");
 const ASL_URL = process.env.NEXT_PUBLIC_ASL_URL ?? (process.env.NODE_ENV === "production" ? "https://getcognis.vercel.app" : "http://localhost:3000");
 const NEWS_CATALOG = newsVocabulary();
+const PERSIAN_VOICE_SAMPLE = "سلام. امروز می‌خواهیم فارسی را با تلفظ طبیعی و روان تمرین کنیم.";
 
 function syntaxUrl(sentence: string) {
   const params = new URLSearchParams({ sentence, language: "fa" });
@@ -83,6 +84,7 @@ function morphologyUrl(word: string, definition?: string, romanization?: string)
 }
 
 type Tab = "home" | "today" | "reading" | "listening" | "speaking" | "vocabulary" | "analytics" | "account";
+type PersianVoice = "male" | "female";
 
 const TAB_LABELS: Record<Tab, string> = {
   home: "Home",
@@ -332,6 +334,8 @@ export default function Home() {
   const [persianFont,setPersianFont]=useState('original');
   useEffect(()=>{try{const saved=localStorage.getItem('cursos-persian-font');if(saved&&['original','tahoma','arial','serif'].includes(saved))setPersianFont(saved);}catch{}},[]);
   useEffect(()=>{document.documentElement.style.setProperty('--persian-font',({original:'"Cursos Persian Mono"',tahoma:'"Persian Tahoma"',arial:'"Persian Arial"',serif:'"Persian Times"'} as Record<string,string>)[persianFont]);},[persianFont]);
+  const [persianVoice,setPersianVoice]=useState<PersianVoice>('male');
+  useEffect(()=>{try{const saved=localStorage.getItem('cursos-persian-voice');if(saved==='male'||saved==='female')setPersianVoice(saved);}catch{}},[]);
   const [showIntake, setShowIntake] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [courseBusy, setCourseBusy] = useState(false);
@@ -463,22 +467,28 @@ export default function Home() {
     return new Request(`${window.location.origin}/__speech-cache/${encodeURIComponent(cacheKey)}`);
   }
 
+  function selectedVoiceCacheKey(cacheKey: string) {
+    return `eleven-v2-${persianVoice}-${cacheKey}`;
+  }
+
   async function readCachedSpeech(cacheKey: string) {
-    const memory = speechCacheRef.current.get(cacheKey);
+    const voiceKey = selectedVoiceCacheKey(cacheKey);
+    const memory = speechCacheRef.current.get(voiceKey);
     if (memory) return memory;
     if (!("caches" in window)) return null;
-    const stored = await caches.open("persian-audio-eleven-v1").then((cache) => cache.match(speechCacheRequest(`eleven-v1-${cacheKey}`)));
+    const stored = await caches.open("persian-audio-eleven-v2").then((cache) => cache.match(speechCacheRequest(voiceKey)));
     if (!stored) return null;
     const blob = await stored.blob();
     if (blob.size < 500) return null;
-    speechCacheRef.current.set(cacheKey, blob);
+    speechCacheRef.current.set(voiceKey, blob);
     return blob;
   }
 
   async function prepareSpeech(text: string, cacheKey: string) {
+    const voiceKey = selectedVoiceCacheKey(cacheKey);
     const cached = await readCachedSpeech(cacheKey);
     if (cached) return cached;
-    const pending = speechRequestsRef.current.get(cacheKey);
+    const pending = speechRequestsRef.current.get(voiceKey);
     if (pending) return pending;
 
     const request = (async () => {
@@ -486,7 +496,7 @@ export default function Home() {
         method: "POST",
         signal: AbortSignal.timeout(30_000),
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: sanitizePersianSpeechText(text) }),
+        body: JSON.stringify({ text: sanitizePersianSpeechText(text), voice: persianVoice }),
       });
       const contentType = response.headers.get("content-type") || "";
       if (!response.ok || !contentType.startsWith("audio/")) {
@@ -495,15 +505,15 @@ export default function Home() {
       }
       const blob = await response.blob();
       if (blob.size < 500) throw new Error("The generated audio file was empty.");
-      speechCacheRef.current.set(cacheKey, blob);
+      speechCacheRef.current.set(voiceKey, blob);
       if ("caches" in window) {
-        const cache = await caches.open("persian-audio-eleven-v1");
-        await cache.put(speechCacheRequest(`eleven-v1-${cacheKey}`), new Response(blob, { headers: { "Content-Type": "audio/mpeg" } }));
+        const cache = await caches.open("persian-audio-eleven-v2");
+        await cache.put(speechCacheRequest(voiceKey), new Response(blob, { headers: { "Content-Type": "audio/mpeg" } }));
       }
       return blob;
-    })().finally(() => speechRequestsRef.current.delete(cacheKey));
+    })().finally(() => speechRequestsRef.current.delete(voiceKey));
 
-    speechRequestsRef.current.set(cacheKey, request);
+    speechRequestsRef.current.set(voiceKey, request);
     return request;
   }
 
@@ -512,21 +522,23 @@ export default function Home() {
   }
 
   async function readCachedSpeechTimings(cacheKey: string) {
-    const memory = speechTimingsRef.current.get(cacheKey);
+    const voiceKey = selectedVoiceCacheKey(cacheKey);
+    const memory = speechTimingsRef.current.get(voiceKey);
     if (memory) return memory;
     if (!("caches" in window)) return null;
-    const stored = await caches.open("persian-speech-timings-eleven-v1").then((cache) => cache.match(speechTimingCacheRequest(cacheKey)));
+    const stored = await caches.open("persian-speech-timings-eleven-v2").then((cache) => cache.match(speechTimingCacheRequest(voiceKey)));
     if (!stored) return null;
     const data = (await stored.json()) as { words?: TimedCaption[] };
     if (!data.words?.length) return null;
-    speechTimingsRef.current.set(cacheKey, data.words);
+    speechTimingsRef.current.set(voiceKey, data.words);
     return data.words;
   }
 
   async function prepareAlignedSpeech(text: string, cacheKey: string) {
+    const voiceKey = selectedVoiceCacheKey(cacheKey);
     const [cachedAudio, cachedTimings] = await Promise.all([readCachedSpeech(cacheKey), readCachedSpeechTimings(cacheKey)]);
     if (cachedAudio && cachedTimings && captionsCoverText(text,cachedTimings)) return { audio: cachedAudio, timings: cachedTimings };
-    const pending = speechTimingRequestsRef.current.get(cacheKey);
+    const pending = speechTimingRequestsRef.current.get(voiceKey);
     if (pending) return pending;
 
     const request = (async () => {
@@ -534,7 +546,7 @@ export default function Home() {
         method: "POST",
         signal: AbortSignal.timeout(30_000),
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text, voice: persianVoice }),
       });
       if (!response.ok) {
         const data = await response.json().catch(() => null) as { error?: string } | null;
@@ -550,24 +562,24 @@ export default function Home() {
       };
       if (!metadata.words?.length || !captionsCoverText(text,metadata.words)) throw new Error("The captions are incomplete. Please retry or use Full audio.");
       const audio = new Blob([payload.slice(4 + metadataLength)], { type: metadata.mimeType || "audio/mpeg" });
-      speechCacheRef.current.set(cacheKey, audio);
-      speechTimingsRef.current.set(cacheKey, metadata.words);
+      speechCacheRef.current.set(voiceKey, audio);
+      speechTimingsRef.current.set(voiceKey, metadata.words);
       if ("caches" in window) {
         const [audioCache, timingCache] = await Promise.all([
-          caches.open("persian-audio-eleven-v1"),
-          caches.open("persian-speech-timings-eleven-v1"),
+          caches.open("persian-audio-eleven-v2"),
+          caches.open("persian-speech-timings-eleven-v2"),
         ]);
         await Promise.all([
-          audioCache.put(speechCacheRequest(`v2-${cacheKey}`), new Response(audio, { headers: { "Content-Type": audio.type } })),
-          timingCache.put(speechTimingCacheRequest(cacheKey), new Response(JSON.stringify({ words: metadata.words }), {
+          audioCache.put(speechCacheRequest(voiceKey), new Response(audio, { headers: { "Content-Type": audio.type } })),
+          timingCache.put(speechTimingCacheRequest(voiceKey), new Response(JSON.stringify({ words: metadata.words }), {
             headers: { "Content-Type": "application/json" },
           })),
         ]);
       }
       return { audio, timings: metadata.words };
-    })().finally(() => speechTimingRequestsRef.current.delete(cacheKey));
+    })().finally(() => speechTimingRequestsRef.current.delete(voiceKey));
 
-    speechTimingRequestsRef.current.set(cacheKey, request);
+    speechTimingRequestsRef.current.set(voiceKey, request);
     return request;
   }
 
@@ -845,21 +857,22 @@ export default function Home() {
     void prepareSpeech(current.displayForm, `word-${current.id}`).catch(() => {
       // The device voice remains available if native audio cannot be prepared.
     });
-  }, [current?.id, reviewModality]);
+  }, [current?.id, reviewModality, persianVoice]);
 
   useEffect(() => {
     if (!latestListening || !isMeaningfulPersianText(latestListening.transcriptFa)) return;
     const speechText = sanitizePersianSpeechText(latestListening.transcriptFa);
-    const alignedKey = `aligned-eleven-v1-${latestListening.id}-${speechText}`;
+    const alignedKey = `aligned-eleven-v2-${latestListening.id}-${speechText}`;
     const listeningKey = `listening-${latestListening.id}`;
 
     // Start exact alignment as soon as the lesson exists, not when the learner
     // presses Start. The same narration can also satisfy normal listening.
     void prepareAlignedSpeech(speechText, alignedKey).then(async ({ audio }) => {
-      speechCacheRef.current.set(listeningKey, audio);
+      const voiceKey = selectedVoiceCacheKey(listeningKey);
+      speechCacheRef.current.set(voiceKey, audio);
       if ("caches" in window) {
-        const cache = await caches.open("persian-audio-eleven-v1");
-        await cache.put(speechCacheRequest(`eleven-v1-${listeningKey}`), new Response(audio, { headers: { "Content-Type": audio.type } }));
+        const cache = await caches.open("persian-audio-eleven-v2");
+        await cache.put(speechCacheRequest(voiceKey), new Response(audio, { headers: { "Content-Type": audio.type } }));
       }
     }).catch(() => {
       if (!latestListening.mediaUrl) {
@@ -868,7 +881,7 @@ export default function Home() {
         });
       }
     });
-  }, [latestListening?.id]);
+  }, [latestListening?.id, persianVoice]);
 
   async function signIn(email: string, password: string) {
     const supabase = getSupabaseClient();
@@ -1222,6 +1235,20 @@ export default function Home() {
       }
       setStatus("Playing with the device’s Persian voice.");
       setPlayedReviewWord(current.id);
+    }
+  }
+
+  async function previewPersianVoice() {
+    if (audioBusy) return;
+    setAudioBusy(true);
+    setStatus(`Preparing ${persianVoice === "female" ? "Mina" : "Arman"}…`);
+    try {
+      await playAudioBlob(await prepareSpeech(PERSIAN_VOICE_SAMPLE, "settings-voice-preview"));
+      setStatus(`Playing ${persianVoice === "female" ? "Mina" : "Arman"} with native Iranian Persian pronunciation.`);
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "The voice preview is unavailable. Try again in a moment.");
+    } finally {
+      setAudioBusy(false);
     }
   }
 
@@ -1673,7 +1700,7 @@ export default function Home() {
   async function playRapidListening() {
     if (!latestListening || audioBusy || rapidPlaying) return;
     const speechText = sanitizePersianSpeechText(latestListening.transcriptFa);
-    const cacheKey = `aligned-eleven-v1-${latestListening.id}-${speechText}`;
+    const cacheKey = `aligned-eleven-v2-${latestListening.id}-${speechText}`;
     setAudioBusy(true);
     setStatus("Aligning every word to the audio…");
     try {
@@ -2296,7 +2323,7 @@ export default function Home() {
       onChangePassword={changePassword}
       onChangeUsername={changeUsername}
     />}
-    {tab === "account" && <section className="font-preferences"><h2>Account settings</h2><label>Persian font <select value={persianFont} onChange={event=>{setPersianFont(event.target.value);try{localStorage.setItem('cursos-persian-font',event.target.value);}catch{}}}><option value="original">Original · Cursos</option><option value="tahoma">Tahoma · system</option><option value="arial">Arial · system</option><option value="serif">Times New Roman · system</option></select></label><p className="fa">هر روز با خواندن و شنیدن، فارسی را بهتر یاد می‌گیریم.</p><small>Saved on this browser. System font availability varies by device.</small></section>}
+    {tab === "account" && <section className="font-preferences"><h2>Account settings</h2><div className="preference-row"><label>Persian font <select value={persianFont} onChange={event=>{setPersianFont(event.target.value);try{localStorage.setItem('cursos-persian-font',event.target.value);}catch{}}}><option value="original">Original · Cursos</option><option value="tahoma">Tahoma · system</option><option value="arial">Arial · system</option><option value="serif">Times New Roman · system</option></select></label></div><div className="preference-row voice-preference"><label>Persian voice <select aria-label="Persian voice" value={persianVoice} onChange={event=>{const voice=event.target.value as PersianVoice;releasePlayback();setPersianVoice(voice);try{localStorage.setItem('cursos-persian-voice',voice);}catch{}}}><option value="male">Arman · male · Tehran</option><option value="female">Mina · female · Tehran</option></select></label><button className="secondary" disabled={audioBusy} onClick={()=>void previewPersianVoice()}>{audioBusy?"Preparing…":"▶ Preview voice"}</button></div><p className="fa">هر روز با خواندن و شنیدن، فارسی را بهتر یاد می‌گیریم.</p><small>Font and voice are saved on this browser. Arman and Mina use native Iranian Persian pronunciation; system font availability varies by device.</small></section>}
   </main>;
 }
 

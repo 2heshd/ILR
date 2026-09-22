@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {characterAlignmentToWords} from '../lib/elevenlabs-speech.js';
+import {characterAlignmentToWords, normalizeElevenLabsVoice} from '../lib/elevenlabs-speech.js';
 
 test('ElevenLabs character timings become exact Persian word cues',()=>{
   const characters=[...'من کتاب\u200cها را دیدم.'];
@@ -19,4 +19,11 @@ test('ElevenLabs character timings become exact Persian word cues',()=>{
 
 test('invalid ElevenLabs alignments are rejected',()=>{
   assert.deepEqual(characterAlignmentToWords({characters:['م'],character_start_times_seconds:[],character_end_times_seconds:[.1]}),[]);
+});
+
+test('only the configured female choice can select the female voice',()=>{
+  assert.equal(normalizeElevenLabsVoice('female'),'female');
+  assert.equal(normalizeElevenLabsVoice('male'),'male');
+  assert.equal(normalizeElevenLabsVoice('arbitrary-voice-id'),'male');
+  assert.equal(normalizeElevenLabsVoice(undefined),'male');
 });
