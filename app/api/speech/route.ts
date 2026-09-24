@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { createElevenLabsSpeech, elevenLabsErrorResponse, elevenLabsSpeechConfigured, normalizeElevenLabsVoice } from "@/lib/elevenlabs-speech";
+import { canFallBackToOpenAiSpeech, createElevenLabsSpeech, elevenLabsErrorResponse, elevenLabsSpeechConfigured, normalizeElevenLabsVoice } from "@/lib/elevenlabs-speech";
 import { openAiErrorResponse } from "@/lib/openai-error";
 import { isPlayablePersianText, sanitizePersianSpeechText } from "@/lib/persian-speech";
 import { persianVoiceProfile } from "@/lib/persian-voices.js";
@@ -19,13 +19,20 @@ export async function POST(request: Request) {
   }
   const speechText = sanitizePersianSpeechText(text);
   const signal = AbortSignal.any([request.signal, AbortSignal.timeout(25_000)]);
+  let useOpenAi = !elevenLabsSpeechConfigured(voice);
 
   try {
-    if (elevenLabsSpeechConfigured(voice)) {
-      const audio = await createElevenLabsSpeech(speechText, signal, voice);
-      return new Response(Uint8Array.from(audio), {
-        headers: { "Content-Type": "audio/mpeg", "Cache-Control": "private, max-age=604800", "X-Speech-Provider": "elevenlabs", "X-Speech-Voice": voice },
-      });
+    if (!useOpenAi) {
+      try {
+        const audio = await createElevenLabsSpeech(speechText, signal, voice);
+        return new Response(Uint8Array.from(audio), {
+          headers: { "Content-Type": "audio/mpeg", "Cache-Control": "private, max-age=604800", "X-Speech-Provider": "elevenlabs", "X-Speech-Voice": voice },
+        });
+      } catch (error) {
+        if (!process.env.OPENAI_API_KEY || !canFallBackToOpenAiSpeech(error)) throw error;
+        useOpenAi = true;
+        console.warn("ElevenLabs speech unavailable; using OpenAI speech", error);
+      }
     }
     const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, timeout: 20_000, maxRetries: 0 });
     const audio = await client.audio.speech.create({
@@ -37,14 +44,14 @@ export async function POST(request: Request) {
       response_format: "mp3",
     }, { signal });
     return new Response(await audio.arrayBuffer(), {
-      headers: { "Content-Type": "audio/mpeg", "Cache-Control": "private, max-age=604800" },
+      headers: { "Content-Type": "audio/mpeg", "Cache-Control": "private, max-age=604800", "X-Speech-Provider": "openai", "X-Speech-Voice": voice },
     });
   } catch (error) {
     if (signal.aborted || error instanceof OpenAI.APIConnectionTimeoutError) {
       return Response.json({ error: "Audio took too long. Your practice is unchanged; please try again." }, { status: 504 });
     }
     console.error(error);
-    if (elevenLabsSpeechConfigured(voice)) return elevenLabsErrorResponse(error, "Speech generation failed.");
+    if (!useOpenAi) return elevenLabsErrorResponse(error, "Speech generation failed.");
     return openAiErrorResponse(error, "Speech generation failed.");
   }
 }

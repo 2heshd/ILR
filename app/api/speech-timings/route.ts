@@ -1,6 +1,6 @@
 import OpenAI, { toFile } from "openai";
 import { captionsCoverText, reconcileCaptionSpellings } from '@/lib/caption-integrity';
-import { characterAlignmentToWords, createElevenLabsSpeechWithTimestamps, elevenLabsErrorResponse, elevenLabsSpeechConfigured, normalizeElevenLabsVoice } from '@/lib/elevenlabs-speech';
+import { canFallBackToOpenAiSpeech, characterAlignmentToWords, createElevenLabsSpeechWithTimestamps, elevenLabsErrorResponse, elevenLabsSpeechConfigured, normalizeElevenLabsVoice } from '@/lib/elevenlabs-speech';
 import { openAiErrorResponse } from "@/lib/openai-error";
 import { isPlayablePersianText, sanitizePersianSpeechText } from "@/lib/persian-speech";
 import { persianVoiceProfile } from "@/lib/persian-voices.js";
@@ -21,17 +21,25 @@ export async function POST(request: Request) {
   const speechText = sanitizePersianSpeechText(text);
   // One deadline spans narration AND alignment, not a new allowance per call.
   const signal = AbortSignal.any([request.signal, AbortSignal.timeout(25_000)]);
+  let useOpenAi = !elevenLabsSpeechConfigured(voice);
 
   try {
-    let audioBuffer: Buffer;
-    let words: {word:string;start:number;end:number}[];
+    let audioBuffer: Buffer = Buffer.alloc(0);
+    let words: {word:string;start:number;end:number}[] = [];
     let duration: number | undefined;
-    if (elevenLabsSpeechConfigured(voice)) {
-      const speech = await createElevenLabsSpeechWithTimestamps(speechText, signal, voice);
-      audioBuffer = speech.audio;
-      words = characterAlignmentToWords(speech.alignment);
-      duration = words.at(-1)?.end;
-    } else {
+    if (!useOpenAi) {
+      try {
+        const speech = await createElevenLabsSpeechWithTimestamps(speechText, signal, voice);
+        audioBuffer = speech.audio;
+        words = characterAlignmentToWords(speech.alignment);
+        duration = words.at(-1)?.end;
+      } catch (error) {
+        if (!process.env.OPENAI_API_KEY || !canFallBackToOpenAiSpeech(error)) throw error;
+        useOpenAi = true;
+        console.warn("ElevenLabs alignment unavailable; using OpenAI speech", error);
+      }
+    }
+    if (useOpenAi) {
       const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, timeout: 20_000, maxRetries: 0 });
       const speech = await client.audio.speech.create({
         model: process.env.OPENAI_TTS_MODEL || "gpt-4o-mini-tts",
@@ -81,6 +89,7 @@ export async function POST(request: Request) {
         "Content-Length": String(payload.length),
         "Cache-Control": "private, max-age=604800",
         "X-Speech-Voice": voice,
+        "X-Speech-Provider": useOpenAi ? "openai" : "elevenlabs",
       },
     });
   } catch (error) {
@@ -88,7 +97,7 @@ export async function POST(request: Request) {
       return Response.json({ error: "Audio alignment took too long. Your practice is unchanged; retry or use Full audio." }, { status: 504 });
     }
     console.error(error);
-    if (elevenLabsSpeechConfigured(voice)) return elevenLabsErrorResponse(error, "Word alignment failed.");
+    if (!useOpenAi) return elevenLabsErrorResponse(error, "Word alignment failed.");
     return openAiErrorResponse(error, "Word alignment failed.");
   }
 }

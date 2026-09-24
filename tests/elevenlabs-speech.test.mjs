@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {characterAlignmentToWords, normalizeElevenLabsVoice} from '../lib/elevenlabs-speech.js';
+import {canFallBackToOpenAiSpeech, characterAlignmentToWords, ElevenLabsSpeechError, normalizeElevenLabsVoice} from '../lib/elevenlabs-speech.js';
 
 test('ElevenLabs character timings become exact Persian word cues',()=>{
   const characters=[...'من کتاب\u200cها را دیدم.'];
@@ -27,4 +27,12 @@ test('voice choices are normalized to a safe regional profile',()=>{
   assert.equal(normalizeElevenLabsVoice('shiraz-female'),'shiraz-female');
   assert.equal(normalizeElevenLabsVoice('arbitrary-voice-id'),'tehran-male');
   assert.equal(normalizeElevenLabsVoice(undefined),'tehran-male');
+});
+
+test('provider account failures permit an independent speech provider to recover audio',()=>{
+  for(const status of [401,402,403,422,429]) {
+    assert.equal(canFallBackToOpenAiSpeech(new ElevenLabsSpeechError('provider failed',status)),true);
+  }
+  assert.equal(canFallBackToOpenAiSpeech(new ElevenLabsSpeechError('server failed',500)),false);
+  assert.equal(canFallBackToOpenAiSpeech(new Error('unrelated failure')),false);
 });

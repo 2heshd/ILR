@@ -11,6 +11,7 @@ export class ElevenLabsSpeechError extends Error {
   status: number;
   constructor(message: string, status?: number);
 }
+export function canFallBackToOpenAiSpeech(error: unknown): boolean;
 
 export function normalizeElevenLabsVoice(voice: unknown): ElevenLabsVoice;
 export function elevenLabsVoiceId(voice?: ElevenLabsVoice): string | undefined;
