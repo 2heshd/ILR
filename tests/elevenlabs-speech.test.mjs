@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {canFallBackToOpenAiSpeech, characterAlignmentToWords, ElevenLabsSpeechError, normalizeElevenLabsVoice} from '../lib/elevenlabs-speech.js';
+import {canFallBackToOpenAiSpeech, characterAlignmentToWords, ElevenLabsSpeechError, elevenLabsVoiceId, normalizeElevenLabsVoice} from '../lib/elevenlabs-speech.js';
+import {PERSIAN_VOICE_REGIONS, PERSIAN_VOICE_GENDERS} from '../lib/persian-voices.js';
 
 test('ElevenLabs character timings become exact Persian word cues',()=>{
   const characters=[...'من کتاب\u200cها را دیدم.'];
@@ -27,6 +28,14 @@ test('voice choices are normalized to a safe regional profile',()=>{
   assert.equal(normalizeElevenLabsVoice('shiraz-female'),'shiraz-female');
   assert.equal(normalizeElevenLabsVoice('arbitrary-voice-id'),'tehran-male');
   assert.equal(normalizeElevenLabsVoice(undefined),'tehran-male');
+});
+
+test('every non-Tehran regional choice has its own ElevenLabs voice identity',()=>{
+  const ids=PERSIAN_VOICE_REGIONS.filter(region=>region.id!=='tehran')
+    .flatMap(region=>PERSIAN_VOICE_GENDERS.map(gender=>elevenLabsVoiceId(`${region.id}-${gender.id}`)));
+  assert.equal(ids.length,10);
+  assert.equal(new Set(ids).size,10);
+  assert.ok(ids.every(id=>/^[A-Za-z0-9]{20}$/.test(id)));
 });
 
 test('provider account failures permit an independent speech provider to recover audio',()=>{

@@ -26,10 +26,10 @@ test('flashcards and listening wait for native server audio before device fallba
   assert.doesNotMatch(flashcard,/!cached && playWithDeviceVoice/);
   assert.match(listening,/cached \?\? await prepareSpeech/);
   assert.doesNotMatch(listening,/!cached && playWithDeviceVoice/);
-  assert.equal((page.match(/aligned-eleven-accent-v1-/g)||[]).length,2);
+  assert.equal((page.match(/aligned-regional-voice-v2-/g)||[]).length,2);
   assert.equal((page.match(/voice: persianVoice/g)||[]).length,2);
   assert.match(page,/cursos-persian-voice/);
   assert.match(page,/Persian accent region/);
   assert.match(page,/Persian voice gender/);
-  assert.match(page,/experimental strong-accent direction/);
+  assert.match(page,/Each region and gender has its own ElevenLabs voice/);
 });

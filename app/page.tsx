@@ -469,7 +469,7 @@ export default function Home() {
   }
 
   function selectedVoiceCacheKey(cacheKey: string) {
-    return `eleven-accent-v1-${persianVoice}-${cacheKey}`;
+    return `regional-voice-v2-${persianVoice}-${cacheKey}`;
   }
 
   async function readCachedSpeech(cacheKey: string) {
@@ -477,7 +477,7 @@ export default function Home() {
     const memory = speechCacheRef.current.get(voiceKey);
     if (memory) return memory;
     if (!("caches" in window)) return null;
-    const stored = await caches.open("persian-audio-eleven-accent-v1").then((cache) => cache.match(speechCacheRequest(voiceKey)));
+    const stored = await caches.open("persian-audio-regional-voice-v2").then((cache) => cache.match(speechCacheRequest(voiceKey)));
     if (!stored) return null;
     const blob = await stored.blob();
     if (blob.size < 500) return null;
@@ -508,7 +508,7 @@ export default function Home() {
       if (blob.size < 500) throw new Error("The generated audio file was empty.");
       speechCacheRef.current.set(voiceKey, blob);
       if ("caches" in window) {
-        const cache = await caches.open("persian-audio-eleven-accent-v1");
+        const cache = await caches.open("persian-audio-regional-voice-v2");
         await cache.put(speechCacheRequest(voiceKey), new Response(blob, { headers: { "Content-Type": "audio/mpeg" } }));
       }
       return blob;
@@ -527,7 +527,7 @@ export default function Home() {
     const memory = speechTimingsRef.current.get(voiceKey);
     if (memory) return memory;
     if (!("caches" in window)) return null;
-    const stored = await caches.open("persian-speech-timings-eleven-accent-v1").then((cache) => cache.match(speechTimingCacheRequest(voiceKey)));
+    const stored = await caches.open("persian-speech-timings-regional-voice-v2").then((cache) => cache.match(speechTimingCacheRequest(voiceKey)));
     if (!stored) return null;
     const data = (await stored.json()) as { words?: TimedCaption[] };
     if (!data.words?.length) return null;
@@ -567,8 +567,8 @@ export default function Home() {
       speechTimingsRef.current.set(voiceKey, metadata.words);
       if ("caches" in window) {
         const [audioCache, timingCache] = await Promise.all([
-          caches.open("persian-audio-eleven-accent-v1"),
-          caches.open("persian-speech-timings-eleven-accent-v1"),
+          caches.open("persian-audio-regional-voice-v2"),
+          caches.open("persian-speech-timings-regional-voice-v2"),
         ]);
         await Promise.all([
           audioCache.put(speechCacheRequest(voiceKey), new Response(audio, { headers: { "Content-Type": audio.type } })),
@@ -863,7 +863,7 @@ export default function Home() {
   useEffect(() => {
     if (!latestListening || !isMeaningfulPersianText(latestListening.transcriptFa)) return;
     const speechText = sanitizePersianSpeechText(latestListening.transcriptFa);
-    const alignedKey = `aligned-eleven-accent-v1-${latestListening.id}-${speechText}`;
+    const alignedKey = `aligned-regional-voice-v2-${latestListening.id}-${speechText}`;
     const listeningKey = `listening-${latestListening.id}`;
 
     // Start exact alignment as soon as the lesson exists, not when the learner
@@ -872,7 +872,7 @@ export default function Home() {
       const voiceKey = selectedVoiceCacheKey(listeningKey);
       speechCacheRef.current.set(voiceKey, audio);
       if ("caches" in window) {
-        const cache = await caches.open("persian-audio-eleven-accent-v1");
+        const cache = await caches.open("persian-audio-regional-voice-v2");
         await cache.put(speechCacheRequest(voiceKey), new Response(audio, { headers: { "Content-Type": audio.type } }));
       }
     }).catch(() => {
@@ -1245,7 +1245,7 @@ export default function Home() {
     setStatus(`Preparing ${selectedPersianVoice.genderLabel.toLowerCase()} voice · ${selectedPersianVoice.regionLabel}…`);
     try {
       await playAudioBlob(await prepareSpeech(PERSIAN_VOICE_SAMPLE, "settings-voice-preview"));
-      setStatus(`Playing ${selectedPersianVoice.genderLabel.toLowerCase()} voice with the ${selectedPersianVoice.regionLabel} accent mode.`);
+      setStatus(`Playing ${selectedPersianVoice.name} from ${selectedPersianVoice.regionLabel}.`);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "The voice preview is unavailable. Try again in a moment.");
     } finally {
@@ -1701,7 +1701,7 @@ export default function Home() {
   async function playRapidListening() {
     if (!latestListening || audioBusy || rapidPlaying) return;
     const speechText = sanitizePersianSpeechText(latestListening.transcriptFa);
-    const cacheKey = `aligned-eleven-accent-v1-${latestListening.id}-${speechText}`;
+    const cacheKey = `aligned-regional-voice-v2-${latestListening.id}-${speechText}`;
     setAudioBusy(true);
     setStatus("Aligning every word to the audio…");
     try {
@@ -2325,7 +2325,7 @@ export default function Home() {
       onChangePassword={changePassword}
       onChangeUsername={changeUsername}
     />}
-    {tab === "account" && <section className="font-preferences"><h2>Account settings</h2><div className="preference-row"><label>Persian font <select value={persianFont} onChange={event=>{setPersianFont(event.target.value);try{localStorage.setItem('cursos-persian-font',event.target.value);}catch{}}}><option value="original">Original · Cursos</option><option value="tahoma">Tahoma · system</option><option value="arial">Arial · system</option><option value="serif">Times New Roman · system</option></select></label></div><div className="preference-row voice-preference"><label>Accent region <select aria-label="Persian accent region" value={selectedPersianVoice.regionId} onChange={event=>{const voice=normalizePersianVoiceProfile(`${event.target.value}-${selectedPersianVoice.gender}`);releasePlayback();setPersianVoice(voice);try{localStorage.setItem('cursos-persian-voice',voice);}catch{}}}>{PERSIAN_VOICE_REGIONS.map(region=><option key={region.id} value={region.id}>{region.label}{region.experimental?" · experimental":" · standard"}</option>)}</select></label><label>Voice <select aria-label="Persian voice gender" value={selectedPersianVoice.gender} onChange={event=>{const voice=normalizePersianVoiceProfile(`${selectedPersianVoice.regionId}-${event.target.value}`);releasePlayback();setPersianVoice(voice);try{localStorage.setItem('cursos-persian-voice',voice);}catch{}}}>{PERSIAN_VOICE_GENDERS.map(gender=><option key={gender.id} value={gender.id}>{gender.name} · {gender.label.toLowerCase()}</option>)}</select></label><button className="secondary" disabled={audioBusy} onClick={()=>void previewPersianVoice()}>{audioBusy?"Preparing…":"▶ Preview voice"}</button></div><p className="fa">هر روز با خواندن و شنیدن، فارسی را بهتر یاد می‌گیریم.</p><small>Saved on this browser. ElevenLabs uses Arman or Mina when available; OpenAI speech takes over if ElevenLabs is unavailable. Regional accents are experimental and can vary.</small></section>}
+    {tab === "account" && <section className="font-preferences"><h2>Account settings</h2><div className="preference-row"><label>Persian font <select value={persianFont} onChange={event=>{setPersianFont(event.target.value);try{localStorage.setItem('cursos-persian-font',event.target.value);}catch{}}}><option value="original">Original · Cursos</option><option value="tahoma">Tahoma · system</option><option value="arial">Arial · system</option><option value="serif">Times New Roman · system</option></select></label></div><div className="preference-row voice-preference"><label>Accent region <select aria-label="Persian accent region" value={selectedPersianVoice.regionId} onChange={event=>{const voice=normalizePersianVoiceProfile(`${event.target.value}-${selectedPersianVoice.gender}`);releasePlayback();setPersianVoice(voice);try{localStorage.setItem('cursos-persian-voice',voice);}catch{}}}>{PERSIAN_VOICE_REGIONS.map(region=><option key={region.id} value={region.id}>{region.label}{region.experimental?" · experimental":" · standard"}</option>)}</select></label><label>Voice <select aria-label="Persian voice gender" value={selectedPersianVoice.gender} onChange={event=>{const voice=normalizePersianVoiceProfile(`${selectedPersianVoice.regionId}-${event.target.value}`);releasePlayback();setPersianVoice(voice);try{localStorage.setItem('cursos-persian-voice',voice);}catch{}}}>{PERSIAN_VOICE_GENDERS.map(gender=><option key={gender.id} value={gender.id}>{persianVoiceProfile(`${selectedPersianVoice.regionId}-${gender.id}`).name} · {gender.label.toLowerCase()}</option>)}</select></label><button className="secondary" disabled={audioBusy} onClick={()=>void previewPersianVoice()}>{audioBusy?"Preparing…":"▶ Preview voice"}</button></div><p className="fa">هر روز با خواندن و شنیدن، فارسی را بهتر یاد می‌گیریم.</p><small>Saved on this browser. Each region and gender has its own ElevenLabs voice. OpenAI speech takes over if ElevenLabs is unavailable. Designed regional accents are experimental; ask a native speaker to check them before using them as pronunciation models.</small></section>}
   </main>;
 }
 

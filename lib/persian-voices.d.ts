@@ -32,5 +32,3 @@ export function persianVoiceProfile(value: unknown): {
   coachAccent: string;
   experimental: boolean;
 };
-export function accentDirectedSpeechText(text: string, voice: unknown): { text: string; prefix: string };
-export function stripSpeechDirectionFromAlignment<T>(alignment: T, prefix: string): T;
