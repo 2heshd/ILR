@@ -2,12 +2,14 @@ import OpenAI from "openai";
 import { createElevenLabsSpeech, elevenLabsErrorResponse, elevenLabsSpeechConfigured, normalizeElevenLabsVoice } from "@/lib/elevenlabs-speech";
 import { openAiErrorResponse } from "@/lib/openai-error";
 import { isPlayablePersianText, sanitizePersianSpeechText } from "@/lib/persian-speech";
+import { persianVoiceProfile } from "@/lib/persian-voices.js";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
   const { text, voice: requestedVoice } = (await request.json()) as { text?: string; voice?: unknown };
   const voice = normalizeElevenLabsVoice(requestedVoice);
+  const profile = persianVoiceProfile(voice);
   if (!elevenLabsSpeechConfigured(voice) && !process.env.OPENAI_API_KEY) {
     return Response.json({ error: "Persian speech is not configured." }, { status: 503 });
   }
@@ -28,9 +30,9 @@ export async function POST(request: Request) {
     const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, timeout: 20_000, maxRetries: 0 });
     const audio = await client.audio.speech.create({
       model: process.env.OPENAI_TTS_MODEL || "gpt-4o-mini-tts",
-      voice: process.env.OPENAI_TTS_VOICE || "marin",
+      voice: profile.gender === "female" ? "marin" : "cedar",
       input: speechText,
-      instructions: "Read only the supplied Persian text. Speak in natural educated Iranian Persian at a clear, slightly slower-than-normal broadcast pace for an intermediate learner. Keep natural phrasing and rhythm. Never describe punctuation, say the words dot or ellipsis, translate the text, or add commentary.",
+      instructions: `Read only the supplied Persian text. Speak with ${profile.coachAccent} at a clear, slightly slower-than-normal pace for an intermediate learner. Keep natural Iranian Persian phrasing and rhythm. Never describe punctuation, say the words dot or ellipsis, translate the text, or add commentary.`,
       speed: 0.88,
       response_format: "mp3",
     }, { signal });

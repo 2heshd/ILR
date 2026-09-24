@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { IlrLevel, SpeakingAttempt, SpeakingPrompt } from "@/lib/types";
+import { persianVoiceProfile, type PersianVoiceProfileId } from "@/lib/persian-voices.js";
 
-type PersianVoice = "male" | "female";
 type ChatTurn = { id: string; role: "learner" | "coach"; text: string };
 type RealtimeEvent = { type?: string; transcript?: string; error?: { message?: string } };
 
@@ -12,7 +12,7 @@ type Props = {
   prompts: SpeakingPrompt[];
   onAttempt: (attempt: SpeakingAttempt) => void;
   makeId: () => string;
-  voice: PersianVoice;
+  voice: PersianVoiceProfileId;
 };
 
 function clientId() {
@@ -39,6 +39,7 @@ export default function SpeakingLab({ level, prompts, onAttempt, makeId, voice }
   const transcriptRef = useRef<ChatTurn[]>([]);
   const transcriptEndRef = useRef<HTMLDivElement | null>(null);
   const currentPrompt = prompts[promptIndex] ?? prompts[0];
+  const selectedVoice = persianVoiceProfile(voice);
   const topics = useMemo(() => prompts.map((prompt) => prompt.topic), [prompts]);
 
   function addTurn(role: ChatTurn["role"], text: unknown) {
@@ -207,7 +208,7 @@ export default function SpeakingLab({ level, prompts, onAttempt, makeId, voice }
     <div className="live-speaking-controls">
       <label><span>Conversation topic</span><select disabled={active} aria-label="Choose conversation topic" value={promptIndex} onChange={(event) => { setPromptIndex(Number(event.target.value)); setTurns([]); transcriptRef.current = []; setStatus("Topic changed. Start when you are ready."); }}>{topics.map((topic, index) => <option key={`${topic}-${index}`} value={index}>{String(index + 1).padStart(2, "0")} · {topic}</option>)}</select></label>
       <label><span>Target</span><strong>ILR {level}</strong></label>
-      <label><span>Coach voice</span><strong>{voice === "female" ? "Female" : "Male"}</strong></label>
+      <label><span>Coach voice</span><strong>{selectedVoice.name} · {selectedVoice.regionLabel}</strong></label>
     </div>
 
     <div className="live-chat" aria-live="polite">
@@ -223,6 +224,6 @@ export default function SpeakingLab({ level, prompts, onAttempt, makeId, voice }
       <p className="speaking-status">{status}</p>
     </div>
     <audio ref={remoteAudioRef} autoPlay className="remote-coach-audio" />
-    <p className="muted live-speaking-note">AI coaching is experimental and not an official ILR score. The microphone is streamed only while the live session is active.</p>
+    <p className="muted live-speaking-note">AI coaching is experimental and not an official ILR score. Regional delivery in live mode is prompt-based and can vary. The microphone is streamed only while the live session is active.</p>
   </section>;
 }

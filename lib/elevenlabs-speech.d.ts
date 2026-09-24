@@ -5,7 +5,7 @@ export type ElevenLabsCharacterAlignment = {
 };
 
 export type TimedWord = { word: string; start: number; end: number };
-export type ElevenLabsVoice = "male" | "female";
+export type ElevenLabsVoice = PersianVoiceProfileId;
 
 export class ElevenLabsSpeechError extends Error {
   status: number;
@@ -22,3 +22,4 @@ export function createElevenLabsSpeechWithTimestamps(text: string, signal: Abort
 }>;
 export function characterAlignmentToWords(alignment: ElevenLabsCharacterAlignment | null | undefined): TimedWord[];
 export function elevenLabsErrorResponse(error: unknown, fallback: string): Response;
+import type { PersianVoiceProfileId } from "./persian-voices.js";

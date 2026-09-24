@@ -1,14 +1,15 @@
 import { createHash } from "node:crypto";
 import { openAiErrorResponse } from "@/lib/openai-error";
+import { persianVoiceProfile } from "@/lib/persian-voices.js";
 
 export const runtime = "nodejs";
 
 const REALTIME_MODEL = process.env.OPENAI_REALTIME_MODEL || "gpt-realtime-2.1";
 
-function tutorInstructions(level: number, topic: string) {
+function tutorInstructions(level: number, topic: string, accent: string) {
   return `You are a native Iranian Persian conversation partner and a precise speaking coach for a DLI learner.
 
-Run a natural LIVE voice conversation in contemporary Iranian Persian. Use an educated Tehran accent and Iranian vocabulary, pronunciation, rhythm, and grammar—not Dari or Arabic pronunciation. The learner's target is ILR ${level}. The topic is: ${topic}.
+Run a natural LIVE voice conversation in contemporary Iranian Persian. Use ${accent} and Iranian vocabulary, pronunciation, rhythm, and grammar—not Dari or Arabic pronunciation. Keep the regional accent recognizable but the words intelligible to a learner. The learner's target is ILR ${level}. The topic is: ${topic}.
 
 Conversation behavior:
 - Start with a brief Persian greeting and one interesting question about the topic.
@@ -42,7 +43,8 @@ export async function POST(request: Request) {
   const url = new URL(request.url);
   const level = Math.max(1, Math.min(4, Number(url.searchParams.get("level")) || 1));
   const topic = String(url.searchParams.get("topic") || "everyday life").trim().slice(0, 120) || "everyday life";
-  const voice = url.searchParams.get("voice") === "male" ? "cedar" : "marin";
+  const profile = persianVoiceProfile(url.searchParams.get("voice"));
+  const voice = profile.gender === "male" ? "cedar" : "marin";
   const anonymousId = String(request.headers.get("x-cursos-user") || "anonymous").slice(0, 128);
   const safetyId = createHash("sha256").update(`cursos-realtime:${anonymousId}`).digest("hex");
 
@@ -50,7 +52,7 @@ export async function POST(request: Request) {
     type: "realtime",
     model: REALTIME_MODEL,
     output_modalities: ["audio"],
-    instructions: tutorInstructions(level, topic),
+    instructions: tutorInstructions(level, topic, profile.coachAccent),
     audio: {
       input: {
         transcription: { model: "gpt-4o-mini-transcribe", language: "fa" },

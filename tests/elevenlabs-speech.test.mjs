@@ -21,9 +21,10 @@ test('invalid ElevenLabs alignments are rejected',()=>{
   assert.deepEqual(characterAlignmentToWords({characters:['م'],character_start_times_seconds:[],character_end_times_seconds:[.1]}),[]);
 });
 
-test('only the configured female choice can select the female voice',()=>{
-  assert.equal(normalizeElevenLabsVoice('female'),'female');
-  assert.equal(normalizeElevenLabsVoice('male'),'male');
-  assert.equal(normalizeElevenLabsVoice('arbitrary-voice-id'),'male');
-  assert.equal(normalizeElevenLabsVoice(undefined),'male');
+test('voice choices are normalized to a safe regional profile',()=>{
+  assert.equal(normalizeElevenLabsVoice('female'),'tehran-female');
+  assert.equal(normalizeElevenLabsVoice('male'),'tehran-male');
+  assert.equal(normalizeElevenLabsVoice('shiraz-female'),'shiraz-female');
+  assert.equal(normalizeElevenLabsVoice('arbitrary-voice-id'),'tehran-male');
+  assert.equal(normalizeElevenLabsVoice(undefined),'tehran-male');
 });
