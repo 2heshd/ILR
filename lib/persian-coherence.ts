@@ -24,7 +24,23 @@ export function persianCoherenceIssues(value: unknown) {
     issues.push("State what the person helps the speaker do; به من کمک می‌کند cannot end as a vague event in a controlled passage.");
   }
 
+  if (/به\s+معاینه\s+کردن\s+(?:رفت|می‌?رود|برود)/u.test(text)) {
+    issues.push("Use برای معاینه رفتن or معاینه شدن, not به معاینه کردن رفتن.");
+  }
+
   for (const sentence of text.split(/[.؟!]+/u)) {
+    if (/(?:مدرک|مدارک|مدرک‌ها)[^،؛.؟!]{0,30}پر\s+(?:کرد|می‌?کند|می‌?کن|کن)/u.test(sentence)) {
+      issues.push("Fill out a form or information fields; documents are submitted, not filled out.");
+    }
+    if (/(?:مدرک|مدارک|مدرک‌ها)[^،؛.؟!]{0,12}معاینه/u.test(sentence)) {
+      issues.push("A person is medically examined; documents are reviewed or checked.");
+    }
+    if (/ضعیف/u.test(sentence) && /معافیت/u.test(sentence) && /(?:نمی‌?(?:ده|دن)|نداشت|نگرفت)/u.test(sentence)) {
+      issues.push("Do not claim that physical weakness itself causes denial of a military-service exemption.");
+    }
+    if (/(?:کارت پایان خدمت|برگ اعزام به خدمت)/u.test(sentence) && /اعلام\s+(?:کرد|شد|می‌)/u.test(sentence)) {
+      issues.push("Issue, give, or deliver the document itself; announce its status or timing, not the document.");
+    }
     if (/(?:^|[\s،])من(?:[\s،])/u.test(sentence)
       && !/(?:^|[\s،])من\s+و\s+/u.test(sentence)
       && /(?:کردیم|خریدیم|رفتیم|آمدیم|بودیم|داشتیم|شدیم|گفتیم|دیدیم|خوردیم|خواندیم|نوشتیم|گرفتیم)(?=$|[\s،])/u.test(sentence)) {

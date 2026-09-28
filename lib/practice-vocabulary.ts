@@ -6,10 +6,12 @@ const GRAMMAR_WORDS = new Set([
   "باشد", "باشند", "باشیم", "باید", "پس", "تا", "تو", "چرا", "چون", "چه", "خود", "در", "درباره", "را", "روی", "زیر", "سپس", "شما",
   "که", "کی", "ما", "من", "میان", "نه", "نیز", "نیست", "نیستم", "نیستند", "هست", "هستم", "هستی", "هستند", "هستیم", "هستید", "هم", "همه", "هر", "هیچ", "و", "ولی", "یا", "یک",
   "بعد", "قبل", "هنوز", "فقط", "حتی", "دیگر", "وقتی", "اگرچه", "بنابراین", "زیرا", "چطور", "چگونه", "کدام", "چقدر", "چند", "نیستی", "نیستیم", "نیستید", "باشم", "باشی", "باشید",
-  "رو", "یه", "چی", "اینا", "اونا", "اینو", "اونو", "همون", "همین", "دیگه", "واسه", "توی",
-  "همچنین", "همان", "اون", "آنجا", "اینجا", "چیزی", "کسی", "یکی", "یکدیگر", "خودم", "خودت", "خودش", "خودمان", "خودتان", "خودشان", "برایم", "برایت", "برایش", "برایمان", "برایتان", "برایشان",
+  "رو", "یه", "چی", "اینا", "اونا", "اینو", "اونو", "منو", "تورو", "مارو", "شمارو", "همون", "همین", "دیگه", "واسه", "توی", "اگه", "اونجا",
+  "همچنین", "همان", "اون", "آنجا", "اینجا", "چیزی", "کسی", "یکی", "یکدیگر", "خودم", "خودت", "خودش", "خودمان", "خودتان", "خودشان", "برایم", "برایت", "برایش", "برایمان", "برایتان", "برایشان", "همهچیز",
   "نبود", "نبودم", "نبودی", "نبودیم", "نبودید", "نبودند", "نباشد", "نباشم", "نباشی", "نباشیم", "نباشید", "نباشند",
+  "نباشه", "نباشین", "نباشن", "نشم", "نشی", "نشه", "نشیم", "نشین", "نشن",
   "شده", "شد", "شدم", "شدی", "شدیم", "شدید", "شدند", "شود", "شوم", "شوی", "شویم", "شوید", "شوند",
+  "بشه", "بشم", "بشی", "بشیم", "بشین", "بشن",
   "شدهام", "شدهای", "شدهاست", "شدهایم", "شدهاید", "شدهاند",
   // Basic numerals and productive counters provide concrete question details;
   // they are grammatical scaffolding rather than the lesson's lexical focus.
@@ -50,15 +52,19 @@ const SPOKEN_FORMS: Record<string,string> = {
 };
 const SPOKEN_VERBS: Record<string,string[]> = {
   "رفتن":["میرم","میری","میره","میریم","میرین","میرن"],
-  "آمدن":["میام","میای","میاد","میایم","میاین","میان","اومدم","اومدی","اومد","اومدیم","اومدین","اومدن"],
-  "خواستن":["میخوام","میخوای","میخواد","میخوایم","میخواین","میخوان"],
+  "آمدن":["میام","میای","میاد","میایم","میاین","میان","بیام","بیای","بیاد","بیایم","بیاین","بیان","اومدم","اومدی","اومد","اومدیم","اومدین","اومدن"],
+  "خواستن":["میخوام","میخوای","میخواد","میخوایم","میخواین","میخوان","بخوام","بخوای","بخواد","بخوایم","بخواین","بخوان"],
   "گفتن":["میگم","میگی","میگه","میگیم","میگین","میگن"],
   "شدن":["میشم","میشی","میشه","میشیم","میشین","میشن"],
-  "دادن":["میدم","میدی","میده","میدیم","میدین","میدن"],
+  "دادن":["میدم","میدی","میده","میدیم","میدین","میدن","بدم","بدی","بده","بدیم","بدین","بدن"],
+  "داشتن":["دارم","داری","داره","داریم","دارین","دارن"],
+  "توانستن":["میتونم","میتونی","میتونه","میتونیم","میتونین","میتونن"],
+  "کردن":["میکنم","میکنی","میکنه","میکنیم","میکنین","میکنن","کنم","کنی","کنه","کنیم","کنین","کنن"],
+  "آوردن":["بیارم","بیاری","بیاره","بیاریم","بیارین","بیارن"],
 };
 
 const VERB_ENDINGS = ["", "م", "ی", "د", "یم", "ید", "ند", "ه", "هام", "های", "هایم", "هاید", "هاند"];
-const NOMINAL_SUFFIXES = ["هایمان", "هایتان", "هایشان", "هایم", "هایت", "هایش", "هایی", "های", "ها", "مان", "تان", "شان", "اند", "ام", "ات", "اش", "ان", "ای", "ی", "م", "ت", "ش"];
+const NOMINAL_SUFFIXES = ["هایمان", "هایتان", "هایشان", "هامون", "هاتون", "هاشون", "هایم", "هایت", "هایش", "هایی", "های", "ترین", "ها", "مان", "تان", "شان", "مون", "تون", "شون", "اند", "ام", "ات", "اش", "ان", "ای", "تر", "ی", "م", "ت", "ش", "ه"];
 
 function normalize(value: string) {
   return value
@@ -119,6 +125,9 @@ export function unselectedContentWords(text: string, selectedVocabulary: string[
   // Only join complete selected entries, never arbitrary passage words.
   for (const item of selectedItems) selectedTokens.add(item.join(''));
   const standaloneVerbs = new Set(selectedItems.filter((item) => item.length === 1 && item[0].endsWith("ن")).map((item) => item[0]));
+  const licensedLightVerbs = new Set(selectedItems
+    .filter((item) => item.length > 1 && ["کردن", "شدن", "داشتن"].includes(item.at(-1) ?? ""))
+    .map((item) => item.at(-1)!));
   const licensedCompounds = new Set(selectedItems
     .filter((item) => item.length > 1 && item.at(-1)?.endsWith("ن"))
     .map((item) => `${item.at(-2)}|${item.at(-1)}`));
@@ -149,10 +158,13 @@ export function unselectedContentWords(text: string, selectedVocabulary: string[
       && /^(بود|باش|شد|شو)/u.test(token.slice(prefix.length))
       && GRAMMAR_WORDS.has(token.slice(prefix.length)))) continue;
     if (SPOKEN_FORMS[token] && selectedTokens.has(SPOKEN_FORMS[token])) continue;
+    // کمی is introduced early in the course and naturally loses its final ی
+    // before some colloquial continuations; this is not a new lexical item.
+    if (token === "کم" && selectedTokens.has("کمی")) continue;
     if ([...nominalBases(token)].some((base) => selectedTokens.has(base))) continue;
     const verbLemma = [...verbStems].find(([lemma, stems]) => [...stems].some((stem) => matchesStem(token, stem)) || (SPOKEN_VERBS[lemma]??[]).some(form=>token===form||token===`ن${form}`))?.[0];
     if (verbLemma) {
-      if (standaloneVerbs.has(verbLemma)) continue;
+      if (standaloneVerbs.has(verbLemma) || licensedLightVerbs.has(verbLemma)) continue;
       // The object marker can intervene: تصمیم را گرفت. It does not
       // introduce a new verb, but arbitrary intervening words must not
       // license a different light-verb use elsewhere in the sentence.

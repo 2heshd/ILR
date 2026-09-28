@@ -49,6 +49,10 @@ test('a selected compound allows its object marker without licensing a different
   assert.deepEqual(unselectedContentWords('تصمیم. گرفت', ['تصمیم گرفتن']), ['گرفت']);
   assert.deepEqual(unselectedContentWords('تصمیم، گرفت', ['تصمیم گرفتن']), ['گرفت']);
 });
+test('productive light verbs learned inside selected compounds may inflect naturally',()=>{
+  assert.deepEqual(unselectedContentWords('مدارکم را کامل کردم', ['پر کردن','مدارک','کامل']), []);
+  assert.deepEqual(unselectedContentWords('کتاب را گرفت', ['تصمیم گرفتن','کتاب']), ['گرفت']);
+});
 test('vowel-final nouns retain their identity with linking-ye possessives',()=>{
   assert.deepEqual(unselectedContentWords('زانویش صدایم موهایت', ['زانو','صدا','مو']), []);
   assert.deepEqual(unselectedContentWords('زانویش', ['کتاب']), ['زانویش']);
@@ -72,4 +76,13 @@ test('colloquial location and joined perfect auxiliaries remain grammatical',()=
 test('basic numerals and counters can support concrete comprehension details',()=>{
  assert.deepEqual(unselectedContentWords('دو محله و پنج نفر', ['محله']),[]);
  assert.deepEqual(unselectedContentWords('دو محله و پنج پزشک', ['محله']),['پزشک']);
+});
+
+test('colloquial inflections remain tied to licensed dictionary entries',()=>{
+ assert.deepEqual(unselectedContentWords('اگه مهمه، کارشون رو انجام بدن و اگه میتونن بیارن، انجامش میدن.', ['مهم','کار','انجام','دادن','توانستن','آوردن']),[]);
+ assert.deepEqual(unselectedContentWords('اگه نتیجه مهمه، کارشون رو انجام بدن.', ['مهم','کار','انجام','دادن']),['نتیجه']);
+});
+test('earlier words license comparative and colloquial subjunctive forms',()=>{
+ assert.deepEqual(unselectedContentWords('زودتر بیاد', ['زود','آمدن']),[]);
+ assert.deepEqual(unselectedContentWords('زودتر بیاد', ['دیر','رفتن']),['زودتر','بیاد']);
 });
