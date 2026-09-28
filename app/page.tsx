@@ -1334,15 +1334,23 @@ export default function Home() {
 
   function practiceGenerationContext(kind: "reading" | "listening", source: PracticeSource, currentState = latestState.current): PracticeGenerationContext {
     const planned = plannedWords(currentState, kind);
+    const selectedCandidates = source === "selected" ? adaptiveContextWords(currentState, planned, new Date(), 80) : [];
     const bank = source === "selected"
-      ? focusedSelectedPracticeWords(adaptiveContextWords(currentState, planned, new Date(), 80))
+      ? focusedSelectedPracticeWords(selectedCandidates)
       : topicPracticeWords(practiceTopic[kind], courseCatalog, NEWS_CATALOG);
     const words = bank.map((entry) => entry.word);
     const targetIlr = currentState.skillLevels[kind];
     const knownKeys = new Set(currentState.words
       .filter((word) => word.knowledgeState === "known" || word.knowledgeState === "automatic")
       .map((word) => normalizePersian(word.displayForm)));
-    const knownWords = words.filter((word) => knownKeys.has(normalizePersian(word)));
+    const knownWords = currentState.words
+      .filter((word) => knownKeys.has(normalizePersian(word.displayForm)))
+      .map((word) => word.displayForm);
+    const targetKeys = new Set(words.map(normalizePersian));
+    const targetCourseListNumbers = selectedCandidates
+      .filter((word) => targetKeys.has(normalizePersian(word.displayForm)))
+      .map((word) => word.courseListNumber)
+      .filter((value): value is number => Number.isInteger(value) && Number(value) > 0);
     const practiceMode: PracticeMode = source === "selected" ? "controlled" : "transfer";
     const practiceFocus = suitePracticeFocus(currentState, new Date());
     const fingerprint = {
@@ -1356,6 +1364,7 @@ export default function Home() {
       targetWords: words,
       wordDefinitions: bank,
       knownWords,
+      targetCourseListNumbers,
       practiceFocus,
     };
     return {

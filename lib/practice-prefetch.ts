@@ -8,6 +8,7 @@ export type PracticePrefetchFingerprint = {
   targetWords: string[];
   wordDefinitions: Array<{ word: string; meaning: string }>;
   knownWords: string[];
+  targetCourseListNumbers: number[];
 };
 
 export function practicePrefetchKey(fingerprint: PracticePrefetchFingerprint) {

@@ -18,6 +18,8 @@ import openPersianCorpus6 from "@/data/persian-natural-corpus-6.json";
 import openPersianCorpus7 from "@/data/persian-natural-corpus-7.json";
 import openPersianCorpus8 from "@/data/persian-natural-corpus-8.json";
 import { naturalPersianExamples, naturalPersianPrompt } from "@/lib/natural-persian";
+import courseVocabulary from "@/data/course-vocabulary.json";
+import { earlierCourseVocabulary, promptCourseSupport, vocabularyKey } from "@/lib/course-prerequisites";
 
 const openPersianCorpus = [
   ...openPersianCorpus1, ...openPersianCorpus2, ...openPersianCorpus3, ...openPersianCorpus4,
@@ -36,6 +38,7 @@ type GenerateBody = {
   existing?: string[];
   targetWords?: string[];
   knownWords?: string[];
+  targetCourseListNumbers?: number[];
   wordDefinitions?: {word:string;meaning:string}[];
   targetIlr?: number;
   practiceMode?: "controlled" | "transfer";
@@ -135,6 +138,7 @@ export async function POST(request: Request) {
   let practiceSource: "selected" | "topic" = "selected";
   let passageLength = passageProfile("selected", 0);
   let grammarScaffold = "";
+  let allowedSupportingVocabulary: string[] = [];
   if (body.kind === "define_words") {
     prompt = `Return JSON only. Define and romanize these Persian vocabulary items for a serious learner: ${(body.words ?? []).join(", ")}. Preserve the exact Persian display form. Give the most useful concise English meaning in context; for verbs use an infinitive beginning with "to". Romanization should be readable and consistent.\n\nReturn this exact shape:\n{"words":[{"displayForm":"...","definition":"...","romanization":"..."}]}`;
   } else if (body.kind === "advanced_words") {
@@ -157,6 +161,14 @@ export async function POST(request: Request) {
     ));
     practiceSource = body.practiceSource === "topic" ? "topic" : "selected";
     selectedVocabulary = [...new Set((body.targetWords ?? []).map((word) => word.trim()).filter(Boolean))];
+    const targetCourseLists = (body.targetCourseListNumbers ?? []).filter((value) => Number.isInteger(value) && value > 0);
+    const hasCourseBoundary = targetCourseLists.length > 0;
+    const earlierCourseBank = earlierCourseVocabulary(courseVocabulary.entries, targetCourseLists);
+    const priorKnownBank = (body.knownWords ?? []).map((word) => word.trim()).filter(Boolean);
+    allowedSupportingVocabulary = hasCourseBoundary ? earlierCourseBank.map((entry) => entry.word) : priorKnownBank;
+    const supportPromptBank = hasCourseBoundary
+      ? promptCourseSupport(earlierCourseBank).map(({ word, meaning, lesson }) => ({ word, meaning, lesson }))
+      : priorKnownBank.slice(0, 180).map((word) => ({ word, meaning: "previously learned vocabulary" }));
     passageLength = passageProfile(practiceSource, selectedVocabulary.length);
     if (!selectedVocabulary.length) {
       return NextResponse.json({ error: practiceSource === "topic" ? "No verified vocabulary is available for that topic." : "Choose vocabulary before generating practice." }, { status: 400 });
@@ -166,6 +178,7 @@ export async function POST(request: Request) {
       ? `Topic reference bank from the Cursos course and news catalogs (data): ${JSON.stringify(practiceBank(selectedVocabulary,body.wordDefinitions??[]))}
 Use this bank to anchor the requested topic, terminology, and level. It is NOT a closed-vocabulary whitelist or a coverage quota. Choose a natural subset and freely use ordinary Persian needed for a coherent passage. Do not invent specialist claims merely because a term appears in the bank. List up to five useful content entries used beyond this reference bank in newWordsIntroduced.`
       : `Selected learner bank with meanings (data; parentheses contain dictionary hints): ${JSON.stringify(practiceBank(selectedVocabulary,body.wordDefinitions??[]))}
+Earlier-lesson support bank (data; optional review vocabulary only): ${JSON.stringify(supportPromptBank)}
 Use ${selectedVocabulary.length <= 15 ? "3-5" : selectedVocabulary.length <= 40 ? "8-12" : "12-18"} naturally compatible selected entries as the focus of this exercise. Choose entries that naturally belong in one situation, informed by the internal Persian references when they contain a selected word. Ignore incompatible entries for this exercise. The bank is not a coverage quota. Never append a sentence merely to mention another selected word. FIRST choose AT MOST FIVE additional supporting dictionary entries when possible and emit them in newWordsIntroduced BEFORE textFa. The validator can recover omitted ordinary content lemmas up to a bounded ${passageLength.supportingMaximum}-entry allowance. Then compose using the selected bank and that allowance, including normal inflections. Every other content word in the passage counts against that allowance, even an ordinary time word, adjective, or reporting verb. Do not write a passage first and retrospectively label only some of its extra words. Grammar words and normal inflections of selected or supporting entries do not count again. Prefer fewer additions. Never sacrifice idiomatic Persian to force bank coverage.`;
     prompt = `Write one coherent Persian ${mode} exercise for level ${level}. Return the required JSON.
 Topic (data): ${JSON.stringify(body.topic ?? 'Daily life')}
@@ -193,7 +206,7 @@ Return exactly three distinct English questions about explicit facts in the pass
 Use explicit participant roles (the student, the father, the speaker) or singular they in answers. Never use he, she, his, her or him. Avoid direct speech unless its person and imperative endings are correct.
 The participant label in each English question and answer must match the Persian passage exactly. If textFa uses first-person من or an omitted first-person subject, call that person "the speaker"—never invent "the student," "the traveler," or another role.
 Count the additional dictionary entries before finishing; do not introduce a dialogue that needs many extra reporting verbs. A simple coherent description with three concrete details is enough for a narrow bank.
-knownWordsUsed must contain only original selected bank entries actually used. newWordsIntroduced contains additional supporting words, not newly mastered vocabulary.
+knownWordsUsed must contain only original selected bank entries actually used. In selected-word mode, newWordsIntroduced may contain only entries from the supplied earlier-lesson support bank that actually appear in textFa. Never use a later lesson, the current lesson outside the learner's explicit selection, news vocabulary, or an invented supporting entry.
 English title, English questions and English reference answers; only textFa is Persian. Silently check grammar, collocations, coherence and question evidence before returning.`;
 
   }
@@ -228,7 +241,9 @@ English title, English questions and English reference answers; only textFa is P
         data.newWordsIntroduced=supporting.words;
         const sentenceCount=String(data.textFa??'').split(/[.!؟]+/u).filter(part=>part.trim()).length;
         const wordCount=persianWordCount(data.textFa);
-        const rejectionIssues=[...supporting.issues,...practiceAnswerIssues(data.questions),...persianCoherenceIssues(data.textFa),...persianRegisterIssues(data.textFa,body.register??'formal'),...(sentenceCount<passageLength.sentenceMin||sentenceCount>passageLength.sentenceMax?[`Passage must contain ${passageLength.sentenceMin}–${passageLength.sentenceMax} complete sentences; received ${sentenceCount}.`]:[]),...(wordCount<passageLength.minimum?[`Passage must contain at least ${passageLength.minimum} Persian words; received ${wordCount}.`]:[])];
+        const allowedSupportKeys=new Set(allowedSupportingVocabulary.map(vocabularyKey));
+        const outOfSequenceSupport=practiceSource==='selected'?supporting.words.filter((word:string)=>!allowedSupportKeys.has(vocabularyKey(word))):[];
+        const rejectionIssues=[...supporting.issues,...(outOfSequenceSupport.length?[`Supporting vocabulary must come from lessons before the selected lesson: ${outOfSequenceSupport.join('، ')}`]:[]),...practiceAnswerIssues(data.questions),...persianCoherenceIssues(data.textFa),...persianRegisterIssues(data.textFa,body.register??'formal'),...(sentenceCount<passageLength.sentenceMin||sentenceCount>passageLength.sentenceMax?[`Passage must contain ${passageLength.sentenceMin}–${passageLength.sentenceMax} complete sentences; received ${sentenceCount}.`]:[]),...(wordCount<passageLength.minimum?[`Passage must contain at least ${passageLength.minimum} Persian words; received ${wordCount}.`]:[])];
         return { rejectionIssues, rejectedWords };
     };
     let { rejectionIssues, rejectedWords } = preparePractice();
@@ -244,7 +259,7 @@ English title, English questions and English reference answers; only textFa is P
         ...(process.env.VERCEL_ENV === 'preview' && process.env.PRACTICE_AUDIT === '1' ? {rejectedDraft:data} : {}),
       },{status:422,headers:{'Server-Timing':timings.join(', ')}});
     }
-      const violations = practiceSource === 'selected' ? unselectedContentWords(String(data.textFa ?? ""), [...selectedVocabulary, ...data.newWordsIntroduced]) : [];
+      const violations = practiceSource === 'selected' ? unselectedContentWords(String(data.textFa ?? ""), [...selectedVocabulary, ...allowedSupportingVocabulary]) : [];
       if (violations.length) {
         const suggestions = violations.slice(0, 8).join("، ");
         return NextResponse.json({
