@@ -132,7 +132,7 @@ test("reading and listening generation are constrained to learner-selected vocab
   const route = await readFile(new URL("../app/api/generate/route.ts", import.meta.url), "utf8");
   assert.match(route, /AT MOST FIVE additional supporting/u);
   assert.match(route, /data.newWordsIntroduced=supporting.words/u);
-  assert.match(route, /rejectionIssues=\[\.\.\.supporting.issues,\.\.\.practiceAnswerIssues\(data.questions\),\.\.\.persianCoherenceIssues\(data.textFa\),\.\.\.persianRegisterIssues/u);
+  assert.match(route, /rejectionIssues=\[\.\.\.supporting.issues,\.\.\.\(outOfSequenceSupport\.length[\s\S]*?\.\.\.practiceAnswerIssues\(data.questions\),\.\.\.persianCoherenceIssues\(data.textFa\),\.\.\.persianRegisterIssues/u);
   assert.doesNotMatch(route, /data\s*=\s*verdict.exercise/u);
   assert.match(route, /if\(rejectionIssues.length\)/u);
   assert.doesNotMatch(route, /naturalnessScore/u);
@@ -143,6 +143,11 @@ test("reading and listening generation are constrained to learner-selected vocab
   assert.match(route, /SILENT NATIVE EDIT/u);
   assert.match(route, /status: 422/u);
   assert.match(route, /suggestedWords: violations\.slice\(0, 8\)/u);
+  assert.match(route, /earlierCourseVocabulary/u);
+  assert.match(route, /allowedSupportingVocabulary = hasCourseBoundary/u);
+  assert.match(route, /Supporting vocabulary must come from lessons before the selected lesson/u);
+  assert.match(route, /\.\.\.selectedVocabulary, \.\.\.allowedSupportingVocabulary/u);
+  assert.match(pageSource, /targetCourseListNumbers/u);
   assert.match(pageSource, /if \(!currentState\.words\.length\)/u);
   assert.match(pageSource, /selectedContextKeys/u);
   assert.match(pageSource, /practicePrefetchRef\.current\[kind\]/u);
