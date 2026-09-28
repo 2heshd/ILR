@@ -16,3 +16,15 @@ test("a coherent natural routine passes the deterministic gate", () => {
   const passage = "هر روز زود بیدار می‌شوم. بعد با مادربزرگم صبحانه می‌خورم. وقتی وقتِ رفتن به سرِ کار می‌شود، او کمک می‌کند وسایلم را آماده کنم و بعد از خانه بیرون می‌روم.";
   assert.deepEqual(persianCoherenceIssues(passage), []);
 });
+
+test("the generator gate rejects recurring military-course semantic mismatches", () => {
+  assert.ok(persianCoherenceIssues("او مدارک را پر کرد و تحویل داد.").some((issue) => issue.includes("documents")));
+  assert.ok(persianCoherenceIssues("او اطلاعات و مدارک خود را پر کرد.").some((issue) => issue.includes("documents")));
+  assert.ok(persianCoherenceIssues("او باید مدارک را کامل پر کند.").some((issue) => issue.includes("documents")));
+  assert.ok(persianCoherenceIssues("کارمند مدارک را معاینه کرد.").some((issue) => issue.includes("medically examined")));
+  assert.ok(persianCoherenceIssues("او به معاینه کردن رفت.").some((issue) => issue.includes("برای معاینه")));
+  assert.ok(persianCoherenceIssues("چون او ضعیف بود، برای همین معافیت نگرفت.").some((issue) => issue.includes("weakness")));
+  assert.ok(persianCoherenceIssues("اگر ضعیف باشی، معافیت بهت نمی‌دن.").some((issue) => issue.includes("weakness")));
+  assert.ok(persianCoherenceIssues("برگ اعزام به خدمت را اعلام کردند.").some((issue) => issue.includes("document")));
+  assert.deepEqual(persianCoherenceIssues("او فرم را پر کرد، مدارک را تحویل داد و برای معاینه رفت."), []);
+});

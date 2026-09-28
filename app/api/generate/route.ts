@@ -19,7 +19,7 @@ import openPersianCorpus7 from "@/data/persian-natural-corpus-7.json";
 import openPersianCorpus8 from "@/data/persian-natural-corpus-8.json";
 import { naturalPersianExamples, naturalPersianPrompt } from "@/lib/natural-persian";
 import courseVocabulary from "@/data/course-vocabulary.json";
-import { earlierCourseVocabulary, promptCourseSupport, vocabularyKey } from "@/lib/course-prerequisites";
+import { earlierCourseVocabulary, promptCourseSupport } from "@/lib/course-prerequisites";
 
 const openPersianCorpus = [
   ...openPersianCorpus1, ...openPersianCorpus2, ...openPersianCorpus3, ...openPersianCorpus4,
@@ -90,6 +90,29 @@ function persianWordCount(value: unknown) {
   return String(value ?? "").match(/[\u0621-\u063A\u0641-\u064A\u066E-\u06D3\u06FA-\u06FC\u200C]+/gu)?.length ?? 0;
 }
 
+function copiedDictionaryInfinitives(text: unknown, vocabulary: string[]) {
+  const normalized = String(text ?? "").normalize("NFKC").replace(/[\u064b-\u065f\u0670]/gu, "").replace(/[\u200c\s]+/gu, " ");
+  return vocabulary.filter((entry) => {
+    const form = entry.replace(/\([^)]*\)/gu, "").split(/[،؛/]/u)[0]?.trim().normalize("NFKC").replace(/[\u064b-\u065f\u0670]/gu, "").replace(/[\u200c\s]+/gu, " ");
+    if (!form || !/[دت]ن$/u.test(form)) return false;
+    const pattern = new RegExp(`(?:^|[\\s،؛])${form.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?=$|[\\s،؛.!؟])`, "gu");
+    return [...normalized.matchAll(pattern)].some((match) => {
+      const before = normalized.slice(0, match.index).trimEnd();
+      // Persian infinitives are legitimate after a preposition (برای معاینه کردن,
+      // بعد از پر کردن). The gate targets dictionary forms pasted as predicates.
+      return !/(?:^|\s)(?:برای|از|به|با)$/u.test(before);
+    });
+  });
+}
+
+function normalizeColloquialFunctionWords(text: unknown) {
+  return String(text ?? "")
+    .replace(/(^|[\s،؛])را(?=$|[\s،؛.!؟])/gu, "$1رو")
+    .replace(/(^|[\s،؛])اگر(?=$|[\s،؛.!؟])/gu, "$1اگه")
+    .replace(/(^|[\s،؛])آن[‌\s]?جا(?=$|[\s،؛.!؟])/gu, "$1اونجا")
+    .replace(/(^|[\s،؛])یک(?=$|[\s،؛.!؟])/gu, "$1یه");
+}
+
 function passageProfile(source: "selected" | "topic", selectedCount: number) {
   if (source === "topic") return { sentenceMin: 4, sentenceMax: 8, target: "110–135", minimum: 60, supportingMaximum: SUPPORTING_VOCABULARY_LIMIT };
   if (selectedCount <= 15) return { sentenceMin: 3, sentenceMax: 5, target: "36–50", minimum: 30, supportingMaximum: 30 };
@@ -126,7 +149,7 @@ export async function POST(request: Request) {
   const body = (await request.json()) as GenerateBody;
   const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, timeout: 9_500, maxRetries: 0 });
   // Keep the complete request inside the learner-facing latency budget while
-  // leaving room for one targeted repair when the deterministic gate rejects it.
+  // leaving room for bounded targeted repairs when the deterministic gate rejects it.
   const deadline = AbortSignal.timeout(19_500);
   const signal = AbortSignal.any([request.signal, deadline]);
   // Practice generation is a tightly constrained JSON task. A mini model keeps
@@ -179,7 +202,8 @@ export async function POST(request: Request) {
 Use this bank to anchor the requested topic, terminology, and level. It is NOT a closed-vocabulary whitelist or a coverage quota. Choose a natural subset and freely use ordinary Persian needed for a coherent passage. Do not invent specialist claims merely because a term appears in the bank. List up to five useful content entries used beyond this reference bank in newWordsIntroduced.`
       : `Selected learner bank with meanings (data; parentheses contain dictionary hints): ${JSON.stringify(practiceBank(selectedVocabulary,body.wordDefinitions??[]))}
 Earlier-lesson support bank (data; optional review vocabulary only): ${JSON.stringify(supportPromptBank)}
-Use ${selectedVocabulary.length <= 15 ? "3-5" : selectedVocabulary.length <= 40 ? "8-12" : "12-18"} naturally compatible selected entries as the focus of this exercise. Choose entries that naturally belong in one situation, informed by the internal Persian references when they contain a selected word. Ignore incompatible entries for this exercise. The bank is not a coverage quota. Never append a sentence merely to mention another selected word. FIRST choose AT MOST FIVE additional supporting dictionary entries when possible and emit them in newWordsIntroduced BEFORE textFa. The validator can recover omitted ordinary content lemmas up to a bounded ${passageLength.supportingMaximum}-entry allowance. Then compose using the selected bank and that allowance, including normal inflections. Every other content word in the passage counts against that allowance, even an ordinary time word, adjective, or reporting verb. Do not write a passage first and retrospectively label only some of its extra words. Grammar words and normal inflections of selected or supporting entries do not count again. Prefer fewer additions. Never sacrifice idiomatic Persian to force bank coverage.`;
+The earlier-lesson support bank is a CLOSED content-word whitelist. If a Persian noun, adjective, adverb, or verb is absent from both banks, do not use it—even if it feels basic or obvious. Simplify the idea instead of substituting another unlisted synonym. Normal Persian grammar/function words and inflections of listed dictionary forms remain allowed.
+Use ${selectedVocabulary.length <= 15 ? "3-5" : selectedVocabulary.length <= 40 ? "8-12" : "12-18"} naturally compatible selected entries as the focus of this exercise. Choose entries that naturally belong in one situation, informed by the internal Persian references when they contain a selected word. Ignore incompatible entries for this exercise. The bank is not a coverage quota. Never append a sentence merely to mention another selected word. FIRST choose AT MOST FIVE additional supporting dictionary entries from the earlier-lesson bank when possible and emit them in newWordsIntroduced BEFORE textFa. Then compose using the selected bank and those earlier entries, including normal inflections. Every other content word in the passage is forbidden, even an ordinary time word, adjective, or reporting verb. Do not copy content vocabulary from the style references. Prefer fewer additions. Never sacrifice idiomatic Persian to force bank coverage.`;
     prompt = `Write one coherent Persian ${mode} exercise for level ${level}. Return the required JSON.
 Topic (data): ${JSON.stringify(body.topic ?? 'Daily life')}
 Register: ${body.register === 'colloquial' ? 'Natural spoken Iranian Persian' : 'Standard written Iranian Persian'}
@@ -198,9 +222,11 @@ Write ONE coherent description, explanation, or event. Do not stitch unrelated e
 Before drafting, silently choose one believable setting, one timeline, and only the participants needed for it. Every sentence must advance or explain that same situation. Avoid translated-English transitions, redundant restatements, and vague movement such as آمدن when the destination or point of view does not make it natural.
 Every person and action must contribute clearly to that one situation. Do not insert a family member or helper merely to connect vocabulary. If somebody helps the speaker, state what they help the speaker do. In a first-person passage, use an explicit possessive form for the speaker's relative, such as مادربزرگم rather than bare مادربزرگ. Write با هم as two words. For "when it is time to go to work," use a natural pattern such as وقتی وقتِ رفتن به سرِ کار می‌شود; never write *وقت سر کار رفتن می‌رسد.
 Treat every bank item according to its dictionary meaning and part of speech. Never manufacture a Persian compound verb by attaching کردن, شدن, دادن, or another light verb to a noun merely to include it. Use only an established collocation that fits the intended sense; if uncertain, omit that item. For example, express recovery with بهبود یافتن or بهتر شدن, not *بهبود شدن.
+Respect the semantic roles of every collocation, not just its grammar: people are examined; forms or information fields are filled out; documents are submitted; and a certificate of completed service follows completion of service. Never infer that weakness itself denies an exemption. Do not use one selected noun as the object of a selected verb unless that pairing is idiomatic and logically accurate.
+Dictionary forms ending in ـن are infinitives, not ready-made predicates. Whenever a selected simple or compound verb appears, conjugate its final verb for the actual subject and tense. Never paste forms such as پر کردن، تحویل دادن، طول کشیدن, or بستگی داشتن unchanged into an ordinary finite sentence.
 Write ${passageLength.sentenceMin}–${passageLength.sentenceMax} connected sentences containing ${passageLength.target} Persian words total, leaving a safe margin above the enforced ${passageLength.minimum}-word minimum, with at least three concrete details that support distinct questions. Match sentence complexity to the requested level through structure and meaning rather than filler. Conjugate dictionary forms normally; do not copy stem annotations or vowel marks. Keep tense, viewpoint and register consistent.
 ${body.register === 'colloquial'
-  ? 'Write as an Iranian speaker naturally explaining or retelling the topic to a friend aloud, using a first- or second-person frame when that helps technical subject matter sound conversational. Make the spoken register unmistakable throughout, using at least four natural conversational forms: spoken function words such as یه، رو، توی، اون، اینا; spoken vocabulary such as خونه; and spoken verb or possessive forms such as می‌خوام، می‌رم، می‌شه، خریدشون. Do not merely insert one casual word into otherwise formal prose. Do not mix forms such as توی خانه‌ام with conversational speech, and do not return formal news prose with a colloquial label. Required technical, institutional, or formal content terms from the selected bank may remain standard; do not distort those terms into fake colloquialisms.'
+  ? 'Write as an Iranian speaker naturally explaining or retelling the topic to a friend aloud, using a first- or second-person frame when that helps technical subject matter sound conversational. Make the spoken register unmistakable throughout, using at least three natural conversational forms. Prefer grammatical/function-word signals such as رو، یه، توی، اون، اگه plus spoken inflections of verbs already present in the supplied banks; do not introduce a new content lemma merely to sound casual. Do not merely insert one casual word into otherwise formal prose. Do not mix forms such as توی خانه‌ام with conversational speech, and do not return formal news prose with a colloquial label. Required technical, institutional, or formal content terms from the selected bank may remain standard; do not distort those terms into fake colloquialisms.'
   : 'Keep the entire passage in standard written Persian. Do not use colloquial forms such as توی, رو as an object marker, یه, اینا, اونا, می‌خوام, or spoken plural verb endings.'}
 Return exactly three distinct English questions about explicit facts in the passage, with concise English reference answers preserving tense, person and meaning. Do not invent gender or unstated motives. No inference question is required; use inference only when concrete clues support it.
 Use explicit participant roles (the student, the father, the speaker) or singular they in answers. Never use he, she, his, her or him. Avoid direct speech unless its person and imperative endings are correct.
@@ -233,6 +259,7 @@ English title, English questions and English reference answers; only textFa is P
     let response = await generate(`${prompt}\nSILENT NATIVE EDIT: Read textFa once as a native Iranian editor before returning JSON. Remove literal translations, mixed register, filler, odd timelines, and unnatural motion viewpoint. Aim for ${passageLength.target} Persian words so the result remains above ${passageLength.minimum} after deterministic token counting, and keep ${passageLength.sentenceMin}–${passageLength.sentenceMax} complete sentences.${body.register === 'colloquial' ? ' Confirm the whole passage sounds spoken and contains at least four conversational forms drawn from at least two different spoken-pattern categories, without distorting technical content words.' : ''}`, 'draft');
     let data = parseJson(response.output_text);
     const preparePractice = () => {
+        if(body.register==='colloquial')data.textFa=normalizeColloquialFunctionWords(data.textFa);
         data.questions=repairPracticeAnswerArticles(data.questions);
         const supporting=practiceSource === 'selected'
           ? checkSupportingVocabulary(String(data.textFa??''),selectedVocabulary,data.newWordsIntroduced,passageLength.supportingMaximum)
@@ -241,14 +268,19 @@ English title, English questions and English reference answers; only textFa is P
         data.newWordsIntroduced=supporting.words;
         const sentenceCount=String(data.textFa??'').split(/[.!؟]+/u).filter(part=>part.trim()).length;
         const wordCount=persianWordCount(data.textFa);
-        const allowedSupportKeys=new Set(allowedSupportingVocabulary.map(vocabularyKey));
-        const outOfSequenceSupport=practiceSource==='selected'?supporting.words.filter((word:string)=>!allowedSupportKeys.has(vocabularyKey(word))):[];
-        const rejectionIssues=[...supporting.issues,...(outOfSequenceSupport.length?[`Supporting vocabulary must come from lessons before the selected lesson: ${outOfSequenceSupport.join('، ')}`]:[]),...practiceAnswerIssues(data.questions),...persianCoherenceIssues(data.textFa),...persianRegisterIssues(data.textFa,body.register??'formal'),...(sentenceCount<passageLength.sentenceMin||sentenceCount>passageLength.sentenceMax?[`Passage must contain ${passageLength.sentenceMin}–${passageLength.sentenceMax} complete sentences; received ${sentenceCount}.`]:[]),...(wordCount<passageLength.minimum?[`Passage must contain at least ${passageLength.minimum} Persian words; received ${wordCount}.`]:[])];
+        const curriculumViolations=practiceSource==='selected'?unselectedContentWords(String(data.textFa??''),[...selectedVocabulary,...allowedSupportingVocabulary]):[];
+        // In colloquial Persian the third-person plural past (کردن = they did)
+        // is surface-identical to an infinitive, so this check is formal-only.
+        const copiedInfinitives=body.register==='colloquial'?[]:copiedDictionaryInfinitives(data.textFa,selectedVocabulary);
+        const rejectionIssues=[...supporting.issues,...(curriculumViolations.length?[`Replace words outside the selected and earlier-lesson banks: ${curriculumViolations.slice(0,12).join('، ')}`]:[]),...(copiedInfinitives.length?[`Conjugate these dictionary infinitives as finite verbs instead of copying them into the passage: ${copiedInfinitives.slice(0,8).join('، ')}`]:[]),...practiceAnswerIssues(data.questions),...persianCoherenceIssues(data.textFa),...persianRegisterIssues(data.textFa,body.register??'formal'),...(sentenceCount<passageLength.sentenceMin||sentenceCount>passageLength.sentenceMax?[`Passage must contain ${passageLength.sentenceMin}–${passageLength.sentenceMax} complete sentences; received ${sentenceCount}.`]:[]),...(wordCount<passageLength.minimum?[`Passage must contain at least ${passageLength.minimum} Persian words; received ${wordCount}.`]:[])];
         return { rejectionIssues, rejectedWords };
     };
     let { rejectionIssues, rejectedWords } = preparePractice();
-    if (rejectionIssues.length && !signal.aborted) {
-      response = await generate(`${prompt}\nREPAIR THE REJECTED DRAFT BELOW. Return a complete replacement JSON object, not commentary. Fix every listed issue while preserving one natural, coherent situation and factual English answers. Do not copy malformed wording.\nIssues: ${JSON.stringify(rejectionIssues)}\nRejected draft: ${JSON.stringify(data)}\n${body.register === 'colloquial' ? 'For colloquial Persian, rewrite the narration itself in consistently spoken Iranian Persian. Use at least four genuine spoken forms across the passage, for example یه، رو، توی، اون، خونه، می‌خوام، می‌شه، هستن, while keeping formal bank terms unchanged.' : ''}`, 'repair');
+    for (let repairAttempt=1; rejectionIssues.length && repairAttempt<=4 && !signal.aborted; repairAttempt++) {
+      const repairContext = repairAttempt <= 2
+        ? `Rejected draft: ${JSON.stringify(data)}`
+        : "Start over from the supplied banks. Do not reuse wording from the rejected attempts.";
+      response = await generate(`${prompt}\nREPAIR THE REJECTED DRAFT. Return a complete replacement JSON object, not commentary. Fix every listed issue while preserving one natural, coherent situation and factual English answers. Do not copy malformed wording. Curriculum-bank issues are hard whitelist violations: delete each listed surface form and rewrite using only an explicitly listed target or earlier-lesson entry; do not replace it with another unlisted synonym.\nIssues: ${JSON.stringify(rejectionIssues)}\n${repairContext}\n${body.register === 'colloquial' ? 'For colloquial Persian, rewrite the narration itself in consistently spoken Iranian Persian. Use genuine spoken inflections of allowed bank entries; do not introduce a new content lemma merely to sound conversational.' : ''}`, `repair-${repairAttempt}`);
       data = parseJson(response.output_text);
       ({ rejectionIssues, rejectedWords } = preparePractice());
     }
@@ -256,7 +288,7 @@ English title, English questions and English reference answers; only textFa is P
       return NextResponse.json({error:practiceSource === 'topic' ? 'This draft did not pass the Persian language and question-quality checks. Generate again.' : 'This draft did not pass the Persian language and question-quality checks. Try a broader vocabulary selection or generate again.',qualityIssues:rejectionIssues,suggestedWords:rejectedWords,
         // Only an explicitly enabled protected preview returns synthetic audit
         // drafts. Never expose rejected content through the production contract.
-        ...(process.env.VERCEL_ENV === 'preview' && process.env.PRACTICE_AUDIT === '1' ? {rejectedDraft:data} : {}),
+        ...((process.env.VERCEL_ENV === 'preview' || process.env.NODE_ENV === 'development') && process.env.PRACTICE_AUDIT === '1' ? {rejectedDraft:data} : {}),
       },{status:422,headers:{'Server-Timing':timings.join(', ')}});
     }
       const violations = practiceSource === 'selected' ? unselectedContentWords(String(data.textFa ?? ""), [...selectedVocabulary, ...allowedSupportingVocabulary]) : [];

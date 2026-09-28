@@ -19,12 +19,14 @@ test("a foreground generation gets the same retries as background preparation", 
   assert.doesNotMatch(source, /if \(!prepared\) prepared = await fetchPreparedPractice\(context\)/);
 });
 
-test("practice generation uses one fast draft with at most one targeted repair", async () => {
+test("practice generation uses one fast draft with bounded targeted repairs", async () => {
   const source = await readFile(new URL("../app/api/generate/route.ts", import.meta.url), "utf8");
   assert.match(source, /AbortSignal\.timeout\(19_500\)/);
   assert.match(source, /timeout: 9_500/);
   assert.match(source, /"gpt-4\.1-mini"/);
-  assert.match(source, /REPAIR THE REJECTED DRAFT BELOW/);
+  assert.match(source, /REPAIR THE REJECTED DRAFT/);
+  assert.match(source, /repairAttempt<=4/);
+  assert.match(source, /normalizeColloquialFunctionWords/);
   assert.doesNotMatch(source, /candidatePrompts/);
   assert.doesNotMatch(source, /practice_editor_review/);
 });
