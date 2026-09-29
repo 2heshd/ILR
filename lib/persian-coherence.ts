@@ -46,12 +46,12 @@ export function persianCoherenceIssues(value: unknown) {
     if (/ضعیف/u.test(sentence) && /معافیت/u.test(sentence) && /(?:نمی‌?(?:ده|دن)|نداشت|نگرفت)/u.test(sentence)) {
       issues.push("Do not claim that physical weakness itself causes denial of a military-service exemption.");
     }
-    if (/(?:کارت پایان خدمت|برگ اعزام به خدمت)/u.test(sentence) && /اعلام\s+(?:کرد|شد|می‌)/u.test(sentence)) {
+    if (/(?:کارت پایان خدمت|برگ اعزام به خدمت)[^،؛.؟!]{0,12}اعلام\s+(?:کرد|شد|می‌)/u.test(sentence)) {
       issues.push("Issue, give, or deliver the document itself; announce its status or timing, not the document.");
     }
-    if (/(?:^|[\s،])من(?:[\s،])/u.test(sentence)
-      && !/(?:^|[\s،])من\s+و\s+/u.test(sentence)
-      && /(?:کردیم|خریدیم|رفتیم|آمدیم|بودیم|داشتیم|شدیم|گفتیم|دیدیم|خوردیم|خواندیم|نوشتیم|گرفتیم)(?=$|[\s،])/u.test(sentence)) {
+    const singularPluralMismatch = /(?:^|[\s،])من(?!\s+و\s+)[^،؛]{0,28}(?:کردیم|خریدیم|رفتیم|آمدیم|بودیم|داشتیم|شدیم|گفتیم|دیدیم|خوردیم|خواندیم|نوشتیم|گرفتیم)(?=$|[\s،])/u.test(sentence);
+    const coordinatedWith = /(?:^|[\s،])من\s+با\s+[^،؛]{1,28}(?:کردیم|خریدیم|رفتیم|آمدیم|بودیم|داشتیم|شدیم|گفتیم|دیدیم|خوردیم|خواندیم|نوشتیم|گرفتیم)(?=$|[\s،])/u.test(sentence);
+    if (singularPluralMismatch && !coordinatedWith) {
       issues.push("An explicit singular من subject cannot take a first-person plural verb ending unless it is coordinated with another participant.");
     }
   }

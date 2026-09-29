@@ -19,5 +19,6 @@ test("listening passages require consistent spoken Persian", () => {
 test("first-person singular subjects reject plural verb endings", () => {
   assert.ok(persianCoherenceIssues("من غذا را با دوستانم خریدیم.").length > 0);
   assert.deepEqual(persianCoherenceIssues("من و دوستانم غذا را خریدیم."), []);
+  assert.deepEqual(persianCoherenceIssues("من با دوستانم به بازار رفتیم."), []);
   assert.deepEqual(persianCoherenceIssues("من غذا را با دوستانم خریدم."), []);
 });
