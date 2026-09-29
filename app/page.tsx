@@ -1418,6 +1418,24 @@ export default function Home() {
     return loadPracticeWithRetries(() => fetchPreparedPractice(context, request));
   }
 
+  async function fetchVisiblePractice(context: PracticeGenerationContext) {
+    if (context.practiceSource !== "selected") return fetchPreparedPractice(context);
+    let firstError: unknown;
+    const candidates = [0, 1].map(() => fetchPreparedPractice(context).catch((error) => {
+      firstError ??= error;
+      throw error;
+    }));
+    try {
+      // Selected-word drafts have a strict earlier-lesson vocabulary gate. Two
+      // candidates race under the same per-request deadline, and only the first
+      // fully validated result is exposed; this improves availability without
+      // weakening the curriculum boundary or lengthening the learner's wait.
+      return await Promise.any(candidates);
+    } catch {
+      throw firstError instanceof Error ? firstError : new Error("Generation failed.");
+    }
+  }
+
   function activatePreparedPractice(kind: "reading" | "listening", prepared: PreparedPractice) {
     const { data, targetIlr, practiceMode, generatedTargets, generatedWordCount, supportingWords } = prepared;
     const unknownCount = supportingWords.length;
@@ -1520,7 +1538,7 @@ export default function Home() {
       // Never wait on the background retry queue. A prefetch may be making up to
       // three quality-gated attempts; coupling the button to that promise made a
       // learner-visible generation appear frozen for tens of seconds.
-      if (!prepared) prepared = await fetchPreparedPractice(context);
+      if (!prepared) prepared = await fetchVisiblePractice(context);
       activatePreparedPractice(kind, prepared);
       prepareNextPractice(context, prepared.data.title);
       setStatus(`${source === "topic" ? "Topic" : "Selected-word"} ${kind} ready.`);

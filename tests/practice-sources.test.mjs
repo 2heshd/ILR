@@ -43,7 +43,7 @@ test("reading and listening expose the same two generation sources", () => {
 test("learner-visible generation never waits for the background retry queue", () => {
   assert.doesNotMatch(page, /await cache\.waitAndTake\(context\.key\)/u);
   assert.match(page, /let prepared = cache\.take\(context\.key\);/u);
-  assert.match(page, /if \(!prepared\) prepared = await fetchPreparedPractice\(context\);/u);
+  assert.match(page, /if \(!prepared\) prepared = await fetchVisiblePractice\(context\);/u);
 });
 
 test("only selected-word generation uses the closed-vocabulary gate", () => {

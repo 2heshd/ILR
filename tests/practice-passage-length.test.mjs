@@ -13,9 +13,11 @@ test("topic and selected-word practice use adaptive passage lengths", async () =
   assert.doesNotMatch(source, /around 24-36 Persian words total/);
 });
 
-test("foreground generation is single-attempt while background preparation may retry", async () => {
+test("foreground selected-word generation races bounded candidates while background preparation may retry", async () => {
   const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
-  assert.match(source, /if \(!prepared\) prepared = await fetchPreparedPractice\(context\)/);
+  assert.match(source, /if \(!prepared\) prepared = await fetchVisiblePractice\(context\)/);
+  assert.match(source, /return await Promise\.any\(candidates\)/);
+  assert.match(source, /context\.practiceSource !== "selected"/);
   assert.match(source, /loadPracticeWithRetries\(\(\) => fetchPreparedPractice\(context, request\)\)/);
   assert.match(source, /AbortSignal\.timeout\(10_000\)/);
 });
