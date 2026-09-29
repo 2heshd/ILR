@@ -113,10 +113,15 @@ function normalizeColloquialFunctionWords(text: unknown) {
     .replace(/(^|[\s،؛])یک(?=$|[\s،؛.!؟])/gu, "$1یه")
     .replace(/(^|[\s،؛])خانه(?=$|[\s،؛.!؟])/gu, "$1خونه")
     .replace(/می‌?شوم/gu, "می‌شم")
+    .replace(/می‌?شوند/gu, "می‌شن")
     .replace(/می‌?شود/gu, "می‌شه")
     .replace(/می‌?روم/gu, "می‌رم")
+    .replace(/می‌?کنند/gu, "می‌کنن")
+    .replace(/می‌?کند/gu, "می‌کنه")
+    .replace(/می‌?رسند/gu, "می‌رسن")
     .replace(/(^|[\s،؛])بروم(?=$|[\s،؛.!؟])/gu, "$1برم")
-    .replace(/ه‌ام(?=$|[\s،؛.!؟])/gu, "ه‌م");
+    .replace(/ه‌ام(?=$|[\s،؛.!؟])/gu, "ه‌م")
+    .replace(/([\u0600-\u06ff‌]+)\s+است(?=$|[\s،؛.!؟])/gu, "$1ه");
 }
 
 function passageProfile(source: "selected" | "topic", selectedCount: number) {

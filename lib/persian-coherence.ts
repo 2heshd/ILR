@@ -77,7 +77,7 @@ export function persianRegisterIssues(value: unknown, register: "formal" | "coll
     if (markerCount < 3) {
       issues.push("The colloquial passage must use consistent spoken Persian throughout, with at least three conversational forms.");
     }
-    if (/(?:می‌?(?:شوم|شود|روم)|(?:^|[\s،,.؟!])بروم)(?=$|[\s،,.؟!])/u.test(text)) {
+    if (/(?:می‌?(?:شوم|شود|شوند|روم|کند|کنند|رسند)|(?:^|[\s،,.؟!])بروم)(?=$|[\s،,.؟!])/u.test(text)) {
       issues.push("The colloquial passage mixes formal verb inflections into spoken Persian.");
     }
   }

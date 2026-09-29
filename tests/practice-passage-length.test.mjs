@@ -29,6 +29,8 @@ test("practice generation uses one quality-gated draft inside ten seconds", asyn
   assert.doesNotMatch(source, /REPAIR THE REJECTED DRAFT/);
   assert.doesNotMatch(source, /repairAttempt/);
   assert.match(source, /normalizeColloquialFunctionWords/);
+  assert.match(source, /replace\(\/می‌\?کند\/gu, "می‌کنه"\)/);
+  assert.match(source, /replace\(\/می‌\?شوند\/gu, "می‌شن"\)/);
   assert.match(source, /persianCoherenceIssues/);
   assert.match(source, /persianRegisterIssues/);
   assert.doesNotMatch(source, /candidatePrompts/);
