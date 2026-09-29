@@ -20,6 +20,14 @@ export function persianCoherenceIssues(value: unknown) {
     issues.push("Use a natural time-to-leave construction, such as وقتی وقتِ رفتن به سرِ کار می‌شود; do not use وقت سر کار رفتن می‌رسد.");
   }
 
+  if (/دوست\s+دار(?:ی|ید)[^؟.!]{0,45}دوست\s+داشته\s+باش/u.test(text)) {
+    issues.push("Avoid redundant constructions such as asking whether someone likes to like an activity.");
+  }
+
+  if (/؟\s*$/u.test(text)) {
+    issues.push("Finish the practice passage with a statement, not a rhetorical or conversational question.");
+  }
+
   if (/به\s+من\s+کمک\s+می‌?کند(?:\s+و|[.،؟!]|$)/u.test(text)) {
     issues.push("State what the person helps the speaker do; به من کمک می‌کند cannot end as a vague event in a controlled passage.");
   }

@@ -17,6 +17,11 @@ test("a coherent natural routine passes the deterministic gate", () => {
   assert.deepEqual(persianCoherenceIssues(passage), []);
 });
 
+test("practice passages reject rhetorical endings and redundant liking constructions", () => {
+  assert.ok(persianCoherenceIssues("تو هم دوست داری سوارکاری رو دوست داشته باشی؟").length >= 2);
+  assert.deepEqual(persianCoherenceIssues("من سوارکاری را دوست دارم."), []);
+});
+
 test("the generator gate rejects recurring military-course semantic mismatches", () => {
   assert.ok(persianCoherenceIssues("او مدارک را پر کرد و تحویل داد.").some((issue) => issue.includes("documents")));
   assert.ok(persianCoherenceIssues("او اطلاعات و مدارک خود را پر کرد.").some((issue) => issue.includes("documents")));
