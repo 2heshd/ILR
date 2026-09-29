@@ -155,9 +155,9 @@ export async function POST(request: Request) {
   // Rejected drafts fail the deterministic gate; only invisible prefetch may retry.
   const deadline = AbortSignal.timeout(9_000);
   const signal = AbortSignal.any([request.signal, deadline]);
-  // Practice generation is a tightly constrained JSON task. A mini model keeps
-  // the lab responsive while OPENAI_MODEL still allows a deployment override.
-  const model = process.env.OPENAI_MODEL || "gpt-4.1-mini";
+  // Natural Persian collocations and spoken inflections need the full model.
+  // The single-call deadline—not a weaker model—keeps learner-facing latency bounded.
+  const model = process.env.OPENAI_MODEL || "gpt-4.1";
 
   let prompt = "";
   let selectedVocabulary: string[] = [];

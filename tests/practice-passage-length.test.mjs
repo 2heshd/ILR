@@ -24,7 +24,7 @@ test("practice generation uses one quality-gated draft inside ten seconds", asyn
   const source = await readFile(new URL("../app/api/generate/route.ts", import.meta.url), "utf8");
   assert.match(source, /AbortSignal\.timeout\(9_000\)/);
   assert.match(source, /timeout: 8_200/);
-  assert.match(source, /"gpt-4\.1-mini"/);
+  assert.match(source, /"gpt-4\.1"/);
   assert.match(source, /isPractice \? 1800 : 2200/);
   assert.doesNotMatch(source, /REPAIR THE REJECTED DRAFT/);
   assert.doesNotMatch(source, /repairAttempt/);
