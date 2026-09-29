@@ -52,8 +52,8 @@ test('a selected compound allows its object marker without licensing a different
   assert.deepEqual(unselectedContentWords('تصمیم. گرفت', ['تصمیم گرفتن']), ['گرفت']);
   assert.deepEqual(unselectedContentWords('تصمیم، گرفت', ['تصمیم گرفتن']), ['گرفت']);
 });
-test('productive light verbs learned inside selected compounds may inflect naturally',()=>{
-  assert.deepEqual(unselectedContentWords('مدارکم را کامل کردم', ['پر کردن','مدارک','کامل']), []);
+test('a light verb in one selected compound cannot manufacture another compound',()=>{
+  assert.deepEqual(unselectedContentWords('مدارکم را کامل کردم', ['پر کردن','مدارک','کامل']), ['کردم']);
   assert.deepEqual(unselectedContentWords('کتاب را گرفت', ['تصمیم گرفتن','کتاب']), ['گرفت']);
 });
 test('vowel-final nouns retain their identity with linking-ye possessives',()=>{

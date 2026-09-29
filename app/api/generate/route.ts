@@ -109,6 +109,7 @@ function copiedDictionaryInfinitives(text: unknown, vocabulary: string[]) {
 
 function normalizeColloquialFunctionWords(text: unknown) {
   return String(text ?? "")
+    .replace(/باهم/gu, "با هم")
     .replace(/(^|[\s،؛])را(?=$|[\s،؛.!؟])/gu, "$1رو")
     .replace(/(^|[\s،؛])اگر(?=$|[\s،؛.!؟])/gu, "$1اگه")
     .replace(/(^|[\s،؛])آن[‌\s]?جا(?=$|[\s،؛.!؟])/gu, "$1اونجا")
@@ -290,7 +291,7 @@ English title, English questions and English reference answers; only textFa is P
     let { rejectionIssues, rejectedWords } = preparePractice();
     // A fast rejected first draft gets one rewrite, but never a repair queue.
     // The shared 9-second AbortSignal remains the absolute request deadline.
-    if (rejectionIssues.length && performance.now() - requestStarted < 3_800 && !signal.aborted) {
+    if (rejectionIssues.length && performance.now() - requestStarted < 4_200 && !signal.aborted) {
       const repaired = await generate(`${prompt}\nONE BOUNDED MINIMAL EDIT: Here is an otherwise complete draft: ${JSON.stringify(data)}. It failed only these deterministic checks: ${JSON.stringify(rejectionIssues)}. Preserve its coherent situation and make the fewest possible edits needed to fix every listed issue. Delete or replace each forbidden content word with an exact item from the supplied selected or earlier-lesson bank; never substitute another unlisted synonym. Preserve three fact-supported questions and the requested register. Return the complete corrected JSON only.`, 'rewrite');
       data = parseJson(repaired.output_text);
       ({ rejectionIssues, rejectedWords } = preparePractice());

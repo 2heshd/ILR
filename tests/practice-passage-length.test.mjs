@@ -29,7 +29,7 @@ test("practice generation permits at most one bounded rewrite inside ten seconds
   assert.match(source, /temperature: isPractice \? 0\.2 : undefined/);
   assert.match(source, /No external example passage is supplied in selected-word mode/);
   assert.match(source, /ONE BOUNDED MINIMAL EDIT/);
-  assert.match(source, /performance\.now\(\) - requestStarted < 3_800/);
+  assert.match(source, /performance\.now\(\) - requestStarted < 4_200/);
   assert.doesNotMatch(source, /REPAIR THE REJECTED DRAFT/);
   assert.doesNotMatch(source, /repairAttempt/);
   assert.doesNotMatch(source, /for \(let repair/);

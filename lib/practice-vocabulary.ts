@@ -8,7 +8,7 @@ const GRAMMAR_WORDS = new Set([
   "بعد", "قبل", "هنوز", "فقط", "حتی", "دیگر", "وقتی", "اگرچه", "بنابراین", "زیرا", "چطور", "چگونه", "کدام", "چقدر", "چند", "نیستی", "نیستیم", "نیستید", "باشم", "باشی", "باشید",
   "رو", "یه", "چی", "اینا", "اونا", "اونها", "اینو", "اونو", "منو", "تورو", "مارو", "شمارو", "همون", "همین", "دیگه", "واسه", "توی", "اگه", "اونجا", "ها",
   "همچنین", "همان", "اون", "آنجا", "اینجا", "چیزی", "کسی", "یکی", "یکدیگر", "خودم", "خودت", "خودش", "خودمان", "خودتان", "خودشان", "برایم", "برایت", "برایش", "برایمان", "برایتان", "برایشان", "همهچیز",
-  "گاهی", "بعضی", "بعضیوقتها", "وقتها", "وقتا", "واقعا", "کجا", "دوباره", "کمتر",
+  "گاهی", "بعضی", "بعضیوقتها", "وقتها", "وقتا", "واقعا", "اصلا", "کجا", "دوباره", "کمتر",
   "بهم", "بهت", "بهش", "بهمون", "بهتون", "بهشون", "باهاش", "باهام", "باهات", "باهامون", "باهاتون", "باهاشون",
   "نبود", "نبودم", "نبودی", "نبودیم", "نبودید", "نبودند", "نباشد", "نباشم", "نباشی", "نباشیم", "نباشید", "نباشند",
   "نباشه", "نباشین", "نباشن", "نشد", "نشدن", "نشم", "نشی", "نشه", "نشیم", "نشین", "نشن",
@@ -127,9 +127,6 @@ export function unselectedContentWords(text: string, selectedVocabulary: string[
   // Only join complete selected entries, never arbitrary passage words.
   for (const item of selectedItems) selectedTokens.add(item.join(''));
   const standaloneVerbs = new Set(selectedItems.filter((item) => item.length === 1 && item[0].endsWith("ن")).map((item) => item[0]));
-  const licensedLightVerbs = new Set(selectedItems
-    .filter((item) => item.length > 1 && ["کردن", "شدن", "داشتن"].includes(item.at(-1) ?? ""))
-    .map((item) => item.at(-1)!));
   const licensedCompounds = new Set(selectedItems
     .filter((item) => item.length > 1 && item.at(-1)?.endsWith("ن"))
     .map((item) => `${item.at(-2)}|${item.at(-1)}`));
@@ -166,7 +163,7 @@ export function unselectedContentWords(text: string, selectedVocabulary: string[
     if ([...nominalBases(token)].some((base) => selectedTokens.has(base))) continue;
     const verbLemma = [...verbStems].find(([lemma, stems]) => [...stems].some((stem) => matchesStem(token, stem)) || (SPOKEN_VERBS[lemma]??[]).some(form=>token===form||token===`ن${form}`))?.[0];
     if (verbLemma) {
-      if (standaloneVerbs.has(verbLemma) || licensedLightVerbs.has(verbLemma)) continue;
+      if (standaloneVerbs.has(verbLemma)) continue;
       // The object marker can intervene: تصمیم را گرفت. It does not
       // introduce a new verb, but arbitrary intervening words must not
       // license a different light-verb use elsewhere in the sentence.
