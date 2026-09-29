@@ -217,8 +217,8 @@ export async function POST(request: Request) {
 Use this bank to anchor the requested topic, terminology, and level. It is NOT a closed-vocabulary whitelist or a coverage quota. Choose a natural subset and freely use ordinary Persian needed for a coherent passage. Do not invent specialist claims merely because a term appears in the bank. List up to five useful content entries used beyond this reference bank in newWordsIntroduced.`
       : `Selected learner bank with meanings (data; parentheses contain dictionary hints): ${JSON.stringify(practiceBank(selectedVocabulary,body.wordDefinitions??[]))}
 Earlier-lesson support bank (data; optional review vocabulary only): ${JSON.stringify(supportPromptBank)}
-The earlier-lesson support bank is a CLOSED content-word whitelist. If a Persian noun, adjective, adverb, or verb is absent from both banks, do not use it—even if it feels basic or obvious. Simplify the idea instead of substituting another unlisted synonym. Normal Persian grammar/function words and inflections of listed dictionary forms remain allowed.
-Use ${selectedVocabulary.length <= 15 ? "3-5" : selectedVocabulary.length <= 40 ? "8-12" : "12-18"} naturally compatible selected entries as the focus of this exercise. Choose entries that naturally belong in one situation, informed by the internal Persian references when they contain a selected word. Ignore incompatible entries for this exercise. The bank is not a coverage quota. Never append a sentence merely to mention another selected word. FIRST choose AT MOST FIVE additional supporting dictionary entries from the earlier-lesson bank when possible and emit them in newWordsIntroduced BEFORE textFa. Then compose using the selected bank and those earlier entries, including normal inflections. Every other content word in the passage is forbidden, even an ordinary time word, adjective, or reporting verb. Do not copy content vocabulary from the style references. Prefer fewer additions. Never sacrifice idiomatic Persian to force bank coverage.`;
+Use the earlier-lesson support bank first. If coherent Persian still requires an ordinary content word absent from both banks, you may use at most five such dictionary entries and must list each one in newWordsIntroduced. Simplify the idea instead of adding specialist vocabulary. Normal Persian grammar/function words and inflections of listed dictionary forms remain allowed.
+Use ${selectedVocabulary.length <= 15 ? "3-5" : selectedVocabulary.length <= 40 ? "8-12" : "12-18"} naturally compatible selected entries as the focus of this exercise. Choose entries that naturally belong in one situation, informed by the internal Persian references when they contain a selected word. Ignore incompatible entries for this exercise. The bank is not a coverage quota. Never append a sentence merely to mention another selected word. FIRST choose AT MOST FIVE additional supporting dictionary entries from the earlier-lesson bank when possible and emit them in newWordsIntroduced BEFORE textFa. Then compose using the selected bank and those earlier entries, including normal inflections. If the passage needs an additional ordinary support entry, include it in the same five-item newWordsIntroduced limit. Do not copy content vocabulary from the style references. Prefer fewer additions. Never sacrifice idiomatic Persian to force bank coverage.`;
     prompt = `Write one coherent Persian ${mode} exercise for level ${level}. Return the required JSON.
 Topic (data): ${JSON.stringify(body.topic ?? 'Daily life')}
 Register: ${body.register === 'colloquial' ? 'Natural spoken Iranian Persian' : 'Standard written Iranian Persian'}
@@ -279,13 +279,13 @@ English title, English questions and English reference answers; only textFa is P
         if(body.register==='colloquial')data.textFa=normalizeColloquialFunctionWords(data.textFa);
         data.questions=repairPracticeAnswerArticles(data.questions);
         const supporting=practiceSource === 'selected'
-          ? checkSupportingVocabulary(String(data.textFa??''),selectedVocabulary,data.newWordsIntroduced,passageLength.supportingMaximum)
+          ? checkSupportingVocabulary(String(data.textFa??''),[...selectedVocabulary,...allowedSupportingVocabulary],data.newWordsIntroduced,5)
           : {words:Array.isArray(data.newWordsIntroduced)?data.newWordsIntroduced.filter((word:unknown):word is string=>typeof word==='string'&&Boolean(word.trim())).slice(0,SUPPORTING_VOCABULARY_LIMIT):[],unknown:[] as string[],issues:[] as string[]};
         const rejectedWords=supporting.unknown;
         data.newWordsIntroduced=supporting.words;
         const sentenceCount=String(data.textFa??'').split(/[.!؟]+/u).filter(part=>part.trim()).length;
         const wordCount=persianWordCount(data.textFa);
-        const curriculumViolations=practiceSource==='selected'?unselectedContentWords(String(data.textFa??''),[...selectedVocabulary,...allowedSupportingVocabulary]):[];
+        const curriculumViolations=practiceSource==='selected'?unselectedContentWords(String(data.textFa??''),[...selectedVocabulary,...allowedSupportingVocabulary,...supporting.words]):[];
         const rejectionIssues=[...supporting.issues,...(curriculumViolations.length?[`Replace words outside the selected and earlier-lesson banks: ${curriculumViolations.slice(0,12).join('، ')}`]:[]),...practiceAnswerIssues(data.questions),...persianCoherenceIssues(data.textFa),...persianRegisterIssues(data.textFa,body.register??'formal'),...(sentenceCount<passageLength.sentenceMin||sentenceCount>passageLength.sentenceMax?[`Passage must contain ${passageLength.sentenceMin}–${passageLength.sentenceMax} complete sentences; received ${sentenceCount}.`]:[]),...(wordCount<passageLength.minimum?[`Passage must contain at least ${passageLength.minimum} Persian words; received ${wordCount}.`]:[])];
         return { rejectionIssues, rejectedWords };
     };
@@ -304,11 +304,11 @@ English title, English questions and English reference answers; only textFa is P
         ...((process.env.VERCEL_ENV === 'preview' || process.env.NODE_ENV === 'development') && process.env.PRACTICE_AUDIT === '1' ? {rejectedDraft:data} : {}),
       },{status:422,headers:{'Server-Timing':timings.join(', ')}});
     }
-      const violations = practiceSource === 'selected' ? unselectedContentWords(String(data.textFa ?? ""), [...selectedVocabulary, ...allowedSupportingVocabulary]) : [];
+      const violations = practiceSource === 'selected' ? unselectedContentWords(String(data.textFa ?? ""), [...selectedVocabulary, ...allowedSupportingVocabulary, ...(Array.isArray(data.newWordsIntroduced) ? data.newWordsIntroduced : [])]) : [];
       if (violations.length) {
         const suggestions = violations.slice(0, 8).join("، ");
         return NextResponse.json({
-          error: `The selected words could not form a natural closed-vocabulary passage. Add these words to your bank or choose more vocabulary: ${suggestions}.`,
+          error: `The selected words could not form a natural passage within the five-word support limit. Add these words to your bank or choose more vocabulary: ${suggestions}.`,
           suggestedWords: violations.slice(0, 8),
         }, { status: 422 });
       }
