@@ -40,6 +40,7 @@ import { compactStudyState, readStudyState, writeStudyState } from "@/lib/storag
 import { appendCloudReview, deletePlatformVocabulary, getSupabaseClient, loadCloudState, loadPlatformVocabulary, loadSuiteLearningSignals, loadUsername, mergePlatformVocabulary, mergeStudyStates, saveCloudState, syncPlatformVocabulary, updateUsername } from "@/lib/supabase";
 import { mergeSuiteEvidence, suitePracticeFocus } from "@/lib/suite-evidence";
 import { actionableCloudSyncNotice, type CloudSyncFailure } from "@/lib/cloud-sync-status";
+import { DEFAULT_TTS_VOICE, TTS_VOICES, type TtsVoice } from "@/lib/tts-voices";
 import { dedupeLexicalWords, restoreCourseDefinitions } from "@/lib/word-merge";
 import type {
   ComprehensionGrade,
@@ -330,7 +331,9 @@ export default function Home() {
   const [loaded, setLoaded] = useState(false);
   const [tab, setTab] = useState<Tab>("home");
   const [persianFont,setPersianFont]=useState('original');
+  const [ttsVoice,setTtsVoice]=useState<TtsVoice>(DEFAULT_TTS_VOICE);
   useEffect(()=>{try{const saved=localStorage.getItem('cursos-persian-font');if(saved&&['original','tahoma','arial','serif'].includes(saved))setPersianFont(saved);}catch{}},[]);
+  useEffect(()=>{try{const saved=localStorage.getItem('cursos-tts-voice') as TtsVoice|null;if(saved&&TTS_VOICES.includes(saved))setTtsVoice(saved);}catch{}},[]);
   useEffect(()=>{document.documentElement.style.setProperty('--persian-font',({original:'"Cursos Persian Mono"',tahoma:'"Persian Tahoma"',arial:'"Persian Arial"',serif:'"Persian Times"'} as Record<string,string>)[persianFont]);},[persianFont]);
   const [showIntake, setShowIntake] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -476,9 +479,10 @@ export default function Home() {
   }
 
   async function prepareSpeech(text: string, cacheKey: string) {
-    const cached = await readCachedSpeech(cacheKey);
+    const voiceCacheKey=`${ttsVoice}-${cacheKey}`;
+    const cached = await readCachedSpeech(voiceCacheKey);
     if (cached) return cached;
-    const pending = speechRequestsRef.current.get(cacheKey);
+    const pending = speechRequestsRef.current.get(voiceCacheKey);
     if (pending) return pending;
 
     const request = (async () => {
@@ -486,7 +490,7 @@ export default function Home() {
         method: "POST",
         signal: AbortSignal.timeout(25_000),
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: sanitizePersianSpeechText(text) }),
+        body: JSON.stringify({ text: sanitizePersianSpeechText(text), voice: ttsVoice }),
       });
       const contentType = response.headers.get("content-type") || "";
       if (!response.ok || !contentType.startsWith("audio/")) {
@@ -495,15 +499,15 @@ export default function Home() {
       }
       const blob = await response.blob();
       if (blob.size < 500) throw new Error("The generated audio file was empty.");
-      speechCacheRef.current.set(cacheKey, blob);
+      speechCacheRef.current.set(voiceCacheKey, blob);
       if ("caches" in window) {
         const cache = await caches.open("persian-audio-v2");
-        await cache.put(speechCacheRequest(`v2-${cacheKey}`), new Response(blob, { headers: { "Content-Type": "audio/mpeg" } }));
+        await cache.put(speechCacheRequest(`v2-${voiceCacheKey}`), new Response(blob, { headers: { "Content-Type": "audio/mpeg" } }));
       }
       return blob;
-    })().finally(() => speechRequestsRef.current.delete(cacheKey));
+    })().finally(() => speechRequestsRef.current.delete(voiceCacheKey));
 
-    speechRequestsRef.current.set(cacheKey, request);
+    speechRequestsRef.current.set(voiceCacheKey, request);
     return request;
   }
 
@@ -524,9 +528,10 @@ export default function Home() {
   }
 
   async function prepareAlignedSpeech(text: string, cacheKey: string) {
-    const [cachedAudio, cachedTimings] = await Promise.all([readCachedSpeech(cacheKey), readCachedSpeechTimings(cacheKey)]);
+    const voiceCacheKey=`${ttsVoice}-${cacheKey}`;
+    const [cachedAudio, cachedTimings] = await Promise.all([readCachedSpeech(voiceCacheKey), readCachedSpeechTimings(voiceCacheKey)]);
     if (cachedAudio && cachedTimings && captionsCoverText(text,cachedTimings)) return { audio: cachedAudio, timings: cachedTimings };
-    const pending = speechTimingRequestsRef.current.get(cacheKey);
+    const pending = speechTimingRequestsRef.current.get(voiceCacheKey);
     if (pending) return pending;
 
     const request = (async () => {
@@ -534,7 +539,7 @@ export default function Home() {
         method: "POST",
         signal: AbortSignal.timeout(25_000),
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text, voice: ttsVoice }),
       });
       if (!response.ok) {
         const data = await response.json().catch(() => null) as { error?: string } | null;
@@ -550,24 +555,24 @@ export default function Home() {
       };
       if (!metadata.words?.length || !captionsCoverText(text,metadata.words)) throw new Error("The captions are incomplete. Please retry or use Full audio.");
       const audio = new Blob([payload.slice(4 + metadataLength)], { type: metadata.mimeType || "audio/mpeg" });
-      speechCacheRef.current.set(cacheKey, audio);
-      speechTimingsRef.current.set(cacheKey, metadata.words);
+      speechCacheRef.current.set(voiceCacheKey, audio);
+      speechTimingsRef.current.set(voiceCacheKey, metadata.words);
       if ("caches" in window) {
         const [audioCache, timingCache] = await Promise.all([
           caches.open("persian-audio-v2"),
           caches.open("persian-speech-timings-v1"),
         ]);
         await Promise.all([
-          audioCache.put(speechCacheRequest(`v2-${cacheKey}`), new Response(audio, { headers: { "Content-Type": audio.type } })),
-          timingCache.put(speechTimingCacheRequest(cacheKey), new Response(JSON.stringify({ words: metadata.words }), {
+          audioCache.put(speechCacheRequest(`v2-${voiceCacheKey}`), new Response(audio, { headers: { "Content-Type": audio.type } })),
+          timingCache.put(speechTimingCacheRequest(voiceCacheKey), new Response(JSON.stringify({ words: metadata.words }), {
             headers: { "Content-Type": "application/json" },
           })),
         ]);
       }
       return { audio, timings: metadata.words };
-    })().finally(() => speechTimingRequestsRef.current.delete(cacheKey));
+    })().finally(() => speechTimingRequestsRef.current.delete(voiceCacheKey));
 
-    speechTimingRequestsRef.current.set(cacheKey, request);
+    speechTimingRequestsRef.current.set(voiceCacheKey, request);
     return request;
   }
 
@@ -1203,7 +1208,7 @@ export default function Home() {
     if (!current) return;
     try {
       const cacheKey = `word-${current.id}`;
-      const cached = await readCachedSpeech(cacheKey);
+      const cached = await readCachedSpeech(`${ttsVoice}-${cacheKey}`);
       if (!cached && playWithDeviceVoice(current.displayForm)) {
         setPlayedReviewWord(current.id);
         setStatus("Playing with the device’s Persian voice.");
@@ -1582,7 +1587,7 @@ export default function Home() {
         return;
       }
       const cacheKey = `listening-${latestListening.id}`;
-      const cached = await readCachedSpeech(cacheKey);
+      const cached = await readCachedSpeech(`${ttsVoice}-${cacheKey}`);
       if (!cached && playWithDeviceVoice(speechText)) {
         setListensCount((count) => count + 1);
         setStatus("Playing with the device’s Persian voice. Studio audio is caching in the background.");
@@ -1613,7 +1618,7 @@ export default function Home() {
     setAudioBusy(true);
     setStatus(`Starting sentence ${index + 1}…`);
     try {
-      const cached = await readCachedSpeech(cacheKey);
+      const cached = await readCachedSpeech(`${ttsVoice}-${cacheKey}`);
       if (cached) await playAudioBlob(cached);
       else if (playWithDeviceVoice(speechText)) {
         void prepareSpeech(speechText, cacheKey).catch(() => {
@@ -2314,7 +2319,7 @@ export default function Home() {
       onChangePassword={changePassword}
       onChangeUsername={changeUsername}
     />}
-    {tab === "account" && <section className="font-preferences"><h2>Account settings</h2><label>Persian font <select value={persianFont} onChange={event=>{setPersianFont(event.target.value);try{localStorage.setItem('cursos-persian-font',event.target.value);}catch{}}}><option value="original">Original · Cursos</option><option value="tahoma">Tahoma · system</option><option value="arial">Arial · system</option><option value="serif">Times New Roman · system</option></select></label><p className="fa">هر روز با خواندن و شنیدن، فارسی را بهتر یاد می‌گیریم.</p><small>Saved on this browser. System font availability varies by device.</small></section>}
+    {tab === "account" && <section className="font-preferences"><h2>Account settings</h2><label>Persian font <select value={persianFont} onChange={event=>{setPersianFont(event.target.value);try{localStorage.setItem('cursos-persian-font',event.target.value);}catch{}}}><option value="original">Original · Cursos</option><option value="tahoma">Tahoma · system</option><option value="arial">Arial · system</option><option value="serif">Times New Roman · system</option></select></label><label>Studio voice <select aria-label="Studio voice" value={ttsVoice} onChange={event=>{const voice=event.target.value as TtsVoice;setTtsVoice(voice);releasePlayback();try{localStorage.setItem('cursos-tts-voice',voice);}catch{}}}>{TTS_VOICES.map(voice=><option value={voice} key={voice}>{voice[0].toUpperCase()+voice.slice(1)}{voice===DEFAULT_TTS_VOICE?' · default':''}</option>)}</select></label><p className="fa">هر روز با خواندن و شنیدن، فارسی را بهتر یاد می‌گیریم.</p><small>Font and voice are saved on this browser. Studio speech is AI-generated. System font availability varies by device.</small></section>}
   </main>;
 }
 
