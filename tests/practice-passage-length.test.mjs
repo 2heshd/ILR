@@ -26,6 +26,8 @@ test("practice generation permits at most one bounded rewrite inside ten seconds
   assert.match(source, /timeout: 8_200/);
   assert.match(source, /"gpt-4\.1"/);
   assert.match(source, /isPractice \? 1800 : 2200/);
+  assert.match(source, /temperature: isPractice \? 0\.2 : undefined/);
+  assert.match(source, /No external example passage is supplied in selected-word mode/);
   assert.match(source, /ONE BOUNDED REWRITE/);
   assert.match(source, /performance\.now\(\) - requestStarted < 4_500/);
   assert.doesNotMatch(source, /REPAIR THE REJECTED DRAFT/);

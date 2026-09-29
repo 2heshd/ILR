@@ -183,7 +183,7 @@ export async function POST(request: Request) {
     const grammarProfile = grammarProfileForIlr(persianGrammar.rules, level);
     const grammarSeed = `${body.topic ?? "Daily life"}|${mode}|${level}|${(body.targetWords ?? []).slice(0, 12).join("|")}`;
     grammarScaffold = grammarPromptForExercise(grammarProfile, mode, grammarSeed);
-    const naturalStyleReferences = naturalPersianPrompt(naturalPersianExamples(
+    const retrievedStyleReferences = naturalPersianPrompt(naturalPersianExamples(
       [...editorialPersianExamples, ...openPersianCorpus], {
       topic: body.topic ?? "Daily life",
       words: body.targetWords ?? [],
@@ -194,6 +194,9 @@ export async function POST(request: Request) {
       },
     ));
     practiceSource = body.practiceSource === "topic" ? "topic" : "selected";
+    const naturalStyleReferences = practiceSource === "topic"
+      ? retrievedStyleReferences
+      : "No external example passage is supplied in selected-word mode; do not borrow vocabulary outside the two explicit banks.";
     selectedVocabulary = [...new Set((body.targetWords ?? []).map((word) => word.trim()).filter(Boolean))];
     const targetCourseLists = (body.targetCourseListNumbers ?? []).filter((value) => Number.isInteger(value) && value > 0);
     const hasCourseBoundary = targetCourseLists.length > 0;
@@ -256,6 +259,7 @@ English title, English questions and English reference answers; only textFa is P
         model,
         store: false,
         input,
+        temperature: isPractice ? 0.2 : undefined,
         max_output_tokens: budget,
         text: { format: isPractice ? practiceResponseFormat : { type: "json_object" } },
       }, { signal }), isPractice ? 1800 : 2200));
