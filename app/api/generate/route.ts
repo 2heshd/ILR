@@ -158,10 +158,10 @@ export async function POST(request: Request) {
   }
 
   const body = (await request.json()) as GenerateBody;
-  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, timeout: 8_200, maxRetries: 0 });
+  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, timeout: 7_600, maxRetries: 0 });
   // One learner-facing model call must finish inside the ten-second product budget.
   // Rejected drafts fail the deterministic gate; only invisible prefetch may retry.
-  const deadline = AbortSignal.timeout(9_000);
+  const deadline = AbortSignal.timeout(8_300);
   const signal = AbortSignal.any([request.signal, deadline]);
   // Natural Persian collocations and spoken inflections need the full model.
   // The single-call deadline—not a weaker model—keeps learner-facing latency bounded.
@@ -290,8 +290,8 @@ English title, English questions and English reference answers; only textFa is P
     let { rejectionIssues, rejectedWords } = preparePractice();
     // A fast rejected first draft gets one rewrite, but never a repair queue.
     // The shared 9-second AbortSignal remains the absolute request deadline.
-    if (rejectionIssues.length && performance.now() - requestStarted < 4_500 && !signal.aborted) {
-      const repaired = await generate(`${prompt}\nONE BOUNDED REWRITE: The prior draft failed these deterministic checks: ${JSON.stringify(rejectionIssues)}. Return a completely new JSON exercise that fixes every issue. Use one connected situation, keep the requested register throughout, and in selected-word mode use no content vocabulary outside the selected and earlier-lesson banks. Do not add commentary.`, 'rewrite');
+    if (rejectionIssues.length && performance.now() - requestStarted < 3_800 && !signal.aborted) {
+      const repaired = await generate(`${prompt}\nONE BOUNDED MINIMAL EDIT: Here is an otherwise complete draft: ${JSON.stringify(data)}. It failed only these deterministic checks: ${JSON.stringify(rejectionIssues)}. Preserve its coherent situation and make the fewest possible edits needed to fix every listed issue. Delete or replace each forbidden content word with an exact item from the supplied selected or earlier-lesson bank; never substitute another unlisted synonym. Preserve three fact-supported questions and the requested register. Return the complete corrected JSON only.`, 'rewrite');
       data = parseJson(repaired.output_text);
       ({ rejectionIssues, rejectedWords } = preparePractice());
     }

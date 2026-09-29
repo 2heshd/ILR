@@ -22,14 +22,14 @@ test("foreground generation is single-attempt while background preparation may r
 
 test("practice generation permits at most one bounded rewrite inside ten seconds", async () => {
   const source = await readFile(new URL("../app/api/generate/route.ts", import.meta.url), "utf8");
-  assert.match(source, /AbortSignal\.timeout\(9_000\)/);
-  assert.match(source, /timeout: 8_200/);
+  assert.match(source, /AbortSignal\.timeout\(8_300\)/);
+  assert.match(source, /timeout: 7_600/);
   assert.match(source, /"gpt-4\.1"/);
   assert.match(source, /isPractice \? 1800 : 2200/);
   assert.match(source, /temperature: isPractice \? 0\.2 : undefined/);
   assert.match(source, /No external example passage is supplied in selected-word mode/);
-  assert.match(source, /ONE BOUNDED REWRITE/);
-  assert.match(source, /performance\.now\(\) - requestStarted < 4_500/);
+  assert.match(source, /ONE BOUNDED MINIMAL EDIT/);
+  assert.match(source, /performance\.now\(\) - requestStarted < 3_800/);
   assert.doesNotMatch(source, /REPAIR THE REJECTED DRAFT/);
   assert.doesNotMatch(source, /repairAttempt/);
   assert.doesNotMatch(source, /for \(let repair/);
