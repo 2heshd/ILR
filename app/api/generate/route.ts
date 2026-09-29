@@ -123,15 +123,12 @@ function passageProfile(source: "selected" | "topic", selectedCount: number) {
 class IncompleteGeneration extends Error {}
 
 async function completeJsonResponse(make: (budget: number) => Promise<OpenAI.Responses.Response>, budget: number) {
-  for (let attempt = 0; attempt < 2; attempt++) {
-    const response = await make(budget * (attempt + 1));
-    if (response.status === "completed" && response.output_text.trim()) {
-      try { parseJson(response.output_text); return response; } catch { /* Retry malformed output once. */ }
-    }
-    // Log metadata only, never the learner's passage or API credentials.
-    console.warn("Practice response incomplete", { status: response.status, reason: response.incomplete_details?.reason });
-    if (response.incomplete_details?.reason === "content_filter") break;
+  const response = await make(budget);
+  if (response.status === "completed" && response.output_text.trim()) {
+    try { parseJson(response.output_text); return response; } catch { /* Fail fast; background preparation can retry. */ }
   }
+  // Log metadata only, never the learner's passage or API credentials.
+  console.warn("Practice response incomplete", { status: response.status, reason: response.incomplete_details?.reason });
   throw new IncompleteGeneration("The practice response was incomplete. Please generate again; your current work is unchanged.");
 }
 
@@ -147,10 +144,10 @@ export async function POST(request: Request) {
   }
 
   const body = (await request.json()) as GenerateBody;
-  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, timeout: 9_500, maxRetries: 0 });
-  // Keep the complete request inside the learner-facing latency budget while
-  // leaving room for bounded targeted repairs when the deterministic gate rejects it.
-  const deadline = AbortSignal.timeout(19_500);
+  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, timeout: 8_200, maxRetries: 0 });
+  // One learner-facing model call must finish inside the ten-second product budget.
+  // Rejected drafts fail the deterministic gate; only invisible prefetch may retry.
+  const deadline = AbortSignal.timeout(9_000);
   const signal = AbortSignal.any([request.signal, deadline]);
   // Practice generation is a tightly constrained JSON task. A mini model keeps
   // the lab responsive while OPENAI_MODEL still allows a deployment override.
@@ -247,7 +244,7 @@ English title, English questions and English reference answers; only textFa is P
         input,
         max_output_tokens: budget,
         text: { format: isPractice ? practiceResponseFormat : { type: "json_object" } },
-      }, { signal }), isPractice ? 2400 : 2200));
+      }, { signal }), isPractice ? 1800 : 2200));
     if (isPractice) prompt += `\nFINAL CHECK: Prefer a concise natural description over a forced story. No filler or unrelated plans. Use normal Persian collocations rather than mechanically combining dictionary nouns and verbs. Use explicit ezafe after final ه where appropriate (خانهٔ دوستم). Count the final passage: textFa must contain ${passageLength.sentenceMin}–${passageLength.sentenceMax} complete sentences and at least ${passageLength.minimum} Persian words.`;
     if (!isPractice) {
       const response = await generate(prompt);
@@ -256,7 +253,7 @@ English title, English questions and English reference answers; only textFa is P
 
     // A single, self-edited structured generation replaces the old five-draft
     // plus five-review fan-out. Deterministic validation remains a hard gate.
-    let response = await generate(`${prompt}\nSILENT NATIVE EDIT: Read textFa once as a native Iranian editor before returning JSON. Remove literal translations, mixed register, filler, odd timelines, and unnatural motion viewpoint. Aim for ${passageLength.target} Persian words so the result remains above ${passageLength.minimum} after deterministic token counting, and keep ${passageLength.sentenceMin}–${passageLength.sentenceMax} complete sentences.${body.register === 'colloquial' ? ' Confirm the whole passage sounds spoken and contains at least four conversational forms drawn from at least two different spoken-pattern categories, without distorting technical content words.' : ''}`, 'draft');
+    const response = await generate(`${prompt}\nSILENT NATIVE EDIT: Read textFa once as a native Iranian editor before returning JSON. Remove literal translations, mixed register, filler, odd timelines, and unnatural motion viewpoint. Aim for ${passageLength.target} Persian words so the result remains above ${passageLength.minimum} after deterministic token counting, and keep ${passageLength.sentenceMin}–${passageLength.sentenceMax} complete sentences.${body.register === 'colloquial' ? ' Confirm the whole passage sounds spoken and contains at least four conversational forms drawn from at least two different spoken-pattern categories, without distorting technical content words.' : ''}`, 'draft');
     let data = parseJson(response.output_text);
     const preparePractice = () => {
         if(body.register==='colloquial')data.textFa=normalizeColloquialFunctionWords(data.textFa);
@@ -275,15 +272,7 @@ English title, English questions and English reference answers; only textFa is P
         const rejectionIssues=[...supporting.issues,...(curriculumViolations.length?[`Replace words outside the selected and earlier-lesson banks: ${curriculumViolations.slice(0,12).join('، ')}`]:[]),...(copiedInfinitives.length?[`Conjugate these dictionary infinitives as finite verbs instead of copying them into the passage: ${copiedInfinitives.slice(0,8).join('، ')}`]:[]),...practiceAnswerIssues(data.questions),...persianCoherenceIssues(data.textFa),...persianRegisterIssues(data.textFa,body.register??'formal'),...(sentenceCount<passageLength.sentenceMin||sentenceCount>passageLength.sentenceMax?[`Passage must contain ${passageLength.sentenceMin}–${passageLength.sentenceMax} complete sentences; received ${sentenceCount}.`]:[]),...(wordCount<passageLength.minimum?[`Passage must contain at least ${passageLength.minimum} Persian words; received ${wordCount}.`]:[])];
         return { rejectionIssues, rejectedWords };
     };
-    let { rejectionIssues, rejectedWords } = preparePractice();
-    for (let repairAttempt=1; rejectionIssues.length && repairAttempt<=4 && !signal.aborted; repairAttempt++) {
-      const repairContext = repairAttempt <= 2
-        ? `Rejected draft: ${JSON.stringify(data)}`
-        : "Start over from the supplied banks. Do not reuse wording from the rejected attempts.";
-      response = await generate(`${prompt}\nREPAIR THE REJECTED DRAFT. Return a complete replacement JSON object, not commentary. Fix every listed issue while preserving one natural, coherent situation and factual English answers. Do not copy malformed wording. Curriculum-bank issues are hard whitelist violations: delete each listed surface form and rewrite using only an explicitly listed target or earlier-lesson entry; do not replace it with another unlisted synonym.\nIssues: ${JSON.stringify(rejectionIssues)}\n${repairContext}\n${body.register === 'colloquial' ? 'For colloquial Persian, rewrite the narration itself in consistently spoken Iranian Persian. Use genuine spoken inflections of allowed bank entries; do not introduce a new content lemma merely to sound conversational.' : ''}`, `repair-${repairAttempt}`);
-      data = parseJson(response.output_text);
-      ({ rejectionIssues, rejectedWords } = preparePractice());
-    }
+    const { rejectionIssues, rejectedWords } = preparePractice();
     if(rejectionIssues.length){
       return NextResponse.json({error:practiceSource === 'topic' ? 'This draft did not pass the Persian language and question-quality checks. Generate again.' : 'This draft did not pass the Persian language and question-quality checks. Try a broader vocabulary selection or generate again.',qualityIssues:rejectionIssues,suggestedWords:rejectedWords,
         // Only an explicitly enabled protected preview returns synthetic audit

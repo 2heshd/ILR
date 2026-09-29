@@ -13,20 +13,24 @@ test("topic and selected-word practice use adaptive passage lengths", async () =
   assert.doesNotMatch(source, /around 24-36 Persian words total/);
 });
 
-test("a foreground generation gets the same retries as background preparation", async () => {
+test("foreground generation is single-attempt while background preparation may retry", async () => {
   const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
-  assert.match(source, /if \(!prepared\) prepared = await fetchBackgroundPractice\(context\)/);
-  assert.doesNotMatch(source, /if \(!prepared\) prepared = await fetchPreparedPractice\(context\)/);
+  assert.match(source, /if \(!prepared\) prepared = await fetchPreparedPractice\(context\)/);
+  assert.match(source, /loadPracticeWithRetries\(\(\) => fetchPreparedPractice\(context, request\)\)/);
+  assert.match(source, /AbortSignal\.timeout\(10_000\)/);
 });
 
-test("practice generation uses one fast draft with bounded targeted repairs", async () => {
+test("practice generation uses one quality-gated draft inside ten seconds", async () => {
   const source = await readFile(new URL("../app/api/generate/route.ts", import.meta.url), "utf8");
-  assert.match(source, /AbortSignal\.timeout\(19_500\)/);
-  assert.match(source, /timeout: 9_500/);
+  assert.match(source, /AbortSignal\.timeout\(9_000\)/);
+  assert.match(source, /timeout: 8_200/);
   assert.match(source, /"gpt-4\.1-mini"/);
-  assert.match(source, /REPAIR THE REJECTED DRAFT/);
-  assert.match(source, /repairAttempt<=4/);
+  assert.match(source, /isPractice \? 1800 : 2200/);
+  assert.doesNotMatch(source, /REPAIR THE REJECTED DRAFT/);
+  assert.doesNotMatch(source, /repairAttempt/);
   assert.match(source, /normalizeColloquialFunctionWords/);
+  assert.match(source, /persianCoherenceIssues/);
+  assert.match(source, /persianRegisterIssues/);
   assert.doesNotMatch(source, /candidatePrompts/);
   assert.doesNotMatch(source, /practice_editor_review/);
 });

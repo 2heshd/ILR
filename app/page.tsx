@@ -301,7 +301,7 @@ async function generateJson(body: Record<string, unknown>) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
-    signal: AbortSignal.timeout(100_000),
+    signal: AbortSignal.timeout(10_000),
   });
   const data = await response.json().catch(() => ({error: 'The generation service did not respond. Please try again; your current practice is unchanged.'}));
   if (!response.ok) throw new Error(data.error || "Generation failed");
@@ -1517,7 +1517,9 @@ export default function Home() {
       const cache = practicePrefetchRef.current[kind];
       let prepared = cache.take(context.key);
       if (!prepared) prepared = await cache.waitAndTake(context.key);
-      if (!prepared) prepared = await fetchBackgroundPractice(context);
+      // The visible action makes one bounded attempt. Retrying rejected drafts is
+      // reserved for invisible prefetch so the learner never waits through a queue.
+      if (!prepared) prepared = await fetchPreparedPractice(context);
       activatePreparedPractice(kind, prepared);
       prepareNextPractice(context, prepared.data.title);
       setStatus(`${source === "topic" ? "Topic" : "Selected-word"} ${kind} ready.`);
