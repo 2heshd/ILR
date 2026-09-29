@@ -37,7 +37,7 @@ export function persianCoherenceIssues(value: unknown) {
   }
 
   for (const sentence of text.split(/[.؟!]+/u)) {
-    if (/(?:مدرک|مدارک|مدرک‌ها)[^،؛.؟!]{0,30}پر\s+(?:کرد|می‌?کند|می‌?کن|کن)/u.test(sentence)) {
+    if (/(?:مدرک|مدارک|مدرک‌ها)(?:\s+خود)?\s+را(?:\s+کامل)?\s+پر\s+(?:کرد|می‌?کند|می‌?کن|کن)/u.test(sentence)) {
       issues.push("Fill out a form or information fields; documents are submitted, not filled out.");
     }
     if (/(?:مدرک|مدارک|مدرک‌ها)[^،؛.؟!]{0,12}معاینه/u.test(sentence)) {

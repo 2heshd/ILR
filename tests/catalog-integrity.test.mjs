@@ -136,7 +136,7 @@ test("news vocabulary is grouped into learner-facing topics", () => {
 
 test("reading and listening generation are constrained to learner-selected vocabulary", async () => {
   const route = await readFile(new URL("../app/api/generate/route.ts", import.meta.url), "utf8");
-  assert.match(route, /AT MOST FIVE additional supporting/u);
+  assert.match(route, /at most twelve such dictionary entries/u);
   assert.match(route, /data.newWordsIntroduced=supporting.words/u);
   assert.match(route, /rejectionIssues=\[\.\.\.supporting.issues,\.\.\.\(curriculumViolations\.length\?/u);
   assert.match(route, /\.\.\.practiceAnswerIssues\(data.questions\),\.\.\.persianCoherenceIssues\(data.textFa\),\.\.\.persianRegisterIssues/u);
@@ -144,7 +144,7 @@ test("reading and listening generation are constrained to learner-selected vocab
   assert.match(route, /if\(rejectionIssues.length\)/u);
   assert.doesNotMatch(route, /naturalnessScore/u);
   assert.doesNotMatch(route, /candidatePrompts/u);
-  assert.match(route, /newWordsIntroduced: \{ type: "array", maxItems: 5/u);
+  assert.match(route, /newWordsIntroduced: \{ type: "array", maxItems: 12/u);
   assert.match(route, /No inference question is required/u);
   assert.doesNotMatch(route, /one main idea, two detail, one inference/u);
   assert.match(route, /SILENT NATIVE EDIT/u);
