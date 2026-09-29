@@ -20,14 +20,17 @@ test("foreground generation is single-attempt while background preparation may r
   assert.match(source, /AbortSignal\.timeout\(10_000\)/);
 });
 
-test("practice generation uses one quality-gated draft inside ten seconds", async () => {
+test("practice generation permits at most one bounded rewrite inside ten seconds", async () => {
   const source = await readFile(new URL("../app/api/generate/route.ts", import.meta.url), "utf8");
   assert.match(source, /AbortSignal\.timeout\(9_000\)/);
   assert.match(source, /timeout: 8_200/);
   assert.match(source, /"gpt-4\.1"/);
   assert.match(source, /isPractice \? 1800 : 2200/);
+  assert.match(source, /ONE BOUNDED REWRITE/);
+  assert.match(source, /performance\.now\(\) - requestStarted < 4_500/);
   assert.doesNotMatch(source, /REPAIR THE REJECTED DRAFT/);
   assert.doesNotMatch(source, /repairAttempt/);
+  assert.doesNotMatch(source, /for \(let repair/);
   assert.match(source, /normalizeColloquialFunctionWords/);
   assert.match(source, /replace\(\/می‌\?کند\/gu, "می‌کنه"\)/);
   assert.match(source, /replace\(\/می‌\?شوند\/gu, "می‌شن"\)/);

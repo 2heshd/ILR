@@ -146,6 +146,7 @@ async function completeJsonResponse(make: (budget: number) => Promise<OpenAI.Res
 }
 
 export async function POST(request: Request) {
+  const requestStarted = performance.now();
   const timings: string[] = [];
   async function measured<T>(stage: string, run: () => Promise<T>): Promise<T> {
     const started = performance.now();
@@ -282,7 +283,14 @@ English title, English questions and English reference answers; only textFa is P
         const rejectionIssues=[...supporting.issues,...(curriculumViolations.length?[`Replace words outside the selected and earlier-lesson banks: ${curriculumViolations.slice(0,12).join('، ')}`]:[]),...practiceAnswerIssues(data.questions),...persianCoherenceIssues(data.textFa),...persianRegisterIssues(data.textFa,body.register??'formal'),...(sentenceCount<passageLength.sentenceMin||sentenceCount>passageLength.sentenceMax?[`Passage must contain ${passageLength.sentenceMin}–${passageLength.sentenceMax} complete sentences; received ${sentenceCount}.`]:[]),...(wordCount<passageLength.minimum?[`Passage must contain at least ${passageLength.minimum} Persian words; received ${wordCount}.`]:[])];
         return { rejectionIssues, rejectedWords };
     };
-    const { rejectionIssues, rejectedWords } = preparePractice();
+    let { rejectionIssues, rejectedWords } = preparePractice();
+    // A fast rejected first draft gets one rewrite, but never a repair queue.
+    // The shared 9-second AbortSignal remains the absolute request deadline.
+    if (rejectionIssues.length && performance.now() - requestStarted < 4_500 && !signal.aborted) {
+      const repaired = await generate(`${prompt}\nONE BOUNDED REWRITE: The prior draft failed these deterministic checks: ${JSON.stringify(rejectionIssues)}. Return a completely new JSON exercise that fixes every issue. Use one connected situation, keep the requested register throughout, and in selected-word mode use no content vocabulary outside the selected and earlier-lesson banks. Do not add commentary.`, 'rewrite');
+      data = parseJson(repaired.output_text);
+      ({ rejectionIssues, rejectedWords } = preparePractice());
+    }
     if(rejectionIssues.length){
       return NextResponse.json({error:practiceSource === 'topic' ? 'This draft did not pass the Persian language and question-quality checks. Generate again.' : 'This draft did not pass the Persian language and question-quality checks. Try a broader vocabulary selection or generate again.',qualityIssues:rejectionIssues,suggestedWords:rejectedWords,
         // Only an explicitly enabled protected preview returns synthetic audit
