@@ -110,7 +110,13 @@ function normalizeColloquialFunctionWords(text: unknown) {
     .replace(/(^|[\s،؛])را(?=$|[\s،؛.!؟])/gu, "$1رو")
     .replace(/(^|[\s،؛])اگر(?=$|[\s،؛.!؟])/gu, "$1اگه")
     .replace(/(^|[\s،؛])آن[‌\s]?جا(?=$|[\s،؛.!؟])/gu, "$1اونجا")
-    .replace(/(^|[\s،؛])یک(?=$|[\s،؛.!؟])/gu, "$1یه");
+    .replace(/(^|[\s،؛])یک(?=$|[\s،؛.!؟])/gu, "$1یه")
+    .replace(/(^|[\s،؛])خانه(?=$|[\s،؛.!؟])/gu, "$1خونه")
+    .replace(/می‌?شوم/gu, "می‌شم")
+    .replace(/می‌?شود/gu, "می‌شه")
+    .replace(/می‌?روم/gu, "می‌رم")
+    .replace(/(^|[\s،؛])بروم(?=$|[\s،؛.!؟])/gu, "$1برم")
+    .replace(/ه‌ام(?=$|[\s،؛.!؟])/gu, "ه‌م");
 }
 
 function passageProfile(source: "selected" | "topic", selectedCount: number) {
@@ -223,7 +229,7 @@ Respect the semantic roles of every collocation, not just its grammar: people ar
 Dictionary forms ending in ـن are infinitives, not ready-made predicates. Whenever a selected simple or compound verb appears, conjugate its final verb for the actual subject and tense. Never paste forms such as پر کردن، تحویل دادن، طول کشیدن, or بستگی داشتن unchanged into an ordinary finite sentence.
 Write ${passageLength.sentenceMin}–${passageLength.sentenceMax} connected sentences containing ${passageLength.target} Persian words total, leaving a safe margin above the enforced ${passageLength.minimum}-word minimum, with at least three concrete details that support distinct questions. Match sentence complexity to the requested level through structure and meaning rather than filler. Conjugate dictionary forms normally; do not copy stem annotations or vowel marks. Keep tense, viewpoint and register consistent.
 ${body.register === 'colloquial'
-  ? 'Write as an Iranian speaker naturally explaining or retelling the topic to a friend aloud, using a first- or second-person frame when that helps technical subject matter sound conversational. Make the spoken register unmistakable throughout, using at least three natural conversational forms. Prefer grammatical/function-word signals such as رو، یه، توی، اون، اگه plus spoken inflections of verbs already present in the supplied banks; do not introduce a new content lemma merely to sound casual. Do not merely insert one casual word into otherwise formal prose. Do not mix forms such as توی خانه‌ام with conversational speech, and do not return formal news prose with a colloquial label. Required technical, institutional, or formal content terms from the selected bank may remain standard; do not distort those terms into fake colloquialisms.'
+  ? 'Write as an Iranian speaker naturally explaining or retelling the topic to a friend aloud, using a first- or second-person frame when that helps technical subject matter sound conversational. Make the spoken register unmistakable throughout, using at least three natural conversational forms. Prefer grammatical/function-word signals such as رو، یه، توی، اون، اگه plus spoken inflections of verbs already present in the supplied banks; do not introduce a new content lemma merely to sound casual. Every ordinary inflection must also be spoken: write می‌شم not می‌شوم, می‌شه not می‌شود, می‌رم not می‌روم, برم not بروم, and کرده‌م not کرده‌ام. Do not merely insert casual function words into otherwise formal prose. Do not mix forms such as توی خانه‌ام with conversational speech, and do not return formal news prose with a colloquial label. Required technical, institutional, or formal content terms from the selected bank may remain standard; do not distort those terms into fake colloquialisms.'
   : 'Keep the entire passage in standard written Persian. Do not use colloquial forms such as توی, رو as an object marker, یه, اینا, اونا, می‌خوام, or spoken plural verb endings.'}
 Return exactly three distinct English questions about explicit facts in the passage, with concise English reference answers preserving tense, person and meaning. Do not invent gender or unstated motives. No inference question is required; use inference only when concrete clues support it.
 Use explicit participant roles (the student, the father, the speaker) or singular they in answers. Never use he, she, his, her or him. Avoid direct speech unless its person and imperative endings are correct.

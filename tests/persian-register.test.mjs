@@ -12,6 +12,8 @@ test("listening passages require consistent spoken Persian", () => {
   assert.deepEqual(persianRegisterIssues("الان توی خونه‌ام و می‌خوام یه کتاب رو بخونم.", "colloquial"), []);
   assert.ok(persianRegisterIssues("امروز توی خونه ماندم.", "colloquial").length > 0);
   assert.ok(persianRegisterIssues("امروز به دانشگاه رفتم و با استادم صحبت کردم.", "colloquial").length > 0);
+  assert.ok(persianRegisterIssues("صبح توی خونه یه چای درست می‌کنم و بعد می‌روم دانشگاه رو ببینم.", "colloquial").some((issue) => issue.includes("formal verb")));
+  assert.deepEqual(persianRegisterIssues("صبح توی خونه یه چای درست می‌کنم و بعد می‌رم دانشگاه رو ببینم.", "colloquial"), []);
 });
 
 test("first-person singular subjects reject plural verb endings", () => {
