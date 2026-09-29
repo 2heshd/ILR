@@ -206,11 +206,33 @@
 
   .catalog-word {
     grid-template-columns: 18px minmax(80px, .7fr) 1fr;
+    min-height: 50px;
+    content-visibility: visible;
+    contain: none;
+    touch-action: manipulation;
+  }
+
+  .catalog-list {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .catalog-selection > .row {
+    width: 100%;
+  }
+
+  .catalog-selection button {
+    min-height: 44px;
   }
 
   .catalog-word small {
     display: none;
   }
+}
+
+.catalog-more {
+  justify-self: center;
+  min-height: 44px;
 }
 
 .header-level-controls {

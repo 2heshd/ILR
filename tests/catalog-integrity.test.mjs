@@ -102,6 +102,12 @@ test("course and news catalogs use explicit bulk add and remove selection", () =
   assert.doesNotMatch(pageSource, /Selected · uncheck to remove/u);
 });
 
+test("course vocabulary uses a mobile-safe bounded render window", () => {
+  assert.match(pageSource, /visibleCatalogEntries\.slice\(0, catalogDisplayLimit\)/u);
+  assert.match(pageSource, /Show 120 more/u);
+  assert.match(pageSource, /renderedCatalogEntries\.map/u);
+});
+
 test("new learners choose vocabulary instead of receiving the pilot bank", () => {
   assert.match(pageSource, /words:\s*\[\]/u);
   assert.doesNotMatch(pageSource, /words:\s*curatedVocabulary\(\)/u);

@@ -357,6 +357,7 @@ export default function Home() {
   const [catalogUnit, setCatalogUnit] = useState("");
   const [catalogChapter, setCatalogChapter] = useState("");
   const [catalogQuery, setCatalogQuery] = useState("");
+  const [catalogDisplayLimit, setCatalogDisplayLimit] = useState(120);
   const [selectedCourseEntries, setSelectedCourseEntries] = useState<Set<number>>(new Set());
   const [selectedCourseSections, setSelectedCourseSections] = useState<Set<string>>(new Set());
   const [newsQuery, setNewsQuery] = useState("");
@@ -2004,6 +2005,7 @@ export default function Home() {
     && (courseTopic==='All topics'||courseTopicFor(entry.en)===courseTopic)
     && (!normalizedCatalogQuery || `${entry.fa} ${entry.en}`.toLocaleLowerCase().includes(normalizedCatalogQuery))
   ));
+  const renderedCatalogEntries = visibleCatalogEntries.slice(0, catalogDisplayLimit);
   const bankCourseKeys = new Set(state.words.filter((word) => word.sourceType === "course").map((word) => courseWordKey(word.displayForm)));
   const allBankKeys = new Set(state.words.map((word) => courseWordKey(word.displayForm)));
   const normalizedNewsQuery = newsQuery.trim().toLocaleLowerCase();
@@ -2288,16 +2290,17 @@ export default function Home() {
           <div className="chapter-actions"><button className="text-button" disabled={!selectedCourseSections.size} onClick={() => setSelectedCourseSections(new Set())}>Clear</button><button className="primary" disabled={!selectedCourseSections.size} onClick={addSelectedCourseSections}>Add {selectedCourseSections.size || "selected"} {selectedCourseSections.size === 1 ? "chapter" : "chapters"} to {planLabels[planMode]} · {selectedCourseSectionEntryCount.toLocaleString()} words</button></div>
         </details>
         <div className="catalog-controls">
-          <label><span>Topic (suggested)</span><select value={courseTopic} onChange={event=>setCourseTopic(event.target.value)}>{COURSE_TOPICS.map(topic=><option key={topic}>{topic}</option>)}</select></label>
-          <label><span>Unit / book</span><select value={catalogUnit} onChange={event=>{setCatalogUnit(event.target.value);setCatalogChapter("");setCatalogLesson("");}}><option value="">All units and books</option>{catalogUnits.map(unit=><option key={unit}>{unit}</option>)}</select></label><label><span>Chapter / module</span><select value={catalogChapter} onChange={event=>{setCatalogChapter(event.target.value);setCatalogLesson("");}}><option value="">All chapters</option>{catalogChapters.map(chapter=><option key={chapter}>{chapter}</option>)}</select></label>
-          <label><span>Lesson</span><select value={activeCatalogLesson} onChange={event=>setCatalogLesson(event.target.value)}><option value="">All lessons</option>{catalogLessons.map(lesson=><option key={lesson}>{lesson}</option>)}</select></label>
-          <label><span>Find a word</span><input value={catalogQuery} onChange={(event) => setCatalogQuery(event.target.value)} placeholder="Persian or English" /></label>
+          <label><span>Topic (suggested)</span><select value={courseTopic} onChange={event=>{setCourseTopic(event.target.value);setCatalogDisplayLimit(120);}}>{COURSE_TOPICS.map(topic=><option key={topic}>{topic}</option>)}</select></label>
+          <label><span>Unit / book</span><select value={catalogUnit} onChange={event=>{setCatalogUnit(event.target.value);setCatalogChapter("");setCatalogLesson("");setCatalogDisplayLimit(120);}}><option value="">All units and books</option>{catalogUnits.map(unit=><option key={unit}>{unit}</option>)}</select></label><label><span>Chapter / module</span><select value={catalogChapter} onChange={event=>{setCatalogChapter(event.target.value);setCatalogLesson("");setCatalogDisplayLimit(120);}}><option value="">All chapters</option>{catalogChapters.map(chapter=><option key={chapter}>{chapter}</option>)}</select></label>
+          <label><span>Lesson</span><select value={activeCatalogLesson} onChange={event=>{setCatalogLesson(event.target.value);setCatalogDisplayLimit(120);}}><option value="">All lessons</option>{catalogLessons.map(lesson=><option key={lesson}>{lesson}</option>)}</select></label>
+          <label><span>Find a word</span><input value={catalogQuery} onChange={(event) => {setCatalogQuery(event.target.value);setCatalogDisplayLimit(120);}} placeholder="Persian or English" /></label>
         </div>
-        <div className="catalog-selection row spread"><span>{visibleCatalogEntries.length} shown · {selectedCourseEntries.size} selected</span><div className="row"><button className="text-button" onClick={() => setSelectedCourseEntries(current=>new Set([...current,...visibleCatalogEntries.map(entry=>entry.id)]))}>Select shown</button><button className="text-button" onClick={() => setSelectedCourseEntries(new Set())}>Deselect all</button><button className="primary" disabled={!selectedCourseEntries.size} onClick={()=>addSelectedCourseWords()}>Add to {planLabels[planMode]}</button><button className="secondary" disabled={!selectedCourseEntries.size} onClick={()=>addSelectedCourseWords("replace")}>Use only selected</button><button className="secondary" disabled={!selectedCourseEntries.size} onClick={removeSelectedCourseWords}>Remove from session</button></div></div>
-        <div className="catalog-list">{visibleCatalogEntries.map((entry) => {
+        <div className="catalog-selection row spread"><span>{renderedCatalogEntries.length} of {visibleCatalogEntries.length} shown · {selectedCourseEntries.size} selected</span><div className="row"><button className="text-button" onClick={() => setSelectedCourseEntries(current=>new Set([...current,...renderedCatalogEntries.map(entry=>entry.id)]))}>Select shown</button><button className="text-button" onClick={() => setSelectedCourseEntries(new Set())}>Deselect all</button><button className="primary" disabled={!selectedCourseEntries.size} onClick={()=>addSelectedCourseWords()}>Add to {planLabels[planMode]}</button><button className="secondary" disabled={!selectedCourseEntries.size} onClick={()=>addSelectedCourseWords("replace")}>Use only selected</button><button className="secondary" disabled={!selectedCourseEntries.size} onClick={removeSelectedCourseWords}>Remove from session</button></div></div>
+        <div className="catalog-list">{renderedCatalogEntries.map((entry) => {
           const alreadyAdded = bankCourseKeys.has(courseWordKey(entry.fa));
           return <label className={`catalog-word${alreadyAdded ? " added" : ""}`} key={entry.id}><input type="checkbox" checked={selectedCourseEntries.has(entry.id)} onChange={() => setSelectedCourseEntries((current) => { const next = new Set(current); if (next.has(entry.id)) next.delete(entry.id); else next.add(entry.id); return next; })} /><strong>{entry.fa}</strong><span>{entry.en}</span><small>{alreadyAdded ? "In your bank" : `List ${entry.list}`}</small></label>;
         })}</div>
+        {renderedCatalogEntries.length < visibleCatalogEntries.length && <button className="secondary catalog-more" onClick={()=>setCatalogDisplayLimit(limit=>limit+120)}>Show 120 more</button>}
         {!courseCatalog.length && <div className="empty">Loading the course catalog…</div>}
         {courseCatalog.length > 0 && !visibleCatalogEntries.length && <div className="empty">No words match this search.</div>}
       </div>
