@@ -22,6 +22,9 @@ test('attached possessives retain selected nouns without licensing unrelated nou
 test('transitions and spaced verb prefixes do not require new vocabulary',()=>{
   assert.deepEqual(unselectedContentWords('بعد من می خوانم و او نمی خواند', ['خواندن']),[]);
 });
+test('ordinary discourse scaffolding and colloquial pronouns are not treated as new lesson content',()=>{
+  assert.deepEqual(unselectedContentWords('گاهی بعضی وقتا باهاش صحبت می‌کنم و دوباره برمی‌گردم.', ['صحبت کردن','برگشتن']),[]);
+});
 test('spoken verbs require their actual selected lemma',()=>{
   assert.deepEqual(unselectedContentWords('میخوام میرم نمیاد', ['خواستن','رفتن','آمدن']),[]);
   assert.deepEqual(unselectedContentWords('میخوام', ['خواندن']),['میخوام']);

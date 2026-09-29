@@ -98,9 +98,11 @@ function copiedDictionaryInfinitives(text: unknown, vocabulary: string[]) {
     const pattern = new RegExp(`(?:^|[\\s،؛])${form.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?=$|[\\s،؛.!؟])`, "gu");
     return [...normalized.matchAll(pattern)].some((match) => {
       const before = normalized.slice(0, match.index).trimEnd();
+      const after = normalized.slice((match.index ?? 0) + match[0].length).trimStart();
       // Persian infinitives are legitimate after a preposition (برای معاینه کردن,
-      // بعد از پر کردن). The gate targets dictionary forms pasted as predicates.
-      return !/(?:^|\s)(?:برای|از|به|با)$/u.test(before);
+      // بعد از پر کردن) and as nominal complements (سرگرمی من بازی کردن است).
+      // The gate targets dictionary forms pasted directly as finite predicates.
+      return !/(?:^|\s)(?:برای|از|به|با)$/u.test(before) && !/^(?:است|بود|شد|نیست)(?=$|[\s،؛.!؟])/u.test(after);
     });
   });
 }
