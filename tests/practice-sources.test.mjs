@@ -40,6 +40,12 @@ test("reading and listening expose the same two generation sources", () => {
   assert.match(page, /topicPracticeWords\(practiceTopic\[kind\], courseCatalog, NEWS_CATALOG\)/u);
 });
 
+test("learner-visible generation never waits for the background retry queue", () => {
+  assert.doesNotMatch(page, /await cache\.waitAndTake\(context\.key\)/u);
+  assert.match(page, /let prepared = cache\.take\(context\.key\);/u);
+  assert.match(page, /if \(!prepared\) prepared = await fetchPreparedPractice\(context\);/u);
+});
+
 test("only selected-word generation uses the closed-vocabulary gate", () => {
   assert.match(route, /practiceSource === 'selected'\s*\? checkSupportingVocabulary/u);
   assert.match(route, /practiceSource === 'selected' \? unselectedContentWords/u);

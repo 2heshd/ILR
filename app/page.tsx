@@ -1517,9 +1517,9 @@ export default function Home() {
     try {
       const cache = practicePrefetchRef.current[kind];
       let prepared = cache.take(context.key);
-      if (!prepared) prepared = await cache.waitAndTake(context.key);
-      // The visible action makes one bounded attempt. Retrying rejected drafts is
-      // reserved for invisible prefetch so the learner never waits through a queue.
+      // Never wait on the background retry queue. A prefetch may be making up to
+      // three quality-gated attempts; coupling the button to that promise made a
+      // learner-visible generation appear frozen for tens of seconds.
       if (!prepared) prepared = await fetchPreparedPractice(context);
       activatePreparedPractice(kind, prepared);
       prepareNextPractice(context, prepared.data.title);
