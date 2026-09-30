@@ -9,6 +9,7 @@ import { dueWords, plannedWords, type PlanMode, type StudyPlan } from "@/lib/stu
 import {nextReviewWord,reviewWord} from "@/lib/review-session";
 import { independentSchedules } from "@/lib/independent-schedules";
 import { patternHints } from "@/lib/persian-patterns";
+import { relatedVocabulary } from "@/lib/vocabulary-families";
 import AccountWorkspace from "@/components/AccountWorkspace";
 import {inviteCodeFromHash,normalizeClassCode,validClassCode} from '@/lib/class-invites';
 import ComprehensionGrader from "@/components/ComprehensionGrader";
@@ -216,6 +217,7 @@ function hydrateState(raw: Partial<StudyState> | null | undefined): StudyState {
 
 function weakestAccuracy(word:LexicalItem){const tested=Object.values(word.modalityMastery??{}).filter(item=>item&&item.reviews>0);return tested.length?Math.min(...tested.map(item=>item!.correct/item!.reviews)):word.correct/Math.max(1,word.reviews);}
 function WordPatternHint({word}:{word:string}){const hints=patternHints(word);return hints.length?<details className="vocab-pattern-hint"><summary>Word-building hint</summary>{hints.map(hint=><p key={hint.form}><b lang="fa">{hint.form}</b> · {hint.rule}<br/><small>{hint.example}</small></p>)}</details>:null;}
+function RelatedVocabulary({word,meaning,catalog}:{word:string;meaning:string;catalog:CourseVocabularyEntry[]}){const family=relatedVocabulary(word,meaning,catalog);return family.length?<aside className="related-vocabulary"><span>RELATED WORDS</span><div>{family.map(item=><article key={item.word}><b lang="fa" dir="rtl">{item.word}</b><small>{item.meaning}</small><em lang="fa" dir="rtl">{item.build}</em></article>)}</div></aside>:null;}
 
 function median(values: number[]) {
   if (!values.length) return 0;
@@ -437,7 +439,7 @@ export default function Home() {
 
   useEffect(() => {
     const needsTopicCatalog = (tab === "reading" || tab === "listening") && practiceSource[tab] === "topic";
-    if ((tab !== "vocabulary" && !needsTopicCatalog) || courseCatalog.length) return;
+    if ((tab !== "vocabulary" && tab !== "today" && !needsTopicCatalog) || courseCatalog.length) return;
     void loadCourseCatalog().then((catalog) => setCourseCatalog(catalog.entries));
   }, [tab, courseCatalog.length, practiceSource]);
 
@@ -2212,6 +2214,7 @@ export default function Home() {
                 {current.romanization && <span className="muted">{current.romanization}</span>}
                 <span className="muted">Recall time {(responseMs / 1000).toFixed(1)}s · correct answers move to the next review</span>
               </div>
+              <RelatedVocabulary word={current.displayForm} meaning={current.definition??""} catalog={courseCatalog}/>
               <div className="row"><button className="danger" onClick={() => rateKnown(false)}>I was wrong</button><button className="primary" onClick={() => rateKnown(true)}>I was right</button></div>
             </>}
           </>}
